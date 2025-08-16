@@ -21,6 +21,7 @@ public struct PostRowView: View {
   @Environment(PostContextProvider.self) var postDataControllerProvider
   @Environment(AppRouter.self) var router
   @Environment(BSkyClient.self) var client
+  @Environment(CurrentUser.self) var currentUser
 
   let post: PostItem
   @Namespace private var namespace
@@ -53,6 +54,7 @@ public struct PostRowView: View {
   private var mainView: some View {
     VStack(alignment: .leading, spacing: 8) {
       authorView
+      replyContextView
       PostRowBodyView(post: post)
       PostRowEmbedView(post: post)
       if !isQuote {
@@ -83,7 +85,7 @@ public struct PostRowView: View {
     .overlay {
       Circle()
         .stroke(
-          LinearGradient.avatarBorder(hasReply: post.hasReply),
+          post.hasReply ? LinearGradient.avatarBorderReversed : LinearGradient.avatarBorder,
           lineWidth: 1)
     }
     .shadow(color: .shadowPrimary.opacity(0.3), radius: 2)
@@ -123,7 +125,16 @@ public struct PostRowView: View {
       Rectangle()
         .frame(width: 1)
         .frame(maxHeight: .infinity)
-        .foregroundStyle(LinearGradient.blueskyBlue)
+        .foregroundStyle(LinearGradient.blueskyGradient)
+    }
+  }
+
+  @ViewBuilder
+  private var replyContextView: some View {
+    if post.hasReply, let replyRef = post.replyRef {
+      PostRowReplyContextView(replyRef: replyRef)
+        .padding(.leading, 40)
+        .padding(.bottom, 8)
     }
   }
 }
@@ -189,5 +200,6 @@ public struct PostRowView: View {
     .listStyle(.plain)
     .environment(AppRouter(initialTab: .feed))
     .environment(PostContextProvider())
+    .environment(PostFilterService.shared)
   }
 }

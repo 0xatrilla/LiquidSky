@@ -1,9 +1,9 @@
 import ATProtoKit
 import AppRouter
+import Client
 import DesignSystem
 import Destinations
 import Models
-import Client
 import SwiftUI
 
 struct TimelineFeedRowView: View {
@@ -14,7 +14,7 @@ struct TimelineFeedRowView: View {
           .imageScale(.medium)
           .foregroundStyle(.white)
           .frame(width: 32, height: 32)
-          .background(RoundedRectangle(cornerRadius: 8).fill(Color.blueskyBackground))
+          .background(RoundedRectangle(cornerRadius: 8).fill(LinearGradient.blueskySubtle))
           .clipShape(RoundedRectangle(cornerRadius: 8))
           .shadow(color: .shadowPrimary.opacity(0.7), radius: 2)
         Text("Following")

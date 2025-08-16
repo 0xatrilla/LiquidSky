@@ -1,6 +1,6 @@
 import ATProtoKit
-import Foundation
 import Client
+import Foundation
 import SwiftUI
 
 @MainActor
@@ -70,6 +70,19 @@ public final class PostContext: Sendable {
   }
 
   public func toggleRepost() async {
-    // TODO: Implement
+    let previousState = repostURI
+    do {
+      if let repostURI {
+        self.repostURI = nil
+        try await client.blueskyClient.deleteRecord(.recordURI(atURI: repostURI))
+      } else {
+        self.repostURI = "ui.optimistic.repost"
+        self.repostURI = try await client.blueskyClient.createRepostRecord(
+          .init(recordURI: post.uri, cidHash: post.cid)
+        ).recordURI
+      }
+    } catch {
+      self.repostURI = previousState
+    }
   }
 }

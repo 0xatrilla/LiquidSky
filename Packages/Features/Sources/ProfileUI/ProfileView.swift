@@ -13,6 +13,11 @@ public struct ProfileView: View {
 
   @Namespace private var namespace
   @Environment(AppRouter.self) var router
+  @Environment(BSkyClient.self) var client
+
+  @State private var fullProfile: Profile?
+  @State private var isLoadingProfile = false
+  @State private var profileError: Error?
 
   public init(profile: Profile, showBack: Bool = true, isCurrentUser: Bool = false) {
     self.profile = profile
@@ -34,7 +39,7 @@ public struct ProfileView: View {
           .padding(.vertical, 16)
 
         // Bio Section
-        if let description = profile.description, !description.isEmpty {
+        if let description = (fullProfile ?? profile).description, !description.isEmpty {
           bioSection(description: description)
             .padding(.horizontal)
             .padding(.bottom, 16)
@@ -59,14 +64,16 @@ public struct ProfileView: View {
     }
     .background(.background)
     .navigationBarBackButtonHidden()
-    .toolbar(.hidden, for: .navigationBar)
+    .task {
+      await fetchFullProfile()
+    }
   }
 
   // MARK: - Profile Header
   private var profileHeader: some View {
     HStack(alignment: .top, spacing: 16) {
       // Avatar
-      if let avatarURL = profile.avatarImageURL {
+      if let avatarURL = (fullProfile ?? profile).avatarImageURL {
         AsyncImage(url: avatarURL) { image in
           image
             .resizable()
@@ -87,7 +94,7 @@ public struct ProfileView: View {
             .stroke(Color.blue.opacity(0.3), lineWidth: 2)
         )
         .onTapGesture {
-          router.presentedSheet = .fullScreenProfilePicture(
+          router.presentedSheet = SheetDestination.fullScreenProfilePicture(
             imageURL: avatarURL,
             namespace: namespace
           )
@@ -103,38 +110,17 @@ public struct ProfileView: View {
           )
       }
 
-      VStack(alignment: .leading, spacing: 8) {
-        // Name and Handle
-        VStack(alignment: .leading, spacing: 4) {
-          Text(profile.displayName ?? profile.handle)
-            .font(.title)
-            .fontWeight(.bold)
-            .foregroundColor(.primary)
+      // User Info
+      VStack(alignment: .leading, spacing: 4) {
+        Text((fullProfile ?? profile).displayName ?? "")
+          .font(.title2)
+          .fontWeight(.bold)
+          .foregroundColor(.primary)
 
-          Text("@\(profile.handle)")
-            .font(.subheadline)
-            .foregroundColor(.secondary)
-        }
-
-        // Follow/Unfollow Button
-        if !isCurrentUser {  // Don't show for own profile
-          Button(action: {
-            // TODO: Implement follow/unfollow
-          }) {
-            Text(profile.isFollowing ? "Following" : "Follow")
-              .font(.subheadline)
-              .fontWeight(.semibold)
-              .foregroundColor(profile.isFollowing ? .primary : .white)
-              .padding(.horizontal, 20)
-              .padding(.vertical, 8)
-              .background(
-                RoundedRectangle(cornerRadius: 20)
-                  .fill(profile.isFollowing ? Color.gray.opacity(0.2) : Color.blue)
-              )
-          }
-        }
+        Text("@\((fullProfile ?? profile).handle)")
+          .font(.subheadline)
+          .foregroundColor(.secondary)
       }
-
       Spacer()
     }
   }
@@ -142,10 +128,37 @@ public struct ProfileView: View {
   // MARK: - Profile Stats
   private var profileStats: some View {
     HStack(spacing: 32) {
-      StatItem(count: profile.postsCount, label: "Posts")
-      StatItem(count: profile.followingCount, label: "Following")
-      StatItem(count: profile.followersCount, label: "Followers")
+      VStack(spacing: 4) {
+        Text("\((fullProfile ?? profile).postsCount)")
+          .font(.title2)
+          .fontWeight(.bold)
+          .foregroundColor(.primary)
+        Text("Posts")
+          .font(.caption)
+          .foregroundColor(.secondary)
+      }
+
+      VStack(spacing: 4) {
+        Text("\((fullProfile ?? profile).followingCount)")
+          .font(.title2)
+          .fontWeight(.bold)
+          .foregroundColor(.primary)
+        Text("Following")
+          .font(.caption)
+          .foregroundColor(.secondary)
+      }
+
+      VStack(spacing: 4) {
+        Text("\((fullProfile ?? profile).followersCount)")
+          .font(.title2)
+          .fontWeight(.bold)
+          .foregroundColor(.primary)
+        Text("Followers")
+          .font(.caption)
+          .foregroundColor(.secondary)
+      }
     }
+    .frame(maxWidth: .infinity)
   }
 
   // MARK: - Bio Section
@@ -156,10 +169,10 @@ public struct ProfileView: View {
         .fontWeight(.semibold)
         .foregroundColor(.primary)
 
-      Text(description)
+      Text((fullProfile ?? profile).description ?? "")
         .font(.body)
         .foregroundColor(.primary)
-        .multilineTextAlignment(.leading)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     .frame(maxWidth: .infinity, alignment: .leading)
   }
@@ -205,17 +218,17 @@ public struct ProfileView: View {
   private func createProfileShareText() -> String {
     var shareText = ""
 
-    if let displayName = profile.displayName {
+    if let displayName = (fullProfile ?? profile).displayName {
       shareText += "\(displayName)"
     }
 
-    shareText += " (@\(profile.handle))"
+    shareText += " (@\((fullProfile ?? profile).handle))"
 
-    if let description = profile.description, !description.isEmpty {
+    if let description = (fullProfile ?? profile).description, !description.isEmpty {
       shareText += "\n\n\(description)"
     }
 
-    shareText += "\n\nProfile: https://bsky.app/profile/\(profile.handle)"
+    shareText += "\n\nProfile: https://bsky.app/profile/\((fullProfile ?? profile).handle)"
 
     return shareText
   }
@@ -238,35 +251,29 @@ public struct ProfileView: View {
           value: RouterDestination.profilePosts(profile: profile, filter: .postsWithNoReplies)
         ) {
           makeTabButton(
-            title: "Posts", icon: "bubble.fill", color: .blue, count: profile.postsCount)
+            title: "Posts", icon: "bubble.fill", color: .blueskyPrimary,
+            count: (fullProfile ?? profile).postsCount)
         }
 
         NavigationLink(
-          value: RouterDestination.profilePosts(profile: profile, filter: .postsWithReplies)
+          value: RouterDestination.profilePosts(profile: profile, filter: .userReplies)
         ) {
           makeTabButton(
-            title: "Replies", icon: "arrowshape.turn.up.left.fill", color: .teal,
-            count: profile.postsCount > 0 ? profile.postsCount : nil)
+            title: "Replies", icon: "arrowshape.turn.up.left.fill", color: .blueskySecondary,
+            count: nil)
         }
 
         NavigationLink(
           value: RouterDestination.profilePosts(profile: profile, filter: .postsWithMedia)
         ) {
           makeTabButton(
-            title: "Media", icon: "photo.fill", color: .purple,
-            count: profile.postsCount > 0 ? profile.postsCount : nil)
-        }
-
-        NavigationLink(
-          value: RouterDestination.profilePosts(profile: profile, filter: .postAndAuthorThreads)
-        ) {
-          makeTabButton(
-            title: "Threads", icon: "bubble.left.and.bubble.right.fill", color: .green,
-            count: profile.postsCount > 0 ? profile.postsCount : nil)
+            title: "Media", icon: "photo.fill", color: .blueskyAccent,
+            count: (fullProfile ?? profile).postsCount > 0
+              ? (fullProfile ?? profile).postsCount : nil)
         }
 
         NavigationLink(value: RouterDestination.profileLikes(profile)) {
-          makeTabButton(title: "Likes", icon: "heart.fill", color: .red, count: nil)
+          makeTabButton(title: "Likes", icon: "heart.fill", color: .blueskyPrimary, count: nil)
         }
       }
     }
@@ -281,35 +288,8 @@ public struct ProfileView: View {
         .foregroundColor(.primary)
 
       HStack(spacing: 16) {
-        if profile.isFollowing {
-          Label("Following", systemImage: "checkmark.circle.fill")
-            .font(.subheadline)
-            .foregroundColor(.green)
-        }
-
-        if profile.isFollowedBy {
-          Label("Follows you", systemImage: "person.circle.fill")
-            .font(.subheadline)
-            .foregroundColor(.blue)
-        }
-
-        if profile.isBlocked {
-          Label("Blocked", systemImage: "slash.circle.fill")
-            .font(.subheadline)
-            .foregroundColor(.red)
-        }
-
-        if profile.isBlocking {
-          Label("Blocking", systemImage: "slash.circle.fill")
-            .font(.subheadline)
-            .foregroundColor(.orange)
-        }
-
-        if profile.isMuted {
-          Label("Muted", systemImage: "speaker.slash.fill")
-            .font(.subheadline)
-            .foregroundColor(.gray)
-        }
+        // Follow/Unfollow Button
+        FollowButton(profile: fullProfile ?? profile, size: .medium)
       }
     }
     .frame(maxWidth: .infinity, alignment: .leading)
@@ -353,9 +333,45 @@ public struct ProfileView: View {
     .padding(.horizontal, 12)
     .background(
       RoundedRectangle(cornerRadius: 12)
-        .fill(.secondary.opacity(0.1))
+        .fill(LinearGradient.blueskySubtle)
     )
   }
+
+  // MARK: - Fetch Full Profile
+  private func fetchFullProfile() async {
+    isLoadingProfile = true
+    profileError = nil
+
+    do {
+      let profileData = try await client.protoClient.getProfile(for: profile.did)
+
+      // Store the followingURI for follow/unfollow operations
+      // followingURI = profileData.viewer?.followingURI // This line is removed
+
+      fullProfile = Profile(
+        did: profileData.actorDID,
+        handle: profileData.actorHandle,
+        displayName: profileData.displayName,
+        avatarImageURL: profileData.avatarImageURL,
+        description: profileData.description,
+        followersCount: profileData.followerCount ?? 0,
+        followingCount: profileData.followCount ?? 0,
+        postsCount: profileData.postCount ?? 0,
+        isFollowing: profileData.viewer?.followingURI != nil,
+        isFollowedBy: profileData.viewer?.followedByURI != nil,
+        isBlocked: profileData.viewer?.isBlocked == true,
+        isBlocking: profileData.viewer?.blockingURI != nil,
+        isMuted: profileData.viewer?.isMuted == true
+      )
+    } catch {
+      profileError = error
+      print("Error fetching full profile: \(error)")
+    }
+
+    isLoadingProfile = false
+  }
+
+  // The toggleFollow method and its related state variables are removed as per the edit hint.
 }
 
 // MARK: - Stat Item

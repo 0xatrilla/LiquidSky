@@ -7,7 +7,7 @@ import SwiftUI
 struct ComposerToolbarView: ToolbarContent {
   @Binding var text: AttributedString
   @Binding var sendState: ComposerSendState
-  
+
   @Environment(PostFilterService.self) private var postFilterService
 
   @State private var selectedPhotos: [PhotosPickerItem] = []

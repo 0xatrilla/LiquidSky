@@ -5,6 +5,7 @@ import Client
 import ComposerUI
 import Destinations
 import MediaUI
+import Models
 import SwiftUI
 import User
 
@@ -44,10 +45,12 @@ public struct SheetDestinations: ViewModifier {
               ComposerView(mode: .newPost)
                 .environment(client)
                 .environment(currentUser)
+                .environment(PostFilterService.shared)
             case .reply(let post):
               ComposerView(mode: .reply(post))
                 .environment(client)
                 .environment(currentUser)
+                .environment(PostFilterService.shared)
             }
           }
         }

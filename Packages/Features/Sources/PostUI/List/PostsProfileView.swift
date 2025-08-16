@@ -1,7 +1,8 @@
 @preconcurrency import ATProtoKit
+import AppRouter
+import Client
 import DesignSystem
 import Models
-import Client
 import SwiftUI
 import User
 
@@ -29,17 +30,38 @@ extension PostsProfileView: @MainActor PostsListViewDatasource {
 
   func loadPosts(with state: PostsListViewState) async -> PostsListViewState {
     do {
+      print("PostsProfileView: Loading posts for profile \(profile.handle) with filter \(filter)")
+      print("PostsProfileView: Profile DID: \(profile.did)")
+
       switch state {
       case .uninitialized, .loading, .error:
+        print("PostsProfileView: Making initial API call...")
         let feed = try await client.protoClient.getAuthorFeed(
           by: profile.did, postFilter: filter.atProtocolFilter)
-        return .loaded(posts: PostListView.processFeed(feed.feed), cursor: feed.cursor)
-      case let .loaded(posts, cursor):
+        print("PostsProfileView: API returned \(feed.feed.count) feed items")
+
+        let processedPosts = PostListView.processFeed(feed.feed)
+        print("PostsProfileView: Processed \(processedPosts.count) posts")
+
+        let filteredPosts =
+          filter == .userReplies ? processedPosts.filter { $0.hasReply } : processedPosts
+        print("PostsProfileView: After filtering: \(filteredPosts.count) posts")
+
+        return .loaded(posts: filteredPosts, cursor: feed.cursor)
+      case .loaded(let posts, let cursor):
+        print("PostsProfileView: Loading more posts with cursor...")
         let feed = try await client.protoClient.getAuthorFeed(
           by: profile.did, limit: nil, cursor: cursor, postFilter: filter.atProtocolFilter)
-        return .loaded(posts: posts + PostListView.processFeed(feed.feed), cursor: feed.cursor)
+        print("PostsProfileView: Loaded \(feed.feed.count) more feed items")
+
+        let processedPosts = PostListView.processFeed(feed.feed)
+        let filteredPosts =
+          filter == .userReplies ? processedPosts.filter { $0.hasReply } : processedPosts
+
+        return .loaded(posts: posts + filteredPosts, cursor: feed.cursor)
       }
     } catch {
+      print("PostsProfileView: Error loading posts: \(error)")
       return .error(error)
     }
   }

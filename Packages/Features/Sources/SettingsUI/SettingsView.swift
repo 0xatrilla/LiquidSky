@@ -140,7 +140,7 @@ public struct SettingsView: View {
   // MARK: - Display Section
   private var displaySection: some View {
     VStack(spacing: 16) {
-      SettingsSectionHeader(title: "Display", icon: "paintbrush.fill", color: .blueskyBackground)
+      SettingsSectionHeader(title: "Display", icon: "paintbrush.fill", color: .blueskyPrimary)
 
       SettingsToggleRow(
         title: "Use System Theme",
@@ -284,7 +284,7 @@ public struct SettingsView: View {
           set: { VideoFeedManager.shared.updateAutoplayEnabled($0) }
         )
       )
-
+      
       SettingsToggleRow(
         title: "Muted by Default",
         subtitle: "Start videos without sound",
@@ -295,7 +295,7 @@ public struct SettingsView: View {
           set: { VideoFeedManager.shared.updateMutedByDefault($0) }
         )
       )
-
+      
       SettingsPickerRow(
         title: "Max Concurrent Videos",
         subtitle: "Limit videos playing simultaneously",
@@ -309,7 +309,7 @@ public struct SettingsView: View {
         optionTitle: { "\($0) video\($0 == 1 ? "" : "s")" }
       )
       */
-      
+
       Text("Video settings temporarily disabled")
         .foregroundColor(.secondary)
         .font(.caption)

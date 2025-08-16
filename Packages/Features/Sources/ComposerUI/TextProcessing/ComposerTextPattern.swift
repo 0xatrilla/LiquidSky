@@ -49,7 +49,7 @@ enum ComposerTextPattern: String, CaseIterable, Codable {
     case .hashtag:
       return .blue
     case .mention:
-      return .blueskyBackground
+      return .blueskyPrimary
     case .url:
       return .blue
     }

@@ -9,7 +9,8 @@ public struct PostListView: View {
   let datasource: PostsListViewDatasource
   @State private var state: PostsListViewState = .uninitialized
 
-  @Environment(PostFilterService.self) private var postFilterService
+  // Use singleton directly instead of environment to avoid injection timing issues
+  private let postFilterService = PostFilterService.shared
 
   init(datasource: PostsListViewDatasource) {
     self.datasource = datasource
@@ -98,17 +99,23 @@ extension PostListView {
     var postItems: [PostItem] = []
     var processedCount = 0
 
-    func insert(post: AppBskyLexicon.Feed.PostViewDefinition, hasReply: Bool) {
+    func insert(post: AppBskyLexicon.Feed.PostViewDefinition) {
       // Add safety check to prevent crash if uri is nil
       guard !post.uri.isEmpty else {
         print("Warning: Skipping post with empty URI")
         return
       }
 
-      guard !postItems.contains(where: { $0.uri == post.uri }) else { return }
+      guard !postItems.contains(where: { $0.uri == post.uri }) else {
+        print("Warning: Skipping duplicate post with URI: \(post.uri)")
+        return
+      }
 
-      var item = post.postItem
-      item.hasReply = hasReply
+      let item = post.postItem
+      print(
+        "PostsListView: Processing post - URI: \(item.uri), Author: \(item.author.handle), Content: \(item.content.prefix(50))..."
+      )
+      // hasReply is already set correctly from replyRef in the PostItem initializer
       postItems.append(item)
       processedCount += 1
     }
@@ -117,7 +124,7 @@ extension PostListView {
       // Debug: Print the structure to understand what we're working with
       print("PostsListView: Processing feed item \(index): post.uri = \(post.post.uri)")
 
-      insert(post: post.post, hasReply: false)
+      insert(post: post.post)
 
       // Process replies - simplified to avoid type issues
       if post.reply != nil {
@@ -128,7 +135,7 @@ extension PostListView {
       // Process repost - simplified to avoid type issues
       if post.reason != nil {
         print("PostsListView: Repost found for item \(index) - processing...")
-        // TODO: Implement proper repost processing when we understand the type structure
+        // TODO: Implement proper reply processing when we understand the type structure
       }
     }
 

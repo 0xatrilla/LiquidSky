@@ -1,41 +1,49 @@
 import SwiftUI
 
 extension LinearGradient {
-  public static let blueskyBlue = LinearGradient(
-    colors: [.blueskyBackground, .blue],
-    startPoint: .top,
-    endPoint: .bottom
-  )
-
-  public static let blueBluesky = LinearGradient(
-    colors: [.blue, .blueskyBackground],
-    startPoint: .top,
-    endPoint: .bottom
-  )
-
-  public static let blueCyan = LinearGradient(
-    colors: [.blue, .cyan],
-    startPoint: .topLeading,
-    endPoint: .bottomTrailing
-  )
-
-  public static let blueskyBlueHorizontal = LinearGradient(
-    colors: [.blueskyBackground, .blue],
-    startPoint: .leading,
-    endPoint: .trailing
-  )
-
-  public static let blueskyBlueAvatar = LinearGradient(
-    colors: [.blue, .blueskyBackground],
-    startPoint: .topLeading,
-    endPoint: .bottomTrailing
-  )
-
-  public static func avatarBorder(hasReply: Bool) -> LinearGradient {
+  public static var blueskyGradient: LinearGradient {
     LinearGradient(
-      colors: hasReply
-        ? [.blue, .blueskyBackground]
-        : [.shadowPrimary.opacity(0.5), .blueskyBackground.opacity(0.5)],
+      colors: [.blueskyPrimary, .blueskySecondary],
+      startPoint: .topLeading,
+      endPoint: .bottomTrailing
+    )
+  }
+
+  public static var blueskyGradientReversed: LinearGradient {
+    LinearGradient(
+      colors: [.blueskySecondary, .blueskyPrimary],
+      startPoint: .topLeading,
+      endPoint: .bottomTrailing
+    )
+  }
+
+  public static var avatarBorder: LinearGradient {
+    LinearGradient(
+      colors: [.blueskyPrimary, .blueskySecondary],
+      startPoint: .topLeading,
+      endPoint: .bottomTrailing
+    )
+  }
+
+  public static var avatarBorderReversed: LinearGradient {
+    LinearGradient(
+      colors: [.blueskySecondary, .blueskyPrimary],
+      startPoint: .topLeading,
+      endPoint: .bottomTrailing
+    )
+  }
+
+  public static var feedBackground: LinearGradient {
+    LinearGradient(
+      colors: [.blueskyPrimary.opacity(0.1), .blueskySecondary.opacity(0.05)],
+      startPoint: .topLeading,
+      endPoint: .bottomTrailing
+    )
+  }
+
+  public static var feedBackgroundReversed: LinearGradient {
+    LinearGradient(
+      colors: [.blueskySecondary.opacity(0.1), .blueskyPrimary.opacity(0.05)],
       startPoint: .topLeading,
       endPoint: .bottomTrailing
     )

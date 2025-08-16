@@ -1,6 +1,7 @@
 import AppRouter
 import Destinations
 import FeedUI
+import Models
 import NotificationsUI
 import PostUI
 import ProfileUI
@@ -21,6 +22,7 @@ public struct AppDestinations: ViewModifier {
           ProfileView(profile: profile, isCurrentUser: false)
         case .profilePosts(let profile, let filter):
           PostsProfileView(profile: profile, filter: filter)
+            .environment(PostFilterService.shared)
         case .profileLikes(let profile):
           PostsLikesView(profile: profile)
         }
