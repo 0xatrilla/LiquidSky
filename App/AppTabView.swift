@@ -18,7 +18,7 @@ struct AppTabView: View {
         }
       }
     }
-    .tint(.blueskyBackground)
+    .tint(.primary)
     .tabBarMinimizeBehavior(.onScrollDown)
     .onChange(
       of: router.selectedTab,

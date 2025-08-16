@@ -47,7 +47,7 @@ public struct FullScreenProfilePictureView: View {
           }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.clear)
+        .background(.background)
       }
       .toolbar {
         ToolbarItem(placement: .navigationBarLeading) {

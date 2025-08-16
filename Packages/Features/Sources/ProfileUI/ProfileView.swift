@@ -57,7 +57,7 @@ public struct ProfileView: View {
           .padding(.horizontal)
       }
     }
-    .background(Color.blueskyBackground)
+    .background(.background)
     .navigationBarBackButtonHidden()
     .toolbar(.hidden, for: .navigationBar)
   }
@@ -353,7 +353,7 @@ public struct ProfileView: View {
     .padding(.horizontal, 12)
     .background(
       RoundedRectangle(cornerRadius: 12)
-        .fill(Color.blueskyBackground.opacity(0.5))
+        .fill(.secondary.opacity(0.1))
     )
   }
 }

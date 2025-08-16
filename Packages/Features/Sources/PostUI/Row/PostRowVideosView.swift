@@ -62,7 +62,13 @@ struct PostRowVideosView: View {
       MediaView(
         media: video.media,
         isQuote: isQuote,
-        namespace: namespace
+        namespace: namespace,
+        onFullScreenRequest: {
+          router.presentedSheet = .fullScreenVideo(
+            media: video.media,
+            namespace: namespace
+          )
+        }
       )
       .frame(width: finalWidth, height: finalHeight)
       .onAppear {
