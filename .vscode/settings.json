@@ -1,0 +1,10 @@
+{
+    "[swift]": {
+      "editor.defaultFormatter": "sweetpad.sweetpad",
+      "editor.formatOnSave": true,
+      "editor.tabSize": 2
+    },
+    "git.autofetch": "all",
+    "git.enableSmartCommit": true,
+    "git.fetchOnPull": true,
+  }
