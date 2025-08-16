@@ -46,7 +46,7 @@ struct FeedRowView: View {
             .imageScale(.medium)
             .foregroundStyle(.white)
             .frame(width: 44, height: 44)
-            .background(RoundedRectangle(cornerRadius: 8).fill(Color.blueskyBackground))
+            .background(RoundedRectangle(cornerRadius: 8).fill(LinearGradient.blueskySubtle))
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .shadow(color: .shadowPrimary.opacity(0.7), radius: 2)
         }

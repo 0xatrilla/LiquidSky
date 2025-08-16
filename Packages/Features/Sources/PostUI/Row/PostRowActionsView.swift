@@ -31,12 +31,16 @@ public struct PostRowActionsView: View {
           Label("\(post.replyCount)", systemImage: "bubble")
         }
         .buttonStyle(.plain)
-        .foregroundStyle(.blue)
+        .foregroundColor(.blueskyPrimary)
       }
 
       // Repost Button
       if postFilterService.canQuotePost(post) {
-        Button(action: {}) {
+        Button(action: {
+          Task {
+            await dataController.toggleRepost()
+          }
+        }) {
           Label("\(dataController.repostCount)", systemImage: "quote.bubble")
             .contentTransition(.numericText(value: Double(dataController.repostCount)))
             .monospacedDigit()
@@ -45,7 +49,7 @@ public struct PostRowActionsView: View {
         }
         .buttonStyle(.plain)
         .symbolVariant(dataController.isReposted ? .fill : .none)
-        .foregroundStyle(.blue)
+        .foregroundColor(.blueskySecondary)
       }
 
       // Like Button
@@ -63,7 +67,7 @@ public struct PostRowActionsView: View {
       .contentTransition(.numericText(value: Double(dataController.likeCount)))
       .monospacedDigit()
       .animation(.smooth, value: dataController.likeCount)
-      .foregroundStyle(.blue)
+      .foregroundColor(.blueskyAccent)
 
       Spacer()
 
@@ -72,7 +76,7 @@ public struct PostRowActionsView: View {
           Image(systemName: "ellipsis")
         }
         .buttonStyle(.plain)
-        .foregroundStyle(.blue)
+        .foregroundColor(.blueskyPrimary)
       }
     }
     .buttonStyle(.plain)

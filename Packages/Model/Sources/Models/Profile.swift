@@ -1,7 +1,8 @@
 import ATProtoKit
 import Foundation
 
-public struct Profile: Codable, Hashable, Sendable {
+public struct Profile: Codable, Hashable, Sendable, Identifiable {
+  public var id: String { did }
   public let did: String
   public let handle: String
   public let displayName: String?
