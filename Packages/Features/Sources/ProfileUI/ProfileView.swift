@@ -7,11 +7,12 @@ import PostUI
 import SwiftUI
 
 public struct ProfileView: View {
-  @Environment(AppRouter.self) var router
+  let profile: Profile
+  let showBack: Bool
+  let isCurrentUser: Bool
 
-  public let profile: Profile
-  public let showBack: Bool
-  public let isCurrentUser: Bool
+  @Namespace private var namespace
+  @Environment(AppRouter.self) var router
 
   public init(profile: Profile, showBack: Bool = true, isCurrentUser: Bool = false) {
     self.profile = profile
@@ -56,7 +57,7 @@ public struct ProfileView: View {
           .padding(.horizontal)
       }
     }
-    .background(Color(uiColor: .systemBackground))
+    .background(Color.blueskyBackground)
     .navigationBarBackButtonHidden()
     .toolbar(.hidden, for: .navigationBar)
   }
@@ -85,6 +86,12 @@ public struct ProfileView: View {
           Circle()
             .stroke(Color.blue.opacity(0.3), lineWidth: 2)
         )
+        .onTapGesture {
+          router.presentedSheet = .fullScreenProfilePicture(
+            imageURL: avatarURL,
+            namespace: namespace
+          )
+        }
       } else {
         Circle()
           .fill(Color.gray.opacity(0.3))
@@ -346,7 +353,7 @@ public struct ProfileView: View {
     .padding(.horizontal, 12)
     .background(
       RoundedRectangle(cornerRadius: 12)
-        .fill(Color(uiColor: .secondarySystemBackground))
+        .fill(Color.blueskyBackground.opacity(0.5))
     )
   }
 }

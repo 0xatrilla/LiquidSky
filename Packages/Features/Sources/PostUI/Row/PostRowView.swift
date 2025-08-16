@@ -23,6 +23,7 @@ public struct PostRowView: View {
   @Environment(BSkyClient.self) var client
 
   let post: PostItem
+  @Namespace private var namespace
 
   public init(post: PostItem) {
     self.post = post
@@ -41,7 +42,8 @@ public struct PostRowView: View {
     }
     .environment(postDataControllerProvider.get(for: post, client: client))
     .listRowSeparator(.hidden)
-    .listRowInsets(.init(top: 0, leading: compactMode ? 14 : 18, bottom: 0, trailing: compactMode ? 14 : 18))
+    .listRowInsets(
+      .init(top: 0, leading: compactMode ? 14 : 18, bottom: 0, trailing: compactMode ? 14 : 18))
   }
 
   private var compactMode: Bool {

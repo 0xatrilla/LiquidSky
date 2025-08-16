@@ -1,10 +1,10 @@
 import AppRouter
 import Auth
 import AuthUI
+import Client
 import ComposerUI
 import Destinations
 import MediaUI
-import Client
 import SwiftUI
 import User
 
@@ -21,20 +21,25 @@ public struct SheetDestinations: ViewModifier {
         case .auth:
           AuthView()
             .environment(auth)
-        case let .fullScreenMedia(images, preloadedImage, namespace):
+        case .fullScreenMedia(let images, let preloadedImage, let namespace):
           FullScreenMediaView(
             images: images,
             preloadedImage: preloadedImage,
             namespace: namespace
           )
-        case let .composer(mode):
+        case .fullScreenProfilePicture(let imageURL, let namespace):
+          FullScreenProfilePictureView(
+            imageURL: imageURL,
+            namespace: namespace
+          )
+        case .composer(let mode):
           if let client, let currentUser {
             switch mode {
             case .newPost:
               ComposerView(mode: .newPost)
                 .environment(client)
                 .environment(currentUser)
-            case let .reply(post):
+            case .reply(let post):
               ComposerView(mode: .reply(post))
                 .environment(client)
                 .environment(currentUser)

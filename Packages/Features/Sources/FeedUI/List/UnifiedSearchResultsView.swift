@@ -1,4 +1,6 @@
+import AppRouter
 import DesignSystem
+import Destinations
 import Models
 import NukeUI
 import SwiftUI
@@ -110,7 +112,10 @@ public struct UnifiedSearchResultsView: View {
 // MARK: - Feed Search Result Row
 
 struct FeedSearchResultRow: View {
+  @Environment(AppRouter.self) var router
+
   let feed: FeedSearchResult
+  @Namespace private var namespace
 
   var body: some View {
     HStack(spacing: 12) {
@@ -132,6 +137,10 @@ struct FeedSearchResultRow: View {
         }
         .frame(width: 50, height: 50)
         .clipShape(RoundedRectangle(cornerRadius: 8))
+        .onTapGesture {
+          // Navigate to the feed itself since this is not a user profile
+          // The feed is already wrapped in a NavigationLink
+        }
       } else {
         RoundedRectangle(cornerRadius: 8)
           .fill(Color.blue.opacity(0.3))

@@ -6,16 +6,25 @@ import Models
 import PostUI
 import SwiftUI
 
-struct SingleNotificationRow: View {
+public struct SingleNotificationRow: View {
+  let notification: AppBskyLexicon.Notification.Notification
+  let postItem: PostItem?
+
+  @Namespace private var namespace
   @Environment(AppRouter.self) var router
   @Environment(BSkyClient.self) var client
   @Environment(PostContextProvider.self) var postDataControllerProvider
-
-  let notification: AppBskyLexicon.Notification.Notification
-  let postItem: PostItem?
   let actionText: String
 
-  var body: some View {
+  public init(
+    notification: AppBskyLexicon.Notification.Notification, postItem: PostItem?, actionText: String
+  ) {
+    self.notification = notification
+    self.postItem = postItem
+    self.actionText = actionText
+  }
+
+  public var body: some View {
     VStack(alignment: .leading, spacing: 16) {
       // Header with avatar, name, action, and timestamp - IceCubesApp style
       HStack(alignment: .top, spacing: 12) {
@@ -39,6 +48,9 @@ struct SingleNotificationRow: View {
           Circle()
             .stroke(Color(uiColor: .separator), lineWidth: 0.5)
         )
+        .onTapGesture {
+          router.navigateTo(.profile(notification.author.profile))
+        }
 
         VStack(alignment: .leading, spacing: 6) {
           // Name and action - IceCubesApp style
@@ -83,17 +95,19 @@ struct SingleNotificationRow: View {
                   .fill(Color(uiColor: .systemGray6))
               )
           }
-          
+
           // Media content if available - extract from embed
           if let embed = postItem.embed {
             switch embed {
             case .embedImagesView(let images):
               // Display images in a grid
-              LazyVGrid(columns: [
-                GridItem(.flexible()),
-                GridItem(.flexible()),
-                GridItem(.flexible())
-              ], spacing: 4) {
+              LazyVGrid(
+                columns: [
+                  GridItem(.flexible()),
+                  GridItem(.flexible()),
+                  GridItem(.flexible()),
+                ], spacing: 4
+              ) {
                 ForEach(Array(images.images.prefix(3).enumerated()), id: \.offset) { index, image in
                   AsyncImage(url: image.thumbnailImageURL ?? image.fullSizeImageURL) { phase in
                     switch phase {
@@ -118,7 +132,7 @@ struct SingleNotificationRow: View {
                 }
               }
               .frame(height: 80)
-              
+
             case .embedVideoView(let video):
               // Display video thumbnail
               AsyncImage(url: URL(string: video.thumbnailImageURL ?? "")) { phase in
@@ -151,7 +165,7 @@ struct SingleNotificationRow: View {
                   .foregroundStyle(.white)
                   .background(Circle().fill(.black.opacity(0.7)))
               )
-              
+
             default:
               EmptyView()
             }

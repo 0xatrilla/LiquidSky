@@ -5,13 +5,19 @@ import Destinations
 import PostUI
 import SwiftUI
 
-struct GroupedNotificationRow: View {
-  @Environment(AppRouter.self) var router
-
+public struct GroupedNotificationRow: View {
   let group: NotificationsGroup
+
+  @Namespace private var namespace
+  @Environment(AppRouter.self) var router
   let actionText: (Int) -> String  // Closure to generate action text based on count
 
-  var body: some View {
+  public init(group: NotificationsGroup, actionText: @escaping (Int) -> String) {
+    self.group = group
+    self.actionText = actionText
+  }
+
+  public var body: some View {
     VStack(alignment: .leading, spacing: 16) {
       // Header with avatars, action text, and timestamp - IceCubesApp style
       HStack(alignment: .top, spacing: 12) {
@@ -58,17 +64,19 @@ struct GroupedNotificationRow: View {
                   .fill(Color(uiColor: .systemGray6))
               )
           }
-          
+
           // Media content if available - extract from embed
           if let embed = post.embed {
             switch embed {
             case .embedImagesView(let images):
               // Display images in a grid
-              LazyVGrid(columns: [
-                GridItem(.flexible()),
-                GridItem(.flexible()),
-                GridItem(.flexible())
-              ], spacing: 4) {
+              LazyVGrid(
+                columns: [
+                  GridItem(.flexible()),
+                  GridItem(.flexible()),
+                  GridItem(.flexible()),
+                ], spacing: 4
+              ) {
                 ForEach(Array(images.images.prefix(3).enumerated()), id: \.offset) { index, image in
                   AsyncImage(url: image.thumbnailImageURL ?? image.fullSizeImageURL) { phase in
                     switch phase {
@@ -93,7 +101,7 @@ struct GroupedNotificationRow: View {
                 }
               }
               .frame(height: 80)
-              
+
             case .embedVideoView(let video):
               // Display video thumbnail
               AsyncImage(url: URL(string: video.thumbnailImageURL ?? "")) { phase in
@@ -126,7 +134,7 @@ struct GroupedNotificationRow: View {
                   .foregroundStyle(.white)
                   .background(Circle().fill(.black.opacity(0.7)))
               )
-              
+
             default:
               EmptyView()
             }
@@ -178,6 +186,9 @@ struct GroupedNotificationRow: View {
           Circle()
             .stroke(Color(uiColor: .systemBackground), lineWidth: 2)
         )
+        .onTapGesture {
+          router.navigateTo(.profile(notification.author.profile))
+        }
       }
     }
   }
@@ -198,17 +209,19 @@ struct GroupedNotificationRow: View {
                 .fill(Color(uiColor: .systemGray6))
             )
         }
-        
+
         // Media content if available - extract from embed
         if let embed = post.embed {
           switch embed {
           case .embedImagesView(let images):
             // Display images in a grid
-            LazyVGrid(columns: [
-              GridItem(.flexible()),
-              GridItem(.flexible()),
-              GridItem(.flexible())
-            ], spacing: 4) {
+            LazyVGrid(
+              columns: [
+                GridItem(.flexible()),
+                GridItem(.flexible()),
+                GridItem(.flexible()),
+              ], spacing: 4
+            ) {
               ForEach(Array(images.images.prefix(3).enumerated()), id: \.offset) { index, image in
                 AsyncImage(url: image.thumbnailImageURL ?? image.fullSizeImageURL) { phase in
                   switch phase {
@@ -233,7 +246,7 @@ struct GroupedNotificationRow: View {
               }
             }
             .frame(height: 80)
-            
+
           case .embedVideoView(let video):
             // Display video thumbnail
             AsyncImage(url: URL(string: video.thumbnailImageURL ?? "")) { phase in
@@ -266,7 +279,7 @@ struct GroupedNotificationRow: View {
                 .foregroundStyle(.white)
                 .background(Circle().fill(.black.opacity(0.7)))
             )
-            
+
           default:
             EmptyView()
           }
