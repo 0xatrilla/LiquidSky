@@ -91,11 +91,16 @@ LiquidSky is a native iOS client for [Bluesky](https://bsky.social), the decentr
 
 ## 🚧 **In Progress Features**
 
-- **Multi-Account Support**: Switch between multiple Bluesky accounts
-- **Advanced Search**: Enhanced search with filters and suggestions
-- **Bookmarks**: Save and organize favorite posts
-- **Offline Support**: Cache content for offline viewing
-- **Push Notifications**: Real-time push notification delivery
+ - [ ] **Multi-Account Support**: Switch between multiple Bluesky accounts
+        
+ - [ ] **Advanced Search**: Enhanced search with filters and suggestions
+    
+ - [ ] **Bookmarks**: Save and organize favorite posts
+    
+ - [ ] **Offline Support**: Cache content for offline viewing
+    
+ - [ ] **Push Notifications**: Real-time push notification delivery
+    
 
 ## 🛠️ **Technical Details**
 
@@ -152,5 +157,3 @@ LiquidSky isn't just another Bluesky client - it's a showcase of modern iOS deve
 - **🌐 Open Protocol**: Built on the decentralized AT Protocol
 - **📱 Native Experience**: Leverages the latest iOS capabilities
 - **🏗️ Clean Architecture**: Well-structured, maintainable codebase
-
-Experience the future of social media with LiquidSky - where beautiful design meets decentralized technology! ✨
