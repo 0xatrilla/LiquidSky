@@ -4,14 +4,14 @@ import Foundation
 import Models
 import SwiftUI
 
-struct NotificationsGroup: Identifiable {
-  let id: String
-  let timestamp: Date
-  let type: AppBskyLexicon.Notification.Notification.Reason
-  let notifications: [AppBskyLexicon.Notification.Notification]
-  let postItem: PostItem?
+public struct NotificationsGroup: Identifiable {
+  public let id: String
+  public let timestamp: Date
+  public let type: AppBskyLexicon.Notification.Notification.Reason
+  public let notifications: [AppBskyLexicon.Notification.Notification]
+  public let postItem: PostItem?
 
-  static func groupNotifications(
+  public static func groupNotifications(
     client: BSkyClient,
     _ notifications: [AppBskyLexicon.Notification.Notification]
   ) async -> [NotificationsGroup] {

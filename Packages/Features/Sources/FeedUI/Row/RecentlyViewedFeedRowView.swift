@@ -1,13 +1,16 @@
 import ATProtoKit
 import AppRouter
+import Client
 import DesignSystem
 import Destinations
 import Models
-import Client
 import SwiftUI
 
-public struct RecentlyViewedFeedRowView: View {
-  public let item: RecentFeedItem
+struct RecentlyViewedFeedRowView: View {
+  @Environment(AppRouter.self) var router
+
+  let item: RecentFeedItem
+  @Namespace private var namespace
 
   public init(item: RecentFeedItem) {
     self.item = item
@@ -45,6 +48,10 @@ public struct RecentlyViewedFeedRowView: View {
               .clipShape(RoundedRectangle(cornerRadius: 8))
               .shadow(color: .shadowPrimary.opacity(0.7), radius: 2)
           }
+        }
+        .onTapGesture {
+          // Navigate to the feed itself since this is not a user profile
+          // The feed is already wrapped in a NavigationLink
         }
         Text(item.name)
           .font(.title3)

@@ -1,11 +1,16 @@
-import Client
+import AppRouter
 import DesignSystem
+import Destinations
+import Models
 import SwiftUI
 
 public struct ComposerAutocompleteView: View {
   @ObservedObject var autocompleteService: ComposerAutocompleteService
   let onUserSelected: (UserSuggestion) -> Void
   let onHashtagSelected: (HashtagSuggestion) -> Void
+
+  @Namespace private var namespace
+  @Environment(AppRouter.self) var router
 
   public init(
     autocompleteService: ComposerAutocompleteService,
@@ -75,6 +80,10 @@ public struct ComposerAutocompleteView: View {
               }
               .frame(width: 32, height: 32)
               .clipShape(Circle())
+              .onTapGesture {
+                // Navigate to user profile instead of showing full-screen image
+                // This will be handled by the row selection
+              }
             } else {
               Circle()
                 .fill(.gray.opacity(0.3))

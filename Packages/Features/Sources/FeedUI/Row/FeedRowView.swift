@@ -1,13 +1,15 @@
 import ATProtoKit
 import AppRouter
+import Client
 import DesignSystem
 import Destinations
 import Models
-import Client
 import SwiftUI
 
 struct FeedRowView: View {
   let feed: FeedItem
+  @Namespace private var namespace
+  @Environment(AppRouter.self) var router
 
   var body: some View {
     NavigationLink(value: RouterDestination.feed(feed)) {
@@ -48,6 +50,10 @@ struct FeedRowView: View {
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .shadow(color: .shadowPrimary.opacity(0.7), radius: 2)
         }
+      }
+      .onTapGesture {
+        // Navigate to the feed itself since this is not a user profile
+        // The feed is already wrapped in a NavigationLink
       }
       VStack(alignment: .leading) {
         Text(feed.displayName)
