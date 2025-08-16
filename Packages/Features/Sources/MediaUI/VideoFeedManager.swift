@@ -106,12 +106,23 @@ public final class VideoFeedManager: ObservableObject {
 }
 
 private struct VideoFeedManagerKey: EnvironmentKey {
-  static let defaultValue = VideoFeedManager.shared
+  static let defaultValue: VideoFeedManager? = nil
 }
 
 extension EnvironmentValues {
   public var videoFeedManager: VideoFeedManager {
-    get { self[VideoFeedManagerKey.self] }
-    set { self[VideoFeedManagerKey.self] = newValue }
+    get {
+      // Check if we have a stored value first
+      if let stored = self[VideoFeedManagerKey.self] {
+        return stored
+      }
+      // If no stored value, we need to handle this carefully
+      // Since VideoFeedManager.shared is main actor-isolated, we'll return nil
+      // and let the caller handle the main actor access
+      fatalError("VideoFeedManager must be explicitly provided in the environment")
+    }
+    set {
+      self[VideoFeedManagerKey.self] = newValue
+    }
   }
 }

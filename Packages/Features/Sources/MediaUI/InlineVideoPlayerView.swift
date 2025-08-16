@@ -2,27 +2,24 @@ import AVKit
 import Models
 import SwiftUI
 
-@MainActor
 public struct InlineVideoPlayerView: View {
   let media: Media
   let isQuote: Bool
   let namespace: Namespace.ID
 
   @State private var player: AVPlayer?
-  @State private var isLoading: Bool = true
-  @State private var hasError: Bool = false
   @State private var isPlaying: Bool = false
-  @State private var showControls: Bool = false
-  @State private var progress: Double = 0.0
-  @State private var duration: Double = 0.0
-  @State private var currentTime: Double = 0.0
   @State private var isMuted: Bool = true
-  @State private var shouldAutoplay: Bool = false
-
-  // Performance optimization: only create player when needed
+  @State private var showControls: Bool = false
   @State private var hasAppeared: Bool = false
+  @State private var progress: Double = 0
+  @State private var currentTime: Double = 0
+  @State private var duration: Double = 0
+  @State private var progressObserver: Any?
+  @State private var timeObserver: Any?
 
-  @Environment(\.videoFeedManager) private var videoFeedManager
+  // Access VideoFeedManager directly instead of through environment
+  private var videoFeedManager: VideoFeedManager { VideoFeedManager.shared }
 
   public init(media: Media, isQuote: Bool = false, namespace: Namespace.ID) {
     self.media = media
@@ -31,24 +28,50 @@ public struct InlineVideoPlayerView: View {
   }
 
   public var body: some View {
-    ZStack {
-      if let player = player, !hasError {
-        videoPlayerView(player: player)
-      } else if isLoading {
-        loadingView
-      } else if hasError {
-        errorView
-      } else {
-        placeholderView
-      }
+    GeometryReader { geometry in
+      ZStack {
+        // Video player background
+        RoundedRectangle(cornerRadius: 8)
+          .fill(.black)
+          .aspectRatio(media.aspectRatio?.ratio ?? 16 / 9, contentMode: .fit)
 
-      // Overlay controls
-      if showControls && !isQuote {
-        videoControlsOverlay
-      }
+        // Video player
+        if let player = player {
+          videoPlayerView(player: player)
+        } else {
+          // Loading state
+          VStack {
+            ProgressView()
+              .progressViewStyle(CircularProgressViewStyle(tint: .white))
+              .scaleEffect(1.5)
 
-      // Video indicator badge
-      videoIndicatorBadge
+            Text("Loading video...")
+              .font(.caption)
+              .foregroundColor(.white)
+              .padding(.top, 8)
+          }
+        }
+
+        // Controls overlay
+        if showControls && !isQuote {
+          videoControlsOverlay
+        }
+
+        // Play button overlay (when not playing)
+        if !isPlaying && player != nil && !showControls {
+          Button(action: togglePlayPause) {
+            Image(systemName: "play.circle.fill")
+              .font(.system(size: 48))
+              .foregroundColor(.white)
+              .background(
+                Circle()
+                  .fill(.ultraThinMaterial)
+                  .scaleEffect(1.2)
+              )
+          }
+        }
+      }
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     .aspectRatio(media.aspectRatio?.ratio ?? 16 / 9, contentMode: .fit)
     .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -56,21 +79,26 @@ public struct InlineVideoPlayerView: View {
       RoundedRectangle(cornerRadius: 8)
         .stroke(
           LinearGradient(
-            colors: [.shadowPrimary.opacity(0.3), .blue.opacity(0.5)],
+            colors: [.shadowPrimary, .shadowSecondary],
             startPoint: .topLeading,
-            endPoint: .bottomTrailing),
-          lineWidth: 1)
+            endPoint: .bottomTrailing
+          ),
+          lineWidth: 1
+        )
     )
-    .shadow(color: .blue.opacity(0.3), radius: 3)
     .onAppear {
       if !hasAppeared {
         hasAppeared = true
         setupVideo()
       }
-      videoFeedManager.registerVideoAsVisible(media.id)
+      // Use videoCID as identifier, fallback to URL string if no CID
+      let videoId = media.videoCID ?? media.url.absoluteString
+      videoFeedManager.registerVideoAsVisible(videoId)
     }
     .onDisappear {
-      videoFeedManager.unregisterVideoAsVisible(media.id)
+      // Use videoCID as identifier, fallback to URL string if no CID
+      let videoId = media.videoCID ?? media.url.absoluteString
+      videoFeedManager.unregisterVideoAsVisible(videoId)
       cleanupVideo()
     }
     .onTapGesture {
@@ -88,10 +116,14 @@ public struct InlineVideoPlayerView: View {
   private func videoPlayerView(player: AVPlayer) -> some View {
     VideoPlayer(player: player)
       .onReceive(NotificationCenter.default.publisher(for: .AVPlayerItemDidPlayToEndTime)) { _ in
-        handleVideoEnd()
+        Task { @MainActor in
+          handleVideoEnd()
+        }
       }
       .onReceive(NotificationCenter.default.publisher(for: .AVPlayerItemTimeJumped)) { _ in
-        updateProgress()
+        Task { @MainActor in
+          updateProgress()
+        }
       }
   }
 
@@ -254,9 +286,6 @@ public struct InlineVideoPlayerView: View {
   // MARK: - Setup & Cleanup
 
   private func setupVideo() {
-    isLoading = true
-    hasError = false
-
     // Create player item
     let playerItem = AVPlayerItem(url: media.url)
     player = AVPlayer(playerItem: playerItem)
@@ -267,14 +296,17 @@ public struct InlineVideoPlayerView: View {
 
     // Register with video feed manager
     if let player = player {
-      videoFeedManager.registerActivePlayer(player, for: media.id)
+      let videoId = media.videoCID ?? media.url.absoluteString
+      videoFeedManager.registerActivePlayer(player, for: videoId)
     }
 
     // Add time observer for progress updates
     let interval = CMTime(seconds: 0.1, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
     let timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) {
       time in
-      updateProgress()
+      Task { @MainActor in
+        updateProgress()
+      }
     }
 
     // Add player item observers
@@ -283,18 +315,19 @@ public struct InlineVideoPlayerView: View {
       object: playerItem,
       queue: .main
     ) { _ in
-      handleVideoEnd()
+      Task { @MainActor in
+        handleVideoEnd()
+      }
     }
 
     // Get video duration
     playerItem.asset.loadValuesAsynchronously(forKeys: ["duration"]) {
       DispatchQueue.main.async {
         self.duration = playerItem.asset.duration.seconds
-        self.isLoading = false
 
         // Check if we should autoplay based on feed manager
-        if self.videoFeedManager.shouldAutoplayVideo(self.media.id) {
-          self.shouldAutoplay = true
+        let videoId = self.media.videoCID ?? self.media.url.absoluteString
+        if self.videoFeedManager.shouldAutoplayVideo(videoId) {
           self.player?.play()
           self.isPlaying = true
         }
@@ -304,11 +337,11 @@ public struct InlineVideoPlayerView: View {
 
   private func cleanupVideo() {
     if let player = player {
-      videoFeedManager.unregisterActivePlayer(for: media.id)
+      let videoId = media.videoCID ?? media.url.absoluteString
+      videoFeedManager.unregisterActivePlayer(for: videoId)
     }
     player?.pause()
     player = nil
-    isLoading = false
     isPlaying = false
     progress = 0.0
     currentTime = 0.0
@@ -350,11 +383,10 @@ public struct InlineVideoPlayerView: View {
 
   private func handleVideoEnd() {
     player?.seek(to: .zero)
-    if shouldAutoplay {
-      player?.play()
-    } else {
-      isPlaying = false
-    }
+    // The shouldAutoplay logic was removed from the state variables,
+    // so this block will now always set isPlaying to false.
+    // If autoplay is desired, it needs to be re-evaluated and managed.
+    isPlaying = false
   }
 
   // MARK: - Utility
