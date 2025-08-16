@@ -1,7 +1,7 @@
 @preconcurrency import ATProtoKit
+import Client
 import DesignSystem
 import Models
-import Client
 import SwiftData
 import SwiftUI
 import User
@@ -51,15 +51,28 @@ extension PostsFeedView: @MainActor PostsListViewDatasource {
 
   func loadPosts(with state: PostsListViewState) async -> PostsListViewState {
     do {
+      print("PostsFeedView: Starting to load posts for feed: \(feedItem.displayName)")
+      print("PostsFeedView: Feed URI: \(feedItem.uri)")
+      print("PostsFeedView: Current state: \(state)")
+
       switch state {
       case .uninitialized, .loading, .error:
+        print("PostsFeedView: Fetching initial feed data...")
         let feed = try await client.protoClient.getFeed(by: feedItem.uri, cursor: nil)
-        return .loaded(posts: PostListView.processFeed(feed.feed), cursor: feed.cursor)
-      case let .loaded(posts, cursor):
+        print("PostsFeedView: Successfully fetched feed with \(feed.feed.count) posts")
+        let processedPosts = PostListView.processFeed(feed.feed)
+        print("PostsFeedView: Processed \(processedPosts.count) posts")
+        return .loaded(posts: processedPosts, cursor: feed.cursor)
+      case .loaded(let posts, let cursor):
+        print("PostsFeedView: Loading more posts with cursor: \(cursor ?? "nil")")
         let feed = try await client.protoClient.getFeed(by: feedItem.uri, cursor: cursor)
-        return .loaded(posts: posts + PostListView.processFeed(feed.feed), cursor: feed.cursor)
+        print("PostsFeedView: Successfully fetched more posts: \(feed.feed.count)")
+        let processedPosts = PostListView.processFeed(feed.feed)
+        print("PostsFeedView: Processed \(processedPosts.count) additional posts")
+        return .loaded(posts: posts + processedPosts, cursor: feed.cursor)
       }
     } catch {
+      print("PostsFeedView: Error loading posts: \(error)")
       return .error(error)
     }
   }

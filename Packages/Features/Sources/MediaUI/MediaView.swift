@@ -1,4 +1,5 @@
 import Models
+import Nuke
 import NukeUI
 import SwiftUI
 
@@ -6,8 +7,6 @@ public struct MediaView: View {
   let media: Media
   let isQuote: Bool
   let namespace: Namespace.ID
-  
-  @Environment(ImageQualityService.self) private var imageQualityService
 
   public init(media: Media, isQuote: Bool = false, namespace: Namespace.ID) {
     self.media = media
@@ -41,7 +40,7 @@ public struct MediaView: View {
   // MARK: - Image View
 
   private var imageView: some View {
-    LazyImage(url: media.url, options: imageQualityService.getImageLoadingOptions()) { state in
+    LazyImage(url: media.url) { state in
       if let image = state.image {
         image
           .resizable()
@@ -59,16 +58,14 @@ public struct MediaView: View {
     }
     .matchedTransitionSource(id: media.id, in: namespace)
     .onAppear {
-      if imageQualityService.shouldPreloadImages() {
-        preloadImage()
-      }
+      preloadImage()
     }
   }
-  
+
   private func preloadImage() {
     // Preload the image using the quality service configuration
-    let options = imageQualityService.getImageLoadingOptions()
-    ImagePipeline.shared.loadImage(with: media.url, options: options) { _ in }
+    // Note: In Nuke 12.x, ImagePipeline.loadImage only takes URL and completion
+    ImagePipeline.shared.loadImage(with: media.url) { _ in }
   }
 
   // MARK: - Video View

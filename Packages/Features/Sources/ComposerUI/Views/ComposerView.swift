@@ -1,6 +1,7 @@
 import ATProtoKit
-import DesignSystem
 import Client
+import DesignSystem
+import Models
 import SwiftUI
 
 public struct ComposerView: View {
@@ -25,7 +26,7 @@ public struct ComposerView: View {
       return "Reply to \(post.author.displayName ?? post.author.handle)"
     }
   }
-  
+
   private var canSendPost: Bool {
     switch mode {
     case .newPost:
@@ -61,11 +62,11 @@ public struct ComposerView: View {
               Image(systemName: "lock.shield")
                 .font(.system(size: 48))
                 .foregroundStyle(.secondary)
-              
+
               Text("Cannot Reply")
                 .font(.title2)
                 .fontWeight(.semibold)
-              
+
               Text("This user has disabled replies to their posts")
                 .font(.body)
                 .foregroundStyle(.secondary)
@@ -86,7 +87,7 @@ public struct ComposerView: View {
 extension ComposerView {
   private func sendPost() async {
     guard canSendPost else { return }
-    
+
     sendState = .loading
     do {
       switch mode {

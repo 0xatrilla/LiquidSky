@@ -1,10 +1,10 @@
 import ATProtoKit
 import AppRouter
 import Auth
+import Client
 import DesignSystem
 import Destinations
 import Models
-import Client
 import Nuke
 import NukeUI
 import SwiftUI
@@ -20,13 +20,11 @@ struct LiquidSkyApp: App {
   @State var postDataControllerProvider: PostContextProvider = .init()
   @State var postFilterService: PostFilterService = .shared
   @State var imageQualityService: ImageQualityService = .shared
+  @State var settingsService: SettingsService = .shared
 
   init() {
     ImagePipeline.shared = ImagePipeline(configuration: .withDataCache)
-    // Configure image quality service
-    Task { @MainActor in
-      ImageQualityService.shared.configureImagePipeline()
-    }
+    // Note: ImageQualityService configuration moved to avoid potential deadlocks
   }
 
   var body: some Scene {
@@ -45,6 +43,7 @@ struct LiquidSkyApp: App {
             .environment(postDataControllerProvider)
             .environment(postFilterService)
             .environment(imageQualityService)
+            .environment(settingsService)
             .withTheme()
         case .unauthenticated:
           Text("Unauthenticated")
@@ -82,6 +81,10 @@ struct LiquidSkyApp: App {
     do {
       let client = await BSkyClient(configuration: configuration)
       let currentUser = try await CurrentUser(client: client)
+
+      // Configure image quality service after authentication is complete
+      await ImageQualityService.shared.configureImagePipeline()
+
       appState = .authenticated(client: client, currentUser: currentUser)
     } catch {
       appState = .error(error)

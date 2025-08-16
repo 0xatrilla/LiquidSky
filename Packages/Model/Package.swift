@@ -31,6 +31,7 @@ let package = Package(
       dependencies: [
         .product(name: "ATProtoKit", package: "ATProtoKit"),
         .product(name: "Nuke", package: "Nuke"),
+        .product(name: "NukeUI", package: "Nuke"),
         "Client",
       ]
     ),
