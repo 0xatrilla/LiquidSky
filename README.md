@@ -1,11 +1,14 @@
-# LiquidSky 🧊✨
+
+<img width="102" height="102" alt="generated-image" src="https://github.com/user-attachments/assets/0a74b4eb-7bec-4e10-ab57-9a1b8bb0ab4e" />
+
+# LiquidSky 
 
 
 A modern, beautiful Bluesky client for iOS built with SwiftUI and the latest iOS 26 SDK features.
 
 ## 🌟 About
 
-LiquidSky (formerly known as GlowSky, RetroSky, IcySky) is a native iOS client for [Bluesky](https://bsky.social), the decentralized social network built on the AT Protocol. This project showcases modern iOS development practices with a focus on beautiful, fluid UI powered by the latest SwiftUI capabilities.
+LiquidSky is a native iOS client for [Bluesky](https://bsky.social), the decentralized social network built on the AT Protocol. This project showcases modern iOS development practices with a focus on beautiful, fluid UI powered by the latest SwiftUI capabilities.
 
 ### ✨ Core Features
 
