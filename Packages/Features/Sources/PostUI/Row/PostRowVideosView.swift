@@ -2,8 +2,8 @@ import ATProtoKit
 import AppRouter
 import DesignSystem
 import Destinations
-import Models
 import MediaUI
+import Models
 import SwiftUI
 
 struct PostRowVideosView: View {
@@ -32,9 +32,8 @@ struct PostRowVideosView: View {
       withAnimation(.easeInOut(duration: 0.1)) {
         shouldRotate = false
       } completion: {
-        router.presentedSheet = .fullScreenMedia(
-          images: [videos.media],
-          preloadedImage: nil,
+        router.presentedSheet = .fullScreenVideo(
+          media: videos.media,
           namespace: namespace
         )
       }
@@ -49,7 +48,9 @@ struct PostRowVideosView: View {
   }
 
   @ViewBuilder
-  private func makeVideoView(video: AppBskyLexicon.Embed.VideoDefinition.View, index: Int) -> some View {
+  private func makeVideoView(video: AppBskyLexicon.Embed.VideoDefinition.View, index: Int)
+    -> some View
+  {
     let width: CGFloat = CGFloat(video.aspectRatio?.width ?? 16)
     let height: CGFloat = CGFloat(video.aspectRatio?.height ?? 9)
     GeometryReader { geometry in
@@ -57,7 +58,7 @@ struct PostRowVideosView: View {
       let displayHeight = isQuote ? quoteMaxSize : displayWidth / (width / height)
       let finalWidth = firstVideoSize?.width ?? displayWidth
       let finalHeight = firstVideoSize?.height ?? displayHeight
-      
+
       MediaView(
         media: video.media,
         isQuote: isQuote,

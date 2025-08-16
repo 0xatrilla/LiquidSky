@@ -7,11 +7,16 @@ public struct MediaView: View {
   let media: Media
   let isQuote: Bool
   let namespace: Namespace.ID
+  let onFullScreenRequest: (() -> Void)?
 
-  public init(media: Media, isQuote: Bool = false, namespace: Namespace.ID) {
+  public init(
+    media: Media, isQuote: Bool = false, namespace: Namespace.ID,
+    onFullScreenRequest: (() -> Void)? = nil
+  ) {
     self.media = media
     self.isQuote = isQuote
     self.namespace = namespace
+    self.onFullScreenRequest = onFullScreenRequest
   }
 
   public var body: some View {
@@ -74,7 +79,8 @@ public struct MediaView: View {
     InlineVideoPlayerView(
       media: media,
       isQuote: isQuote,
-      namespace: namespace
+      namespace: namespace,
+      onFullScreenRequest: onFullScreenRequest
     )
   }
 }

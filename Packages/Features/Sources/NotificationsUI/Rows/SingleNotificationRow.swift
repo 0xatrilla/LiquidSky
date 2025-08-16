@@ -49,7 +49,13 @@ public struct SingleNotificationRow: View {
             .stroke(Color(uiColor: .separator), lineWidth: 0.5)
         )
         .onTapGesture {
-          router.navigateTo(.profile(notification.author.profile))
+          let profile = Profile(
+            did: notification.author.actorDID,
+            handle: notification.author.actorHandle,
+            displayName: notification.author.displayName,
+            avatarImageURL: notification.author.avatarImageURL
+          )
+          router.navigateTo(.profile(profile))
         }
 
         VStack(alignment: .leading, spacing: 6) {
