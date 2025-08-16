@@ -2,6 +2,7 @@ import ATProtoKit
 import AppRouter
 import DesignSystem
 import Destinations
+import Models
 import PostUI
 import SwiftUI
 
@@ -165,8 +166,8 @@ public struct GroupedNotificationRow: View {
     let avatarCount = min(group.notifications.count, maxAvatars)
 
     HStack(spacing: -8) {
-      ForEach(0..<avatarCount, id: \.self) { index in
-        let notification = group.notifications[index]
+      ForEach(Array(group.notifications.prefix(avatarCount).enumerated()), id: \.offset) {
+        index, notification in
         AsyncImage(url: notification.author.avatarImageURL) { image in
           image
             .resizable()
@@ -187,7 +188,13 @@ public struct GroupedNotificationRow: View {
             .stroke(Color(uiColor: .systemBackground), lineWidth: 2)
         )
         .onTapGesture {
-          router.navigateTo(.profile(notification.author.profile))
+          let profile = Profile(
+            did: notification.author.actorDID,
+            handle: notification.author.actorHandle,
+            displayName: notification.author.displayName,
+            avatarImageURL: notification.author.avatarImageURL
+          )
+          router.navigateTo(.profile(profile))
         }
       }
     }

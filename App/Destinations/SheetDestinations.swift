@@ -32,6 +32,11 @@ public struct SheetDestinations: ViewModifier {
             imageURL: imageURL,
             namespace: namespace
           )
+        case .fullScreenVideo(let media, let namespace):
+          FullScreenVideoViewWrapper(
+            media: media,
+            namespace: namespace
+          )
         case .composer(let mode):
           if let client, let currentUser {
             switch mode {

@@ -18,5 +18,8 @@ public enum SheetDestination: SheetType, Hashable, Identifiable {
   case fullScreenProfilePicture(
     imageURL: URL,
     namespace: Namespace.ID)
+  case fullScreenVideo(
+    media: Media,
+    namespace: Namespace.ID)
   case composer(mode: ComposerDestinationMode)
 }

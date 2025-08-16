@@ -21,10 +21,16 @@ public struct InlineVideoPlayerView: View {
   // Access VideoFeedManager directly instead of through environment
   private var videoFeedManager: VideoFeedManager { VideoFeedManager.shared }
 
-  public init(media: Media, isQuote: Bool = false, namespace: Namespace.ID) {
+  let onFullScreenRequest: (() -> Void)?
+
+  public init(
+    media: Media, isQuote: Bool = false, namespace: Namespace.ID,
+    onFullScreenRequest: (() -> Void)? = nil
+  ) {
     self.media = media
     self.isQuote = isQuote
     self.namespace = namespace
+    self.onFullScreenRequest = onFullScreenRequest
   }
 
   public var body: some View {
@@ -134,6 +140,17 @@ public struct InlineVideoPlayerView: View {
     VStack {
       // Top controls
       HStack {
+        Button(action: {
+          onFullScreenRequest?()
+        }) {
+          Image(systemName: "arrow.up.left.and.arrow.down.right")
+            .font(.title2)
+            .foregroundColor(.white)
+            .padding(8)
+            .background(.ultraThinMaterial)
+            .clipShape(Circle())
+        }
+
         Spacer()
 
         Button(action: toggleMute) {
