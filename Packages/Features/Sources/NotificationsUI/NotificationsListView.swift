@@ -26,17 +26,6 @@ public struct NotificationsListView: View {
 
         ScrollView {
           LazyVStack(spacing: 0) {
-            // Header section with proper iOS large title styling
-            LargeTitleHeader(
-              title: "Notifications",
-              subtitle: "Stay updated with your latest activity",
-              icon: "bell.fill",
-              iconColor: .blue,
-              backgroundColor: .white.opacity(0.05),
-              borderColor: .white.opacity(0.1)
-            )
-            .padding(.horizontal, 16)
-
             // Notifications content
             if notificationsGroups.isEmpty {
               // Empty state with glass effect
@@ -87,10 +76,11 @@ public struct NotificationsListView: View {
               .padding(.horizontal, 16)
             } else {
               // Notifications list with improved spacing
-              LazyVStack(spacing: 12) {
+              LazyVStack(spacing: 16) {  // Increased spacing from 12 to 16
                 ForEach(notificationsGroups, id: \.id) { group in
                   NotificationRow(group: group)
                     .padding(.horizontal, 16)
+                    .padding(.vertical, 4)  // Add vertical padding for better separation
                 }
 
                 // Load more indicator with glass effect
@@ -166,9 +156,11 @@ struct NavigationBarModifier: ViewModifier {
     #if os(iOS)
       content
         .navigationBarTitleDisplayMode(.large)
+        .navigationTitle("Notifications")
         .navigationBarHidden(false)
     #else
       content
+        .navigationTitle("Notifications")
     #endif
   }
 }

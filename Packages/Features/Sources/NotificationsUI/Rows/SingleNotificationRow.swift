@@ -95,21 +95,35 @@ public struct SingleNotificationRow: View {
       // Post content if available with glass effects
       if let postItem {
         VStack(alignment: .leading, spacing: 8) {
-          // Post text content with glass background
+          // Post text content with glass background and improved text handling
           if !postItem.content.isEmpty {
-            Text(postItem.content)
-              .font(.subheadline)
-              .foregroundStyle(.secondary)
-              .lineLimit(3)
-              .padding(16)
-              .background(
-                RoundedRectangle(cornerRadius: 12)
-                  .fill(.ultraThinMaterial)
-                  .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                      .stroke(.white.opacity(0.1), lineWidth: 0.5)
-                  )
-              )
+            VStack(alignment: .leading, spacing: 8) {
+              // Improved text display with better typography
+              Text(postItem.content)
+                .font(.system(size: 15, weight: .regular, design: .default))
+                .foregroundStyle(.secondary)
+                .lineLimit(nil)  // Remove line limit to show full text
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)  // Allow text to expand vertically
+                .lineSpacing(2)  // Add line spacing for better readability
+                .textSelection(.enabled)  // Allow text selection
+
+              // Add a subtle divider if there's media content below
+              if postItem.embed != nil {
+                Divider()
+                  .background(.white.opacity(0.1))
+              }
+            }
+            .padding(16)
+            .background(
+              RoundedRectangle(cornerRadius: 12)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                  RoundedRectangle(cornerRadius: 12)
+                    .stroke(.white.opacity(0.1), lineWidth: 0.5)
+                )
+            )
+            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)  // Add subtle shadow for depth
           }
 
           // Media content if available - extract from embed
@@ -279,21 +293,35 @@ public struct SingleNotificationRow: View {
           // Post content if available with glass effects
           if let postItem {
             VStack(alignment: .leading, spacing: 8) {
-              // Post text content with glass background
+              // Post text content with glass background and improved text handling
               if !postItem.content.isEmpty {
-                Text(postItem.content)
-                  .font(.subheadline)
-                  .foregroundStyle(.secondary)
-                  .lineLimit(3)
-                  .padding(16)
-                  .background(
-                    RoundedRectangle(cornerRadius: 12)
-                      .fill(.ultraThinMaterial)
-                      .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                          .stroke(.white.opacity(0.1), lineWidth: 0.5)
-                      )
-                  )
+                VStack(alignment: .leading, spacing: 8) {
+                  // Improved text display with better typography
+                  Text(postItem.content)
+                    .font(.system(size: 15, weight: .regular, design: .default))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(nil)  // Remove line limit to show full text
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)  // Allow text to expand vertically
+                    .lineSpacing(2)  // Add line spacing for better readability
+                    .textSelection(.enabled)  // Allow text selection
+
+                  // Add a subtle divider if there's media content below
+                  if postItem.embed != nil {
+                    Divider()
+                      .background(.white.opacity(0.1))
+                  }
+                }
+                .padding(16)
+                .background(
+                  RoundedRectangle(cornerRadius: 12)
+                    .fill(.ultraThinMaterial)
+                    .overlay(
+                      RoundedRectangle(cornerRadius: 12)
+                        .stroke(.white.opacity(0.1), lineWidth: 0.5)
+                    )
+                )
+                .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)  // Add subtle shadow for depth
               }
 
               // Media content if available - extract from embed
