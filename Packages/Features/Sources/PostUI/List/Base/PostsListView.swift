@@ -29,44 +29,20 @@ public struct PostListView: View {
   }
 
   public var body: some View {
-    ZStack(alignment: .top) {
-      // Feed content in the background
-      VStack(spacing: 0) {
-        // Invisible spacer to push content down behind header
-        Color.clear
-          .frame(height: 120) // Adjust based on header height
-        
-        feedListView
-          .opacity(searchText.isEmpty ? 1.0 : 0.3)
-          .allowsHitTesting(searchText.isEmpty)
+    VStack(spacing: 0) {
+      headerView
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+
+      // Search Results Overlay (when searching)
+      if !searchText.isEmpty {
+        searchResultsOverlay
       }
-      
-      // Liquid glass header overlay
-      VStack(spacing: 0) {
-        headerView
-          .padding(.horizontal, 16)
-          .padding(.top, 8)
-          .padding(.bottom, 16)
-          .background(
-            // Liquid glass effect with blur and material
-            RoundedRectangle(cornerRadius: 0)
-              .fill(.ultraThinMaterial)
-              .overlay(
-                // Subtle border for definition
-                Rectangle()
-                  .stroke(.white.opacity(0.1), lineWidth: 0.5)
-              )
-              .background(
-                // Additional blur for depth
-                Rectangle()
-                  .fill(.ultraThinMaterial)
-                  .blur(radius: 20)
-              )
-          )
-          .clipShape(Rectangle())
-        
-        Spacer()
-      }
+
+      // Normal feed view (always visible, but can be dimmed)
+      feedListView
+        .opacity(searchText.isEmpty ? 1.0 : 0.3)
+        .allowsHitTesting(searchText.isEmpty)
     }
     .screenContainer()
     .scrollDismissesKeyboard(.immediately)
