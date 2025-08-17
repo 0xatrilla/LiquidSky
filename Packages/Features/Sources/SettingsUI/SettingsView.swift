@@ -10,13 +10,7 @@ public struct SettingsView: View {
   @State private var settingsService = SettingsService.shared
   @State private var showingResetAlert = false
   @State private var showingAboutSheet = false
-  @State private var showingPrivacyPolicy = false
-  @State private var showingTermsOfService = false
   @State private var showingChangePassword = false
-  @State private var showingHelpFAQ = false
-  @State private var showingBugReport = false
-  @State private var showingFeatureRequest = false
-  @State private var showingContactSupport = false
 
   public init() {}
 
@@ -43,20 +37,8 @@ public struct SettingsView: View {
           // Content Section
           contentSection
 
-          // Video Section
-          videoSection
-
-          // Privacy Section
-          privacySection
-
-          // Feed Section
-          feedSection
-
           // Media Section
           mediaSection
-
-          // Support Section
-          supportSection
 
           // About Section
           aboutSection
@@ -81,26 +63,8 @@ public struct SettingsView: View {
     .sheet(isPresented: $showingAboutSheet) {
       AboutView()
     }
-    .sheet(isPresented: $showingPrivacyPolicy) {
-      PrivacyPolicyView()
-    }
-    .sheet(isPresented: $showingTermsOfService) {
-      TermsOfServiceView()
-    }
     .sheet(isPresented: $showingChangePassword) {
       ChangePasswordView()
-    }
-    .sheet(isPresented: $showingHelpFAQ) {
-      HelpFAQView()
-    }
-    .sheet(isPresented: $showingBugReport) {
-      BugReportView()
-    }
-    .sheet(isPresented: $showingFeatureRequest) {
-      FeatureRequestView()
-    }
-    .sheet(isPresented: $showingContactSupport) {
-      ContactSupportView()
     }
   }
 
@@ -206,136 +170,6 @@ public struct SettingsView: View {
         iconColor: .orange,
         isOn: $settingsService.showSensitiveContent
       )
-
-      SettingsToggleRow(
-        title: "Push Notifications",
-        subtitle: "Receive notifications for new activity",
-        icon: "bell.fill",
-        iconColor: .blue,
-        isOn: $settingsService.enablePushNotifications
-      )
-    }
-  }
-
-  // MARK: - Privacy Section
-  private var privacySection: some View {
-    VStack(spacing: 16) {
-      SettingsSectionHeader(title: "Privacy", icon: "lock.shield.fill", color: .red)
-
-      SettingsToggleRow(
-        title: "Allow Mentions",
-        subtitle: "Let others mention you in posts",
-        icon: "at",
-        iconColor: .blue,
-        isOn: $settingsService.allowMentions
-      )
-
-      SettingsToggleRow(
-        title: "Allow Replies",
-        subtitle: "Let others reply to your posts",
-        icon: "arrowshape.turn.up.left.fill",
-        iconColor: .green,
-        isOn: $settingsService.allowReplies
-      )
-
-      SettingsToggleRow(
-        title: "Allow Quotes",
-        subtitle: "Let others quote your posts",
-        icon: "quote.bubble.fill",
-        iconColor: .purple,
-        isOn: $settingsService.allowQuotes
-      )
-
-      SettingsNavigationRow(
-        title: "Privacy Policy",
-        subtitle: "Read our privacy policy",
-        icon: "doc.text.fill",
-        iconColor: .blue
-      ) {
-        showingPrivacyPolicy = true
-      }
-
-      SettingsNavigationRow(
-        title: "Terms of Service",
-        subtitle: "Read our terms of service",
-        icon: "doc.plaintext.fill",
-        iconColor: .orange
-      ) {
-        showingTermsOfService = true
-      }
-    }
-  }
-
-  // MARK: - Video Section
-  private var videoSection: some View {
-    VStack(spacing: 16) {
-      SettingsSectionHeader(title: "Video", icon: "video.fill", color: .blue)
-
-      // Temporarily commented out to fix build issues
-      // TODO: Re-implement video settings using environment or different approach
-      /*
-      SettingsToggleRow(
-        title: "Autoplay Videos",
-        subtitle: "Automatically play videos in feed",
-        icon: "play.fill",
-        iconColor: .blue,
-        isOn: Binding(
-          get: { VideoFeedManager.shared.isAutoplayEnabled },
-          set: { VideoFeedManager.shared.updateAutoplayEnabled($0) }
-        )
-      )
-      
-      SettingsToggleRow(
-        title: "Muted by Default",
-        subtitle: "Start videos without sound",
-        icon: "speaker.slash.fill",
-        iconColor: .blue,
-        isOn: Binding(
-          get: { VideoFeedManager.shared.isMutedByDefault },
-          set: { VideoFeedManager.shared.updateMutedByDefault($0) }
-        )
-      )
-      
-      SettingsPickerRow(
-        title: "Max Concurrent Videos",
-        subtitle: "Limit videos playing simultaneously",
-        icon: "number.circle.fill",
-        iconColor: .blue,
-        selection: Binding(
-          get: { VideoFeedManager.shared.maxConcurrentVideos },
-          set: { VideoFeedManager.shared.updateMaxConcurrentVideos($0) }
-        ),
-        options: [1, 2, 3, 4],
-        optionTitle: { "\($0) video\($0 == 1 ? "" : "s")" }
-      )
-      */
-
-      Text("Video settings temporarily disabled")
-        .foregroundColor(.secondary)
-        .font(.caption)
-    }
-  }
-
-  // MARK: - Feed Section
-  private var feedSection: some View {
-    VStack(spacing: 16) {
-      SettingsSectionHeader(title: "Feed", icon: "list.bullet.fill", color: .orange)
-
-      SettingsToggleRow(
-        title: "Show Reposts",
-        subtitle: "Display reposted content",
-        icon: "arrow.2.squarepath",
-        iconColor: .blue,
-        isOn: $settingsService.showReposts
-      )
-
-      SettingsToggleRow(
-        title: "Show Replies",
-        subtitle: "Display reply content",
-        icon: "bubble.left.and.bubble.right.fill",
-        iconColor: .green,
-        isOn: $settingsService.showReplies
-      )
     }
   }
 
@@ -361,49 +195,6 @@ public struct SettingsView: View {
         iconColor: .blue,
         isOn: $settingsService.preloadImages
       )
-    }
-  }
-
-  // MARK: - Support Section
-  private var supportSection: some View {
-    VStack(spacing: 16) {
-      SettingsSectionHeader(title: "Support", icon: "questionmark.circle.fill", color: .teal)
-
-      SettingsNavigationRow(
-        title: "Help & FAQ",
-        subtitle: "Find answers to common questions",
-        icon: "questionmark.circle.fill",
-        iconColor: .teal
-      ) {
-        showingHelpFAQ = true
-      }
-
-      SettingsNavigationRow(
-        title: "Report a Bug",
-        subtitle: "Help us improve by reporting issues",
-        icon: "exclamationmark.triangle.fill",
-        iconColor: .orange
-      ) {
-        showingBugReport = true
-      }
-
-      SettingsNavigationRow(
-        title: "Feature Request",
-        subtitle: "Suggest new features",
-        icon: "lightbulb.fill",
-        iconColor: .yellow
-      ) {
-        showingFeatureRequest = true
-      }
-
-      SettingsNavigationRow(
-        title: "Contact Support",
-        subtitle: "Get help from our team",
-        icon: "envelope.fill",
-        iconColor: .blue
-      ) {
-        showingContactSupport = true
-      }
     }
   }
 
