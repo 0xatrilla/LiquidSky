@@ -20,20 +20,30 @@ public struct UnifiedSearchResultsView: View {
           loadingView
         } else if let error = searchService.searchError {
           errorView(error: error)
-        } else if searchService.searchResults.isEmpty {
+        } else if !searchService.searchResults.hasResults {
           emptyStateView
         } else {
           searchResultsList
         }
       }
       .navigationTitle("Search Results")
-      .navigationBarTitleDisplayMode(.inline)
+      #if os(iOS)
+        .navigationBarTitleDisplayMode(.inline)
+      #endif
       .toolbar {
-        ToolbarItem(placement: .navigationBarTrailing) {
-          Button("Done") {
-            dismiss()
+        #if os(iOS)
+          ToolbarItem(placement: .navigationBarTrailing) {
+            Button("Done") {
+              dismiss()
+            }
           }
-        }
+        #else
+          ToolbarItem(placement: .primaryAction) {
+            Button("Done") {
+              dismiss()
+            }
+          }
+        #endif
       }
     }
   }
@@ -102,10 +112,33 @@ public struct UnifiedSearchResultsView: View {
   // MARK: - Search Results List
 
   private var searchResultsList: some View {
-    List(searchService.searchResults) { feed in
-      FeedSearchResultRow(feed: feed)
+    Group {
+      if searchService.searchResults.hasResults {
+        List {
+          ForEach(Array(searchService.searchResults.feeds.enumerated()), id: \.element.id) {
+            _, feed in
+            FeedSearchResultRow(feed: feed)
+          }
+        }
+        .listStyle(.plain)
+      } else {
+        VStack(spacing: 16) {
+          Image(systemName: "magnifyingglass")
+            .font(.system(size: 48))
+            .foregroundColor(.secondary)
+
+          Text("No feeds found")
+            .font(.title3)
+            .fontWeight(.medium)
+
+          Text("Try adjusting your search terms")
+            .font(.body)
+            .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding()
+      }
     }
-    .listStyle(.plain)
   }
 }
 
