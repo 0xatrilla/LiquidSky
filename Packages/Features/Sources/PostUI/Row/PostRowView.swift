@@ -53,8 +53,12 @@ public struct PostRowView: View {
 
   private var mainView: some View {
     VStack(alignment: .leading, spacing: 8) {
+      // Repost indicator - show who reposted this content
+      if post.isReposted, let repostedBy = post.repostedBy {
+        RepostIndicatorView(repostedBy: repostedBy)
+      }
+
       authorView
-      replyContextView
       PostRowBodyView(post: post)
       PostRowEmbedView(post: post)
       if !isQuote {
@@ -129,14 +133,6 @@ public struct PostRowView: View {
     }
   }
 
-  @ViewBuilder
-  private var replyContextView: some View {
-    if post.hasReply, let replyRef = post.replyRef {
-      PostRowReplyContextView(replyRef: replyRef)
-        .padding(.leading, 40)
-        .padding(.bottom, 8)
-    }
-  }
 }
 
 #Preview {
