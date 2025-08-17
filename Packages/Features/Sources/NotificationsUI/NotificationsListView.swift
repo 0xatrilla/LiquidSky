@@ -16,84 +16,123 @@ public struct NotificationsListView: View {
 
   public var body: some View {
     NavigationView {
-      List {
-        // Header section
-        Section {
-          VStack(alignment: .leading, spacing: 8) {
-            Text("Notifications")
-              .font(.largeTitle)
-              .fontWeight(.bold)
-              .foregroundStyle(.primary)
+      ZStack {
+        // Beautiful animated background
+        AnimatedBackgroundView(
+          primaryColor: .blue,
+          secondaryColor: .purple,
+          accentColor: .cyan
+        )
 
-            Text("Stay updated with your latest activity")
-              .font(.subheadline)
-              .foregroundStyle(.secondary)
-          }
-          .padding(.vertical, 8)
-          .listRowBackground(Color.clear)
-          .listRowSeparator(.hidden)
-        }
+        ScrollView {
+          LazyVStack(spacing: 0) {
+            // Header section with proper iOS large title styling
+            LargeTitleHeader(
+              title: "Notifications",
+              subtitle: "Stay updated with your latest activity",
+              icon: "bell.fill",
+              iconColor: .blue,
+              backgroundColor: .white.opacity(0.05),
+              borderColor: .white.opacity(0.1)
+            )
+            .padding(.horizontal, 16)
 
-        // Notifications content
-        Section {
-          if notificationsGroups.isEmpty {
-            // Empty state - IceCubesApp style
-            VStack(spacing: 16) {
-              Image(systemName: "bell.slash")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
+            // Notifications content
+            if notificationsGroups.isEmpty {
+              // Empty state with glass effect
+              VStack(spacing: 20) {
+                Image(systemName: "bell.slash")
+                  .font(.system(size: 48))
+                  .foregroundStyle(.secondary)
+                  .padding(.bottom, 8)
 
-              Text("No notifications yet")
-                .font(.title2)
-                .fontWeight(.semibold)
-                .foregroundStyle(.primary)
+                Text("No notifications yet")
+                  .font(.title2)
+                  .fontWeight(.semibold)
+                  .foregroundStyle(.primary)
 
-              Text("When you get notifications, they'll appear here")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 40)
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
-          } else {
-            // Notifications list - IceCubesApp style
-            ForEach(notificationsGroups, id: \.id) { group in
-              NotificationRow(group: group)
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-            }
-
-            // Load more indicator - IceCubesApp style
-            if cursor != nil {
-              HStack {
-                Spacer()
-                ProgressView()
-                  .scaleEffect(0.8)
-                Spacer()
+                Text("When you get notifications, they'll appear here")
+                  .font(.subheadline)
+                  .foregroundStyle(.secondary)
+                  .multilineTextAlignment(.center)
               }
-              .padding(.vertical, 20)
-              .listRowBackground(Color.clear)
-              .listRowSeparator(.hidden)
-              .task {
-                await fetchNotifications()
+              .frame(maxWidth: .infinity)
+              .padding(.vertical, 40)
+              .padding(.horizontal, 20)
+              .background(
+                NotificationGlassCard(
+                  backgroundColor: .white.opacity(0.03),
+                  borderColor: .white.opacity(0.08)
+                ) {
+                  VStack(spacing: 20) {
+                    Image(systemName: "bell.slash")
+                      .font(.system(size: 48))
+                      .foregroundStyle(.secondary)
+                      .padding(.bottom, 8)
+
+                    Text("No notifications yet")
+                      .font(.title2)
+                      .fontWeight(.semibold)
+                      .foregroundStyle(.primary)
+
+                    Text("When you get notifications, they'll appear here")
+                      .font(.subheadline)
+                      .foregroundStyle(.secondary)
+                      .multilineTextAlignment(.center)
+                  }
+                  .padding(.vertical, 40)
+                  .padding(.horizontal, 20)
+                }
+              )
+              .padding(.horizontal, 16)
+            } else {
+              // Notifications list with improved spacing
+              LazyVStack(spacing: 12) {
+                ForEach(notificationsGroups, id: \.id) { group in
+                  NotificationRow(group: group)
+                    .padding(.horizontal, 16)
+                }
+
+                // Load more indicator with glass effect
+                if cursor != nil {
+                  HStack {
+                    Spacer()
+                    ProgressView()
+                      .scaleEffect(0.8)
+                      .padding(.vertical, 16)
+                      .padding(.horizontal, 24)
+                      .background(
+                        NotificationGlassCard(
+                          backgroundColor: .white.opacity(0.03),
+                          borderColor: .white.opacity(0.08)
+                        ) {
+                          ProgressView()
+                            .scaleEffect(0.8)
+                            .padding(.vertical, 16)
+                            .padding(.horizontal, 24)
+                        }
+                      )
+                    Spacer()
+                  }
+                  .padding(.vertical, 20)
+                  .padding(.horizontal, 16)
+                  .task {
+                    await fetchNotifications()
+                  }
+                }
               }
             }
           }
         }
-      }
-      .listStyle(.plain)
-      .background(Color(uiColor: .systemGroupedBackground))
-      .navigationBarHidden(true)
-      .task {
-        cursor = nil
-        await fetchNotifications()
-      }
-      .refreshable {
-        cursor = nil
-        await fetchNotifications()
+        .modifier(NavigationBarModifier())
+        .task {
+          cursor = nil
+          await fetchNotifications()
+        }
+        .refreshable {
+          cursor = nil
+          await fetchNotifications()
+        }
       }
     }
   }
@@ -117,6 +156,20 @@ public struct NotificationsListView: View {
     } catch {
       print(error)
     }
+  }
+}
+
+// MARK: - Navigation Bar Modifier
+
+struct NavigationBarModifier: ViewModifier {
+  func body(content: Content) -> some View {
+    #if os(iOS)
+      content
+        .navigationBarTitleDisplayMode(.large)
+        .navigationBarHidden(false)
+    #else
+      content
+    #endif
   }
 }
 

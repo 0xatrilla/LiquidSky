@@ -12,12 +12,17 @@ struct NotificationIconView: View {
       .frame(width: 20, height: 20)
       .background(
         Circle()
-          .fill(Color(uiColor: .systemBackground))
+          .fill(.ultraThinMaterial)
           .overlay(
             Circle()
-              .stroke(color, lineWidth: 2)
+              .stroke(color.opacity(0.8), lineWidth: 1.5)
           )
       )
-      .shadow(color: color.opacity(0.3), radius: 4, x: 0, y: 2)
+      .background(
+        Circle()
+          .fill(color.opacity(0.1))
+          .blur(radius: 4)
+      )
+      .shadow(color: color.opacity(0.4), radius: 6, x: 0, y: 3)
   }
 }

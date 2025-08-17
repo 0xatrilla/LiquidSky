@@ -20,26 +20,31 @@ public struct GroupedNotificationRow: View {
 
   public var body: some View {
     VStack(alignment: .leading, spacing: 16) {
-      // Header with avatars, action text, and timestamp - IceCubesApp style
+      // Header with avatars, action text, and timestamp
       HStack(alignment: .top, spacing: 12) {
-        // Avatar stack with clean styling - IceCubesApp style
+        // Avatar stack with enhanced glass styling
         ZStack(alignment: .bottomTrailing) {
           avatarsView
 
-          // Notification type icon
+          // Notification type icon with glass effect
           NotificationIconView(
             icon: group.type.iconName,
             color: group.type.color
           )
+          .background(
+            Circle()
+              .fill(.ultraThinMaterial)
+              .blur(radius: 8)
+          )
         }
 
         VStack(alignment: .leading, spacing: 6) {
-          // Action text - IceCubesApp style
+          // Action text with improved typography
           Text(actionText(group.notifications.count))
             .font(.subheadline)
             .foregroundStyle(.secondary)
 
-          // Timestamp - IceCubesApp style
+          // Timestamp with better contrast
           if let firstNotification = group.notifications.first {
             Text(firstNotification.indexedAt.formatted(.relative(presentation: .named)))
               .font(.caption)
@@ -50,19 +55,23 @@ public struct GroupedNotificationRow: View {
         Spacer()
       }
 
-      // Post content if available - IceCubesApp style
+      // Post content if available with glass effects
       if let post = group.postItem {
         VStack(alignment: .leading, spacing: 8) {
-          // Post text content
+          // Post text content with glass background
           if !post.content.isEmpty {
             Text(post.content)
               .font(.subheadline)
               .foregroundStyle(.secondary)
               .lineLimit(3)
-              .padding(12)
+              .padding(16)
               .background(
-                RoundedRectangle(cornerRadius: 8)
-                  .fill(Color(uiColor: .systemGray6))
+                RoundedRectangle(cornerRadius: 12)
+                  .fill(.ultraThinMaterial)
+                  .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                      .stroke(.white.opacity(0.1), lineWidth: 0.5)
+                  )
               )
           }
 
@@ -70,13 +79,13 @@ public struct GroupedNotificationRow: View {
           if let embed = post.embed {
             switch embed {
             case .embedImagesView(let images):
-              // Display images in a grid
+              // Display images in a grid with glass effects
               LazyVGrid(
                 columns: [
                   GridItem(.flexible()),
                   GridItem(.flexible()),
                   GridItem(.flexible()),
-                ], spacing: 4
+                ], spacing: 6
               ) {
                 ForEach(Array(images.images.prefix(3).enumerated()), id: \.offset) { index, image in
                   AsyncImage(url: image.thumbnailImageURL ?? image.fullSizeImageURL) { phase in
@@ -86,8 +95,8 @@ public struct GroupedNotificationRow: View {
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                     case .failure, .empty:
-                      RoundedRectangle(cornerRadius: 4)
-                        .fill(Color(uiColor: .systemGray5))
+                      RoundedRectangle(cornerRadius: 8)
+                        .fill(.ultraThinMaterial)
                         .overlay(
                           Image(systemName: "photo")
                             .font(.caption)
@@ -98,13 +107,17 @@ public struct GroupedNotificationRow: View {
                     }
                   }
                   .frame(height: 80)
-                  .clipShape(RoundedRectangle(cornerRadius: 4))
+                  .clipShape(RoundedRectangle(cornerRadius: 8))
+                  .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                      .stroke(.white.opacity(0.1), lineWidth: 0.5)
+                  )
                 }
               }
               .frame(height: 80)
 
             case .embedVideoView(let video):
-              // Display video thumbnail
+              // Display video thumbnail with glass effects
               AsyncImage(url: URL(string: video.thumbnailImageURL ?? "")) { phase in
                 switch phase {
                 case .success(let img):
@@ -112,8 +125,8 @@ public struct GroupedNotificationRow: View {
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                 case .failure, .empty:
-                  RoundedRectangle(cornerRadius: 4)
-                    .fill(Color(uiColor: .systemGray5))
+                  RoundedRectangle(cornerRadius: 8)
+                    .fill(.ultraThinMaterial)
                     .overlay(
                       VStack(spacing: 4) {
                         Image(systemName: "video")
@@ -128,12 +141,20 @@ public struct GroupedNotificationRow: View {
                 }
               }
               .frame(height: 80)
-              .clipShape(RoundedRectangle(cornerRadius: 4))
+              .clipShape(RoundedRectangle(cornerRadius: 8))
+              .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                  .stroke(.white.opacity(0.1), lineWidth: 0.5)
+              )
               .overlay(
                 Image(systemName: "play.circle.fill")
                   .font(.title2)
                   .foregroundStyle(.white)
-                  .background(Circle().fill(.black.opacity(0.7)))
+                  .background(
+                    Circle()
+                      .fill(.black.opacity(0.7))
+                      .blur(radius: 2)
+                  )
               )
 
             default:
@@ -143,16 +164,164 @@ public struct GroupedNotificationRow: View {
         }
       }
     }
-    .padding(16)
+    .padding(20)
     .background(
-      RoundedRectangle(cornerRadius: 12)
-        .fill(Color(uiColor: .systemBackground))
-        .overlay(
-          RoundedRectangle(cornerRadius: 12)
-            .stroke(Color(uiColor: .separator), lineWidth: 0.5)
-        )
+      NotificationGlassCard(
+        backgroundColor: .white.opacity(0.05),
+        borderColor: .white.opacity(0.15),
+        shadowColor: .black.opacity(0.06),
+        shadowRadius: 16,
+        shadowOffset: CGSize(width: 0, height: 6)
+      ) {
+        VStack(alignment: .leading, spacing: 16) {
+          // Header with avatars, action text, and timestamp
+          HStack(alignment: .top, spacing: 12) {
+            // Avatar stack with enhanced glass styling
+            ZStack(alignment: .bottomTrailing) {
+              avatarsView
+
+              // Notification type icon with glass effect
+              NotificationIconView(
+                icon: group.type.iconName,
+                color: group.type.color
+              )
+              .background(
+                Circle()
+                  .fill(.ultraThinMaterial)
+                  .blur(radius: 8)
+              )
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+              // Action text with improved typography
+              Text(actionText(group.notifications.count))
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+              // Timestamp with better contrast
+              if let firstNotification = group.notifications.first {
+                Text(firstNotification.indexedAt.formatted(.relative(presentation: .named)))
+                  .font(.caption)
+                  .foregroundStyle(.secondary)
+              }
+            }
+
+            Spacer()
+          }
+
+          // Post content if available with glass effects
+          if let post = group.postItem {
+            VStack(alignment: .leading, spacing: 8) {
+              // Post text content with glass background
+              if !post.content.isEmpty {
+                Text(post.content)
+                  .font(.subheadline)
+                  .foregroundStyle(.secondary)
+                  .lineLimit(3)
+                  .padding(16)
+                  .background(
+                    RoundedRectangle(cornerRadius: 12)
+                      .fill(.ultraThinMaterial)
+                      .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                          .stroke(.white.opacity(0.1), lineWidth: 0.5)
+                      )
+                  )
+              }
+
+              // Media content if available - extract from embed
+              if let embed = post.embed {
+                switch embed {
+                case .embedImagesView(let images):
+                  // Display images in a grid with glass effects
+                  LazyVGrid(
+                    columns: [
+                      GridItem(.flexible()),
+                      GridItem(.flexible()),
+                      GridItem(.flexible()),
+                    ], spacing: 6
+                  ) {
+                    ForEach(Array(images.images.prefix(3).enumerated()), id: \.offset) {
+                      index, image in
+                      AsyncImage(url: image.thumbnailImageURL ?? image.fullSizeImageURL) { phase in
+                        switch phase {
+                        case .success(let img):
+                          img
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                        case .failure, .empty:
+                          RoundedRectangle(cornerRadius: 8)
+                            .fill(.ultraThinMaterial)
+                            .overlay(
+                              Image(systemName: "photo")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            )
+                        @unknown default:
+                          EmptyView()
+                        }
+                      }
+                      .frame(height: 80)
+                      .clipShape(RoundedRectangle(cornerRadius: 8))
+                      .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                          .stroke(.white.opacity(0.1), lineWidth: 0.5)
+                      )
+                    }
+                  }
+                  .frame(height: 80)
+
+                case .embedVideoView(let video):
+                  // Display video thumbnail with glass effects
+                  AsyncImage(url: URL(string: video.thumbnailImageURL ?? "")) { phase in
+                    switch phase {
+                    case .success(let img):
+                      img
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                    case .failure, .empty:
+                      RoundedRectangle(cornerRadius: 8)
+                        .fill(.ultraThinMaterial)
+                        .overlay(
+                          VStack(spacing: 4) {
+                            Image(systemName: "video")
+                              .font(.caption)
+                            Text("Video")
+                              .font(.caption2)
+                          }
+                          .foregroundStyle(.secondary)
+                        )
+                    @unknown default:
+                      EmptyView()
+                    }
+                  }
+                  .frame(height: 80)
+                  .clipShape(RoundedRectangle(cornerRadius: 8))
+                  .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                      .stroke(.white.opacity(0.1), lineWidth: 0.5)
+                  )
+                  .overlay(
+                    Image(systemName: "play.circle.fill")
+                      .font(.title2)
+                      .foregroundStyle(.white)
+                      .background(
+                        Circle()
+                          .fill(.black.opacity(0.7))
+                          .blur(radius: 2)
+                      )
+                  )
+
+                default:
+                  EmptyView()
+                }
+              }
+            }
+          }
+        }
+        .padding(20)
+      }
     )
-    .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
     .onTapGesture {
       if let post = group.postItem {
         router.navigateTo(.post(post))
@@ -174,7 +343,7 @@ public struct GroupedNotificationRow: View {
             .aspectRatio(contentMode: .fill)
         } placeholder: {
           Circle()
-            .fill(Color(uiColor: .systemGray5))
+            .fill(.ultraThinMaterial)
             .overlay(
               Image(systemName: "person.fill")
                 .font(.caption)
@@ -185,7 +354,12 @@ public struct GroupedNotificationRow: View {
         .clipShape(Circle())
         .overlay(
           Circle()
-            .stroke(Color(uiColor: .systemBackground), lineWidth: 2)
+            .stroke(.ultraThinMaterial, lineWidth: 2)
+        )
+        .background(
+          Circle()
+            .fill(.ultraThinMaterial)
+            .blur(radius: 6)
         )
         .onTapGesture {
           let profile = Profile(
@@ -213,7 +387,7 @@ public struct GroupedNotificationRow: View {
             .padding(12)
             .background(
               RoundedRectangle(cornerRadius: 8)
-                .fill(Color(uiColor: .systemGray6))
+                .fill(.ultraThinMaterial)
             )
         }
 
@@ -238,7 +412,7 @@ public struct GroupedNotificationRow: View {
                       .aspectRatio(contentMode: .fill)
                   case .failure, .empty:
                     RoundedRectangle(cornerRadius: 4)
-                      .fill(Color(uiColor: .systemGray5))
+                      .fill(.ultraThinMaterial)
                       .overlay(
                         Image(systemName: "photo")
                           .font(.caption)
@@ -264,7 +438,7 @@ public struct GroupedNotificationRow: View {
                   .aspectRatio(contentMode: .fill)
               case .failure, .empty:
                 RoundedRectangle(cornerRadius: 4)
-                  .fill(Color(uiColor: .systemGray5))
+                  .fill(.ultraThinMaterial)
                   .overlay(
                     VStack(spacing: 4) {
                       Image(systemName: "video")
