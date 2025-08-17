@@ -18,16 +18,13 @@ public struct FeedsListView: View {
 
   @State var isInSearch: Bool = false
   @State var searchText: String = ""
-  @StateObject private var searchService: UnifiedSearchService
 
   @State var error: Error?
 
   @FocusState var isSearchFocused: Bool
 
   public init() {
-    // Initialize search service without a client initially
-    // This will be updated when the view appears
-    self._searchService = StateObject(wrappedValue: UnifiedSearchService())
+    // No initialization needed for local filtering
   }
 
   public var body: some View {
@@ -52,8 +49,11 @@ public struct FeedsListView: View {
       await loadFeedsForCurrentFilter()
     }
     .onAppear {
-      // Update search service with the actual client
-      searchService.client = client
+      // No initialization needed for local filtering
+    }
+    .onChange(of: searchText) {
+      // Local filtering is handled in the view body
+      // No need to call external search service
     }
     .modifier(FeedsListNavigationBarModifier())
   }
@@ -65,10 +65,6 @@ public struct FeedsListView: View {
       isInSearch: $isInSearch,
       isSearchFocused: $isSearchFocused
     )
-    .task(id: searchText) {
-      guard !searchText.isEmpty else { return }
-      await performUnifiedSearch(query: searchText)
-    }
     .onChange(of: isInSearch, initial: false) {
       guard !isInSearch else { return }
       Task { await fetchSuggestedFeed() }
@@ -124,82 +120,38 @@ public struct FeedsListView: View {
         .padding()
         .frame(maxWidth: .infinity)
       } else {
-        // Show search results when searching
-        if !searchText.isEmpty {
-          searchResultsContent
+        // Show filtered feeds based on search text
+        let filteredFeeds =
+          searchText.isEmpty
+          ? feeds
+          : feeds.filter { feed in
+            feed.displayName.localizedCaseInsensitiveContains(searchText)
+              || feed.description?.localizedCaseInsensitiveContains(searchText) == true
+          }
+
+        if filteredFeeds.isEmpty && !searchText.isEmpty {
+          // No feeds match the search
+          VStack(spacing: 16) {
+            Image(systemName: "magnifyingglass")
+              .font(.system(size: 48))
+              .foregroundColor(.secondary)
+
+            Text("No feeds found")
+              .font(.title2)
+              .fontWeight(.semibold)
+
+            Text("Try adjusting your search terms")
+              .font(.body)
+              .foregroundColor(.secondary)
+          }
+          .padding()
+          .frame(maxWidth: .infinity)
         } else {
-          // Show normal feeds
-          ForEach(feeds) { feed in
+          // Show filtered feeds
+          ForEach(filteredFeeds) { feed in
             FeedRowView(feed: feed)
           }
         }
-      }
-    }
-  }
-
-  private var searchResultsContent: some View {
-    VStack(spacing: 16) {
-      // Users section
-      if !searchService.searchResults.users.isEmpty {
-        VStack(alignment: .leading, spacing: 8) {
-          Text("Users (\(searchService.searchResults.users.count))")
-            .font(.headline)
-            .fontWeight(.semibold)
-            .padding(.horizontal, 16)
-
-          ForEach(searchService.searchResults.users) { user in
-            UserSearchResultRow(user: user)
-          }
-        }
-      }
-
-      // Feeds section
-      if !searchService.searchResults.feeds.isEmpty {
-        VStack(alignment: .leading, spacing: 8) {
-          Text("Feeds (\(searchService.searchResults.feeds.count))")
-            .font(.headline)
-            .fontWeight(.semibold)
-            .padding(.horizontal, 16)
-
-          ForEach(searchService.searchResults.feeds) { feed in
-            SimpleFeedSearchResultRow(feed: feed)
-          }
-        }
-      }
-
-      // Posts section
-      if !searchService.searchResults.posts.isEmpty {
-        VStack(alignment: .leading, spacing: 8) {
-          Text("Posts (\(searchService.searchResults.posts.count))")
-            .font(.headline)
-            .fontWeight(.semibold)
-            .padding(.horizontal, 16)
-
-          ForEach(searchService.searchResults.posts) { post in
-            PostSearchResultRow(post: post)
-          }
-        }
-      }
-
-      // No results
-      if searchService.searchResults.users.isEmpty && searchService.searchResults.feeds.isEmpty
-        && searchService.searchResults.posts.isEmpty && !searchText.isEmpty
-      {
-        VStack(spacing: 16) {
-          Image(systemName: "magnifyingglass")
-            .font(.system(size: 48))
-            .foregroundColor(.secondary)
-
-          Text("No results found")
-            .font(.title2)
-            .fontWeight(.semibold)
-
-          Text("Try adjusting your search terms")
-            .font(.body)
-            .foregroundColor(.secondary)
-        }
-        .padding()
-        .frame(maxWidth: .infinity)
       }
     }
   }
@@ -276,215 +228,6 @@ extension FeedsListView {
         self.feeds = []
       }
     }
-  }
-
-  private func performUnifiedSearch(query: String) async {
-    do {
-      try await Task.sleep(for: .milliseconds(250))
-      await searchService.search(query: query)
-    } catch {
-      print("Error performing unified search: \(error)")
-    }
-  }
-}
-
-// MARK: - Search Result Components
-
-private struct SimpleFeedSearchResultRow: View {
-  let feed: FeedSearchResult
-
-  var body: some View {
-    HStack(spacing: 12) {
-      // Feed icon
-      if let avatarURL = feed.avatarURL {
-        AsyncImage(url: avatarURL) { phase in
-          switch phase {
-          case .success(let image):
-            image
-              .resizable()
-              .scaledToFit()
-          default:
-            Image(systemName: "list.bullet")
-              .font(.title3)
-              .foregroundColor(.blue)
-          }
-        }
-        .frame(width: 50, height: 50)
-        .clipShape(Circle())
-      } else {
-        Image(systemName: "list.bullet")
-          .font(.title3)
-          .foregroundColor(.blue)
-          .frame(width: 50, height: 50)
-          .background(Color.blue.opacity(0.1))
-          .clipShape(Circle())
-      }
-
-      // Feed info
-      VStack(alignment: .leading, spacing: 4) {
-        Text(feed.displayName)
-          .font(.headline)
-          .fontWeight(.semibold)
-
-        if let description = feed.description, !description.isEmpty {
-          Text(description)
-            .font(.body)
-            .foregroundColor(.secondary)
-            .lineLimit(2)
-        }
-
-        HStack(spacing: 8) {
-          Text("by @\(feed.creatorHandle)")
-            .font(.caption)
-            .foregroundColor(.secondary)
-
-          Label("\(feed.likesCount)", systemImage: "heart")
-            .font(.caption)
-            .foregroundColor(.secondary)
-        }
-      }
-
-      Spacer()
-
-      // Arrow indicator
-      Image(systemName: "chevron.right")
-        .foregroundColor(.secondary)
-        .font(.caption)
-    }
-    .padding(.vertical, 12)
-    .padding(.horizontal, 16)
-    .background(Color.gray.opacity(0.05))
-    .cornerRadius(12)
-    .overlay(
-      RoundedRectangle(cornerRadius: 12)
-        .stroke(Color.gray.opacity(0.2), lineWidth: 0.5)
-    )
-    .padding(.horizontal, 16)
-  }
-}
-
-private struct UserSearchResultRow: View {
-  let user: Profile
-
-  var body: some View {
-    HStack(spacing: 12) {
-      // Avatar
-      AsyncImage(url: user.avatarImageURL) { phase in
-        switch phase {
-        case .success(let image):
-          image
-            .resizable()
-            .scaledToFit()
-        default:
-          Circle()
-            .fill(Color.gray.opacity(0.3))
-        }
-      }
-      .frame(width: 50, height: 50)
-      .clipShape(Circle())
-
-      // User info
-      VStack(alignment: .leading, spacing: 4) {
-        Text(user.displayName ?? user.handle)
-          .font(.headline)
-          .fontWeight(.semibold)
-
-        Text("@\(user.handle)")
-          .font(.body)
-          .foregroundColor(.secondary)
-
-        if let description = user.description, !description.isEmpty {
-          Text(description)
-            .font(.caption)
-            .foregroundColor(.secondary)
-            .lineLimit(2)
-        }
-      }
-
-      Spacer()
-
-      // Arrow indicator
-      Image(systemName: "chevron.right")
-        .foregroundColor(.secondary)
-        .font(.caption)
-    }
-    .padding(.vertical, 12)
-    .padding(.horizontal, 16)
-    .background(Color.gray.opacity(0.05))
-    .cornerRadius(12)
-    .overlay(
-      RoundedRectangle(cornerRadius: 12)
-        .stroke(Color.gray.opacity(0.2), lineWidth: 0.5)
-    )
-    .padding(.horizontal, 16)
-  }
-}
-
-private struct PostSearchResultRow: View {
-  let post: PostItem
-
-  var body: some View {
-    VStack(alignment: .leading, spacing: 8) {
-      // Author info
-      HStack(spacing: 8) {
-        AsyncImage(url: post.author.avatarImageURL) { phase in
-          switch phase {
-          case .success(let image):
-            image
-              .resizable()
-              .scaledToFit()
-          default:
-            Circle()
-              .fill(Color.gray.opacity(0.3))
-          }
-        }
-        .frame(width: 24, height: 24)
-        .clipShape(Circle())
-
-        Text(post.author.displayName ?? post.author.handle)
-          .font(.caption)
-          .fontWeight(.medium)
-
-        Text("@\(post.author.handle)")
-          .font(.caption)
-          .foregroundColor(.secondary)
-
-        Spacer()
-
-        Text(post.indexedAt.relativeFormatted)
-          .font(.caption)
-          .foregroundColor(.secondary)
-      }
-
-      // Post content
-      Text(post.content)
-        .font(.body)
-        .lineLimit(3)
-
-      // Engagement metrics
-      HStack(spacing: 16) {
-        Label("\(post.replyCount)", systemImage: "bubble.left")
-          .font(.caption)
-          .foregroundColor(.secondary)
-
-        Label("\(post.repostCount)", systemImage: "arrow.2.squarepath")
-          .font(.caption)
-          .foregroundColor(.secondary)
-
-        Label("\(post.likeCount)", systemImage: "heart")
-          .font(.caption)
-          .foregroundColor(.secondary)
-      }
-    }
-    .padding(.vertical, 12)
-    .padding(.horizontal, 16)
-    .background(Color.gray.opacity(0.05))
-    .cornerRadius(12)
-    .overlay(
-      RoundedRectangle(cornerRadius: 12)
-        .stroke(Color.gray.opacity(0.2), lineWidth: 0.5)
-    )
-    .padding(.horizontal, 16)
   }
 }
 

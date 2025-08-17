@@ -56,6 +56,43 @@ public class UnifiedSearchService: ObservableObject {
     }
   }
 
+  public func searchFeedsOnly(query: String) async {
+    guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+      searchResults = SearchResults()
+      return
+    }
+
+    searchQuery = query
+
+    // Cancel any existing search
+    searchTask?.cancel()
+
+    searchTask = Task {
+      isSearching = true
+      searchError = nil
+
+      do {
+        let feedResults = await searchFeeds(query: query)
+
+        if !Task.isCancelled {
+          searchResults = SearchResults(
+            posts: [],
+            users: [],
+            feeds: feedResults
+          )
+        }
+      } catch {
+        if !Task.isCancelled {
+          searchError = error
+        }
+      }
+
+      if !Task.isCancelled {
+        isSearching = false
+      }
+    }
+  }
+
   private func searchPosts(query: String) async -> [PostItem] {
     guard let client = client else { return [] }
 
