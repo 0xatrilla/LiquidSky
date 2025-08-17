@@ -55,6 +55,7 @@ public struct FeedsListView: View {
       // Update search service with the actual client
       searchService.client = client
     }
+    .modifier(FeedsListNavigationBarModifier())
   }
 
   private var headerView: some View {
@@ -484,5 +485,21 @@ private struct PostSearchResultRow: View {
         .stroke(Color.gray.opacity(0.2), lineWidth: 0.5)
     )
     .padding(.horizontal, 16)
+  }
+}
+
+// MARK: - Navigation Bar Modifier
+
+struct FeedsListNavigationBarModifier: ViewModifier {
+  func body(content: Content) -> some View {
+    #if os(iOS)
+      content
+        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle("Discover")
+        .navigationBarHidden(false)
+    #else
+      content
+        .navigationTitle("Discover")
+    #endif
   }
 }

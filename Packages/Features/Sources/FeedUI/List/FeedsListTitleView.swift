@@ -1,5 +1,5 @@
-import DesignSystem
 import Client
+import DesignSystem
 import SwiftUI
 
 public struct FeedsListTitleView: View {
@@ -46,10 +46,9 @@ public struct FeedsListTitleView: View {
         HStack {
           VStack(alignment: .leading, spacing: 2) {
             Text("Feeds")
-              .headerTitleShadow()
               .font(.title)
               .fontWeight(.bold)
-            // Removed the filter text display - only show in dropdown
+              .foregroundStyle(.primary)
           }
           VStack(spacing: 6) {
             Image(systemName: "chevron.up")
@@ -60,8 +59,9 @@ public struct FeedsListTitleView: View {
         }
       }
       .buttonStyle(.plain)
-      .offset(x: isInSearch ? -200 : 0)
+      .offset(x: isInSearch ? -80 : 0)
       .opacity(isInSearch ? 0 : 1)
+      .animation(.easeInOut(duration: 0.3), value: isInSearch)
 
       Spacer()
 
@@ -71,7 +71,7 @@ public struct FeedsListTitleView: View {
         isSearchFocused: isSearchFocused,
         client: client
       )
-      .padding(.leading, isInSearch ? -120 : 0)
+      .animation(.easeInOut(duration: 0.3), value: isInSearch)
       .contentShape(Rectangle())
       .onTapGesture {
         withAnimation(.bouncy) {
@@ -81,6 +81,5 @@ public struct FeedsListTitleView: View {
       }
       .transition(.slide)
     }
-    .animation(.bouncy, value: isInSearch)
   }
 }

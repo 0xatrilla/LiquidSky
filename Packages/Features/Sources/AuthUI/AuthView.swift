@@ -16,6 +16,7 @@ public struct AuthView: View {
   @State private var animateGradient = false
   @State private var showPassword = false
   @State private var inputFocused = false
+  @State private var hasAppeared = false
 
   public init() {}
 
@@ -41,6 +42,17 @@ public struct AuthView: View {
     }
     .ignoresSafeArea(.container, edges: .top)
     .preferredColorScheme(.dark)  // Force dark mode for better glass effect
+    .onAppear {
+      print("AuthView: onAppear called - starting initialization")
+      hasAppeared = true
+      withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
+        animateGradient = true
+      }
+    }
+    .onDisappear {
+      print("AuthView: onDisappear called")
+      hasAppeared = false
+    }
   }
 
   // MARK: - Background Gradient
@@ -62,11 +74,6 @@ public struct AuthView: View {
 
       // Floating orbs for depth
       floatingOrbs
-    }
-    .onAppear {
-      withAnimation(.easeInOut(duration: 8).repeatForever(autoreverses: true)) {
-        animateGradient.toggle()
-      }
     }
   }
 
@@ -208,7 +215,7 @@ public struct AuthView: View {
       // Input field
       TextField(placeholder, text: text)
         .font(.system(size: 16, weight: .medium))
-        .textInputAutocapitalization(.never)
+        .autocapitalization(.none)
         .autocorrectionDisabled()
         .foregroundStyle(.white)
         .onTapGesture {
@@ -251,7 +258,7 @@ public struct AuthView: View {
         }
       }
       .font(.system(size: 16, weight: .medium))
-      .textInputAutocapitalization(.never)
+      .autocapitalization(.none)
       .autocorrectionDisabled()
       .foregroundStyle(.white)
       .onTapGesture {
@@ -325,8 +332,10 @@ public struct AuthView: View {
     .scaleEffect(handle.isEmpty || appPassword.isEmpty ? 0.98 : 1.0)
     .animation(.easeInOut(duration: 0.2), value: handle.isEmpty || appPassword.isEmpty)
     .onTapGesture {
-      // Haptic feedback on button tap
-      HapticManager.shared.impact(.medium)
+      // Safe haptic feedback on button tap
+      if hasAppeared {
+        HapticManager.shared.impact(.medium)
+      }
     }
   }
 
@@ -371,14 +380,18 @@ public struct AuthView: View {
       HStack(spacing: 16) {
         Button("Create Account") {
           // TODO: Navigate to account creation
-          HapticManager.shared.impact(.light)
+          if hasAppeared {
+            HapticManager.shared.impact(.light)
+          }
         }
         .font(.system(size: 14, weight: .medium))
         .foregroundStyle(.indigo)
 
         Button("Forgot Password?") {
           // TODO: Navigate to password reset
-          HapticManager.shared.impact(.light)
+          if hasAppeared {
+            HapticManager.shared.impact(.light)
+          }
         }
         .font(.system(size: 14, weight: .medium))
         .foregroundStyle(.purple)
@@ -409,7 +422,7 @@ public struct AuthView: View {
 #Preview("Light Mode") {
   @Previewable @State var auth: Auth = .init()
 
-  return AuthView()
+  AuthView()
     .environment(auth)
     .preferredColorScheme(.light)
 }
@@ -417,7 +430,7 @@ public struct AuthView: View {
 #Preview("Dark Mode") {
   @Previewable @State var auth: Auth = .init()
 
-  return AuthView()
+  AuthView()
     .environment(auth)
     .preferredColorScheme(.dark)
 }
@@ -425,7 +438,7 @@ public struct AuthView: View {
 #Preview("Sheet Presentation") {
   @Previewable @State var auth: Auth = .init()
 
-  return ScrollView {
+  ScrollView {
     Text("Hello World")
   }
   .sheet(isPresented: .constant(true)) {
