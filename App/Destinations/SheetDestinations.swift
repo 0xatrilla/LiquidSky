@@ -46,11 +46,13 @@ public struct SheetDestinations: ViewModifier {
                 .environment(client)
                 .environment(currentUser)
                 .environment(PostFilterService.shared)
+                .environment(router)
             case .reply(let post):
               ComposerView(mode: .reply(post))
                 .environment(client)
                 .environment(currentUser)
                 .environment(PostFilterService.shared)
+                .environment(router)
             }
           }
         }

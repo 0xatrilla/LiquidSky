@@ -21,12 +21,7 @@ public class ComposerAutocompleteService: ObservableObject {
   // MARK: - User Search
 
   public func searchUsers(query: String) async {
-    guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-      userSuggestions = []
-      return
-    }
-
-    // Cancel any existing search
+    // Always search, even for empty queries to provide popular users
     searchTask?.cancel()
 
     searchTask = Task {
@@ -53,9 +48,29 @@ public class ComposerAutocompleteService: ObservableObject {
   }
 
   private func searchUsersFromBluesky(query: String) async throws -> [UserSuggestion] {
-    // For now, we'll provide realistic Bluesky user suggestions
-    // In a production app, you'd implement a proper search API call
-    return try await searchPopularUsers(query: query)
+    // Implement real Bluesky user search using ATProto API
+    do {
+      // Use the ATProto search API to find real users
+      let searchResults = try await client.protoClient.searchActors(matching: query, limit: 10)
+
+      // Convert ATProto search results to UserSuggestion format
+      let userSuggestions = searchResults.actors.map { actor in
+        UserSuggestion(
+          handle: actor.actorHandle,
+          displayName: actor.displayName,
+          avatarURL: actor.avatarImageURL,
+          isVerified: false  // Verification status not available in search results
+        )
+      }
+
+      return userSuggestions
+    } catch {
+      print("Bluesky user search failed: \(error)")
+
+      // Fallback to popular users if the API call fails
+      // This ensures the app doesn't break if there are network issues
+      return try await searchPopularUsers(query: query)
+    }
   }
 
   private func loadFollowingUsers() async {
@@ -294,47 +309,46 @@ public class ComposerAutocompleteService: ObservableObject {
       ),
     ]
 
-    // More flexible search logic
+    // If query is empty, return popular verified accounts (max 3 for compact UI)
+    if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+      return popularUsers.filter { $0.isVerified }.prefix(3).map { $0 }
+    }
+
     let queryLower = query.lowercased()
 
-    // First, try exact matches
+    // First, try exact matches (highest priority)
     let exactMatches = popularUsers.filter { user in
       user.handle.lowercased() == queryLower || user.displayName?.lowercased() == queryLower
     }
 
     if !exactMatches.isEmpty {
-      return exactMatches
+      return Array(exactMatches.prefix(3))  // Limit to 3 for compact UI
     }
 
-    // Then, try starts with matches
+    // Then, try starts with matches (second priority)
     let startsWithMatches = popularUsers.filter { user in
       user.handle.lowercased().hasPrefix(queryLower)
         || (user.displayName?.lowercased().hasPrefix(queryLower) ?? false)
     }
 
     if !startsWithMatches.isEmpty {
-      return startsWithMatches
+      return Array(startsWithMatches.prefix(3))  // Limit to 3 for compact UI
     }
 
-    // Finally, try contains matches
+    // Finally, try contains matches (lowest priority)
     let containsMatches = popularUsers.filter { user in
       user.handle.lowercased().contains(queryLower)
         || (user.displayName?.lowercased().contains(queryLower) ?? false)
     }
 
-    // Return up to 15 results to avoid overwhelming the user
-    return Array(containsMatches.prefix(15))
+    // Return max 3 results for compact UI
+    return Array(containsMatches.prefix(3))
   }
 
   // MARK: - Hashtag Search
 
   public func searchHashtags(query: String) async {
-    guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-      hashtagSuggestions = []
-      return
-    }
-
-    // Cancel any existing search
+    // Show suggestions even for empty queries to provide popular hashtags
     searchTask?.cancel()
 
     searchTask = Task {
@@ -360,18 +374,114 @@ public class ComposerAutocompleteService: ObservableObject {
   }
 
   private func searchHashtagsFromBluesky(query: String) async throws -> [HashtagSuggestion] {
-    // Provide realistic Bluesky hashtag suggestions
+    // Implement real Bluesky hashtag search using ATProto API
+    do {
+      // Use the ATProto search API to find real hashtags
+      let searchResults = try await client.protoClient.searchPosts(matching: query, limit: 20)
+
+      // Extract hashtags from search results that actually match the query
+      var hashtagCounts: [String: Int] = [:]
+
+      for post in searchResults.posts {
+        // Extract hashtags from post content using regex
+        if let postRecord = post.record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self) {
+          let postText = postRecord.text
+          let hashtagPattern = "#\\w+"
+          let regex = try NSRegularExpression(pattern: hashtagPattern)
+          let range = NSRange(location: 0, length: postText.count)
+          let matches = regex.matches(in: postText, range: range)
+
+          for match in matches {
+            let hashtag = String(postText[Range(match.range, in: postText)!])
+            let hashtagWithoutHash = String(hashtag.dropFirst())  // Remove the # symbol
+
+            // Only count hashtags that actually match the query
+            if hashtagWithoutHash.lowercased().contains(query.lowercased()) {
+              hashtagCounts[hashtag, default: 0] += 1
+            }
+          }
+        }
+      }
+
+      // Convert to HashtagSuggestion format and sort by usage count
+      let hashtagSuggestions = hashtagCounts.map { hashtag, count in
+        HashtagSuggestion(
+          tag: String(hashtag.dropFirst()),  // Remove the # symbol
+          usageCount: count
+        )
+      }.sorted { $0.usageCount > $1.usageCount }
+
+      // Return top results (max 2 for compact UI)
+      return Array(hashtagSuggestions.prefix(2))
+
+    } catch {
+      print("Bluesky hashtag search failed: \(error)")
+
+      // Fallback to popular hashtags if the API call fails
+      // This ensures the app doesn't break if there are network issues
+      return try await searchPopularHashtags(query: query)
+    }
+  }
+
+  private func searchPopularHashtags(query: String) async throws -> [HashtagSuggestion] {
+    // Provide a comprehensive list of realistic Bluesky hashtag suggestions
+    // In a production app, you'd implement a proper search API
+
     let popularHashtags = [
       "bluesky", "atproto", "fedi", "socialmedia", "tech", "programming",
       "swift", "ios", "design", "art", "photography", "music", "food",
       "travel", "nature", "science", "space", "ai", "ml", "blockchain",
+      "web3", "crypto", "nft", "metaverse", "vr", "ar", "gaming",
+      "streaming", "podcast", "youtube", "tiktok", "instagram", "twitter",
+      "social", "community", "network", "friends", "family", "love",
+      "life", "daily", "motivation", "inspiration", "creativity", "innovation",
+      "startup", "business", "entrepreneur", "marketing", "branding", "growth",
+      "learning", "education", "knowledge", "wisdom", "philosophy", "thoughts",
+      "ideas", "discussion", "debate", "politics", "news", "currentevents",
+      "climate", "environment", "sustainability", "health", "wellness", "fitness",
+      "nutrition", "mentalhealth", "mindfulness", "meditation", "yoga", "spirituality",
     ]
 
-    // Filter based on query
-    let filteredHashtags = popularHashtags.filter { $0.lowercased().contains(query.lowercased()) }
+    // If query is empty, return popular hashtags
+    if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+      return popularHashtags.prefix(2).map { tag in
+        HashtagSuggestion(
+          tag: tag,
+          usageCount: Int.random(in: 1000...100000)  // Higher counts for popular tags
+        )
+      }
+    }
 
-    // Return with realistic usage counts
-    return filteredHashtags.map { tag in
+    // Filter based on query - prioritize exact matches and starts-with matches
+    let queryLower = query.lowercased()
+
+    // First, try exact matches (highest priority)
+    let exactMatches = popularHashtags.filter { $0.lowercased() == queryLower }
+    if !exactMatches.isEmpty {
+      return exactMatches.prefix(2).map { tag in
+        HashtagSuggestion(
+          tag: tag,
+          usageCount: Int.random(in: 5000...100000)  // High counts for exact matches
+        )
+      }
+    }
+
+    // Then, try starts with matches (second priority)
+    let startsWithMatches = popularHashtags.filter { $0.lowercased().hasPrefix(queryLower) }
+    if !startsWithMatches.isEmpty {
+      return startsWithMatches.prefix(2).map { tag in
+        HashtagSuggestion(
+          tag: tag,
+          usageCount: Int.random(in: 1000...50000)  // Good counts for starts-with matches
+        )
+      }
+    }
+
+    // Finally, try contains matches (lowest priority)
+    let containsMatches = popularHashtags.filter { $0.lowercased().contains(queryLower) }
+
+    // Return with realistic usage counts (max 2 for compact UI)
+    return containsMatches.prefix(2).map { tag in
       HashtagSuggestion(
         tag: tag,
         usageCount: Int.random(in: 100...50000)  // Simulated usage count
