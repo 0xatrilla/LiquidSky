@@ -12,10 +12,13 @@ public struct PostListView: View {
   let datasource: PostsListViewDatasource
   @State private var state: PostsListViewState = .uninitialized
   @State private var searchText = ""
-  @State private var isSearching = false
+  @State private var isInSearch = false
   @State private var searchResults = SearchResults()
+  @State private var isSearching = false
   @State private var searchService: UnifiedSearchService?
+  @FocusState var isSearchFocused: Bool
   @Environment(AppRouter.self) var router
+  @Environment(BSkyClient.self) var client
 
   // Use singleton directly instead of environment to avoid injection timing issues
   private let postFilterService = PostFilterService.shared
@@ -26,21 +29,10 @@ public struct PostListView: View {
 
   public var body: some View {
     VStack(spacing: 0) {
-      // Search Bar
-      SearchBar(
-        text: $searchText,
-        placeholder: "Search posts, users, and feeds...",
-        onSearch: {
-          Task {
-            await performSearch()
-          }
-        },
-        onClear: {
-          clearSearch()
-        }
-      )
-      .padding(.horizontal, 16)
-      .padding(.vertical, 12)
+      // Header with search bar in top right
+      headerView
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
 
       // Search Results Overlay (when searching)
       if !searchText.isEmpty {
@@ -52,22 +44,20 @@ public struct PostListView: View {
         .opacity(searchText.isEmpty ? 1.0 : 0.3)
         .allowsHitTesting(searchText.isEmpty)
     }
-    .navigationTitle(datasource.title)
     .screenContainer()
+    .scrollDismissesKeyboard(.immediately)
     .task {
       if case .uninitialized = state {
         state = .loading
         state = await datasource.loadPosts(with: state)
       }
     }
-    .refreshable {
-      if searchText.isEmpty {
-        state = .loading
-        state = await datasource.loadPosts(with: state)
-      }
-    }
     .onAppear {
       setupSearchService()
+    }
+    .refreshable {
+      state = .loading
+      state = await datasource.loadPosts(with: state)
     }
     .onChange(of: searchText) { _, newValue in
       if !newValue.isEmpty {
@@ -76,6 +66,76 @@ public struct PostListView: View {
         }
       } else {
         clearSearch()
+      }
+    }
+  }
+
+  private var headerView: some View {
+    HStack(alignment: .center) {
+      // Title on the left (will be large title that shrinks on scroll)
+      VStack(alignment: .leading, spacing: 2) {
+        Text(datasource.title)
+          .headerTitleShadow()
+          .font(.title)
+          .fontWeight(.bold)
+      }
+      .offset(x: isInSearch ? -200 : 0)
+      .opacity(isInSearch ? 0 : 1)
+
+      Spacer()
+
+      // Search bar on the right (exact copy from feeds page)
+      searchBarView
+        .padding(.leading, isInSearch ? -120 : 0)
+        .contentShape(Rectangle())
+        .onTapGesture {
+          withAnimation(.bouncy) {
+            isInSearch.toggle()
+            isSearchFocused = true
+          }
+        }
+        .transition(.slide)
+    }
+    .animation(.bouncy, value: isInSearch)
+  }
+
+  private var searchBarView: some View {
+    GlassEffectContainer {
+      HStack {
+        HStack {
+          Image(systemName: "magnifyingglass")
+          TextField("Search Users...", text: $searchText)
+            .focused($isSearchFocused)
+            .allowsHitTesting(isInSearch)
+            .onChange(of: searchText) { _, newValue in
+              if !newValue.isEmpty {
+                Task {
+                  await performSearch()
+                }
+              } else {
+                clearSearch()
+              }
+            }
+        }
+        .frame(maxWidth: isInSearch ? .infinity : 100)
+        .padding()
+        .glassEffect(in: Capsule())
+
+        if isInSearch {
+          Button {
+            withAnimation {
+              isInSearch.toggle()
+              isSearchFocused = false
+              searchText = ""
+              clearSearch()
+            }
+          } label: {
+            Image(systemName: "xmark")
+              .frame(width: 50, height: 50)
+              .foregroundStyle(.blue)
+              .glassEffect(in: Circle())
+          }
+        }
       }
     }
   }
@@ -122,25 +182,25 @@ public struct PostListView: View {
   }
 
   private func setupSearchService() {
-    // Get the client from environment or datasource
-    Task {
-      if let client = try? await BSkyClient(configuration: ATProtocolConfiguration()) {
-        await MainActor.run {
-          searchService = UnifiedSearchService(client: client)
-        }
-      }
-    }
+    // Use the client from environment
+    searchService = UnifiedSearchService(client: client)
   }
 
   private func performSearch() async {
     guard let searchService = searchService else { return }
 
     isSearching = true
+
+    // Search for all types but we'll only display users
     await searchService.search(query: searchText)
 
-    // Update our local state
+    // Update our local state with only user results
     await MainActor.run {
-      searchResults = searchService.searchResults
+      searchResults = SearchResults(
+        posts: [],
+        users: searchService.searchResults.users,
+        feeds: []
+      )
       isSearching = false
     }
   }
@@ -194,35 +254,13 @@ public struct PostListView: View {
         // Search results
         ScrollView {
           LazyVStack(spacing: 0) {
-            // Users section
+            // Users section only
             if !searchResults.users.isEmpty {
               SearchSectionHeader(title: "Users", count: searchResults.users.count)
               ForEach(searchResults.users) { user in
                 UserSearchResultRow(user: user)
                   .onTapGesture {
                     onUserTap(user)
-                  }
-              }
-            }
-
-            // Feeds section
-            if !searchResults.feeds.isEmpty {
-              SearchSectionHeader(title: "Feeds", count: searchResults.feeds.count)
-              ForEach(searchResults.feeds) { feed in
-                FeedSearchResultRow(feed: feed)
-                  .onTapGesture {
-                    onFeedTap(feed)
-                  }
-              }
-            }
-
-            // Posts section
-            if !searchResults.posts.isEmpty {
-              SearchSectionHeader(title: "Posts", count: searchResults.posts.count)
-              ForEach(searchResults.posts) { post in
-                PostSearchResultRow(post: post)
-                  .onTapGesture {
-                    onPostTap(post)
                   }
               }
             }
@@ -263,32 +301,6 @@ public struct PostListView: View {
     // Clear search and navigate to profile
     clearSearch()
     router.navigateTo(.profile(user))
-  }
-
-  private func onFeedTap(_ feed: FeedSearchResult) {
-    // Navigate to feed
-    print("Navigate to feed: \(feed.displayName)")
-    // Clear search and navigate to feed
-    clearSearch()
-    // Create FeedItem from search result and navigate
-    let feedItem = FeedItem(
-      uri: feed.uri,
-      displayName: feed.displayName,
-      description: feed.description,
-      avatarImageURL: feed.avatarURL,
-      creatorHandle: feed.creatorHandle,
-      likesCount: feed.likesCount,
-      liked: feed.isLiked
-    )
-    router.navigateTo(.feed(feedItem))
-  }
-
-  private func onPostTap(_ post: PostItem) {
-    // Navigate to post
-    print("Navigate to post: \(post.uri)")
-    // Clear search and navigate to post detail
-    clearSearch()
-    router.navigateTo(.post(post))
   }
 }
 
