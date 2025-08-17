@@ -10,6 +10,14 @@ A modern, beautiful Bluesky client for iOS built with SwiftUI and the latest iOS
 
 LiquidSky is a native iOS client for [Bluesky](https://bsky.social), the decentralized social network built on the AT Protocol. This project showcases modern iOS development practices with a focus on beautiful, fluid UI powered by the latest SwiftUI capabilities.
 
+## 📸 Screenshots
+
+<img width="250" height="500" alt="IMG_0883" src="https://github.com/user-attachments/assets/0674d7da-573b-426d-b244-5047f80b2560" />
+<img width="250" height="500" alt="IMG_0884" src="https://github.com/user-attachments/assets/c2ff8ef8-1a2e-4e86-a0c8-314f0f40df9f" />
+<img width="250" height="500" alt="IMG_0885" src="https://github.com/user-attachments/assets/1dde5a4e-7b7c-461f-9635-cac54cae753d" />
+<img width="250" height="500" alt="IMG_0887" src="https://github.com/user-attachments/assets/60464b32-cde8-465a-b0cf-e8dd3f664366" />
+
+
 ### ✨ Core Features
 
 - **🧊 Liquid Glass UI**: Leverages iOS 26's new Liquid Glass effects for a stunning, modern interface
