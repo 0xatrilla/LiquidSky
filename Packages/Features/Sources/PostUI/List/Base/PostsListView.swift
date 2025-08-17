@@ -99,7 +99,10 @@ extension PostListView {
     var postItems: [PostItem] = []
     var processedCount = 0
 
-    func insert(post: AppBskyLexicon.Feed.PostViewDefinition) {
+    func insert(
+      post: AppBskyLexicon.Feed.PostViewDefinition,
+      fromFeedItem: AppBskyLexicon.Feed.FeedViewPostDefinition
+    ) {
       // Add safety check to prevent crash if uri is nil
       guard !post.uri.isEmpty else {
         print("Warning: Skipping post with empty URI")
@@ -111,7 +114,8 @@ extension PostListView {
         return
       }
 
-      let item = post.postItem
+      // Use the FeedViewPostDefinition.postItem extension to get repost information
+      let item = fromFeedItem.postItem
       print(
         "PostsListView: Processing post - URI: \(item.uri), Author: \(item.author.handle), Content: \(item.content.prefix(50))..."
       )
@@ -124,7 +128,8 @@ extension PostListView {
       // Debug: Print the structure to understand what we're working with
       print("PostsListView: Processing feed item \(index): post.uri = \(post.post.uri)")
 
-      insert(post: post.post)
+      // Pass both the post and the feed item to get repost information
+      insert(post: post.post, fromFeedItem: post)
 
       // Process replies - simplified to avoid type issues
       if post.reply != nil {
