@@ -29,7 +29,7 @@ public struct FeedsListSearchField: View {
             .focused(isSearchFocused)
             .allowsHitTesting(isInSearch)
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: isInSearch ? .infinity : 100)
         .padding()
         .glassEffect(in: Capsule())
 

@@ -102,60 +102,41 @@ public struct PostListView: View {
   }
 
   private var searchBarView: some View {
-    Group {
-      if scrollOffset > 50 && !isInSearch {
-        // Shrunken magnifying glass icon when scrolling
-        Button {
-          withAnimation(.bouncy) {
-            isInSearch = true
-            isSearchFocused = true
-          }
-        } label: {
+    // Always show the full search bar instead of collapsing
+    GlassEffectContainer {
+      HStack {
+        HStack {
           Image(systemName: "magnifyingglass")
-            .font(.system(size: 20, weight: .medium))
-            .foregroundStyle(.blue)
-            .frame(width: 44, height: 44)
-            .glassEffect(in: Circle())
-        }
-        .buttonStyle(.plain)
-      } else {
-        // Full search bar when not scrolling or when focused
-        GlassEffectContainer {
-          HStack {
-            HStack {
-              Image(systemName: "magnifyingglass")
-              TextField("Search Users...", text: $searchText)
-                .focused($isSearchFocused)
-                .allowsHitTesting(isInSearch)
-                .onChange(of: searchText) { _, newValue in
-                  if !newValue.isEmpty {
-                    Task {
-                      await performSearch()
-                    }
-                  } else {
-                    clearSearch()
-                  }
+          TextField("Search Users...", text: $searchText)
+            .focused($isSearchFocused)
+            .allowsHitTesting(isInSearch)
+            .onChange(of: searchText) { _, newValue in
+              if !newValue.isEmpty {
+                Task {
+                  await performSearch()
                 }
-            }
-            .frame(maxWidth: isInSearch ? .infinity : 100)
-            .padding()
-            .glassEffect(in: Capsule())
-
-            if isInSearch {
-              Button {
-                withAnimation {
-                  isInSearch.toggle()
-                  isSearchFocused = false
-                  searchText = ""
-                  clearSearch()
-                }
-              } label: {
-                Image(systemName: "xmark")
-                  .frame(width: 50, height: 50)
-                  .foregroundStyle(.blue)
-                  .glassEffect(in: Circle())
+              } else {
+                clearSearch()
               }
             }
+        }
+        .frame(maxWidth: isInSearch ? .infinity : 100)
+        .padding()
+        .glassEffect(in: Capsule())
+
+        if isInSearch {
+          Button {
+            withAnimation {
+              isInSearch.toggle()
+              isSearchFocused = false
+              searchText = ""
+              clearSearch()
+            }
+          } label: {
+            Image(systemName: "xmark")
+              .frame(width: 50, height: 50)
+              .foregroundStyle(.blue)
+              .glassEffect(in: Circle())
           }
         }
       }
