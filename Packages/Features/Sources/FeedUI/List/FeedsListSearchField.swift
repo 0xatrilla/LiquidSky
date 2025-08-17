@@ -28,13 +28,14 @@ public struct FeedsListSearchField: View {
       HStack {
         HStack {
           Image(systemName: "magnifyingglass")
-          TextField("Search users, posts, feeds...", text: $searchText)
+          TextField("Search feeds...", text: $searchText)
             .focused(isSearchFocused)
             .allowsHitTesting(isInSearch)
             .onChange(of: searchText) { _, newValue in
               if !newValue.isEmpty {
                 Task {
-                  await searchService.search(query: newValue)
+                  // Search only for feeds
+                  await searchService.searchFeedsOnly(query: newValue)
                 }
               } else {
                 searchService.clearSearch()

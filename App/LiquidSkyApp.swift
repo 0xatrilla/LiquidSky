@@ -198,7 +198,7 @@ struct LiquidSkyApp: App {
     print("refreshEnvWith: Starting environment refresh...")
     do {
       print("Creating BSkyClient...")
-      let client = await BSkyClient(configuration: configuration)
+      let client = try await BSkyClient(configuration: configuration)
       print("BSkyClient created successfully")
 
       print("Creating CurrentUser...")

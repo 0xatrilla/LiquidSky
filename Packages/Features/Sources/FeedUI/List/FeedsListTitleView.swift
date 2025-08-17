@@ -23,7 +23,7 @@ public struct FeedsListTitleView: View {
 
   public var body: some View {
     HStack(alignment: .center) {
-      // Restored original design - only show "Feeds" title, filter text only in dropdown
+      // Feeds filter menu
       Menu {
         ForEach(FeedsListFilter.allCases) { filterOption in
           Button(action: {
@@ -59,27 +59,22 @@ public struct FeedsListTitleView: View {
         }
       }
       .buttonStyle(.plain)
-      .offset(x: isInSearch ? -80 : 0)
-      .opacity(isInSearch ? 0 : 1)
-      .animation(.easeInOut(duration: 0.3), value: isInSearch)
 
       Spacer()
 
+      // Search field
       FeedsListSearchField(
         searchText: $searchText,
         isInSearch: $isInSearch,
         isSearchFocused: isSearchFocused,
         client: client
       )
-      .animation(.easeInOut(duration: 0.3), value: isInSearch)
-      .contentShape(Rectangle())
       .onTapGesture {
         withAnimation(.bouncy) {
           isInSearch.toggle()
           isSearchFocused.wrappedValue = true
         }
       }
-      .transition(.slide)
     }
   }
 }
