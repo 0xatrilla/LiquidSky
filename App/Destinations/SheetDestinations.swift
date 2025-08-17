@@ -18,10 +18,26 @@ public struct SheetDestinations: ViewModifier {
   public func body(content: Content) -> some View {
     content
       .sheet(item: $router.presentedSheet) { presentedSheet in
+        let _ = print("SheetDestinations: Creating sheet for \(presentedSheet)")
         switch presentedSheet {
         case .auth:
-          AuthView()
-            .environment(auth)
+          let _ = print("SheetDestinations: Creating AuthView")
+          Group {
+            AuthView()
+              .environment(auth)
+              .onAppear {
+                print("SheetDestinations: AuthView appeared successfully")
+              }
+              .onDisappear {
+                print("SheetDestinations: AuthView disappeared")
+              }
+          }
+          .onAppear {
+            print("SheetDestinations: Auth sheet container appeared")
+          }
+          .onDisappear {
+            print("SheetDestinations: Auth sheet container disappeared")
+          }
         case .fullScreenMedia(let images, let preloadedImage, let namespace):
           FullScreenMediaView(
             images: images,
@@ -56,6 +72,9 @@ public struct SheetDestinations: ViewModifier {
             }
           }
         }
+      }
+      .onChange(of: router.presentedSheet) {
+        print("SheetDestinations: Sheet changed")
       }
   }
 }

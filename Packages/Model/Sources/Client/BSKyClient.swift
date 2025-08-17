@@ -7,10 +7,18 @@ public final class BSkyClient: Sendable {
   public let protoClient: ATProtoKit
   public let blueskyClient: ATProtoBluesky
 
-  public init(configuration: ATProtocolConfiguration) async {
+  public init(configuration: ATProtocolConfiguration) async throws {
     self.configuration = configuration
-    self.protoClient = await ATProtoKit(sessionConfiguration: configuration)
-    self.blueskyClient = ATProtoBluesky(atProtoKitInstance: protoClient)
+    do {
+      print("Initializing ATProtoKit...")
+      self.protoClient = await ATProtoKit(sessionConfiguration: configuration)
+      print("ATProtoKit initialized successfully")
+      self.blueskyClient = ATProtoBluesky(atProtoKitInstance: protoClient)
+      print("ATProtoBluesky initialized successfully")
+    } catch {
+      print("BSkyClient initialization failed: \(error)")
+      throw error
+    }
   }
 }
 
