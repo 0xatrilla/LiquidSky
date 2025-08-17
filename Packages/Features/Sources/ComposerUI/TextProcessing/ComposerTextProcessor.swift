@@ -80,6 +80,27 @@ struct ComposerTextProcessor {
       )
     }
 
+    // Also check for @ or # at the very end (just the symbol)
+    if text.hasSuffix("@") {
+      let startIndex = text.count - 1
+      return AutocompleteContext(
+        type: .mention,
+        query: "@",
+        startIndex: startIndex,
+        endIndex: text.count
+      )
+    }
+
+    if text.hasSuffix("#") {
+      let startIndex = text.count - 1
+      return AutocompleteContext(
+        type: .hashtag,
+        query: "#",
+        startIndex: startIndex,
+        endIndex: text.count
+      )
+    }
+
     return nil
   }
 }

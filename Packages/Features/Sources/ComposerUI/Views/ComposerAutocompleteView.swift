@@ -10,7 +10,6 @@ public struct ComposerAutocompleteView: View {
   let onHashtagSelected: (HashtagSuggestion) -> Void
 
   @Namespace private var namespace
-  @Environment(AppRouter.self) var router
 
   public init(
     autocompleteService: ComposerAutocompleteService,
@@ -24,195 +23,144 @@ public struct ComposerAutocompleteView: View {
 
   public var body: some View {
     VStack(spacing: 0) {
-      if !autocompleteService.userSuggestions.isEmpty {
-        userSuggestionsSection
-      }
-
-      if !autocompleteService.hashtagSuggestions.isEmpty {
-        hashtagSuggestionsSection
-      }
-
-      if autocompleteService.isSearching {
-        loadingSection
-      }
-
-      if let error = autocompleteService.searchError {
-        errorSection(error)
-      }
-    }
-    .background(
-      RoundedRectangle(cornerRadius: 12)
-        .fill(.ultraThinMaterial)
-        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
-    )
-    .overlay(
-      RoundedRectangle(cornerRadius: 12)
-        .stroke(.white.opacity(0.2), lineWidth: 1)
-    )
-  }
-
-  // MARK: - User Suggestions
-
-  private var userSuggestionsSection: some View {
-    VStack(alignment: .leading, spacing: 0) {
-      Text("Users")
-        .font(.caption)
-        .fontWeight(.medium)
-        .foregroundColor(.secondary)
-        .padding(.horizontal, 16)
-        .padding(.top, 12)
-        .padding(.bottom, 8)
-
-      ForEach(autocompleteService.userSuggestions) { user in
-        Button(action: {
-          onUserSelected(user)
-        }) {
-          HStack(spacing: 12) {
-            // Avatar
-            if let avatarURL = user.avatarURL {
-              AsyncImage(url: avatarURL) { image in
-                image
-                  .resizable()
-                  .scaledToFill()
-              } placeholder: {
-                Circle()
-                  .fill(.gray.opacity(0.3))
-              }
-              .frame(width: 32, height: 32)
-              .clipShape(Circle())
-              .onTapGesture {
-                // Navigate to user profile instead of showing full-screen image
-                // This will be handled by the row selection
-              }
-            } else {
-              Circle()
-                .fill(.gray.opacity(0.3))
-                .frame(width: 32, height: 32)
-                .overlay(
-                  Text(String(user.displayName?.first ?? user.handle.first ?? "?"))
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.secondary)
-                )
-            }
-
-            // User info
-            VStack(alignment: .leading, spacing: 2) {
-              HStack(spacing: 4) {
-                Text(user.displayName ?? user.handle)
-                  .font(.subheadline)
-                  .fontWeight(.medium)
-                  .foregroundColor(.primary)
-
-                if user.isVerified {
-                  Image(systemName: "checkmark.seal.fill")
-                    .font(.caption2)
-                    .foregroundColor(.blue)
+      // Compact horizontal suggestions strip
+      if !autocompleteService.userSuggestions.isEmpty
+        || !autocompleteService.hashtagSuggestions.isEmpty
+      {
+        ScrollView(.horizontal, showsIndicators: false) {
+          HStack(spacing: 8) {
+            // User suggestions (max 3 for compact UI)
+            ForEach(autocompleteService.userSuggestions.prefix(3)) { user in
+              CompactSuggestionButton(
+                title: user.displayName ?? user.handle,
+                subtitle: "@\(user.handle)",
+                icon: "person.circle.fill",
+                iconColor: .blue,
+                action: {
+                  onUserSelected(user)
                 }
-              }
-
-              Text("@\(user.handle)")
-                .font(.caption)
-                .foregroundColor(.secondary)
+              )
             }
 
-            Spacer()
+            // Hashtag suggestions (max 2 for compact UI)
+            ForEach(autocompleteService.hashtagSuggestions.prefix(2)) { hashtag in
+              CompactSuggestionButton(
+                title: hashtag.tag,
+                subtitle: "\(hashtag.usageCount) posts",
+                icon: "number",
+                iconColor: .blue,
+                action: {
+                  onHashtagSelected(hashtag)
+                }
+              )
+            }
           }
-          .padding(.horizontal, 16)
+          .padding(.horizontal, 12)
           .padding(.vertical, 8)
         }
-        .buttonStyle(.plain)
-
-        if user != autocompleteService.userSuggestions.last {
-          Divider()
-            .padding(.leading, 60)
-        }
+        .background(
+          RoundedRectangle(cornerRadius: 16)
+            .fill(.ultraThinMaterial)
+            .overlay(
+              RoundedRectangle(cornerRadius: 16)
+                .stroke(.white.opacity(0.2), lineWidth: 0.5)
+            )
+            .background(
+              RoundedRectangle(cornerRadius: 16)
+                .fill(.ultraThinMaterial)
+                .blur(radius: 8)
+            )
+        )
+        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 2)
       }
-    }
-  }
 
-  // MARK: - Hashtag Suggestions
-
-  private var hashtagSuggestionsSection: some View {
-    VStack(alignment: .leading, spacing: 0) {
-      Text("Hashtags")
-        .font(.caption)
-        .fontWeight(.medium)
-        .foregroundColor(.secondary)
+      // Loading indicator (compact)
+      if autocompleteService.isSearching {
+        HStack(spacing: 8) {
+          ProgressView()
+            .scaleEffect(0.7)
+          Text("Searching...")
+            .font(.caption)
+            .foregroundColor(.secondary)
+        }
         .padding(.horizontal, 16)
-        .padding(.top, 12)
-        .padding(.bottom, 8)
+        .padding(.vertical, 8)
+        .background(
+          Rectangle()
+            .fill(.ultraThinMaterial.opacity(0.8))
+        )
+      }
 
-      ForEach(autocompleteService.hashtagSuggestions) { hashtag in
-        Button(action: {
-          onHashtagSelected(hashtag)
-        }) {
-          HStack(spacing: 12) {
-            // Hashtag icon
-            Image(systemName: "number")
-              .font(.title3)
-              .foregroundColor(.purple)
-              .frame(width: 32, height: 32)
-
-            // Hashtag info
-            VStack(alignment: .leading, spacing: 2) {
-              Text("#\(hashtag.tag)")
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundColor(.primary)
-
-              Text("\(hashtag.usageCount) posts")
-                .font(.caption)
-                .foregroundColor(.secondary)
-            }
-
-            Spacer()
-          }
-          .padding(.horizontal, 16)
-          .padding(.vertical, 8)
+      // Error state (compact)
+      if let error = autocompleteService.searchError {
+        HStack(spacing: 8) {
+          Image(systemName: "exclamationmark.triangle")
+            .font(.caption)
+            .foregroundColor(.orange)
+          Text("Search failed")
+            .font(.caption)
+            .foregroundColor(.secondary)
         }
-        .buttonStyle(.plain)
-
-        if hashtag != autocompleteService.hashtagSuggestions.last {
-          Divider()
-            .padding(.leading, 60)
-        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(
+          Rectangle()
+            .fill(.ultraThinMaterial.opacity(0.8))
+        )
       }
     }
+    .animation(.easeInOut(duration: 0.15), value: autocompleteService.userSuggestions.count)
+    .animation(.easeInOut(duration: 0.15), value: autocompleteService.hashtagSuggestions.count)
+    .animation(.easeInOut(duration: 0.15), value: autocompleteService.isSearching)
   }
+}
 
-  // MARK: - Loading State
+// MARK: - Compact Suggestion Button
 
-  private var loadingSection: some View {
-    HStack(spacing: 12) {
-      ProgressView()
-        .scaleEffect(0.8)
+private struct CompactSuggestionButton: View {
+  let title: String
+  let subtitle: String
+  let icon: String
+  let iconColor: Color
+  let action: () -> Void
 
-      Text("Searching...")
-        .font(.subheadline)
-        .foregroundColor(.secondary)
+  var body: some View {
+    Button(action: action) {
+      HStack(spacing: 6) {
+        Image(systemName: icon)
+          .font(.caption)
+          .foregroundColor(iconColor)
 
-      Spacer()
+        VStack(alignment: .leading, spacing: 1) {
+          Text(title)
+            .font(.caption)
+            .fontWeight(.medium)
+            .foregroundColor(.primary)
+            .lineLimit(1)
+
+          Text(subtitle)
+            .font(.caption2)
+            .foregroundColor(.secondary)
+            .lineLimit(1)
+        }
+      }
+      .padding(.horizontal, 10)
+      .padding(.vertical, 6)
+      .background(
+        RoundedRectangle(cornerRadius: 10)
+          .fill(.ultraThinMaterial)
+          .overlay(
+            RoundedRectangle(cornerRadius: 10)
+              .stroke(.white.opacity(0.15), lineWidth: 0.5)
+          )
+          .background(
+            RoundedRectangle(cornerRadius: 10)
+              .fill(.ultraThinMaterial.opacity(0.3))
+              .blur(radius: 4)
+          )
+      )
+      .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 1)
     }
-    .padding(.horizontal, 16)
-    .padding(.vertical, 12)
-  }
-
-  // MARK: - Error State
-
-  private func errorSection(_ error: Error) -> some View {
-    HStack(spacing: 12) {
-      Image(systemName: "exclamationmark.triangle")
-        .font(.title3)
-        .foregroundColor(.orange)
-
-      Text("Search failed")
-        .font(.subheadline)
-        .foregroundColor(.secondary)
-
-      Spacer()
-    }
-    .padding(.horizontal, 16)
-    .padding(.vertical, 12)
+    .buttonStyle(.plain)
   }
 }
