@@ -9,8 +9,6 @@ public struct FeedsListSearchField: View {
   @Binding var isInSearch: Bool
   var isSearchFocused: FocusState<Bool>.Binding
 
-  @StateObject private var searchService: UnifiedSearchService
-
   public init(
     searchText: Binding<String>,
     isInSearch: Binding<Bool>,
@@ -20,7 +18,6 @@ public struct FeedsListSearchField: View {
     _searchText = searchText
     _isInSearch = isInSearch
     self.isSearchFocused = isSearchFocused
-    self._searchService = StateObject(wrappedValue: UnifiedSearchService(client: client))
   }
 
   public var body: some View {
@@ -31,18 +28,8 @@ public struct FeedsListSearchField: View {
           TextField("Search feeds...", text: $searchText)
             .focused(isSearchFocused)
             .allowsHitTesting(isInSearch)
-            .onChange(of: searchText) { _, newValue in
-              if !newValue.isEmpty {
-                Task {
-                  // Search only for feeds
-                  await searchService.searchFeedsOnly(query: newValue)
-                }
-              } else {
-                searchService.clearSearch()
-              }
-            }
         }
-        .frame(maxWidth: isInSearch ? .infinity : 100)
+        .frame(maxWidth: .infinity)
         .padding()
         .glassEffect(in: Capsule())
 
@@ -52,7 +39,6 @@ public struct FeedsListSearchField: View {
               isInSearch.toggle()
               isSearchFocused.wrappedValue = false
               searchText = ""
-              searchService.clearSearch()
             }
           } label: {
             Image(systemName: "xmark")
