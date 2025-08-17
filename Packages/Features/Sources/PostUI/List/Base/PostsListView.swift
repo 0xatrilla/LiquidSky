@@ -17,6 +17,7 @@ public struct PostListView: View {
   @State private var isSearching = false
   @State private var searchService: UnifiedSearchService?
   @FocusState var isSearchFocused: Bool
+  @State private var scrollOffset: CGFloat = 0
   @Environment(AppRouter.self) var router
   @Environment(BSkyClient.self) var client
 
@@ -28,21 +29,44 @@ public struct PostListView: View {
   }
 
   public var body: some View {
-    VStack(spacing: 0) {
-      // Header with search bar in top right
-      headerView
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-
-      // Search Results Overlay (when searching)
-      if !searchText.isEmpty {
-        searchResultsOverlay
+    ZStack(alignment: .top) {
+      // Feed content in the background
+      VStack(spacing: 0) {
+        // Invisible spacer to push content down behind header
+        Color.clear
+          .frame(height: 120) // Adjust based on header height
+        
+        feedListView
+          .opacity(searchText.isEmpty ? 1.0 : 0.3)
+          .allowsHitTesting(searchText.isEmpty)
       }
-
-      // Normal feed view (always visible, but can be dimmed)
-      feedListView
-        .opacity(searchText.isEmpty ? 1.0 : 0.3)
-        .allowsHitTesting(searchText.isEmpty)
+      
+      // Liquid glass header overlay
+      VStack(spacing: 0) {
+        headerView
+          .padding(.horizontal, 16)
+          .padding(.top, 8)
+          .padding(.bottom, 16)
+          .background(
+            // Liquid glass effect with blur and material
+            RoundedRectangle(cornerRadius: 0)
+              .fill(.ultraThinMaterial)
+              .overlay(
+                // Subtle border for definition
+                Rectangle()
+                  .stroke(.white.opacity(0.1), lineWidth: 0.5)
+              )
+              .background(
+                // Additional blur for depth
+                Rectangle()
+                  .fill(.ultraThinMaterial)
+                  .blur(radius: 20)
+              )
+          )
+          .clipShape(Rectangle())
+        
+        Spacer()
+      }
     }
     .screenContainer()
     .scrollDismissesKeyboard(.immediately)
@@ -72,19 +96,20 @@ public struct PostListView: View {
 
   private var headerView: some View {
     HStack(alignment: .center) {
-      // Title on the left (will be large title that shrinks on scroll)
+      // Title on the left (shrinks to top when scrolling)
       VStack(alignment: .leading, spacing: 2) {
         Text(datasource.title)
           .headerTitleShadow()
-          .font(.title)
-          .fontWeight(.bold)
+          .font(.system(size: max(28, 34 - scrollOffset * 0.1), weight: .bold))
+          .scaleEffect(max(0.8, 1.0 - scrollOffset * 0.002))
+          .opacity(max(0.6, 1.0 - scrollOffset * 0.003))
       }
       .offset(x: isInSearch ? -200 : 0)
       .opacity(isInSearch ? 0 : 1)
 
       Spacer()
 
-      // Search bar on the right (exact copy from feeds page)
+      // Search bar on the right (shrinks to magnifying glass when scrolling)
       searchBarView
         .padding(.leading, isInSearch ? -120 : 0)
         .contentShape(Rectangle())
@@ -97,43 +122,64 @@ public struct PostListView: View {
         .transition(.slide)
     }
     .animation(.bouncy, value: isInSearch)
+    .animation(.easeOut(duration: 0.2), value: scrollOffset)
   }
 
   private var searchBarView: some View {
-    GlassEffectContainer {
-      HStack {
-        HStack {
+    Group {
+      if scrollOffset > 50 && !isInSearch {
+        // Shrunken magnifying glass icon when scrolling
+        Button {
+          withAnimation(.bouncy) {
+            isInSearch = true
+            isSearchFocused = true
+          }
+        } label: {
           Image(systemName: "magnifyingglass")
-          TextField("Search Users...", text: $searchText)
-            .focused($isSearchFocused)
-            .allowsHitTesting(isInSearch)
-            .onChange(of: searchText) { _, newValue in
-              if !newValue.isEmpty {
-                Task {
-                  await performSearch()
+            .font(.system(size: 20, weight: .medium))
+            .foregroundStyle(.blue)
+            .frame(width: 44, height: 44)
+            .glassEffect(in: Circle())
+        }
+        .buttonStyle(.plain)
+      } else {
+        // Full search bar when not scrolling or when focused
+        GlassEffectContainer {
+          HStack {
+            HStack {
+              Image(systemName: "magnifyingglass")
+              TextField("Search Users...", text: $searchText)
+                .focused($isSearchFocused)
+                .allowsHitTesting(isInSearch)
+                .onChange(of: searchText) { _, newValue in
+                  if !newValue.isEmpty {
+                    Task {
+                      await performSearch()
+                    }
+                  } else {
+                    clearSearch()
+                  }
                 }
-              } else {
-                clearSearch()
+            }
+            .frame(maxWidth: isInSearch ? .infinity : 100)
+            .padding()
+            .glassEffect(in: Capsule())
+
+            if isInSearch {
+              Button {
+                withAnimation {
+                  isInSearch.toggle()
+                  isSearchFocused = false
+                  searchText = ""
+                  clearSearch()
+                }
+              } label: {
+                Image(systemName: "xmark")
+                  .frame(width: 50, height: 50)
+                  .foregroundStyle(.blue)
+                  .glassEffect(in: Circle())
               }
             }
-        }
-        .frame(maxWidth: isInSearch ? .infinity : 100)
-        .padding()
-        .glassEffect(in: Capsule())
-
-        if isInSearch {
-          Button {
-            withAnimation {
-              isInSearch.toggle()
-              isSearchFocused = false
-              searchText = ""
-              clearSearch()
-            }
-          } label: {
-            Image(systemName: "xmark")
-              .frame(width: 50, height: 50)
-              .foregroundStyle(.blue)
-              .glassEffect(in: Circle())
           }
         }
       }
@@ -141,43 +187,63 @@ public struct PostListView: View {
   }
 
   private var feedListView: some View {
-    List {
-      switch state {
-      case .loading, .uninitialized:
-        placeholderView
-      case .loaded(let posts, let cursor):
-        ForEach(filteredPosts(posts)) { post in
-          PostRowView(post: post)
-        }
-        if cursor != nil {
-          nextPageView
-        }
-      case .error(let error):
-        VStack(spacing: 16) {
-          Image(systemName: "exclamationmark.triangle.fill")
-            .font(.system(size: 48))
-            .foregroundStyle(.red)
-
-          Text("Error Loading Feed")
-            .font(.title2)
-            .fontWeight(.semibold)
-
-          Text(error.localizedDescription)
-            .font(.body)
-            .foregroundStyle(.secondary)
-            .multilineTextAlignment(.center)
-
-          Button("Try Again") {
-            Task {
-              state = .loading
-              state = await datasource.loadPosts(with: state)
+    ScrollViewReader { proxy in
+      ScrollView {
+        LazyVStack(spacing: 16) {
+          switch state {
+          case .loading, .uninitialized:
+            placeholderView
+          case .loaded(let posts, let cursor):
+            ForEach(filteredPosts(posts)) { post in
+              PostRowView(post: post)
             }
+            if cursor != nil {
+              nextPageView
+            }
+          case .error(let error):
+            VStack(spacing: 16) {
+              Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 48))
+                .foregroundStyle(.red)
+
+              Text("Error Loading Feed")
+                .font(.title2)
+                .fontWeight(.semibold)
+
+              Text(error.localizedDescription)
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+
+              Button("Try Again") {
+                Task {
+                  state = .loading
+                  state = await datasource.loadPosts(with: state)
+                }
+              }
+              .buttonStyle(.borderedProminent)
+            }
+            .padding()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
           }
-          .buttonStyle(.borderedProminent)
         }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.horizontal, 16)
       }
+      .onAppear {
+        scrollOffset = 0
+      }
+      .simultaneousGesture(
+        DragGesture()
+          .onChanged { value in
+            let newOffset = max(0, -value.translation.height)
+            scrollOffset = newOffset
+          }
+          .onEnded { value in
+            // Keep the final scroll offset for visual effects
+            let finalOffset = max(0, -value.translation.height)
+            scrollOffset = finalOffset
+          }
+      )
     }
   }
 
