@@ -10,10 +10,10 @@ public class UnifiedSearchService: ObservableObject {
   @Published public var searchError: Error?
   @Published public var searchQuery: String = ""
 
-  private let client: BSkyClient
+  public var client: BSkyClient?
   private var searchTask: Task<Void, Never>?
 
-  public init(client: BSkyClient) {
+  public init(client: BSkyClient? = nil) {
     self.client = client
   }
 
@@ -57,6 +57,8 @@ public class UnifiedSearchService: ObservableObject {
   }
 
   private func searchPosts(query: String) async -> [PostItem] {
+    guard let client = client else { return [] }
+
     do {
       let results = try await client.protoClient.searchPosts(matching: query, limit: 20)
       return results.posts.map { post in
@@ -82,6 +84,8 @@ public class UnifiedSearchService: ObservableObject {
   }
 
   private func searchUsers(query: String) async -> [Profile] {
+    guard let client = client else { return [] }
+
     do {
       let results = try await client.protoClient.searchActors(matching: query, limit: 20)
       return results.actors.map { actor in
@@ -108,6 +112,8 @@ public class UnifiedSearchService: ObservableObject {
   }
 
   private func searchFeeds(query: String) async -> [FeedSearchResult] {
+    guard let client = client else { return [] }
+
     do {
       let results = try await client.protoClient.getPopularFeedGenerators(matching: query)
       return results.feeds.map { feed in
