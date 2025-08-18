@@ -72,7 +72,9 @@ public struct PostRowView: View {
           PostRowEmbedQuoteView(post: parentPost)
         }
       }
-      if post.isReplyTo, let toHandle = post.inReplyToHandle {
+
+      // Show simple reply indicator in thread view only
+      if post.isReplyTo && isInThreadContext, let toHandle = post.inReplyToHandle {
         Text("Replying to @\(toHandle)")
           .font(.caption)
           .foregroundStyle(.secondary)

@@ -40,7 +40,7 @@ extension PostsProfileView: @MainActor PostsListViewDatasource {
           by: profile.did, postFilter: filter.atProtocolFilter)
         print("PostsProfileView: API returned \(feed.feed.count) feed items")
 
-        let processedPosts = PostListView.processFeed(feed.feed)
+        let processedPosts = await PostListView.processFeed(feed.feed, client: client.protoClient)
         print("PostsProfileView: Processed \(processedPosts.count) posts")
 
         let filteredPosts =
@@ -54,7 +54,7 @@ extension PostsProfileView: @MainActor PostsListViewDatasource {
           by: profile.did, limit: nil, cursor: cursor, postFilter: filter.atProtocolFilter)
         print("PostsProfileView: Loaded \(feed.feed.count) more feed items")
 
-        let processedPosts = PostListView.processFeed(feed.feed)
+        let processedPosts = await PostListView.processFeed(feed.feed, client: client.protoClient)
         let filteredPosts =
           filter == .userReplies ? processedPosts.filter { $0.isReplyTo } : processedPosts
 

@@ -45,13 +45,13 @@ extension PostsTimelineView: @MainActor PostsListViewDatasource {
         }
 
         // Try to process the feed with enhanced error handling
-        let posts = PostListView.processFeed(feed.feed)
+        let posts = await PostListView.processFeed(feed.feed, client: client.protoClient)
         print("Successfully processed \(posts.count) posts from timeline")
 
         return .loaded(posts: posts, cursor: feed.cursor)
       case .loaded(let posts, let cursor):
         let feed = try await client.protoClient.getTimeline(cursor: cursor)
-        let newPosts = PostListView.processFeed(feed.feed)
+        let newPosts = await PostListView.processFeed(feed.feed, client: client.protoClient)
         return .loaded(posts: posts + newPosts, cursor: feed.cursor)
       }
     } catch {

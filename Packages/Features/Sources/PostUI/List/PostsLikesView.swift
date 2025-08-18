@@ -1,7 +1,7 @@
 @preconcurrency import ATProtoKit
+import Client
 import DesignSystem
 import Models
-import Client
 import SwiftUI
 import User
 
@@ -30,11 +30,14 @@ extension PostsLikesView: @MainActor PostsListViewDatasource {
       switch state {
       case .uninitialized, .loading, .error:
         let feed = try await client.protoClient.getActorLikes(by: profile.did)
-        return .loaded(posts: PostListView.processFeed(feed.feed), cursor: feed.cursor)
-      case let .loaded(posts, cursor):
+        return .loaded(
+          posts: await PostListView.processFeed(feed.feed, client: client.protoClient),
+          cursor: feed.cursor)
+      case .loaded(let posts, let cursor):
         let feed = try await client.protoClient.getActorLikes(
           by: profile.did, limit: nil, cursor: cursor)
-        return .loaded(posts: posts + PostListView.processFeed(feed.feed), cursor: feed.cursor)
+        let newPosts = await PostListView.processFeed(feed.feed, client: client.protoClient)
+        return .loaded(posts: posts + newPosts, cursor: feed.cursor)
       }
     } catch {
       return .error(error)
