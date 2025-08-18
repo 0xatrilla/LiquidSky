@@ -12,6 +12,7 @@ public struct SettingsView: View {
   @State private var showingResetAlert = false
   @State private var showingAboutSheet = false
   @State private var showingChangePassword = false
+  @State private var showingAppIconPicker = false
 
   public init() {}
 
@@ -66,6 +67,9 @@ public struct SettingsView: View {
     }
     .sheet(isPresented: $showingChangePassword) {
       ChangePasswordView()
+    }
+    .sheet(isPresented: $showingAppIconPicker) {
+      AppIconPickerView(selectedIcon: $settingsService.selectedAppIcon)
     }
   }
 
@@ -131,6 +135,15 @@ public struct SettingsView: View {
         .onChange(of: settingsService.selectedTheme) { _, _ in
           updateTheme()
         }
+      }
+
+      SettingsNavigationRow(
+        title: "App Icon",
+        subtitle: "Choose your preferred app icon",
+        icon: "app.badge",
+        iconColor: .orange
+      ) {
+        showingAppIconPicker = true
       }
 
       SettingsToggleRow(
@@ -324,7 +337,7 @@ private struct AboutView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 32, height: 32)
-                  
+
                   Text("GitHub")
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -344,7 +357,7 @@ private struct AboutView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 32, height: 32)
-                  
+
                   Text("Bluesky")
                     .font(.caption)
                     .foregroundColor(.secondary)

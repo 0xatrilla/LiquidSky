@@ -27,6 +27,11 @@ public final class SettingsService {
     set { settings.useSystemTheme = newValue }
   }
 
+  public var selectedAppIcon: AppIcon {
+    get { settings.selectedAppIcon }
+    set { settings.selectedAppIcon = newValue }
+  }
+
   public var selectedTheme: AppTheme {
     get { settings.selectedTheme }
     set { settings.selectedTheme = newValue }

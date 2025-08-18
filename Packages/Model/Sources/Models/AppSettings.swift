@@ -9,6 +9,10 @@ public final class AppSettings {
     didSet { UserDefaults.standard.set(useSystemTheme, forKey: "useSystemTheme") }
   }
 
+  public var selectedAppIcon: AppIcon {
+    didSet { UserDefaults.standard.set(selectedAppIcon.rawValue, forKey: "selectedAppIcon") }
+  }
+
   public var selectedTheme: AppTheme {
     didSet { UserDefaults.standard.set(selectedTheme.rawValue, forKey: "selectedTheme") }
   }
@@ -43,6 +47,9 @@ public final class AppSettings {
   public init() {
     // Load saved settings or use defaults
     self.useSystemTheme = UserDefaults.standard.object(forKey: "useSystemTheme") as? Bool ?? true
+    self.selectedAppIcon =
+      AppIcon(rawValue: UserDefaults.standard.string(forKey: "selectedAppIcon") ?? "cloud")
+      ?? .cloud
     self.selectedTheme =
       AppTheme(rawValue: UserDefaults.standard.string(forKey: "selectedTheme") ?? "system")
       ?? .system
@@ -65,6 +72,7 @@ public final class AppSettings {
 
   public func resetToDefaults() {
     useSystemTheme = true
+    selectedAppIcon = .cloud
     selectedTheme = .system
     showTimestamps = true
     compactMode = false
@@ -76,6 +84,36 @@ public final class AppSettings {
 }
 
 // MARK: - Supporting Enums
+public enum AppIcon: String, CaseIterable {
+  case cloud = "AppIcon"
+  case og = "AppIcon2"
+  case blueprint = "AppIcon3"
+
+  public var displayName: String {
+    switch self {
+    case .cloud: return "Cloud"
+    case .og: return "OG"
+    case .blueprint: return "Blueprint"
+    }
+  }
+
+  public var previewImageName: String {
+    switch self {
+    case .cloud: return "cloud"
+    case .og: return "OG"
+    case .blueprint: return "Blueprint"
+    }
+  }
+
+  public var iconName: String? {
+    switch self {
+    case .cloud: return nil  // nil means use the primary app icon
+    case .og: return "AppIcon2"
+    case .blueprint: return "AppIcon3"
+    }
+  }
+}
+
 public enum AppTheme: String, CaseIterable {
   case system = "system"
   case light = "light"
