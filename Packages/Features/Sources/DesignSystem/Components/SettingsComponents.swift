@@ -6,7 +6,7 @@ public struct SettingsSectionHeader: View {
   let icon: String
   let color: Color
 
-  public init(title: String, icon: String, color: Color = .blueskyPrimary) {
+  public init(title: String, icon: String, color: Color = .themePrimary) {
     self.title = title
     self.icon = icon
     self.color = color

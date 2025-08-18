@@ -9,6 +9,7 @@ public struct SettingsView: View {
   @Environment(Auth.self) var auth
   @Environment(CurrentUser.self) var currentUser
   @State private var settingsService = SettingsService.shared
+  @State private var colorThemeManager = ColorThemeManager.shared
   @State private var showingResetAlert = false
   @State private var showingAboutSheet = false
   @State private var showingChangePassword = false
@@ -21,6 +22,10 @@ public struct SettingsView: View {
     let themeManager = ThemeManager.shared
     themeManager.useSystemTheme = settingsService.useSystemTheme
     themeManager.currentTheme = settingsService.selectedTheme
+  }
+  
+  private func updateColorTheme() {
+    colorThemeManager.currentTheme = settingsService.selectedColorTheme
   }
 
   public var body: some View {
@@ -113,7 +118,7 @@ public struct SettingsView: View {
   // MARK: - Display Section
   private var displaySection: some View {
     VStack(spacing: 16) {
-      SettingsSectionHeader(title: "Display", icon: "paintbrush.fill", color: .blueskyPrimary)
+      SettingsSectionHeader(title: "Display", icon: "paintbrush.fill", color: .themePrimary)
 
       SettingsToggleRow(
         title: "Use System Theme",
@@ -148,6 +153,19 @@ public struct SettingsView: View {
         iconColor: .orange
       ) {
         showingAppIconPicker = true
+      }
+
+      SettingsPickerRow(
+        title: "Color Theme",
+        subtitle: "Choose your preferred color scheme",
+        icon: "paintbrush.fill",
+        iconColor: .themePrimary,
+        selection: $settingsService.selectedColorTheme,
+        options: ColorTheme.allCases,
+        optionTitle: { $0.displayName }
+      )
+      .onChange(of: settingsService.selectedColorTheme) { _, _ in
+        updateColorTheme()
       }
 
       SettingsToggleRow(

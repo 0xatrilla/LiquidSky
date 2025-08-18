@@ -52,7 +52,9 @@ struct LiquidSkyApp: App {
             .environment(postFilterService)
             .environment(imageQualityService)
             .environment(settingsService)
+            .environment(ColorThemeManager.shared)
             .withTheme()
+            .themeAware()
             .onAppear {
               print("LiquidSkyApp: Showing authenticated state")
             }

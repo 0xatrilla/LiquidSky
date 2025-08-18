@@ -15,25 +15,23 @@ struct PatternColorConstraint: AttributedTextValueConstraint {
   typealias Scope = AttributeScopes.ComposerAttributes
   typealias AttributeKey = AttributeScopes.SwiftUIAttributes.ForegroundColorAttribute
   
-  func constrain(_ container: inout Attributes) {
+  nonisolated func constrain(_ container: inout Attributes) {
     if let pattern = container.textPattern {
-      container.foregroundColor = pattern.color
-    } else {
-      container.foregroundColor = nil
+      // Get the current theme from UserDefaults and apply the appropriate color
+      let currentTheme = UserDefaults.standard.string(forKey: "selectedColorTheme") ?? "bluesky"
+      container.foregroundColor = pattern.color(for: currentTheme)
     }
   }
 }
 
-/// Constraint that underlines URLs
+/// Constraint that applies underlines to URLs
 struct URLUnderlineConstraint: AttributedTextValueConstraint {
   typealias Scope = AttributeScopes.ComposerAttributes
   typealias AttributeKey = AttributeScopes.SwiftUIAttributes.UnderlineStyleAttribute
   
-  func constrain(_ container: inout Attributes) {
-    if container.textPattern == .url {
+  nonisolated func constrain(_ container: inout Attributes) {
+    if let pattern = container.textPattern, pattern == .url {
       container.underlineStyle = .single
-    } else {
-      container.underlineStyle = nil
     }
   }
 }

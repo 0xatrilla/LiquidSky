@@ -91,7 +91,7 @@ public struct ProfileView: View {
         .clipShape(Circle())
         .overlay(
           Circle()
-            .stroke(Color.blue.opacity(0.3), lineWidth: 2)
+            .stroke(Color.themePrimary.opacity(0.3), lineWidth: 2)
         )
         .onTapGesture {
           router.presentedSheet = SheetDestination.fullScreenProfilePicture(
@@ -251,7 +251,7 @@ public struct ProfileView: View {
           value: RouterDestination.profilePosts(profile: profile, filter: .postsWithNoReplies)
         ) {
           makeTabButton(
-            title: "Posts", icon: "bubble.fill", color: .blueskyPrimary,
+            title: "Posts", icon: "bubble.fill", color: .themePrimary,
             count: (fullProfile ?? profile).postsCount)
         }
 
@@ -259,7 +259,7 @@ public struct ProfileView: View {
           value: RouterDestination.profilePosts(profile: profile, filter: .userReplies)
         ) {
           makeTabButton(
-            title: "Replies", icon: "arrowshape.turn.up.left.fill", color: .blueskySecondary,
+            title: "Replies", icon: "arrowshape.turn.up.left.fill", color: .themeSecondary,
             count: nil)
         }
 
@@ -267,13 +267,13 @@ public struct ProfileView: View {
           value: RouterDestination.profilePosts(profile: profile, filter: .postsWithMedia)
         ) {
           makeTabButton(
-            title: "Media", icon: "photo.fill", color: .blueskyAccent,
+            title: "Media", icon: "photo.fill", color: .themeAccent,
             count: (fullProfile ?? profile).postsCount > 0
               ? (fullProfile ?? profile).postsCount : nil)
         }
 
         NavigationLink(value: RouterDestination.profileLikes(profile)) {
-          makeTabButton(title: "Likes", icon: "heart.fill", color: .blueskyPrimary, count: nil)
+          makeTabButton(title: "Likes", icon: "heart.fill", color: .themePrimary, count: nil)
         }
       }
     }
@@ -333,7 +333,7 @@ public struct ProfileView: View {
     .padding(.horizontal, 12)
     .background(
       RoundedRectangle(cornerRadius: 12)
-        .fill(LinearGradient.blueskySubtle)
+        .fill(LinearGradient.themeSubtle)
     )
   }
 

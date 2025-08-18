@@ -1,4 +1,5 @@
 import SwiftUI
+import DesignSystem
 
 struct ComposerSendButtonView: View {
   let sendState: ComposerSendState
