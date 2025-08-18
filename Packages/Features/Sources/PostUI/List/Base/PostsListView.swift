@@ -502,8 +502,10 @@ private struct ReplyChainView: View {
             if index < posts.count - 1 {
               Rectangle()
                 .fill(LinearGradient.themeGradient)
-                .frame(width: 2, height: 48)
-                .offset(y: 12)
+                .frame(width: 2)
+                .frame(maxHeight: .infinity)
+                .padding(.top, 12)  // Start below the avatar
+                .padding(.bottom, 8)  // Extend to connect with next post
             }
           }
           .frame(width: 40)  // Ensure consistent width for avatar column
