@@ -148,11 +148,11 @@ struct LiquidSkyApp: App {
       }
       .task {
         print("LiquidSkyApp: Main task started")
-        
+
         // Wait for initial session restoration attempt
         print("Waiting for initial session restoration...")
         await auth.restoreSession()
-        
+
         // Check if we have an initial configuration after restoration attempt
         if auth.configuration == nil {
           print("No initial configuration after restoration, showing auth screen")
