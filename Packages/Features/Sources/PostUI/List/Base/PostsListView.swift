@@ -5,7 +5,6 @@ import DesignSystem
 import Destinations
 import FeedUI
 import Models
-import PostUI
 import SwiftUI
 import User
 
@@ -231,74 +230,142 @@ public struct PostListView: View {
     return postFilterService.filterPosts(posts)
   }
 
-  // MARK: - Reply Chain Grouping
+  private func groupPostsByReplyChain(_ posts: [PostItem]) -> [PostGroup] {
+    var groups: [PostGroup] = []
+    var processedURIs = Set<String>()
+
+    print("PostsListView: Grouping \(posts.count) posts by reply chains")
+    print("PostsListView: Checking each post for reply status:")
+
+    // First pass: identify all reply chains to avoid processing parents twice
+    var replyChains: [(parent: PostItem, reply: PostItem)] = []
+    for post in posts {
+      if post.isReplyTo, let parent = findParentPost(for: post, in: posts) {
+        replyChains.append((parent: parent, reply: post))
+      }
+    }
+
+    // Second pass: create groups, prioritizing reply chains
+    for (index, post) in posts.enumerated() {
+      print(
+        "PostsListView: [\(index)] \(post.author.handle) - isReplyTo: \(post.isReplyTo), hasReply: \(post.hasReply), replyRef: \(post.replyRef != nil)"
+      )
+
+      if processedURIs.contains(post.uri) {
+        continue
+      }
+
+      // Check if this post is part of a reply chain
+      if let replyChain = replyChains.first(where: {
+        $0.parent.uri == post.uri || $0.reply.uri == post.uri
+      }) {
+        if !processedURIs.contains(replyChain.parent.uri)
+          && !processedURIs.contains(replyChain.reply.uri)
+        {
+          print(
+            "PostsListView: Creating reply chain for \(replyChain.parent.author.handle) -> \(replyChain.reply.author.handle)"
+          )
+          groups.append(
+            PostGroup(posts: [replyChain.parent, replyChain.reply], isReplyChain: true))
+          processedURIs.insert(replyChain.parent.uri)
+          processedURIs.insert(replyChain.reply.uri)
+        }
+      } else {
+        // Not part of a reply chain, add as single post
+        groups.append(PostGroup(posts: [post], isReplyChain: false))
+        processedURIs.insert(post.uri)
+      }
+    }
+
+    print("PostsListView: Created \(groups.count) groups")
+    return groups
+  }
+
+  private func findParentPost(for post: PostItem, in allPosts: [PostItem]) -> PostItem? {
+    print("PostsListView: Finding parent for post: \(post.author.handle)")
+
+    // Require a concrete parent URI; do not guess by handle to avoid incorrect threads
+    guard let replyRef = post.replyRef else {
+      print("PostsListView: Post has no replyRef")
+      return nil
+    }
+
+    guard let parentURI = Self.replyParentURI(from: replyRef) else {
+      print("PostsListView: Could not extract parent URI from replyRef")
+      return nil
+    }
+
+    print("PostsListView: Looking for parent with URI: \(parentURI)")
+
+    let parent = allPosts.first(where: { $0.uri == parentURI })
+    if let parent = parent {
+      print("PostsListView: Found parent post: \(parent.author.handle)")
+    } else {
+      print("PostsListView: Parent post not found in current feed")
+      print("PostsListView: Available URIs in feed:")
+      for (index, feedPost) in allPosts.enumerated() {
+        print("PostsListView: [\(index)] \(feedPost.author.handle): \(feedPost.uri)")
+      }
+    }
+
+    return parent
+  }
+
+  private static func replyParentURI(from replyRef: AppBskyLexicon.Feed.PostRecord.ReplyReference)
+    -> String?
+  {
+    print("PostsListView: Extracting parent URI from replyRef: \(replyRef)")
+
+    let mirror = Mirror(reflecting: replyRef)
+    print("PostsListView: ReplyRef mirror children:")
+    for child in mirror.children {
+      print("PostsListView: - \(child.label ?? "nil"): \(child.value)")
+    }
+
+    func extractURI(from value: Any) -> String? {
+      let m = Mirror(reflecting: value)
+      for child in m.children {
+        if let label = child.label {
+          if label == "recordURI", let uri = child.value as? String {
+            print("PostsListView: Found recordURI: \(uri)")
+            return uri
+          }
+          if label == "uri", let uri = child.value as? String {
+            print("PostsListView: Found uri: \(uri)")
+            return uri
+          }
+        }
+      }
+      return nil
+    }
+
+    // Prefer parent.uri
+    if let parentChild = mirror.children.first(where: { $0.label == "parent" }),
+      let parentURI = extractURI(from: parentChild.value)
+    {
+      print("PostsListView: Using parent.uri: \(parentURI)")
+      return parentURI
+    }
+    // Fallback to root.uri
+    if let rootChild = mirror.children.first(where: { $0.label == "root" }),
+      let rootURI = extractURI(from: rootChild.value)
+    {
+      print("PostsListView: Using root.uri: \(rootURI)")
+      return rootURI
+    }
+
+    print("PostsListView: No URI found in replyRef")
+    return nil
+  }
 
   private struct PostGroup: Identifiable {
     let id = UUID()
     let posts: [PostItem]
     let isReplyChain: Bool
 
-    init(posts: [PostItem]) {
+    init(posts: [PostItem], isReplyChain: Bool) {
       self.posts = posts
-      self.isReplyChain = posts.count > 1
-    }
-  }
-
-  private func groupPostsByReplyChain(_ posts: [PostItem]) -> [PostGroup] {
-    var groups: [PostGroup] = []
-    var processedURIs = Set<String>()
-
-    for post in posts {
-      if processedURIs.contains(post.uri) {
-        continue
-      }
-
-      if post.isReplyTo {
-        // Find the reply chain
-        let chain = findReplyChain(for: post, in: posts)
-        groups.append(PostGroup(posts: chain))
-        // Mark all posts in the chain as processed
-        for chainPost in chain {
-          processedURIs.insert(chainPost.uri)
-        }
-      } else {
-        // Single post, not part of a reply chain
-        groups.append(PostGroup(posts: [post]))
-        processedURIs.insert(post.uri)
-      }
-    }
-
-    return groups
-  }
-
-  private func findReplyChain(for post: PostItem, in allPosts: [PostItem]) -> [PostItem] {
-    var chain: [PostItem] = []
-    var currentPost = post
-
-    // Find the root post (the one that's not a reply)
-    while currentPost.isReplyTo {
-      if let parent = findParentPost(for: currentPost, in: allPosts) {
-        chain.insert(parent, at: 0)
-        currentPost = parent
-      } else {
-        break
-      }
-    }
-
-    // Add the reply post
-    chain.append(post)
-
-    return chain
-  }
-
-  private func findParentPost(for post: PostItem, in allPosts: [PostItem]) -> PostItem? {
-    // Try to find the parent post using the replyRef if available
-    // For now, we'll use a more sophisticated approach that looks for posts
-    // that this post might be replying to
-    return allPosts.first { potentialParent in
-      // Check if this could be the parent based on handle and timing
-      potentialParent.uri != post.uri && potentialParent.indexedAt < post.indexedAt
-        && (post.inReplyToHandle == nil || potentialParent.author.handle == post.inReplyToHandle)
+      self.isReplyChain = isReplyChain
     }
   }
 
@@ -388,6 +455,121 @@ public struct PostListView: View {
     // Clear search and navigate to profile
     clearSearch()
     router.navigateTo(.profile(user))
+  }
+}
+
+// MARK: - Reply Chain View
+
+private struct ReplyChainView: View {
+  let posts: [PostItem]
+  @Environment(AppRouter.self) var router
+  @Environment(PostContextProvider.self) var postDataControllerProvider
+  @Environment(BSkyClient.self) var client
+
+  var body: some View {
+    VStack(spacing: 0) {
+      ForEach(Array(posts.enumerated()), id: \.element.uri) { index, post in
+        HStack(alignment: .top, spacing: 8) {
+          // Avatar column with thread line
+          VStack(spacing: 0) {
+            // Avatar
+            AsyncImage(url: post.author.avatarImageURL) { phase in
+              switch phase {
+              case .success(let image):
+                image
+                  .resizable()
+                  .scaledToFit()
+                  .frame(width: 40, height: 40)
+                  .clipShape(Circle())
+              default:
+                Circle()
+                  .fill(.gray.opacity(0.2))
+                  .frame(width: 40, height: 40)
+              }
+            }
+            .overlay {
+              Circle()
+                .stroke(
+                  post.hasReply ? LinearGradient.avatarBorderReversed : LinearGradient.avatarBorder,
+                  lineWidth: 1)
+            }
+            .shadow(color: .shadowPrimary.opacity(0.3), radius: 2)
+            .onTapGesture {
+              router.navigateTo(.profile(post.author))
+            }
+
+            // Thread line connector (blue line connecting posts in the chain)
+            if index < posts.count - 1 {
+              Rectangle()
+                .fill(LinearGradient.blueskyGradient)
+                .frame(width: 2, height: 48)
+                .offset(y: 12)
+            }
+          }
+          .frame(width: 40)  // Ensure consistent width for avatar column
+
+          // Post content
+          VStack(alignment: .leading, spacing: 8) {
+            // Author info
+            HStack(alignment: .firstTextBaseline) {
+              Text("\(post.author.displayName ?? "")  @\(post.author.handle)")
+                .font(.callout)
+                .foregroundStyle(.primary)
+                .fontWeight(.semibold)
+              Spacer()
+              Text(post.indexedAt.relativeFormatted)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+            .lineLimit(1)
+            .onTapGesture {
+              router.navigateTo(.profile(post.author))
+            }
+
+            // Reply indicator
+            if post.isReplyTo, let toHandle = post.inReplyToHandle {
+              Text("Replying to @\(toHandle)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+
+            // Repost indicator
+            if post.isReposted, let repostedBy = post.repostedBy {
+              HStack(spacing: 4) {
+                Image(systemName: "arrow.2.squarepath")
+                  .font(.caption)
+                  .foregroundStyle(.secondary)
+                Text("Reposted by \(repostedBy.displayName ?? repostedBy.handle)")
+                  .font(.caption)
+                  .foregroundStyle(.secondary)
+              }
+            }
+
+            // Post text
+            Text(post.content)
+              .font(.body)
+              .foregroundStyle(.primary)
+              .multilineTextAlignment(.leading)
+
+            // Embed content (proper media display)
+            if post.embed != nil {
+              PostRowEmbedView(post: post)
+            }
+
+            // Actions (use same PostRowActionsView as normal posts for consistency)
+            PostRowActionsView(post: post)
+              .environment(postDataControllerProvider.get(for: post, client: client))
+          }
+          .onTapGesture {
+            router.navigateTo(.post(post))
+          }
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+      }
+    }
+    .padding(.horizontal, 4)
+    .padding(.vertical, 8)
   }
 }
 
@@ -588,11 +770,14 @@ private struct PostSearchResultRow: View {
 
 // MARK: - Data
 extension PostListView {
-  public static func processFeed(_ feed: [AppBskyLexicon.Feed.FeedViewPostDefinition]) -> [PostItem]
-  {
+  public static func processFeed(
+    _ feed: [AppBskyLexicon.Feed.FeedViewPostDefinition], client: ATProtoKit
+  ) async -> [PostItem] {
     print("PostsListView: Starting to process feed with \(feed.count) items")
     var postItems: [PostItem] = []
     var processedCount = 0
+    var missingParentURIs: Set<String> = []
+    var replyToParentMap: [String: String] = [:]  // reply URI -> parent URI
 
     func insert(
       post: AppBskyLexicon.Feed.PostViewDefinition,
@@ -619,17 +804,33 @@ extension PostListView {
       processedCount += 1
     }
 
+    // First pass: process all posts and identify missing parents
     for (index, post) in feed.enumerated() {
-      // Debug: Print the structure to understand what we're working with
       print("PostsListView: Processing feed item \(index): post.uri = \(post.post.uri)")
 
       // Pass both the post and the feed item to get repost information
       insert(post: post.post, fromFeedItem: post)
 
-      // Process replies - simplified to avoid type issues
+      // Check if this is a reply and identify missing parent
+      let postItem = post.postItem
+      if let replyRef = postItem.replyRef {
+        let parentURI = Self.replyParentURI(from: replyRef)
+        if let parentURI = parentURI {
+          // Check if parent is already in the current feed
+          let parentExists = feed.contains { $0.post.uri == parentURI }
+          if !parentExists {
+            print(
+              "PostsListView: Parent post missing for reply \(postItem.uri), parent: \(parentURI)")
+            missingParentURIs.insert(parentURI)
+            replyToParentMap[postItem.uri] = parentURI
+          }
+        }
+      }
+
+      // Note: The reply field indicates that a reply exists, but doesn't contain the reply post data
+      // The main posts already have the reply information they need (isReplyTo, replyRef, etc.)
       if post.reply != nil {
-        print("PostsListView: Reply found for item \(index) - processing...")
-        // TODO: Implement proper reply processing when we understand the type structure
+        print("PostsListView: Reply found for item \(index) - this indicates a reply exists")
       }
 
       // Process repost - simplified to avoid type issues
@@ -639,168 +840,40 @@ extension PostListView {
       }
     }
 
+    // Second pass: fetch missing parent posts and insert them above their replies
+    if !missingParentURIs.isEmpty {
+      print("PostsListView: Fetching \(missingParentURIs.count) missing parent posts...")
+
+      do {
+        let parentURIs = Array(missingParentURIs)
+        let parentPosts = try await client.getPosts(parentURIs)
+
+        print("PostsListView: Successfully fetched \(parentPosts.posts.count) parent posts")
+
+        // Insert parent posts above their replies
+        for (replyURI, parentURI) in replyToParentMap {
+          if let parentPost = parentPosts.posts.first(where: { $0.uri == parentURI }) {
+            print("PostsListView: Inserting parent post \(parentURI) above reply \(replyURI)")
+
+            // Find the reply post index
+            if let replyIndex = postItems.firstIndex(where: { $0.uri == replyURI }) {
+              // Create PostItem from parent post
+              let parentPostItem = parentPost.postItem
+              postItems.insert(parentPostItem, at: replyIndex)
+              processedCount += 1
+              print("PostsListView: Successfully inserted parent post above reply")
+            }
+          }
+        }
+      } catch {
+        print("PostsListView: Error fetching parent posts: \(error)")
+        // Continue without parent posts if fetch fails
+      }
+    }
+
     print(
       "PostsListView: Finished processing feed. Total posts: \(postItems.count), Processed: \(processedCount)"
     )
     return postItems
-  }
-}
-
-// MARK: - Reply Chain View
-
-private struct ReplyChainView: View {
-  let posts: [PostItem]
-  @Environment(AppRouter.self) var router
-
-  var body: some View {
-    VStack(spacing: 0) {
-      ForEach(Array(posts.enumerated()), id: \.element.uri) { index, post in
-        HStack(alignment: .top, spacing: 8) {
-          // Avatar column with thread line
-          VStack(spacing: 0) {
-            // Avatar
-            AsyncImage(url: post.author.avatarImageURL) { phase in
-              switch phase {
-              case .success(let image):
-                image
-                  .resizable()
-                  .scaledToFit()
-                  .frame(width: 40, height: 40)
-                  .clipShape(Circle())
-              default:
-                Circle()
-                  .fill(.gray.opacity(0.2))
-                  .frame(width: 40, height: 40)
-              }
-            }
-            .overlay {
-              Circle()
-                .stroke(
-                  post.hasReply ? LinearGradient.avatarBorderReversed : LinearGradient.avatarBorder,
-                  lineWidth: 1)
-            }
-            .shadow(color: .shadowPrimary.opacity(0.3), radius: 2)
-            .onTapGesture {
-              router.navigateTo(.profile(post.author))
-            }
-
-            // Thread line connector (blue line connecting posts in the chain)
-            if index < posts.count - 1 {
-              // Create a curved connector line that looks more natural
-              Path { path in
-                path.move(to: CGPoint(x: 20, y: 40))  // Start at bottom center of avatar
-                path.addLine(to: CGPoint(x: 20, y: 56))  // Go down to connect to next post
-              }
-              .stroke(LinearGradient.blueskyGradient, lineWidth: 2)
-              .frame(width: 40, height: 16)
-            }
-          }
-          .frame(width: 40)  // Ensure consistent width for avatar column
-
-          // Post content
-          VStack(alignment: .leading, spacing: 8) {
-            // Author info
-            HStack(alignment: .firstTextBaseline) {
-              Text("\(post.author.displayName ?? "")  @\(post.author.handle)")
-                .font(.callout)
-                .foregroundStyle(.primary)
-                .fontWeight(.semibold)
-              Spacer()
-              Text(post.indexedAt.relativeFormatted)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
-            .lineLimit(1)
-            .onTapGesture {
-              router.navigateTo(.profile(post.author))
-            }
-
-            // Reply indicator
-            if post.isReplyTo, let toHandle = post.inReplyToHandle {
-              Text("Replying to @\(toHandle)")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
-
-            // Repost indicator - show who reposted this content
-            if post.isReposted, let repostedBy = post.repostedBy {
-              HStack(spacing: 4) {
-                Image(systemName: "arrow.2.squarepath")
-                  .font(.caption)
-                  .foregroundStyle(.secondary)
-                Text("Reposted by \(repostedBy.displayName ?? repostedBy.handle)")
-                  .font(.caption)
-                  .foregroundStyle(.secondary)
-              }
-            }
-
-            // Post content
-            if !post.content.isEmpty {
-              Text(post.content)
-                .font(.body)
-                .foregroundStyle(.primary)
-            }
-
-            // Embed content (images, videos, etc.)
-            if post.embed != nil {
-              // Simple embed indicator without complex property access
-              HStack(spacing: 8) {
-                Image(systemName: "paperclip")
-                  .font(.caption)
-                  .foregroundStyle(.secondary)
-                Text("Media")
-                  .font(.caption)
-                  .foregroundStyle(.secondary)
-              }
-              .padding(8)
-              .background(.ultraThinMaterial)
-              .clipShape(RoundedRectangle(cornerRadius: 8))
-            }
-
-            // Simple actions display (only for the last post in the chain)
-            if index == posts.count - 1 {
-              HStack(spacing: 16) {
-                // Reply count
-                Label("\(post.replyCount)", systemImage: "bubble.left")
-                  .font(.caption)
-                  .foregroundStyle(.secondary)
-
-                // Repost count
-                Label("\(post.repostCount)", systemImage: "arrow.2.squarepath")
-                  .font(.caption)
-                  .foregroundStyle(.secondary)
-
-                // Like count
-                Label("\(post.likeCount)", systemImage: "heart")
-                  .font(.caption)
-                  .foregroundStyle(.secondary)
-
-                Spacer()
-              }
-              .padding(.top, 8)
-            }
-          }
-          .padding(.bottom, 18)
-        }
-        .listRowSeparator(.hidden)
-        .listRowInsets(
-          .init(top: 0, leading: 14, bottom: 0, trailing: 14)
-        )
-        .contentShape(Rectangle())
-        .onTapGesture {
-          router.navigateTo(.post(post))
-        }
-      }
-    }
-    .background(
-      RoundedRectangle(cornerRadius: 12)
-        .fill(.ultraThinMaterial)
-        .overlay(
-          RoundedRectangle(cornerRadius: 12)
-            .stroke(.quaternary, lineWidth: 0.5)
-        )
-    )
-    .padding(.horizontal, 4)
-    .padding(.vertical, 8)
   }
 }
