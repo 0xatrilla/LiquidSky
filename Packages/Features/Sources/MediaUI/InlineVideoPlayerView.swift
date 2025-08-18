@@ -131,6 +131,7 @@ public struct InlineVideoPlayerView: View {
           updateProgress()
         }
       }
+
   }
 
   // MARK: - Controls Overlay
@@ -141,7 +142,31 @@ public struct InlineVideoPlayerView: View {
       // Top controls
       HStack {
         Button(action: {
-          onFullScreenRequest?()
+          // Try native full screen first, fallback to custom full screen
+          if let player = player {
+            // Create a temporary AVPlayerViewController for native full screen
+            let playerViewController = AVPlayerViewController()
+            playerViewController.player = player
+            playerViewController.showsPlaybackControls = true
+            playerViewController.allowsPictureInPicturePlayback = true
+
+            // Present the player view controller
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first,
+              let rootViewController = window.rootViewController
+            {
+              rootViewController.present(playerViewController, animated: true) {
+                // Start playing when presented
+                player.play()
+              }
+            } else {
+              // Fallback to custom full screen
+              onFullScreenRequest?()
+            }
+          } else {
+            // Fallback to custom full screen
+            onFullScreenRequest?()
+          }
         }) {
           Image(systemName: "arrow.up.left.and.arrow.down.right")
             .font(.title2)
@@ -413,4 +438,5 @@ public struct InlineVideoPlayerView: View {
     let seconds = Int(time) % 60
     return String(format: "%d:%02d", minutes, seconds)
   }
+
 }
