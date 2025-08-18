@@ -172,12 +172,15 @@ struct LiquidSkyApp: App {
             "LiquidSkyApp: Received configuration update: \(configuration != nil ? "available" : "nil")"
           )
           if let configuration {
-            // Only clear the auth sheet if it's currently showing
+            // Keep the auth sheet visible while we're setting up the environment
+            // Only clear it after authentication is fully complete
+            await refreshEnvWith(configuration: configuration)
+
+            // Now that authentication is complete, clear the auth sheet
             if router.presentedSheet == .auth {
-              print("Clearing auth sheet and proceeding with authentication")
+              print("Authentication complete, clearing auth sheet")
               router.presentedSheet = nil
             }
-            await refreshEnvWith(configuration: configuration)
           } else {
             print("No configuration available, showing auth screen")
             appState = .unauthenticated
@@ -217,10 +220,15 @@ struct LiquidSkyApp: App {
       }
     } catch {
       print("refreshEnvWith failed: \(error)")
-      // Don't crash, just log the error
-      await MainActor.run {
-        appState = .unauthenticated
-        print("App state set to unauthenticated due to error")
+      // Don't set to unauthenticated while auth sheet is showing
+      // This prevents the "Unauthenticated" screen from appearing
+      if router.presentedSheet != .auth {
+        await MainActor.run {
+          appState = .unauthenticated
+          print("App state set to unauthenticated due to error")
+        }
+      } else {
+        print("Auth sheet is showing, keeping current state to avoid 'Unauthenticated' screen")
       }
     }
   }

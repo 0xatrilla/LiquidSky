@@ -17,7 +17,6 @@ public struct PostListView: View {
   @State private var isSearching = false
   @State private var searchService: UnifiedSearchService?
   @FocusState var isSearchFocused: Bool
-  @State private var scrollOffset: CGFloat = 0
   @Environment(AppRouter.self) var router
   @Environment(BSkyClient.self) var client
 
@@ -30,16 +29,12 @@ public struct PostListView: View {
 
   public var body: some View {
     VStack(spacing: 0) {
-      headerView
-        .padding(.horizontal, 16)
-        .padding(.top, 8)
-
       // Search Results Overlay (when searching)
       if !searchText.isEmpty {
         searchResultsOverlay
       }
 
-      // Normal feed view (always visible, but can be dimmed)
+      // Feed view with header inside ScrollView
       feedListView
         .opacity(searchText.isEmpty ? 1.0 : 0.3)
         .allowsHitTesting(searchText.isEmpty)
@@ -72,20 +67,18 @@ public struct PostListView: View {
 
   private var headerView: some View {
     HStack(alignment: .center) {
-      // Title on the left (shrinks to top when scrolling)
+      // Title on the left (static, no shrinking)
       VStack(alignment: .leading, spacing: 2) {
         Text(datasource.title)
           .headerTitleShadow()
-          .font(.system(size: max(28, 34 - scrollOffset * 0.1), weight: .bold))
-          .scaleEffect(max(0.8, 1.0 - scrollOffset * 0.002))
-          .opacity(max(0.6, 1.0 - scrollOffset * 0.003))
+          .font(.system(size: 34, weight: .bold))
       }
       .offset(x: isInSearch ? -200 : 0)
       .opacity(isInSearch ? 0 : 1)
 
       Spacer()
 
-      // Search bar on the right (shrinks to magnifying glass when scrolling)
+      // Search bar on the right (static, no shrinking)
       searchBarView
         .padding(.leading, isInSearch ? -120 : 0)
         .contentShape(Rectangle())
@@ -98,7 +91,8 @@ public struct PostListView: View {
         .transition(.slide)
     }
     .animation(.bouncy, value: isInSearch)
-    .animation(.easeOut(duration: 0.2), value: scrollOffset)
+    .padding(.horizontal, 16)
+    .padding(.top, 8)
   }
 
   private var searchBarView: some View {
@@ -147,6 +141,9 @@ public struct PostListView: View {
     ScrollViewReader { proxy in
       ScrollView {
         LazyVStack(spacing: 16) {
+          // Header at the top of the ScrollView
+          headerView
+
           switch state {
           case .loading, .uninitialized:
             placeholderView
@@ -187,20 +184,8 @@ public struct PostListView: View {
         .padding(.horizontal, 16)
       }
       .onAppear {
-        scrollOffset = 0
+        // Header will scroll naturally with content
       }
-      .simultaneousGesture(
-        DragGesture()
-          .onChanged { value in
-            let newOffset = max(0, -value.translation.height)
-            scrollOffset = newOffset
-          }
-          .onEnded { value in
-            // Keep the final scroll offset for visual effects
-            let finalOffset = max(0, -value.translation.height)
-            scrollOffset = finalOffset
-          }
-      )
     }
   }
 
