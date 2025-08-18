@@ -151,7 +151,7 @@ public struct PostRowView: View {
       Rectangle()
         .frame(width: 1)
         .frame(maxHeight: .infinity)
-        .foregroundStyle(LinearGradient.blueskyGradient)
+        .foregroundStyle(LinearGradient.themeGradient)
     }
   }
 

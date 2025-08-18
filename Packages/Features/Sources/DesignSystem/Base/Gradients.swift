@@ -1,49 +1,55 @@
 import SwiftUI
 
 extension LinearGradient {
+  @MainActor
   public static var blueskyGradient: LinearGradient {
     LinearGradient(
-      colors: [.blueskyPrimary, .blueskySecondary],
+      colors: [.themePrimary, .themeSecondary],
       startPoint: .topLeading,
       endPoint: .bottomTrailing
     )
   }
 
+  @MainActor
   public static var blueskyGradientReversed: LinearGradient {
     LinearGradient(
-      colors: [.blueskySecondary, .blueskyPrimary],
+      colors: [.themeSecondary, .themePrimary],
       startPoint: .topLeading,
       endPoint: .bottomTrailing
     )
   }
 
+  @MainActor
   public static var avatarBorder: LinearGradient {
     LinearGradient(
-      colors: [.blueskyPrimary, .blueskySecondary],
+      colors: [.themePrimary, .themeSecondary],
       startPoint: .topLeading,
       endPoint: .bottomTrailing
     )
   }
 
+  @MainActor
   public static var avatarBorderReversed: LinearGradient {
     LinearGradient(
-      colors: [.blueskySecondary, .blueskyPrimary],
+      colors: [.themeSecondary, .themePrimary],
       startPoint: .topLeading,
       endPoint: .bottomTrailing
     )
   }
 
+  @MainActor
   public static var feedBackground: LinearGradient {
     LinearGradient(
-      colors: [.blueskyPrimary.opacity(0.1), .blueskySecondary.opacity(0.05)],
+      colors: [.themePrimary.opacity(0.1), .themeSecondary.opacity(0.05)],
       startPoint: .topLeading,
       endPoint: .bottomTrailing
     )
   }
 
+  @MainActor
   public static var feedBackgroundReversed: LinearGradient {
     LinearGradient(
-      colors: [.blueskySecondary.opacity(0.1), .blueskyPrimary.opacity(0.05)],
+      colors: [.themeSecondary.opacity(0.1), .themePrimary.opacity(0.05)],
       startPoint: .topLeading,
       endPoint: .bottomTrailing
     )

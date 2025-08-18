@@ -234,8 +234,8 @@ public struct PostListView: View {
     var groups: [PostGroup] = []
     var processedURIs = Set<String>()
 
-    print("PostsListView: Grouping \(posts.count) posts by reply chains")
-    print("PostsListView: Checking each post for reply status:")
+    // print("PostsListView: Grouping \(posts.count) posts by reply chains")
+    // print("PostsListView: Checking each post for reply status:")
 
     // First pass: identify all reply chains to avoid processing parents twice
     var replyChains: [(parent: PostItem, reply: PostItem)] = []
@@ -247,9 +247,9 @@ public struct PostListView: View {
 
     // Second pass: create groups, prioritizing reply chains
     for (index, post) in posts.enumerated() {
-      print(
-        "PostsListView: [\(index)] \(post.author.handle) - isReplyTo: \(post.isReplyTo), hasReply: \(post.hasReply), replyRef: \(post.replyRef != nil)"
-      )
+      // print(
+      //   "PostsListView: [\(index)] \(post.author.handle) - isReplyTo: \(post.isReplyTo), hasReply: \(post.hasReply), replyRef: \(post.replyRef != nil)"
+      // )
 
       if processedURIs.contains(post.uri) {
         continue
@@ -262,9 +262,9 @@ public struct PostListView: View {
         if !processedURIs.contains(replyChain.parent.uri)
           && !processedURIs.contains(replyChain.reply.uri)
         {
-          print(
-            "PostsListView: Creating reply chain for \(replyChain.parent.author.handle) -> \(replyChain.reply.author.handle)"
-          )
+          // print(
+          //   "PostsListView: Creating reply chain for \(replyChain.parent.author.handle) -> \(replyChain.reply.author.handle)"
+          // )
           groups.append(
             PostGroup(posts: [replyChain.parent, replyChain.reply], isReplyChain: true))
           processedURIs.insert(replyChain.parent.uri)
@@ -277,35 +277,35 @@ public struct PostListView: View {
       }
     }
 
-    print("PostsListView: Created \(groups.count) groups")
+    // print("PostsListView: Created \(groups.count) groups")
     return groups
   }
 
   private func findParentPost(for post: PostItem, in allPosts: [PostItem]) -> PostItem? {
-    print("PostsListView: Finding parent for post: \(post.author.handle)")
+    // print("PostsListView: Finding parent for post: \(post.author.handle)")
 
     // Require a concrete parent URI; do not guess by handle to avoid incorrect threads
     guard let replyRef = post.replyRef else {
-      print("PostsListView: Post has no replyRef")
+      // print("PostsListView: Post has no replyRef")
       return nil
     }
 
     guard let parentURI = Self.replyParentURI(from: replyRef) else {
-      print("PostsListView: Could not extract parent URI from replyRef")
+      // print("PostsListView: Could not extract parent URI from replyRef")
       return nil
     }
 
-    print("PostsListView: Looking for parent with URI: \(parentURI)")
+    // print("PostsListView: Looking for parent with URI: \(parentURI)")
 
     let parent = allPosts.first(where: { $0.uri == parentURI })
     if let parent = parent {
-      print("PostsListView: Found parent post: \(parent.author.handle)")
+      // print("PostsListView: Found parent post: \(parent.author.handle)")
     } else {
-      print("PostsListView: Parent post not found in current feed")
-      print("PostsListView: Available URIs in feed:")
-      for (index, feedPost) in allPosts.enumerated() {
-        print("PostsListView: [\(index)] \(feedPost.author.handle): \(feedPost.uri)")
-      }
+      // print("PostsListView: Parent post not found in current feed")
+      // print("PostsListView: Available URIs in feed:")
+      // for (index, feedPost) in allPosts.enumerated() {
+      //   print("PostsListView: [\(index)] \(feedPost.author.handle): \(feedPost.uri)")
+      // }
     }
 
     return parent
@@ -314,24 +314,24 @@ public struct PostListView: View {
   private static func replyParentURI(from replyRef: AppBskyLexicon.Feed.PostRecord.ReplyReference)
     -> String?
   {
-    print("PostsListView: Extracting parent URI from replyRef: \(replyRef)")
+    // print("PostsListView: Extracting parent URI from replyRef: \(replyRef)")
 
     let mirror = Mirror(reflecting: replyRef)
-    print("PostsListView: ReplyRef mirror children:")
-    for child in mirror.children {
-      print("PostsListView: - \(child.label ?? "nil"): \(child.value)")
-    }
+    // print("PostsListView: ReplyRef mirror children:")
+    // for child in mirror.children {
+    //   print("PostsListView: - \(child.label ?? \"nil\"): \(child.value)")
+    // }
 
     func extractURI(from value: Any) -> String? {
       let m = Mirror(reflecting: value)
       for child in m.children {
         if let label = child.label {
           if label == "recordURI", let uri = child.value as? String {
-            print("PostsListView: Found recordURI: \(uri)")
+            // print("PostsListView: Found recordURI: \(uri)")
             return uri
           }
           if label == "uri", let uri = child.value as? String {
-            print("PostsListView: Found uri: \(uri)")
+            // print("PostsListView: Found uri: \(uri)")
             return uri
           }
         }
@@ -343,18 +343,18 @@ public struct PostListView: View {
     if let parentChild = mirror.children.first(where: { $0.label == "parent" }),
       let parentURI = extractURI(from: parentChild.value)
     {
-      print("PostsListView: Using parent.uri: \(parentURI)")
+      // print("PostsListView: Using parent.uri: \(parentURI)")
       return parentURI
     }
     // Fallback to root.uri
     if let rootChild = mirror.children.first(where: { $0.label == "root" }),
       let rootURI = extractURI(from: rootChild.value)
     {
-      print("PostsListView: Using root.uri: \(rootURI)")
+      // print("PostsListView: Using root.uri: \(rootURI)")
       return rootURI
     }
 
-    print("PostsListView: No URI found in replyRef")
+    // print("PostsListView: No URI found in replyRef")
     return nil
   }
 
@@ -451,7 +451,7 @@ public struct PostListView: View {
 
   private func onUserTap(_ user: Profile) {
     // Navigate to user profile
-    print("Navigate to user: \(user.handle)")
+    // print("Navigate to user: \(user.handle)")
     // Clear search and navigate to profile
     clearSearch()
     router.navigateTo(.profile(user))
@@ -498,10 +498,10 @@ private struct ReplyChainView: View {
               router.navigateTo(.profile(post.author))
             }
 
-            // Thread line connector (blue line connecting posts in the chain)
+            // Thread line connector (theme-aware line connecting posts in the chain)
             if index < posts.count - 1 {
               Rectangle()
-                .fill(LinearGradient.blueskyGradient)
+                .fill(LinearGradient.themeGradient)
                 .frame(width: 2, height: 48)
                 .offset(y: 12)
             }
@@ -773,7 +773,7 @@ extension PostListView {
   public static func processFeed(
     _ feed: [AppBskyLexicon.Feed.FeedViewPostDefinition], client: ATProtoKit
   ) async -> [PostItem] {
-    print("PostsListView: Starting to process feed with \(feed.count) items")
+    // print("PostsListView: Starting to process feed with \(feed.count) items")
     var postItems: [PostItem] = []
     var processedCount = 0
     var missingParentURIs: Set<String> = []
@@ -785,20 +785,20 @@ extension PostListView {
     ) {
       // Add safety check to prevent crash if uri is nil
       guard !post.uri.isEmpty else {
-        print("Warning: Skipping post with empty URI")
+        // print("Warning: Skipping post with empty URI")
         return
       }
 
       guard !postItems.contains(where: { $0.uri == post.uri }) else {
-        print("Warning: Skipping duplicate post with URI: \(post.uri)")
+        // print("Warning: Skipping duplicate post with URI: \(post.uri)")
         return
       }
 
       // Use the FeedViewPostDefinition.postItem extension to get repost information
       let item = fromFeedItem.postItem
-      print(
-        "PostsListView: Processing post - URI: \(item.uri), Author: \(item.author.handle), Content: \(item.content.prefix(50))..."
-      )
+      // print(
+      //   "PostsListView: Processing post - URI: \(item.uri), Author: \(item.author.handle), Content: \(item.content.prefix(50))..."
+      // )
       // hasReply is already set correctly from replyRef in the PostItem initializer
       postItems.append(item)
       processedCount += 1
@@ -806,7 +806,7 @@ extension PostListView {
 
     // First pass: process all posts and identify missing parents
     for (index, post) in feed.enumerated() {
-      print("PostsListView: Processing feed item \(index): post.uri = \(post.post.uri)")
+      // print("PostsListView: Processing feed item \(index): post.uri = \(post.post.uri)")
 
       // Pass both the post and the feed item to get repost information
       insert(post: post.post, fromFeedItem: post)
@@ -819,8 +819,8 @@ extension PostListView {
           // Check if parent is already in the current feed
           let parentExists = feed.contains { $0.post.uri == parentURI }
           if !parentExists {
-            print(
-              "PostsListView: Parent post missing for reply \(postItem.uri), parent: \(parentURI)")
+            // print(
+            //   "PostsListView: Parent post missing for reply \(postItem.uri), parent: \(parentURI)")
             missingParentURIs.insert(parentURI)
             replyToParentMap[postItem.uri] = parentURI
           }
@@ -830,30 +830,30 @@ extension PostListView {
       // Note: The reply field indicates that a reply exists, but doesn't contain the reply post data
       // The main posts already have the reply information they need (isReplyTo, replyRef, etc.)
       if post.reply != nil {
-        print("PostsListView: Reply found for item \(index) - this indicates a reply exists")
+        // print("PostsListView: Reply found for item \(index) - this indicates a reply exists")
       }
 
       // Process repost - simplified to avoid type issues
       if post.reason != nil {
-        print("PostsListView: Repost found for item \(index) - processing...")
+        // print("PostsListView: Repost found for item \(index) - processing...")
         // TODO: Implement proper reply processing when we understand the type structure
       }
     }
 
     // Second pass: fetch missing parent posts and insert them above their replies
     if !missingParentURIs.isEmpty {
-      print("PostsListView: Fetching \(missingParentURIs.count) missing parent posts...")
+      // print("PostsListView: Fetching \(missingParentURIs.count) missing parent posts...")
 
       do {
         let parentURIs = Array(missingParentURIs)
         let parentPosts = try await client.getPosts(parentURIs)
 
-        print("PostsListView: Successfully fetched \(parentPosts.posts.count) parent posts")
+        // print("PostsListView: Successfully fetched \(parentPosts.posts.count) parent posts")
 
         // Insert parent posts above their replies
         for (replyURI, parentURI) in replyToParentMap {
           if let parentPost = parentPosts.posts.first(where: { $0.uri == parentURI }) {
-            print("PostsListView: Inserting parent post \(parentURI) above reply \(replyURI)")
+            // print("PostsListView: Inserting parent post \(parentURI) above reply \(replyURI)")
 
             // Find the reply post index
             if let replyIndex = postItems.firstIndex(where: { $0.uri == replyURI }) {
@@ -861,19 +861,19 @@ extension PostListView {
               let parentPostItem = parentPost.postItem
               postItems.insert(parentPostItem, at: replyIndex)
               processedCount += 1
-              print("PostsListView: Successfully inserted parent post above reply")
+              // print("PostsListView: Successfully inserted parent post above reply")
             }
           }
         }
       } catch {
-        print("PostsListView: Error fetching parent posts: \(error)")
+        // print("PostsListView: Error fetching parent posts: \(error)")
         // Continue without parent posts if fetch fails
       }
     }
 
-    print(
-      "PostsListView: Finished processing feed. Total posts: \(postItems.count), Processed: \(processedCount)"
-    )
+    // print(
+    //   "PostsListView: Finished processing feed. Total posts: \(postItems.count), Processed: \(processedCount)"
+    // )
     return postItems
   }
 }

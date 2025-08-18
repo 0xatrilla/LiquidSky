@@ -61,7 +61,7 @@ struct ClickablePostText: View {
       let mentionRange = mentionStart..<mentionEnd
 
       if let attributedRange = Range(NSRange(mentionRange, in: text), in: attributedString) {
-        attributedString[attributedRange].foregroundColor = .blueskyPrimary
+        attributedString[attributedRange].foregroundColor = .themePrimary
         attributedString[attributedRange].underlineStyle = .single
       }
     }

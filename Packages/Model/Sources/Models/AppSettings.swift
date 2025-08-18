@@ -17,6 +17,10 @@ public final class AppSettings {
     didSet { UserDefaults.standard.set(selectedTheme.rawValue, forKey: "selectedTheme") }
   }
 
+  public var selectedColorTheme: ColorTheme {
+    didSet { UserDefaults.standard.set(selectedColorTheme.rawValue, forKey: "selectedColorTheme") }
+  }
+
   public var showTimestamps: Bool {
     didSet { UserDefaults.standard.set(showTimestamps, forKey: "showTimestamps") }
   }
@@ -53,6 +57,9 @@ public final class AppSettings {
     self.selectedTheme =
       AppTheme(rawValue: UserDefaults.standard.string(forKey: "selectedTheme") ?? "system")
       ?? .system
+    self.selectedColorTheme =
+      ColorTheme(rawValue: UserDefaults.standard.string(forKey: "selectedColorTheme") ?? "bluesky")
+      ?? .bluesky
     self.showTimestamps = UserDefaults.standard.object(forKey: "showTimestamps") as? Bool ?? true
     self.compactMode = UserDefaults.standard.object(forKey: "compactMode") as? Bool ?? false
     self.autoPlayVideos = UserDefaults.standard.object(forKey: "autoPlayVideos") as? Bool ?? true
@@ -74,6 +81,7 @@ public final class AppSettings {
     useSystemTheme = true
     selectedAppIcon = .cloud
     selectedTheme = .system
+    selectedColorTheme = .bluesky
     showTimestamps = true
     compactMode = false
     autoPlayVideos = true
@@ -162,6 +170,48 @@ public enum ImageQuality: String, CaseIterable {
     case .low: return "Faster loading, lower quality"
     case .medium: return "Balanced performance"
     case .high: return "Best quality, slower loading"
+    }
+  }
+}
+
+public enum ColorTheme: String, CaseIterable {
+  case bluesky = "bluesky"
+  case sunset = "sunset"
+  case forest = "forest"
+  case ocean = "ocean"
+  case lavender = "lavender"
+  case fire = "fire"
+
+  public var displayName: String {
+    switch self {
+    case .bluesky: return "Bluesky Blue"
+    case .sunset: return "Sunset Orange"
+    case .forest: return "Forest Green"
+    case .ocean: return "Ocean Teal"
+    case .lavender: return "Lavender Purple"
+    case .fire: return "Fire Red"
+    }
+  }
+
+  public var description: String {
+    switch self {
+    case .bluesky: return "Official Bluesky blue theme"
+    case .sunset: return "Warm orange and red tones"
+    case .forest: return "Natural green and brown tones"
+    case .ocean: return "Cool blue and teal tones"
+    case .lavender: return "Soft purple and pink tones"
+    case .fire: return "Bold red and orange tones"
+    }
+  }
+
+  public var icon: String {
+    switch self {
+    case .bluesky: return "paintbrush.fill"
+    case .sunset: return "sunset.fill"
+    case .forest: return "leaf.fill"
+    case .ocean: return "drop.fill"
+    case .lavender: return "sparkles"
+    case .fire: return "flame.fill"
     }
   }
 }

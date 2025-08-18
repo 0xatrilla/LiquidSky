@@ -37,6 +37,11 @@ public final class SettingsService {
     set { settings.selectedTheme = newValue }
   }
 
+  public var selectedColorTheme: ColorTheme {
+    get { settings.selectedColorTheme }
+    set { settings.selectedColorTheme = newValue }
+  }
+
   public var showTimestamps: Bool {
     get { settings.showTimestamps }
     set { settings.showTimestamps = newValue }

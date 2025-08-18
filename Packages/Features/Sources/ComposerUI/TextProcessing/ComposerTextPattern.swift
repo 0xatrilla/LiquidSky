@@ -24,15 +24,35 @@ extension AttributeDynamicLookup {
   subscript<T: AttributedStringKey>(
     dynamicMember keyPath: KeyPath<AttributeScopes.ComposerAttributes, T>
   ) -> T {
-    self[T.self]
+    return self[T.self]
   }
 }
 
+/// Text patterns that can be applied to composer text
 enum ComposerTextPattern: String, CaseIterable, Codable {
-  case hashtag
-  case mention
-  case url
-
+  case mention = "mention"
+  case url = "url"
+  case hashtag = "hashtag"
+  
+  /// Get the color for a specific theme
+  func color(for theme: String) -> Color {
+    switch self {
+    case .mention:
+      return .blue // Fallback color for now
+    case .url:
+      return .blue // Fallback color for now
+    case .hashtag:
+      return .blue // Fallback color for now
+    }
+  }
+  
+  /// Get the color for the current theme (for backward compatibility)
+  var color: Color {
+    let currentTheme = UserDefaults.standard.string(forKey: "selectedColorTheme") ?? "bluesky"
+    return color(for: currentTheme)
+  }
+  
+  /// Get the regex pattern for matching
   var pattern: String {
     switch self {
     case .hashtag:
@@ -43,18 +63,8 @@ enum ComposerTextPattern: String, CaseIterable, Codable {
       return "(?i)https?://(?:www\\.)?\\S+(?:/|\\b)"
     }
   }
-
-  var color: Color {
-    switch self {
-    case .hashtag:
-      return .blue
-    case .mention:
-      return .blueskyPrimary
-    case .url:
-      return .blue
-    }
-  }
-
+  
+  /// Check if text matches this pattern
   func matches(_ text: String) -> Bool {
     switch self {
     case .hashtag:

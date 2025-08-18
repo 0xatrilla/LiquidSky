@@ -31,7 +31,7 @@ public struct PostRowActionsView: View {
           Label("\(post.replyCount)", systemImage: "bubble")
         }
         .buttonStyle(.plain)
-        .foregroundColor(.blueskyPrimary)
+        .foregroundColor(.themePrimary)
       }
 
       // Repost Button
@@ -49,7 +49,7 @@ public struct PostRowActionsView: View {
         }
         .buttonStyle(.plain)
         .symbolVariant(dataController.isReposted ? .fill : .none)
-        .foregroundColor(.blueskySecondary)
+        .foregroundColor(.themeSecondary)
       }
 
       // Like Button
@@ -67,7 +67,7 @@ public struct PostRowActionsView: View {
       .contentTransition(.numericText(value: Double(dataController.likeCount)))
       .monospacedDigit()
       .animation(.smooth, value: dataController.likeCount)
-      .foregroundColor(.blueskyAccent)
+              .foregroundColor(.themeAccent)
 
       Spacer()
 
@@ -76,7 +76,7 @@ public struct PostRowActionsView: View {
           Image(systemName: "ellipsis")
         }
         .buttonStyle(.plain)
-        .foregroundColor(.blueskyPrimary)
+        .foregroundColor(.themePrimary)
       }
     }
     .buttonStyle(.plain)

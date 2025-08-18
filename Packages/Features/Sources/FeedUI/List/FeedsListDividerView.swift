@@ -6,7 +6,7 @@ struct FeedsListDividerView: View {
       Rectangle()
         .fill(
           LinearGradient(
-            colors: [.blueskyPrimary, .blueskySecondary],
+            colors: [.themePrimary, .themeSecondary],
             startPoint: .leading,
             endPoint: .trailing)
         )
