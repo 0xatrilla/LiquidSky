@@ -1,6 +1,15 @@
 {
-  "originHash" : "24c95b404ee3914065b3d0fea5f1884e1e95c2a141b456b37cabcc4cbe57502a",
+  "originHash" : "ff40505083c27878468c3246c7fa6f5b40335550c9f635f21c9e3864744d68b7",
   "pins" : [
+    {
+      "identity" : "acknowlist",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vtourraine/AcknowList",
+      "state" : {
+        "revision" : "d975b9a4ff2e1364b7ece2384c1add739d21219e",
+        "version" : "3.3.0"
+      }
+    },
     {
       "identity" : "approuter",
       "kind" : "remoteSourceControl",

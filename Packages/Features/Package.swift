@@ -31,6 +31,7 @@ let package = Package(
     .package(url: "https://github.com/nalexn/ViewInspector", from: "0.10.1"),
     .package(url: "https://github.com/kean/Nuke", from: "12.8.0"),
     .package(url: "https://github.com/Dimillian/AppRouter.git", from: "1.0.2"),
+    .package(url: "https://github.com/vtourraine/AcknowList", from: "3.3.0"),
   ],
   targets: [
     .target(
@@ -62,7 +63,9 @@ let package = Package(
     ),
     .target(
       name: "SettingsUI",
-      dependencies: baseDeps
+      dependencies: baseDeps + [
+        .product(name: "AcknowList", package: "AcknowList"),
+      ]
     ),
     .target(
       name: "MediaUI",
