@@ -12,6 +12,7 @@ public struct GroupedNotificationRow: View {
   @Namespace private var namespace
   @Environment(AppRouter.self) var router
   let actionText: (Int) -> String  // Closure to generate action text based on count
+  @State private var showingFollowersList = false
 
   public init(group: NotificationsGroup, actionText: @escaping (Int) -> String) {
     self.group = group
@@ -41,8 +42,9 @@ public struct GroupedNotificationRow: View {
         // Action text and timestamp
         HStack(alignment: .firstTextBaseline) {
           Text(actionText(group.notifications.count))
-            .font(.callout)
+            .font(.headline)
             .foregroundStyle(.primary)
+            .lineLimit(2)
 
           Spacer()
 
@@ -52,20 +54,33 @@ public struct GroupedNotificationRow: View {
               .foregroundStyle(.secondary)
           }
         }
-        .lineLimit(1)
 
         // Post content if available
-        if let post = group.postItem {
-          PostRowBodyView(post: post)
-          PostRowEmbedView(post: post)
+        if let postItem = group.postItem {
+          PostRowBodyView(post: postItem)
+        }
+
+        // Embed if available
+        if let postItem = group.postItem, let embed = postItem.embed {
+          PostRowEmbedView(post: postItem)
         }
       }
     }
     .padding(.horizontal, 16)
     .padding(.vertical, 12)
-    .contentShape(Rectangle())
+    .background(Color(.systemBackground))
     .onTapGesture {
       handleNotificationTap()
+    }
+    .sheet(isPresented: $showingFollowersList) {
+      FollowersListView(
+        followers: group.notifications.map { notification in
+          // Pass the basic profile data we need
+          notification.author
+        }
+      )
+      .presentationDetents([.medium, .large])
+      .presentationDragIndicator(.visible)
     }
   }
 
@@ -84,25 +99,14 @@ public struct GroupedNotificationRow: View {
         )
         router.navigateTo(.profile(profile))
       } else {
-        // Multiple followers - navigate to the first follower's profile for now
-        // TODO: Implement proper followers list view in the future
-        let notification = group.notifications[0]
-        let profile = Profile(
-          did: notification.author.actorDID,
-          handle: notification.author.actorHandle,
-          displayName: notification.author.displayName,
-          avatarImageURL: notification.author.avatarImageURL
-        )
-        router.navigateTo(.profile(profile))
-      }
-    case .like, .repost, .reply, .mention, .quote:
-      // Handle post-related notifications
-      if let post = group.postItem {
-        router.navigateTo(.post(post))
+        // Multiple followers - show the Liquid Glass sheet
+        showingFollowersList = true
       }
     default:
       // Handle other notification types
-      break
+      if let postItem = group.postItem {
+        router.navigateTo(.post(postItem))
+      }
     }
   }
 
