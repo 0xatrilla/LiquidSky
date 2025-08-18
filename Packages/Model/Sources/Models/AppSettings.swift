@@ -89,6 +89,7 @@ public enum AppIcon: String, CaseIterable {
   case og = "AppIcon2"
   case blueprint = "AppIcon3"
   case butterfly = "AppIcon4"
+  case rain = "AppIcon5"
 
   public var displayName: String {
     switch self {
@@ -96,6 +97,7 @@ public enum AppIcon: String, CaseIterable {
     case .og: return "OG"
     case .blueprint: return "Blueprint"
     case .butterfly: return "Butterfly"
+    case .rain: return "Rain"
     }
   }
 
@@ -105,6 +107,7 @@ public enum AppIcon: String, CaseIterable {
     case .og: return "OG"
     case .blueprint: return "Blueprint"
     case .butterfly: return "butterfly"
+    case .rain: return "rain"
     }
   }
 
@@ -114,6 +117,7 @@ public enum AppIcon: String, CaseIterable {
     case .og: return "AppIcon2"
     case .blueprint: return "AppIcon3"
     case .butterfly: return "AppIcon4"
+    case .rain: return "AppIcon5"
     }
   }
 }

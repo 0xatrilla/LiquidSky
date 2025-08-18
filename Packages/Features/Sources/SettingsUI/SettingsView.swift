@@ -13,6 +13,7 @@ public struct SettingsView: View {
   @State private var showingAboutSheet = false
   @State private var showingChangePassword = false
   @State private var showingAppIconPicker = false
+  @State private var showingAcknowledgementsSheet = false
 
   public init() {}
 
@@ -70,6 +71,9 @@ public struct SettingsView: View {
     }
     .sheet(isPresented: $showingAppIconPicker) {
       AppIconPickerView(selectedIcon: $settingsService.selectedAppIcon)
+    }
+    .sheet(isPresented: $showingAcknowledgementsSheet) {
+      AcknowledgementsView()
     }
   }
 
@@ -226,6 +230,15 @@ public struct SettingsView: View {
         showingAboutSheet = true
       }
 
+      SettingsNavigationRow(
+        title: "Acknowledgements",
+        subtitle: "Open source libraries and licenses",
+        icon: "doc.text.fill",
+        iconColor: .green
+      ) {
+        showingAcknowledgementsSheet = true
+      }
+
       SettingsButtonRow(
         title: "Reset Settings",
         subtitle: "Restore all settings to defaults",
@@ -276,8 +289,10 @@ private struct AboutView: View {
       ScrollView {
         VStack(spacing: 24) {
           // App Icon
-          Image(systemName: "cloud.sun.fill")
-            .font(.system(size: 80))
+          Image("cloud")
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 80, height: 80)
             .foregroundColor(.blue)
             .padding(.top, 40)
 
@@ -323,7 +338,7 @@ private struct AboutView: View {
             Text("Connect with us")
               .font(.headline)
               .foregroundColor(.secondary)
-
+            
             HStack(spacing: 40) {
               // GitHub Logo
               Button {
@@ -337,14 +352,14 @@ private struct AboutView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 32, height: 32)
-
+                  
                   Text("GitHub")
                     .font(.caption)
                     .foregroundColor(.secondary)
                 }
               }
               .buttonStyle(PlainButtonStyle())
-
+              
               // Bluesky Logo
               Button {
                 if let url = URL(string: "https://bsky.app/profile/acxtrilla.xyz") {
@@ -357,7 +372,7 @@ private struct AboutView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 32, height: 32)
-
+                  
                   Text("Bluesky")
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -366,10 +381,11 @@ private struct AboutView: View {
               .buttonStyle(PlainButtonStyle())
             }
           }
-          .padding(.top, 20)
+          .padding(.horizontal, 32)
 
           Spacer(minLength: 40)
         }
+        .padding()
       }
       .navigationTitle("About")
       .navigationBarTitleDisplayMode(.inline)
@@ -381,6 +397,131 @@ private struct AboutView: View {
         }
       }
     }
+  }
+}
+
+// MARK: - Acknowledgements View
+private struct AcknowledgementsView: View {
+  @Environment(\.dismiss) private var dismiss
+
+  var body: some View {
+    NavigationView {
+      ScrollView {
+        VStack(spacing: 24) {
+          // Header
+          VStack(spacing: 8) {
+            Image(systemName: "doc.text.fill")
+              .font(.system(size: 80))
+              .foregroundColor(.green)
+              .padding(.top, 40)
+
+            Text("Acknowledgements")
+              .font(.largeTitle)
+              .fontWeight(.bold)
+
+            Text("Open source libraries and licenses")
+              .font(.title3)
+              .foregroundColor(.secondary)
+          }
+
+          // Description
+          VStack(spacing: 16) {
+            Text("This app uses several open source libraries to provide a better experience. We're grateful to the developers who maintain these projects.")
+              .font(.body)
+              .multilineTextAlignment(.center)
+              .padding(.horizontal, 32)
+          }
+
+          // Dependencies List
+          VStack(spacing: 16) {
+            Text("Dependencies")
+              .font(.headline)
+              .foregroundColor(.secondary)
+            
+            VStack(spacing: 12) {
+              DependencyRow(
+                name: "ATProtoKit",
+                description: "Bluesky AT Protocol client library",
+                url: "https://github.com/MasterJ93/ATProtoKit"
+              )
+              
+              DependencyRow(
+                name: "AppRouter",
+                description: "SwiftUI navigation and routing",
+                url: "https://github.com/Dimillian/AppRouter"
+              )
+              
+              DependencyRow(
+                name: "Nuke",
+                description: "Image loading and caching framework",
+                url: "https://github.com/kean/Nuke"
+              )
+              
+              DependencyRow(
+                name: "KeychainSwift",
+                description: "Keychain wrapper for Swift",
+                url: "https://github.com/evgenyneu/keychain-swift"
+              )
+              
+              DependencyRow(
+                name: "ViewInspector",
+                description: "SwiftUI testing framework",
+                url: "https://github.com/nalexn/ViewInspector"
+              )
+            }
+            .padding(.horizontal, 32)
+          }
+
+          Spacer(minLength: 40)
+        }
+      }
+      .navigationTitle("Acknowledgements")
+      .navigationBarTitleDisplayMode(.large)
+      .toolbar {
+        ToolbarItem(placement: .navigationBarTrailing) {
+          Button("Done") {
+            dismiss()
+          }
+        }
+      }
+    }
+  }
+}
+
+// MARK: - Dependency Row
+private struct DependencyRow: View {
+  let name: String
+  let description: String
+  let url: String
+  
+  var body: some View {
+    Button {
+      if let url = URL(string: url) {
+        UIApplication.shared.open(url)
+      }
+    } label: {
+      HStack {
+        VStack(alignment: .leading, spacing: 4) {
+          Text(name)
+            .font(.headline)
+            .foregroundColor(.primary)
+          
+          Text(description)
+            .font(.caption)
+            .foregroundColor(.secondary)
+        }
+        
+        Spacer()
+        
+        Image(systemName: "arrow.up.right.square")
+          .font(.system(size: 16))
+          .foregroundColor(.blue)
+      }
+      .padding()
+      .background(Color(.systemGray6))
+      .cornerRadius(12)
+    }
+    .buttonStyle(PlainButtonStyle())
   }
 }
 
