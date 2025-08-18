@@ -149,9 +149,11 @@ public struct PostRowView: View {
     // In a feed view, posts are individual and not connected, so no thread lines should appear
     if isInThreadContext {
       Rectangle()
-        .frame(width: 1)
+        .fill(LinearGradient.themeGradient)
+        .frame(width: 2)
         .frame(maxHeight: .infinity)
-        .foregroundStyle(LinearGradient.themeGradient)
+        .padding(.top, 12)  // Start below the avatar
+        .padding(.bottom, 8)  // Extend to connect with next post
     }
   }
 
