@@ -88,12 +88,14 @@ public enum AppIcon: String, CaseIterable {
   case cloud = "AppIcon"
   case og = "AppIcon2"
   case blueprint = "AppIcon3"
+  case butterfly = "AppIcon4"
 
   public var displayName: String {
     switch self {
     case .cloud: return "Cloud"
     case .og: return "OG"
     case .blueprint: return "Blueprint"
+    case .butterfly: return "Butterfly"
     }
   }
 
@@ -102,6 +104,7 @@ public enum AppIcon: String, CaseIterable {
     case .cloud: return "cloud"
     case .og: return "OG"
     case .blueprint: return "Blueprint"
+    case .butterfly: return "butterfly"
     }
   }
 
@@ -110,6 +113,7 @@ public enum AppIcon: String, CaseIterable {
     case .cloud: return nil  // nil means use the primary app icon
     case .og: return "AppIcon2"
     case .blueprint: return "AppIcon3"
+    case .butterfly: return "AppIcon4"
     }
   }
 }

@@ -21,12 +21,15 @@ public struct PostItem: Hashable, Identifiable, Equatable, Sendable {
   public let repostURI: String?
   public let embed: ATUnion.EmbedViewUnion?
   public let replyRef: AppBskyLexicon.Feed.PostRecord.ReplyReference?
+  // If this post is a reply, this is the handle of the user being replied to (best-effort)
+  public let inReplyToHandle: String?
 
   // Repost information
   public let repostedBy: Profile?
   public let isReposted: Bool
 
   public var hasReply: Bool = false
+  public var isReplyTo: Bool = false
 
   public init(
     uri: String,
@@ -41,6 +44,7 @@ public struct PostItem: Hashable, Identifiable, Equatable, Sendable {
     repostURI: String?,
     embed: ATUnion.EmbedViewUnion?,
     replyRef: AppBskyLexicon.Feed.PostRecord.ReplyReference?,
+    inReplyToHandle: String? = nil,
     repostedBy: Profile? = nil
   ) {
     self.uri = uri
@@ -56,9 +60,11 @@ public struct PostItem: Hashable, Identifiable, Equatable, Sendable {
     self.embed = embed
     self.indexAtFormatted = indexedAt.relativeFormatted
     self.replyRef = replyRef
+    self.inReplyToHandle = inReplyToHandle
     self.repostedBy = repostedBy
     self.isReposted = repostedBy != nil
-    self.hasReply = replyRef != nil
+    self.hasReply = replyCount > 0
+    self.isReplyTo = replyRef != nil
   }
 }
 
@@ -116,6 +122,8 @@ extension AppBskyLexicon.Feed.FeedViewPostDefinition {
       repostURI: post.viewer?.repostURI,
       embed: post.embed,
       replyRef: post.record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self)?.reply,
+      inReplyToHandle: extractReplyTargetHandle(
+        from: post.record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self)?.reply),
       repostedBy: repostedByProfile
     )
 
@@ -127,6 +135,27 @@ extension AppBskyLexicon.Feed.FeedViewPostDefinition {
 
     return postItem
   }
+}
+// Best-effort: attempt to pull the handle of the author of the parent/root of a reply reference
+private func extractReplyTargetHandle(from reply: AppBskyLexicon.Feed.PostRecord.ReplyReference?)
+  -> String?
+{
+  guard let reply else { return nil }
+  // We do not have full author objects here, so try common fields via reflection
+  let mirror = Mirror(reflecting: reply)
+  for child in mirror.children {
+    if child.label == "parent" || child.label == "root" {
+      let subMirror = Mirror(reflecting: child.value)
+      for subChild in subMirror.children {
+        if let label = subChild.label, label.lowercased().contains("handle"),
+          let handle = subChild.value as? String
+        {
+          return handle
+        }
+      }
+    }
+  }
+  return nil
 }
 
 extension AppBskyLexicon.Feed.PostViewDefinition {

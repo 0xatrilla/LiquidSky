@@ -44,7 +44,7 @@ extension PostsProfileView: @MainActor PostsListViewDatasource {
         print("PostsProfileView: Processed \(processedPosts.count) posts")
 
         let filteredPosts =
-          filter == .userReplies ? processedPosts.filter { $0.hasReply } : processedPosts
+          filter == .userReplies ? processedPosts.filter { $0.isReplyTo } : processedPosts
         print("PostsProfileView: After filtering: \(filteredPosts.count) posts")
 
         return .loaded(posts: filteredPosts, cursor: feed.cursor)
@@ -56,7 +56,7 @@ extension PostsProfileView: @MainActor PostsListViewDatasource {
 
         let processedPosts = PostListView.processFeed(feed.feed)
         let filteredPosts =
-          filter == .userReplies ? processedPosts.filter { $0.hasReply } : processedPosts
+          filter == .userReplies ? processedPosts.filter { $0.isReplyTo } : processedPosts
 
         return .loaded(posts: posts + filteredPosts, cursor: feed.cursor)
       }
