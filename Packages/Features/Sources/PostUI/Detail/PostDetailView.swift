@@ -1,8 +1,8 @@
 import ATProtoKit
 import AppRouter
+import Client
 import DesignSystem
 import Models
-import Client
 import SwiftUI
 
 public struct PostDetailView: View {
@@ -23,14 +23,16 @@ public struct PostDetailView: View {
       List {
         ForEach(parents) { parent in
           PostRowView(post: parent)
+            .environment(\.isFocused, false)  // Parent posts are not focused
         }
 
         PostRowView(post: post)
-          .environment(\.isFocused, true)
+          .environment(\.isFocused, true)  // This is the focused post
           .id("focusedPost")
 
         ForEach(replies) { reply in
           PostRowView(post: reply)
+            .environment(\.isFocused, false)  // Reply posts are not focused
         }
 
         VStack {}

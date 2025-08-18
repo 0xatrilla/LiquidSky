@@ -25,6 +25,7 @@ public struct PostRowView: View {
 
   let post: PostItem
   @Namespace private var namespace
+  @State private var parentPost: PostItem?
 
   public init(post: PostItem) {
     self.post = post
@@ -44,7 +45,13 @@ public struct PostRowView: View {
     .environment(postDataControllerProvider.get(for: post, client: client))
     .listRowSeparator(.hidden)
     .listRowInsets(
-      .init(top: 0, leading: compactMode ? 14 : 18, bottom: 0, trailing: compactMode ? 14 : 18))
+      .init(top: 0, leading: compactMode ? 14 : 18, bottom: 0, trailing: compactMode ? 14 : 18)
+    )
+    .task {
+      if post.isReplyTo, parentPost == nil {
+        await loadParentPost()
+      }
+    }
   }
 
   private var compactMode: Bool {
@@ -59,6 +66,12 @@ public struct PostRowView: View {
       }
 
       authorView
+      // If this post is a reply, show the parent inline above
+      if post.isReplyTo {
+        if let parentPost {
+          PostRowEmbedQuoteView(post: parentPost)
+        }
+      }
       if post.isReplyTo, let toHandle = post.inReplyToHandle {
         Text("Replying to @\(toHandle)")
           .font(.caption)
@@ -130,11 +143,44 @@ public struct PostRowView: View {
 
   @ViewBuilder
   private var threadLineView: some View {
-    if post.isReplyTo {
+    // Show thread lines for replies, focused posts, and posts with replies
+    if post.isReplyTo || isFocused || post.hasReply {
       Rectangle()
         .frame(width: 1)
         .frame(maxHeight: .infinity)
         .foregroundStyle(LinearGradient.blueskyGradient)
+    }
+  }
+
+  // Determine if we're in a thread context (viewing replies to a specific post)
+  // vs. a feed context (viewing individual posts from different users)
+  private var isInThreadContext: Bool {
+    // We're in a thread context if:
+    // 1. This post is focused (main post in PostDetailView)
+    // 2. This post has replies below it
+    // 3. We're viewing a thread (PostDetailView)
+    return isFocused || post.hasReply
+  }
+
+  // Fetch the immediate parent of this post for inline display in feed
+  private func loadParentPost() async {
+    do {
+      let thread = try await client.protoClient.getPostThread(from: post.uri)
+      switch thread.thread {
+      case .threadViewPost(let threadViewPost):
+        if let parent = threadViewPost.parent {
+          switch parent {
+          case .threadViewPost(let parentPostView):
+            self.parentPost = parentPostView.post.postItem
+          default:
+            break
+          }
+        }
+      default:
+        break
+      }
+    } catch {
+      // Silently ignore; parent will just not render
     }
   }
 
