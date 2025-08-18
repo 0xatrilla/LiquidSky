@@ -2,6 +2,7 @@ import Auth
 import DesignSystem
 import Models
 import SwiftUI
+import UIKit
 import User
 
 public struct SettingsView: View {
@@ -49,7 +50,7 @@ public struct SettingsView: View {
             .padding(.bottom, 32)
         }
       }
-      .background(Color(uiColor: .systemGroupedBackground))
+      .background(Color(.systemGroupedBackground))
       .navigationBarHidden(true)
     }
     .alert("Reset Settings", isPresented: $showingResetAlert) {
@@ -303,6 +304,56 @@ private struct AboutView: View {
               icon: "gear", title: "Customizable", description: "Tailor the app to your needs")
           }
           .padding(.horizontal, 32)
+
+          // Social Links
+          VStack(spacing: 20) {
+            Text("Connect with us")
+              .font(.headline)
+              .foregroundColor(.secondary)
+
+            HStack(spacing: 40) {
+              // GitHub Logo
+              Button {
+                if let url = URL(string: "https://github.com/0xatrilla/LiquidSky") {
+                  UIApplication.shared.open(url)
+                }
+              } label: {
+                VStack(spacing: 8) {
+                  // Use actual GitHub logo from assets
+                  Image("GitHubLogo")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 32, height: 32)
+                  
+                  Text("GitHub")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                }
+              }
+              .buttonStyle(PlainButtonStyle())
+
+              // Bluesky Logo
+              Button {
+                if let url = URL(string: "https://bsky.app/profile/acxtrilla.xyz") {
+                  UIApplication.shared.open(url)
+                }
+              } label: {
+                VStack(spacing: 8) {
+                  // Use actual Bluesky logo from assets
+                  Image("BlueskyLogo")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 32, height: 32)
+                  
+                  Text("Bluesky")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                }
+              }
+              .buttonStyle(PlainButtonStyle())
+            }
+          }
+          .padding(.top, 20)
 
           Spacer(minLength: 40)
         }

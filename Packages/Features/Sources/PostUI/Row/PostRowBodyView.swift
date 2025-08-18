@@ -12,12 +12,85 @@ public struct PostRowBodyView: View {
   }
 
   public var body: some View {
-    Text(post.content)
-      .font(compactMode ? (isFocused ? .system(size: UIFontMetrics.default.scaledValue(for: 18)) : .callout) : (isFocused ? .system(size: UIFontMetrics.default.scaledValue(for: 20)) : .body))
-      .lineSpacing(compactMode ? 2 : 4)
+    ClickablePostText(text: post.content, compactMode: compactMode, isFocused: isFocused)
   }
-  
+
   private var compactMode: Bool {
     settingsService.compactMode
+  }
+}
+
+// MARK: - Clickable Post Text Component
+struct ClickablePostText: View {
+  let text: String
+  let compactMode: Bool
+  let isFocused: Bool
+
+  var body: some View {
+    let attributedText = createAttributedString()
+
+    Text(attributedText)
+      .font(
+        compactMode
+          ? (isFocused ? .system(size: 18) : .callout)
+          : (isFocused ? .system(size: 20) : .body)
+      )
+      .lineLimit(compactMode ? 3 : nil)
+      .onTapGesture { location in
+        handleMentionTap(at: location)
+      }
+  }
+
+  private func createAttributedString() -> AttributedString {
+    var attributedString = AttributedString(text)
+
+    // Find and style mentions (handles starting with @)
+    let mentionPattern = try! NSRegularExpression(pattern: "@([a-zA-Z0-9._-]+)")
+    let range = NSRange(location: 0, length: text.utf16.count)
+
+    mentionPattern.enumerateMatches(in: text, range: range) { match, _, _ in
+      guard let match = match else { return }
+
+      let nsRange = match.range(at: 1)  // Capture group for the handle without @
+      let handleRange = Range(nsRange, in: text)!
+      let handle = String(text[handleRange])
+
+      // Style the entire mention (@handle)
+      let mentionStart = text.index(text.startIndex, offsetBy: match.range.location)
+      let mentionEnd = text.index(mentionStart, offsetBy: match.range.length)
+      let mentionRange = mentionStart..<mentionEnd
+
+      if let attributedRange = Range(NSRange(mentionRange, in: text), in: attributedString) {
+        attributedString[attributedRange].foregroundColor = .blueskyPrimary
+        attributedString[attributedRange].underlineStyle = .single
+      }
+    }
+
+    return attributedString
+  }
+
+  private func handleMentionTap(at location: CGPoint) {
+    // Find which mention was tapped
+    let mentionPattern = try! NSRegularExpression(pattern: "@([a-zA-Z0-9._-]+)")
+    let range = NSRange(location: 0, length: text.utf16.count)
+
+    mentionPattern.enumerateMatches(in: text, range: range) { match, _, _ in
+      guard let match = match else { return }
+
+      let nsRange = match.range(at: 1)  // Capture group for the handle without @
+      let handleRange = Range(nsRange, in: text)!
+      let handle = String(text[handleRange])
+
+      // For now, just print the handle - navigation will be implemented later
+      print("Tapped on mention: @\(handle)")
+
+      // TODO: Implement navigation to profile when AppRouter is available
+      // This will require:
+      // 1. Adding AppRouter to the environment
+      // 2. Creating a Profile object from the handle
+      // 3. Calling router.navigateTo(.profile(profile))
+
+      // Only handle the first mention for now
+    }
   }
 }
