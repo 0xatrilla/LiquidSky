@@ -35,6 +35,11 @@ public final class Auth: @unchecked Sendable {
         continuation = cont
       }
       self.configurationContinuation = continuation
+      
+      // Try to restore existing session on initialization
+      Task {
+        await restoreSession()
+      }
     } catch {
       print("Auth initialization failed: \(error)")
       // Fallback to safe defaults
@@ -44,6 +49,26 @@ public final class Auth: @unchecked Sendable {
         continuation = cont
       }
       self.configurationContinuation = continuation
+    }
+  }
+  
+  /// Attempts to restore an existing session from stored credentials
+  public func restoreSession() async {
+    do {
+      print("Auth: Attempting to restore existing session...")
+      let configuration = ATProtocolConfiguration(keychainProtocol: ATProtoKeychain)
+      
+      // Try to refresh the session without requiring user input
+      try await configuration.refreshSession()
+      
+      print("Auth: Successfully restored existing session")
+      self.configuration = configuration
+      configurationContinuation.yield(configuration)
+    } catch {
+      print("Auth: Failed to restore existing session: \(error)")
+      // Session restoration failed, user will need to authenticate
+      self.configuration = nil
+      configurationContinuation.yield(nil)
     }
   }
 

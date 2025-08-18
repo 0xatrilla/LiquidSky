@@ -141,30 +141,28 @@ struct LiquidSkyApp: App {
       .task(id: scenePhase) {
         print("LiquidSkyApp: Scene phase changed to: \(scenePhase)")
         if scenePhase == .active {
-          print("LiquidSkyApp: Scene became active, refreshing auth...")
-          // Only refresh if we're not currently showing the auth sheet
-          if router.presentedSheet != .auth {
-            await auth.refresh()
-          } else {
-            print("Skipping auth refresh while auth sheet is showing")
-          }
+          print("LiquidSkyApp: Scene became active")
+          // Session restoration is now handled in the main task
+          // No need to refresh here as it could interfere with the restoration process
         }
       }
       .task {
         print("LiquidSkyApp: Main task started")
-        // Check if we have an initial configuration
+        
+        // Wait for initial session restoration attempt
+        print("Waiting for initial session restoration...")
+        await auth.restoreSession()
+        
+        // Check if we have an initial configuration after restoration attempt
         if auth.configuration == nil {
-          print("No initial configuration, immediately showing auth screen")
+          print("No initial configuration after restoration, showing auth screen")
           await MainActor.run {
             appState = .unauthenticated
             router.presentedSheet = .auth
-            print("Auth screen immediately requested")
+            print("Auth screen requested after failed restoration")
           }
-
-          // Wait a moment to ensure the sheet is presented before checking for updates
-          try? await Task.sleep(nanoseconds: 500_000_000)  // 0.5 seconds
         } else {
-          print("Initial configuration found, proceeding with authentication")
+          print("Initial configuration found after restoration, proceeding with authentication")
         }
 
         for await configuration in auth.configurationUpdates {
