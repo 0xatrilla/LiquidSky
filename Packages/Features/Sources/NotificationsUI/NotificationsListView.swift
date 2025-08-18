@@ -17,18 +17,14 @@ public struct NotificationsListView: View {
   public var body: some View {
     NavigationView {
       ZStack {
-        // Beautiful animated background
-        AnimatedBackgroundView(
-          primaryColor: .blue,
-          secondaryColor: .purple,
-          accentColor: .cyan
-        )
+        // Simple background
+        Color.clear
 
         ScrollView {
           LazyVStack(spacing: 0) {
             // Notifications content
             if notificationsGroups.isEmpty {
-              // Empty state with glass effect
+              // Empty state
               VStack(spacing: 20) {
                 Image(systemName: "bell.slash")
                   .font(.system(size: 48))
@@ -48,64 +44,24 @@ public struct NotificationsListView: View {
               .frame(maxWidth: .infinity)
               .padding(.vertical, 40)
               .padding(.horizontal, 20)
-              .background(
-                NotificationGlassCard(
-                  backgroundColor: .white.opacity(0.03),
-                  borderColor: .white.opacity(0.08)
-                ) {
-                  VStack(spacing: 20) {
-                    Image(systemName: "bell.slash")
-                      .font(.system(size: 48))
-                      .foregroundStyle(.secondary)
-                      .padding(.bottom, 8)
-
-                    Text("No notifications yet")
-                      .font(.title2)
-                      .fontWeight(.semibold)
-                      .foregroundStyle(.primary)
-
-                    Text("When you get notifications, they'll appear here")
-                      .font(.subheadline)
-                      .foregroundStyle(.secondary)
-                      .multilineTextAlignment(.center)
-                  }
-                  .padding(.vertical, 40)
-                  .padding(.horizontal, 20)
-                }
-              )
               .padding(.horizontal, 16)
             } else {
-              // Notifications list with improved spacing
-              LazyVStack(spacing: 16) {  // Increased spacing from 12 to 16
+              // Notifications list
+              LazyVStack(spacing: 0) {
                 ForEach(notificationsGroups, id: \.id) { group in
                   NotificationRow(group: group)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 4)  // Add vertical padding for better separation
                 }
 
-                // Load more indicator with glass effect
+                // Load more indicator
                 if cursor != nil {
                   HStack {
                     Spacer()
                     ProgressView()
                       .scaleEffect(0.8)
                       .padding(.vertical, 16)
-                      .padding(.horizontal, 24)
-                      .background(
-                        NotificationGlassCard(
-                          backgroundColor: .white.opacity(0.03),
-                          borderColor: .white.opacity(0.08)
-                        ) {
-                          ProgressView()
-                            .scaleEffect(0.8)
-                            .padding(.vertical, 16)
-                            .padding(.horizontal, 24)
-                        }
-                      )
                     Spacer()
                   }
                   .padding(.vertical, 20)
-                  .padding(.horizontal, 16)
                   .task {
                     await fetchNotifications()
                   }

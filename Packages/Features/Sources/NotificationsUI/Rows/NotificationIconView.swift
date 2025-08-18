@@ -9,20 +9,15 @@ struct NotificationIconView: View {
       .font(.caption)
       .fontWeight(.semibold)
       .foregroundStyle(color)
-      .frame(width: 20, height: 20)
+      .frame(width: 16, height: 16)
       .background(
         Circle()
-          .fill(.ultraThinMaterial)
+          .fill(.white)
           .overlay(
             Circle()
-              .stroke(color.opacity(0.8), lineWidth: 1.5)
+              .stroke(color, lineWidth: 1)
           )
       )
-      .background(
-        Circle()
-          .fill(color.opacity(0.1))
-          .blur(radius: 4)
-      )
-      .shadow(color: color.opacity(0.4), radius: 6, x: 0, y: 3)
+      .shadow(color: .shadowPrimary.opacity(0.3), radius: 2)
   }
 }
