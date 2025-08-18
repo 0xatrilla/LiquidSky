@@ -66,8 +66,8 @@ public struct PostRowView: View {
       }
 
       authorView
-      // If this post is a reply, show the parent inline above
-      if post.isReplyTo {
+      // If this post is a reply, show the parent inline above (only in thread context, not feed)
+      if post.isReplyTo && isInThreadContext {
         if let parentPost {
           PostRowEmbedQuoteView(post: parentPost)
         }
@@ -143,8 +143,9 @@ public struct PostRowView: View {
 
   @ViewBuilder
   private var threadLineView: some View {
-    // Show thread lines for replies, focused posts, and posts with replies
-    if post.isReplyTo || isFocused || post.hasReply {
+    // Only show thread lines when we're actually viewing a thread, not in a feed view
+    // In a feed view, posts are individual and not connected, so no thread lines should appear
+    if isInThreadContext {
       Rectangle()
         .frame(width: 1)
         .frame(maxHeight: .infinity)
@@ -157,9 +158,9 @@ public struct PostRowView: View {
   private var isInThreadContext: Bool {
     // We're in a thread context if:
     // 1. This post is focused (main post in PostDetailView)
-    // 2. This post has replies below it
-    // 3. We're viewing a thread (PostDetailView)
-    return isFocused || post.hasReply
+    // 2. We're viewing a thread (PostDetailView) - this is determined by the parent view
+    // 3. NOT in a feed view where posts are individual and unrelated
+    return isFocused
   }
 
   // Fetch the immediate parent of this post for inline display in feed

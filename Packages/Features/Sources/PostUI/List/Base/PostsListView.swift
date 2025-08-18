@@ -5,6 +5,7 @@ import DesignSystem
 import Destinations
 import FeedUI
 import Models
+import PostUI
 import SwiftUI
 import User
 
@@ -148,8 +149,15 @@ public struct PostListView: View {
           case .loading, .uninitialized:
             placeholderView
           case .loaded(let posts, let cursor):
-            ForEach(filteredPosts(posts)) { post in
-              PostRowView(post: post)
+            // Group posts by reply chains and render with proper threading
+            ForEach(groupPostsByReplyChain(filteredPosts(posts)), id: \.id) { postGroup in
+              if postGroup.isReplyChain {
+                // Render reply chain with visual connectors
+                ReplyChainView(posts: postGroup.posts)
+              } else {
+                // Render single post normally
+                PostRowView(post: postGroup.posts.first!)
+              }
             }
             if cursor != nil {
               nextPageView
@@ -221,6 +229,77 @@ public struct PostListView: View {
 
   private func filteredPosts(_ posts: [PostItem]) -> [PostItem] {
     return postFilterService.filterPosts(posts)
+  }
+
+  // MARK: - Reply Chain Grouping
+
+  private struct PostGroup: Identifiable {
+    let id = UUID()
+    let posts: [PostItem]
+    let isReplyChain: Bool
+
+    init(posts: [PostItem]) {
+      self.posts = posts
+      self.isReplyChain = posts.count > 1
+    }
+  }
+
+  private func groupPostsByReplyChain(_ posts: [PostItem]) -> [PostGroup] {
+    var groups: [PostGroup] = []
+    var processedURIs = Set<String>()
+
+    for post in posts {
+      if processedURIs.contains(post.uri) {
+        continue
+      }
+
+      if post.isReplyTo {
+        // Find the reply chain
+        let chain = findReplyChain(for: post, in: posts)
+        groups.append(PostGroup(posts: chain))
+        // Mark all posts in the chain as processed
+        for chainPost in chain {
+          processedURIs.insert(chainPost.uri)
+        }
+      } else {
+        // Single post, not part of a reply chain
+        groups.append(PostGroup(posts: [post]))
+        processedURIs.insert(post.uri)
+      }
+    }
+
+    return groups
+  }
+
+  private func findReplyChain(for post: PostItem, in allPosts: [PostItem]) -> [PostItem] {
+    var chain: [PostItem] = []
+    var currentPost = post
+
+    // Find the root post (the one that's not a reply)
+    while currentPost.isReplyTo {
+      if let parent = findParentPost(for: currentPost, in: allPosts) {
+        chain.insert(parent, at: 0)
+        currentPost = parent
+      } else {
+        break
+      }
+    }
+
+    // Add the reply post
+    chain.append(post)
+
+    return chain
+  }
+
+  private func findParentPost(for post: PostItem, in allPosts: [PostItem]) -> PostItem? {
+    // Try to find the parent post using the replyRef if available
+    // For now, we'll use a more sophisticated approach that looks for posts
+    // that this post might be replying to
+    return allPosts.first { potentialParent in
+      // Check if this could be the parent based on handle and timing
+      potentialParent.uri != post.uri && potentialParent.indexedAt < post.indexedAt
+        && (post.inReplyToHandle == nil || potentialParent.author.handle == post.inReplyToHandle)
+    }
   }
 
   private var nextPageView: some View {
@@ -564,5 +643,164 @@ extension PostListView {
       "PostsListView: Finished processing feed. Total posts: \(postItems.count), Processed: \(processedCount)"
     )
     return postItems
+  }
+}
+
+// MARK: - Reply Chain View
+
+private struct ReplyChainView: View {
+  let posts: [PostItem]
+  @Environment(AppRouter.self) var router
+
+  var body: some View {
+    VStack(spacing: 0) {
+      ForEach(Array(posts.enumerated()), id: \.element.uri) { index, post in
+        HStack(alignment: .top, spacing: 8) {
+          // Avatar column with thread line
+          VStack(spacing: 0) {
+            // Avatar
+            AsyncImage(url: post.author.avatarImageURL) { phase in
+              switch phase {
+              case .success(let image):
+                image
+                  .resizable()
+                  .scaledToFit()
+                  .frame(width: 40, height: 40)
+                  .clipShape(Circle())
+              default:
+                Circle()
+                  .fill(.gray.opacity(0.2))
+                  .frame(width: 40, height: 40)
+              }
+            }
+            .overlay {
+              Circle()
+                .stroke(
+                  post.hasReply ? LinearGradient.avatarBorderReversed : LinearGradient.avatarBorder,
+                  lineWidth: 1)
+            }
+            .shadow(color: .shadowPrimary.opacity(0.3), radius: 2)
+            .onTapGesture {
+              router.navigateTo(.profile(post.author))
+            }
+
+            // Thread line connector (blue line connecting posts in the chain)
+            if index < posts.count - 1 {
+              // Create a curved connector line that looks more natural
+              Path { path in
+                path.move(to: CGPoint(x: 20, y: 40))  // Start at bottom center of avatar
+                path.addLine(to: CGPoint(x: 20, y: 56))  // Go down to connect to next post
+              }
+              .stroke(LinearGradient.blueskyGradient, lineWidth: 2)
+              .frame(width: 40, height: 16)
+            }
+          }
+          .frame(width: 40)  // Ensure consistent width for avatar column
+
+          // Post content
+          VStack(alignment: .leading, spacing: 8) {
+            // Author info
+            HStack(alignment: .firstTextBaseline) {
+              Text("\(post.author.displayName ?? "")  @\(post.author.handle)")
+                .font(.callout)
+                .foregroundStyle(.primary)
+                .fontWeight(.semibold)
+              Spacer()
+              Text(post.indexedAt.relativeFormatted)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+            .lineLimit(1)
+            .onTapGesture {
+              router.navigateTo(.profile(post.author))
+            }
+
+            // Reply indicator
+            if post.isReplyTo, let toHandle = post.inReplyToHandle {
+              Text("Replying to @\(toHandle)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+
+            // Repost indicator - show who reposted this content
+            if post.isReposted, let repostedBy = post.repostedBy {
+              HStack(spacing: 4) {
+                Image(systemName: "arrow.2.squarepath")
+                  .font(.caption)
+                  .foregroundStyle(.secondary)
+                Text("Reposted by \(repostedBy.displayName ?? repostedBy.handle)")
+                  .font(.caption)
+                  .foregroundStyle(.secondary)
+              }
+            }
+
+            // Post content
+            if !post.content.isEmpty {
+              Text(post.content)
+                .font(.body)
+                .foregroundStyle(.primary)
+            }
+
+            // Embed content (images, videos, etc.)
+            if post.embed != nil {
+              // Simple embed indicator without complex property access
+              HStack(spacing: 8) {
+                Image(systemName: "paperclip")
+                  .font(.caption)
+                  .foregroundStyle(.secondary)
+                Text("Media")
+                  .font(.caption)
+                  .foregroundStyle(.secondary)
+              }
+              .padding(8)
+              .background(.ultraThinMaterial)
+              .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+
+            // Simple actions display (only for the last post in the chain)
+            if index == posts.count - 1 {
+              HStack(spacing: 16) {
+                // Reply count
+                Label("\(post.replyCount)", systemImage: "bubble.left")
+                  .font(.caption)
+                  .foregroundStyle(.secondary)
+
+                // Repost count
+                Label("\(post.repostCount)", systemImage: "arrow.2.squarepath")
+                  .font(.caption)
+                  .foregroundStyle(.secondary)
+
+                // Like count
+                Label("\(post.likeCount)", systemImage: "heart")
+                  .font(.caption)
+                  .foregroundStyle(.secondary)
+
+                Spacer()
+              }
+              .padding(.top, 8)
+            }
+          }
+          .padding(.bottom, 18)
+        }
+        .listRowSeparator(.hidden)
+        .listRowInsets(
+          .init(top: 0, leading: 14, bottom: 0, trailing: 14)
+        )
+        .contentShape(Rectangle())
+        .onTapGesture {
+          router.navigateTo(.post(post))
+        }
+      }
+    }
+    .background(
+      RoundedRectangle(cornerRadius: 12)
+        .fill(.ultraThinMaterial)
+        .overlay(
+          RoundedRectangle(cornerRadius: 12)
+            .stroke(.quaternary, lineWidth: 0.5)
+        )
+    )
+    .padding(.horizontal, 4)
+    .padding(.vertical, 8)
   }
 }
