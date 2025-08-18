@@ -59,6 +59,11 @@ public struct PostRowView: View {
       }
 
       authorView
+      if post.isReplyTo, let toHandle = post.inReplyToHandle {
+        Text("Replying to @\(toHandle)")
+          .font(.caption)
+          .foregroundStyle(.secondary)
+      }
       PostRowBodyView(post: post)
       PostRowEmbedView(post: post)
       if !isQuote {
@@ -125,7 +130,7 @@ public struct PostRowView: View {
 
   @ViewBuilder
   private var threadLineView: some View {
-    if post.hasReply {
+    if post.isReplyTo {
       Rectangle()
         .frame(width: 1)
         .frame(maxHeight: .infinity)
