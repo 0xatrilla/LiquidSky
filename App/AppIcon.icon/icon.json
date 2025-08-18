@@ -6,26 +6,49 @@
     {
       "layers" : [
         {
-          "glass" : true,
+          "glass-specializations" : [
+            {
+              "value" : false
+            },
+            {
+              "appearance" : "dark",
+              "value" : true
+            },
+            {
+              "appearance" : "tinted",
+              "value" : false
+            }
+          ],
           "image-name" : "cloud no bg.png",
           "name" : "cloud no bg",
           "position" : {
             "scale" : 1.41,
             "translation-in-points" : [
-              0,
-              0
+              -16.5,
+              -13
             ]
           }
         },
         {
-          "glass" : false,
-          "image-name" : "cloud bg.png",
-          "name" : "cloud bg",
+          "fill-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : {
+                "linear-gradient" : [
+                  "display-p3:0.27897,0.27897,0.27897,1.00000",
+                  "extended-gray:0.00000,1.00000"
+                ]
+              }
+            }
+          ],
+          "hidden" : false,
+          "image-name" : "cloud bg 2.png",
+          "name" : "cloud bg 2",
           "position" : {
             "scale" : 1.33,
             "translation-in-points" : [
-              0,
-              0
+              -9.828125,
+              -13.5703125
             ]
           }
         }
