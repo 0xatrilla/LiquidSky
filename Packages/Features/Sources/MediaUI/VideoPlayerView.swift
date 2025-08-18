@@ -7,7 +7,6 @@ public struct VideoPlayerView: View {
   let media: Media
   let isFullScreen: Bool
   
-  @State private var player: AVPlayer?
   @State private var isLoading: Bool = true
   @State private var hasError: Bool = false
   @State private var errorMessage: String = ""
@@ -19,21 +18,15 @@ public struct VideoPlayerView: View {
   
   public var body: some View {
     ZStack {
-      if let player = player, !hasError {
-        VideoPlayer(player: player)
-          .aspectRatio(media.aspectRatio?.ratio ?? 16/9, contentMode: .fit)
+      if !hasError {
+        AVPlayerViewControllerRepresentable(media: media)
           .onAppear {
-            player.play()
-          }
-          .onDisappear {
-            player.pause()
+            isLoading = false
           }
       } else if isLoading {
         loadingView
-      } else if hasError {
-        errorView
       } else {
-        placeholderView
+        errorView
       }
     }
     .onAppear {
@@ -48,29 +41,13 @@ public struct VideoPlayerView: View {
     hasError = false
     errorMessage = ""
     
-    // Debug: Print the video URL being used
-    print("VideoPlayerView: Attempting to play video with URL: \(media.url)")
-    print("VideoPlayerView: Video CID: \(media.videoCID ?? "nil")")
-    print("VideoPlayerView: Video Playlist URI: \(media.videoPlaylistURI ?? "nil")")
-    
-    // Use the media URL directly - AVPlayer will handle various video formats
-    let playerItem = AVPlayerItem(url: media.url)
-    player = AVPlayer(playerItem: playerItem)
-    
-    // Add player item observer for completion
-    NotificationCenter.default.addObserver(
-      forName: .AVPlayerItemDidPlayToEndTime,
-      object: playerItem,
-      queue: .main
-    ) { _ in
-      Task { @MainActor in
-        player?.seek(to: .zero)
-        player?.play()
-      }
+    // Check if media has a valid URL
+    guard !media.url.absoluteString.isEmpty else {
+      hasError = true
+      errorMessage = "Video URL not available"
+      isLoading = false
+      return
     }
-    
-    // Start playing automatically
-    player?.play()
     
     // Mark as loaded after a short delay to allow for any immediate errors
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -119,24 +96,48 @@ public struct VideoPlayerView: View {
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(Color(uiColor: .systemGray6))
   }
+}
+
+// MARK: - AVPlayerViewControllerRepresentable
+
+struct AVPlayerViewControllerRepresentable: UIViewControllerRepresentable {
+  let media: Media
   
-  private var placeholderView: some View {
-    VStack(spacing: 16) {
-      Image(systemName: "video")
-        .font(.largeTitle)
-        .foregroundColor(.secondary)
-      
-      Text("Video not available")
-        .font(.headline)
-        .foregroundColor(.primary)
-      
-      Text("This video cannot be played at the moment")
-        .font(.caption)
-        .foregroundColor(.secondary)
-        .multilineTextAlignment(.center)
+  func makeUIViewController(context: Context) -> AVPlayerViewController {
+    let playerViewController = AVPlayerViewController()
+    
+    // Configure the player view controller
+    playerViewController.showsPlaybackControls = true
+    
+    // Create and configure the player
+    let url = media.url
+    let playerItem = AVPlayerItem(url: url)
+    let player = AVPlayer(playerItem: playerItem)
+    
+    // Configure player for better performance
+    player.automaticallyWaitsToMinimizeStalling = true
+    player.volume = 1.0
+    
+    // Set the player
+    playerViewController.player = player
+    
+    // Start playing automatically
+    player.play()
+    
+    // Add player item observer for completion
+    NotificationCenter.default.addObserver(
+      forName: .AVPlayerItemDidPlayToEndTime,
+      object: playerItem,
+      queue: .main
+    ) { _ in
+      player.seek(to: .zero)
+      player.play()
     }
-    .padding()
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .background(Color(uiColor: .systemGray6))
+    
+    return playerViewController
+  }
+  
+  func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
+    // Update if needed
   }
 }
