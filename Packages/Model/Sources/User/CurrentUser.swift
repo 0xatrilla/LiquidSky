@@ -19,7 +19,9 @@ public final class CurrentUser: @unchecked Sendable {
     async let profile: AppBskyLexicon.Actor.ProfileViewDetailedDefinition? = fetchProfile()
     async let savedFeeds = fetchPreferences()
     (self.profile, self.savedFeeds) = try await (profile, savedFeeds)
-    print("CurrentUser: Refresh complete. Profile: \(self.profile?.displayName ?? "nil"), Saved feeds: \(self.savedFeeds.count)")
+    print(
+      "CurrentUser: Refresh complete. Profile: \(self.profile?.displayName ?? "nil"), Saved feeds: \(self.savedFeeds.count)"
+    )
   }
 
   public func fetchProfile() async throws -> AppBskyLexicon.Actor.ProfileViewDetailedDefinition? {
@@ -35,7 +37,7 @@ public final class CurrentUser: @unchecked Sendable {
     print("CurrentUser: Fetching preferences...")
     let preferences = try await client.protoClient.getPreferences().preferences
     print("CurrentUser: Raw preferences: \(preferences)")
-    
+
     for preference in preferences {
       switch preference {
       case .savedFeedsVersion2(let feeds):
