@@ -27,11 +27,26 @@
 		9FD63DE22CEF20F500243D9A /* AuthUI in Frameworks */ = {isa = PBXBuildFile; productRef = 9FD63DE12CEF20F500243D9A /* AuthUI */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		DB21B1072E53F69F00B27D22 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		9F2142232CE9DAA1004167D7 /* LiquidSky.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LiquidSky.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F5F5E102CEE46B200A4712C /* LiquidSky-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "LiquidSky-Info.plist"; sourceTree = "<group>"; };
 		9FAEE3A72CF0994400F86CDC /* Features */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Features; path = Packages/Features; sourceTree = "<group>"; };
 		9FAEE3A82CF0994C00F86CDC /* Model */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Model; path = Packages/Model; sourceTree = "<group>"; };
+		DB21B0F42E53F69B00B27D22 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		DB21B0F62E53F69B00B27D22 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		E9FE37002DF0661A00EB0418 /* FeaturesTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = FeaturesTests.xctestplan; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -39,6 +54,11 @@
 		9F2142252CE9DAA1004167D7 /* App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = App;
+			sourceTree = "<group>";
+		};
+		DB21B0F82E53F69B00B27D22 /* LiquidSkyWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = LiquidSkyWidgets;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -80,6 +100,7 @@
 				9F2142252CE9DAA1004167D7 /* App */,
 				9FAEE3A82CF0994C00F86CDC /* Model */,
 				9FAEE3A72CF0994400F86CDC /* Features */,
+				DB21B0F82E53F69B00B27D22 /* LiquidSkyWidgets */,
 				9FAEE3B82CF09BB400F86CDC /* Frameworks */,
 				9F2142242CE9DAA1004167D7 /* Products */,
 			);
@@ -96,6 +117,8 @@
 		9FAEE3B82CF09BB400F86CDC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				DB21B0F42E53F69B00B27D22 /* WidgetKit.framework */,
+				DB21B0F62E53F69B00B27D22 /* SwiftUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -110,6 +133,7 @@
 				9F21421F2CE9DAA1004167D7 /* Sources */,
 				9F2142202CE9DAA1004167D7 /* Frameworks */,
 				9F2142212CE9DAA1004167D7 /* Resources */,
+				DB21B1072E53F69F00B27D22 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
@@ -150,7 +174,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1610;
+				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					9F2142222CE9DAA1004167D7 = {

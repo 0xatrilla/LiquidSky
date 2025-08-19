@@ -64,7 +64,7 @@ let package = Package(
     .target(
       name: "SettingsUI",
       dependencies: baseDeps + [
-        .product(name: "AcknowList", package: "AcknowList"),
+        .product(name: "AcknowList", package: "AcknowList")
       ]
     ),
     .target(
@@ -87,6 +87,9 @@ let package = Package(
       dependencies: [
         .product(name: "Destinations", package: "Model"),
         "AppRouter",
+      ],
+      swiftSettings: [
+        .enableUpcomingFeature("AppIntentsMacro")
       ]
     ),
     .testTarget(

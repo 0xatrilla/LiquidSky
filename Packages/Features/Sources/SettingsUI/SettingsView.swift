@@ -23,7 +23,7 @@ public struct SettingsView: View {
     themeManager.useSystemTheme = settingsService.useSystemTheme
     themeManager.currentTheme = settingsService.selectedTheme
   }
-  
+
   private func updateColorTheme() {
     colorThemeManager.currentTheme = settingsService.selectedColorTheme
   }
@@ -209,6 +209,8 @@ public struct SettingsView: View {
     }
   }
 
+
+
   // MARK: - Media Section
   private var mediaSection: some View {
     VStack(spacing: 16) {
@@ -356,7 +358,7 @@ private struct AboutView: View {
             Text("Connect with us")
               .font(.headline)
               .foregroundColor(.secondary)
-            
+
             HStack(spacing: 40) {
               // GitHub Logo
               Button {
@@ -370,14 +372,14 @@ private struct AboutView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 32, height: 32)
-                  
+
                   Text("GitHub")
                     .font(.caption)
                     .foregroundColor(.secondary)
                 }
               }
               .buttonStyle(PlainButtonStyle())
-              
+
               // Bluesky Logo
               Button {
                 if let url = URL(string: "https://bsky.app/profile/acxtrilla.xyz") {
@@ -390,7 +392,7 @@ private struct AboutView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 32, height: 32)
-                  
+
                   Text("Bluesky")
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -444,10 +446,12 @@ private struct AcknowledgementsView: View {
 
           // Description
           VStack(spacing: 16) {
-            Text("This app uses several open source libraries to provide a better experience. We're grateful to the developers who maintain these projects.")
-              .font(.body)
-              .multilineTextAlignment(.center)
-              .padding(.horizontal, 32)
+            Text(
+              "This app uses several open source libraries to provide a better experience. We're grateful to the developers who maintain these projects."
+            )
+            .font(.body)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 32)
           }
 
           // Dependencies List
@@ -455,32 +459,32 @@ private struct AcknowledgementsView: View {
             Text("Dependencies")
               .font(.headline)
               .foregroundColor(.secondary)
-            
+
             VStack(spacing: 12) {
               DependencyRow(
                 name: "ATProtoKit",
                 description: "Bluesky AT Protocol client library",
                 url: "https://github.com/MasterJ93/ATProtoKit"
               )
-              
+
               DependencyRow(
                 name: "AppRouter",
                 description: "SwiftUI navigation and routing",
                 url: "https://github.com/Dimillian/AppRouter"
               )
-              
+
               DependencyRow(
                 name: "Nuke",
                 description: "Image loading and caching framework",
                 url: "https://github.com/kean/Nuke"
               )
-              
+
               DependencyRow(
                 name: "KeychainSwift",
                 description: "Keychain wrapper for Swift",
                 url: "https://github.com/evgenyneu/keychain-swift"
               )
-              
+
               DependencyRow(
                 name: "ViewInspector",
                 description: "SwiftUI testing framework",
@@ -511,7 +515,7 @@ private struct DependencyRow: View {
   let name: String
   let description: String
   let url: String
-  
+
   var body: some View {
     Button {
       if let url = URL(string: url) {
@@ -523,14 +527,14 @@ private struct DependencyRow: View {
           Text(name)
             .font(.headline)
             .foregroundColor(.primary)
-          
+
           Text(description)
             .font(.caption)
             .foregroundColor(.secondary)
         }
-        
+
         Spacer()
-        
+
         Image(systemName: "arrow.up.right.square")
           .font(.system(size: 16))
           .foregroundColor(.blue)

@@ -12,6 +12,7 @@ import Nuke
 import NukeUI
 import SwiftUI
 import User
+import WidgetKit
 
 @main
 struct LiquidSkyApp: App {
@@ -34,7 +35,7 @@ struct LiquidSkyApp: App {
 
   var body: some Scene {
     WindowGroup {
-      Group {
+      VStack {
         switch appState {
         case .resuming:
           ProgressView()
@@ -57,6 +58,49 @@ struct LiquidSkyApp: App {
             .themeAware()
             .onAppear {
               print("LiquidSkyApp: Showing authenticated state")
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .openComposerNewPostFromShortcut))
+          { _ in
+            Task { @MainActor in
+              router.presentedSheet = .composer(mode: .newPost)
+            }
+          }
+            .onReceive(NotificationCenter.default.publisher(for: .openNotificationsFromShortcut)) {
+              _ in
+              Task { @MainActor in
+                router.selectedTab = .notification
+              }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .openSearchFromShortcut)) { _ in
+              Task { @MainActor in
+                router.selectedTab = .feed
+              }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .openProfileFromShortcut)) { _ in
+              Task { @MainActor in
+                router.selectedTab = .profile
+              }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .openFeedFromShortcut)) { _ in
+              Task { @MainActor in
+                router.selectedTab = .feed
+              }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .notificationsUpdated)) {
+              notification in
+              if let userInfo = notification.userInfo,
+                let title = userInfo["title"] as? String,
+                let subtitle = userInfo["subtitle"] as? String
+              {
+                let defaults = UserDefaults(suiteName: "group.com.acxtrilla.LiquidSky")
+                defaults?.set(title, forKey: "widget.recent.notification.title")
+                defaults?.set(subtitle, forKey: "widget.recent.notification.subtitle")
+
+                // Reload widget timeline
+                if #available(iOS 14.0, *) {
+                  WidgetCenter.shared.reloadTimelines(ofKind: "RecentNotificationWidget")
+                }
+              }
             }
         case .unauthenticated:
           VStack {
@@ -208,6 +252,19 @@ struct LiquidSkyApp: App {
       let currentUser = try await CurrentUser(client: client)
       print("CurrentUser created successfully")
 
+      // Publish follower count to widget after profile is fetched
+      Task {
+        if let profile = await currentUser.profile {
+          let defaults = UserDefaults(suiteName: "group.com.acxtrilla.LiquidSky")
+          defaults?.set(profile.profile.followersCount, forKey: "widget.followers.count")
+
+          // Reload widget timeline
+          if #available(iOS 14.0, *) {
+            WidgetCenter.shared.reloadTimelines(ofKind: "FollowerCountWidget")
+          }
+        }
+      }
+
       print("Configuring ImageQualityService...")
       // Configure image quality service after authentication is complete
       ImageQualityService.shared.configureImagePipeline()
@@ -217,6 +274,20 @@ struct LiquidSkyApp: App {
       await MainActor.run {
         appState = .authenticated(client: client, currentUser: currentUser)
         print("App state set to authenticated successfully")
+      }
+
+      // Publish initial notification data to widget
+      Task {
+        // Wait a bit for the UI to load, then publish a sample notification
+        try? await Task.sleep(nanoseconds: 2_000_000_000)  // 2 seconds
+        NotificationCenter.default.post(
+          name: .notificationsUpdated,
+          object: nil,
+          userInfo: [
+            "title": "Welcome to LiquidSky!",
+            "subtitle": "Your Bluesky client is ready",
+          ]
+        )
       }
     } catch {
       print("refreshEnvWith failed: \(error)")
