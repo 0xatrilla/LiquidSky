@@ -40,6 +40,7 @@ let package = Package(
       dependencies: [
         .product(name: "ATProtoKit", package: "ATProtoKit"),
         .product(name: "KeychainSwift", package: "keychain-swift"),
+        "Models",
       ]
     ),
     .testTarget(

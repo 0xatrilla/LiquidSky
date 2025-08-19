@@ -3,7 +3,7 @@ description: Rules for LiquidSky, a SwiftUI project for a bluesky client
 globs: 
 ---
 - This is a mostly a pure SwiftUI app.
-- It target iOS 18 so you can use the latest SwiftUI and iOS API
+- It target iOS 26 so you can use the latest SwiftUI and iOS API
 - This is a client for the social network BlueSky. 
 - It use the framework @ATPRotoKit, imported as a Swift Package to make all queries to the ATProtocol / API of BlueSky. Please refer to 
 - ATProtoKit is linked in this workspace in @ATProtoKit.swift, look at the parent folder of this file. 

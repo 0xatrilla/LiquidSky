@@ -8,6 +8,7 @@ import User
 public struct SettingsView: View {
   @Environment(Auth.self) var auth
   @Environment(CurrentUser.self) var currentUser
+  @Environment(AccountManager.self) var accountManager
   @State private var settingsService = SettingsService.shared
   @State private var colorThemeManager = ColorThemeManager.shared
   @State private var showingResetAlert = false
@@ -15,6 +16,7 @@ public struct SettingsView: View {
   @State private var showingChangePassword = false
   @State private var showingAppIconPicker = false
   @State private var showingAcknowledgementsSheet = false
+  @State private var showingAccountSwitcher = false
 
   public init() {}
 
@@ -35,6 +37,13 @@ public struct SettingsView: View {
           // Header
           HeaderView(title: "Settings", showBack: false)
             .padding(.horizontal, 16)
+
+          // Current Account Header
+          CurrentAccountHeader()
+            .padding(.horizontal, 16)
+            .onTapGesture {
+              showingAccountSwitcher = true
+            }
 
           // Account Section
           accountSection
@@ -79,6 +88,11 @@ public struct SettingsView: View {
     }
     .sheet(isPresented: $showingAcknowledgementsSheet) {
       AcknowledgementsView()
+    }
+    .sheet(isPresented: $showingAccountSwitcher) {
+      AccountSwitcherView()
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
     }
   }
 
@@ -574,6 +588,9 @@ private struct FeatureRow: View {
 }
 
 #Preview {
+  let accountManager = AccountManager()
+  let auth = Auth(accountManager: accountManager)
   SettingsView()
-    .environment(Auth())
+    .environment(accountManager)
+    .environment(auth)
 }
