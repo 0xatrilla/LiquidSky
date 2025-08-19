@@ -209,8 +209,6 @@ public struct SettingsView: View {
     }
   }
 
-
-
   // MARK: - Media Section
   private var mediaSection: some View {
     VStack(spacing: 16) {
