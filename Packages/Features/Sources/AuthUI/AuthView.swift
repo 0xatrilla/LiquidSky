@@ -22,22 +22,22 @@ public struct AuthView: View {
 
   public var body: some View {
     ZStack {
-      // Beautiful animated background gradient
+      // Enhanced animated background with iOS 26 design
       backgroundGradient
 
       ScrollView {
-        VStack(spacing: 32) {
-          Spacer(minLength: 60)
+        VStack(spacing: 40) {
+          Spacer(minLength: 80)
 
-          // App branding section
+          // Enhanced branding section with iOS 26 styling
           brandingSection
 
-          // Login card with modern glass morphism
+          // Modern login card with enhanced glass morphism
           loginCard
 
-          Spacer(minLength: 40)
+          Spacer(minLength: 60)
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, 28)
       }
     }
     .ignoresSafeArea(.container, edges: .top)
@@ -45,7 +45,7 @@ public struct AuthView: View {
     .onAppear {
       print("AuthView: onAppear called - starting initialization")
       hasAppeared = true
-      withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
+      withAnimation(.easeInOut(duration: 3).repeatForever(autoreverses: true)) {
         animateGradient = true
       }
     }
@@ -55,167 +55,219 @@ public struct AuthView: View {
     }
   }
 
-  // MARK: - Background Gradient
+  // MARK: - Enhanced Background Gradient
 
   @ViewBuilder
   private var backgroundGradient: some View {
     ZStack {
-      // Primary gradient background
+      // iOS 26 enhanced gradient background
       LinearGradient(
         colors: [
-          .blue.opacity(0.8),
-          .blue.opacity(0.6),
-          .cyan.opacity(0.4),
+          Color.blueskyPrimary.opacity(0.9),
+          Color.blueskySecondary.opacity(0.7),
+          Color.blueskyAccent.opacity(0.5),
         ],
         startPoint: animateGradient ? .topLeading : .bottomTrailing,
         endPoint: animateGradient ? .bottomTrailing : .topLeading
       )
       .ignoresSafeArea()
 
-      // Floating orbs for depth
+      // Enhanced floating orbs with iOS 26 blur effects
       floatingOrbs
+
+      // Subtle noise texture for depth
+      noiseTexture
     }
   }
 
   @ViewBuilder
   private var floatingOrbs: some View {
     ZStack {
-      // Large orb
+      // Large primary orb
       Circle()
-        .fill(.white.opacity(0.1))
-        .frame(width: 200, height: 200)
+        .fill(.white.opacity(0.08))
+        .frame(width: 240, height: 240)
+        .blur(radius: 50)
+        .offset(x: -120, y: -240)
+        .scaleEffect(animateGradient ? 1.3 : 0.7)
+
+      // Medium secondary orb
+      Circle()
+        .fill(Color.blueskySecondary.opacity(0.12))
+        .frame(width: 180, height: 180)
         .blur(radius: 40)
-        .offset(x: -100, y: -200)
+        .offset(x: 140, y: 120)
+        .scaleEffect(animateGradient ? 0.7 : 1.3)
+
+      // Small accent orb
+      Circle()
+        .fill(Color.blueskyAccent.opacity(0.15))
+        .frame(width: 120, height: 120)
+        .blur(radius: 30)
+        .offset(x: -100, y: 180)
         .scaleEffect(animateGradient ? 1.2 : 0.8)
 
-      // Medium orb
-      Circle()
-        .fill(.blue.opacity(0.15))
-        .frame(width: 150, height: 150)
-        .blur(radius: 30)
-        .offset(x: 120, y: 100)
-        .scaleEffect(animateGradient ? 0.8 : 1.2)
-
-      // Small orb
-      Circle()
-        .fill(.blue.opacity(0.2))
-        .frame(width: 100, height: 100)
-        .blur(radius: 20)
-        .offset(x: -80, y: 150)
-        .scaleEffect(animateGradient ? 1.1 : 0.9)
+      // Micro orbs for detail
+      ForEach(0..<6, id: \.self) { index in
+        Circle()
+          .fill(.white.opacity(0.06))
+          .frame(width: 20 + CGFloat(index * 10), height: 20 + CGFloat(index * 10))
+          .blur(radius: 15)
+          .offset(
+            x: CGFloat.random(in: -150...150),
+            y: CGFloat.random(in: -300...300)
+          )
+          .scaleEffect(animateGradient ? 1.1 : 0.9)
+      }
     }
-    .animation(.easeInOut(duration: 6).repeatForever(autoreverses: true), value: animateGradient)
+    .animation(.easeInOut(duration: 8).repeatForever(autoreverses: true), value: animateGradient)
   }
 
-  // MARK: - Branding Section
+  @ViewBuilder
+  private var noiseTexture: some View {
+    Rectangle()
+      .fill(.white.opacity(0.02))
+      .blendMode(.overlay)
+      .ignoresSafeArea()
+  }
+
+  // MARK: - Enhanced Branding Section
 
   @ViewBuilder
   private var brandingSection: some View {
-    VStack(spacing: 16) {
-      // App icon/logo with enhanced glass effect
+    VStack(spacing: 24) {
+      // Enhanced app icon with iOS 26 glass effect
       ZStack {
+        // Outer glow ring
         Circle()
-          .fill(.white.opacity(0.2))
-          .frame(width: 80, height: 80)
+          .fill(.white.opacity(0.1))
+          .frame(width: 100, height: 100)
+          .blur(radius: 20)
+
+        // Main glass container
+        Circle()
+          .fill(.white.opacity(0.15))
+          .frame(width: 88, height: 88)
           .background(.ultraThinMaterial)
           .clipShape(Circle())
           .overlay(
             Circle()
-              .stroke(.white.opacity(0.3), lineWidth: 1)
+              .stroke(.white.opacity(0.25), lineWidth: 1.5)
           )
+          .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
 
+        // Icon with enhanced styling
         Image(systemName: "cloud.sun.fill")
-          .font(.system(size: 36, weight: .medium))
-          .foregroundStyle(.blue)
+          .font(.system(size: 40, weight: .medium, design: .rounded))
+          .foregroundStyle(
+            LinearGradient(
+              colors: [.white, Color.blueskySecondary],
+              startPoint: .topLeading,
+              endPoint: .bottomTrailing
+            )
+          )
           .symbolEffect(.bounce, options: .repeating)
       }
 
-      // App title
-      VStack(spacing: 8) {
+      // Enhanced app title with iOS 26 typography
+      VStack(spacing: 12) {
         Text("LiquidSky")
-          .font(.system(size: 36, weight: .bold, design: .rounded))
-          .foregroundStyle(.white)
-          .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 2)
+          .font(.system(size: 42, weight: .heavy, design: .rounded))
+          .foregroundStyle(
+            LinearGradient(
+              colors: [.white, .white.opacity(0.9)],
+              startPoint: .top,
+              endPoint: .bottom
+            )
+          )
+          .shadow(color: .black.opacity(0.4), radius: 4, x: 0, y: 3)
 
         Text("Connect to the decentralized web")
-          .font(.system(size: 16, weight: .medium))
-          .foregroundStyle(.white.opacity(0.8))
+          .font(.system(size: 18, weight: .medium, design: .default))
+          .foregroundStyle(.white.opacity(0.85))
           .multilineTextAlignment(.center)
+          .lineLimit(2)
       }
     }
   }
 
-  // MARK: - Login Card
+  // MARK: - Enhanced Login Card
 
   @ViewBuilder
   private var loginCard: some View {
-    VStack(spacing: 24) {
-      // Header
-      VStack(spacing: 8) {
+    VStack(spacing: 32) {
+      // Enhanced header with iOS 26 typography
+      VStack(spacing: 12) {
         Text("Welcome Back")
-          .font(.system(size: 28, weight: .bold, design: .rounded))
+          .font(.system(size: 32, weight: .bold, design: .rounded))
           .foregroundStyle(.white)
 
         Text("Sign in to your Bluesky account")
-          .font(.system(size: 16, weight: .medium))
-          .foregroundStyle(.white.opacity(0.7))
+          .font(.system(size: 18, weight: .medium))
+          .foregroundStyle(.white.opacity(0.8))
       }
 
-      // Form fields
-      VStack(spacing: 20) {
-        // Handle field
-        inputField(
+      // Enhanced form fields with iOS 26 styling
+      VStack(spacing: 24) {
+        // Enhanced handle field
+        enhancedInputField(
           icon: "at",
           placeholder: "john@bsky.social",
           text: $handle
         )
 
-        // Password field with show/hide toggle
-        passwordField
+        // Enhanced password field
+        enhancedPasswordField
       }
 
-      // Login button
-      loginButton
+      // Enhanced login button
+      enhancedLoginButton
 
-      // Error message
+      // Enhanced error message
       if let error {
-        errorMessage(error)
+        enhancedErrorMessage(error)
       }
 
-      // Help text
-      helpText
+      // Enhanced help text
+      enhancedHelpText
     }
-    .padding(32)
+    .padding(36)
     .background(
-      RoundedRectangle(cornerRadius: 24)
+      RoundedRectangle(cornerRadius: 28)
         .fill(.ultraThinMaterial)
+        .overlay(
+          RoundedRectangle(cornerRadius: 28)
+            .stroke(.white.opacity(0.15), lineWidth: 1.5)
+        )
     )
-    .overlay(
-      RoundedRectangle(cornerRadius: 24)
-        .stroke(.white.opacity(0.2), lineWidth: 1)
-    )
-    .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 10)
+    .shadow(color: .black.opacity(0.15), radius: 30, x: 0, y: 15)
     .scaleEffect(inputFocused ? 1.02 : 1.0)
     .animation(.spring(response: 0.6, dampingFraction: 0.8), value: inputFocused)
   }
 
   @ViewBuilder
-  private func inputField(
+  private func enhancedInputField(
     icon: String,
     placeholder: String,
     text: Binding<String>
   ) -> some View {
-    HStack(spacing: 16) {
-      // Icon
+    HStack(spacing: 18) {
+      // Enhanced icon with iOS 26 styling
       Image(systemName: icon)
-        .font(.system(size: 18, weight: .medium))
-        .foregroundStyle(.blue)
-        .frame(width: 24)
+        .font(.system(size: 20, weight: .semibold))
+        .foregroundStyle(
+          LinearGradient(
+            colors: [Color.blueskySecondary, Color.blueskyPrimary],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+          )
+        )
+        .frame(width: 28)
 
-      // Input field
+      // Enhanced input field
       TextField(placeholder, text: text)
-        .font(.system(size: 16, weight: .medium))
-        .autocapitalization(.none)
+        .font(.system(size: 18, weight: .medium))
+        .textInputAutocapitalization(.never)
         .autocorrectionDisabled()
         .foregroundStyle(.white)
         .onTapGesture {
@@ -226,113 +278,137 @@ public struct AuthView: View {
 
       Spacer()
     }
-    .padding(.horizontal, 20)
-    .padding(.vertical, 16)
+    .padding(.horizontal, 24)
+    .padding(.vertical, 20)
     .background(
-      RoundedRectangle(cornerRadius: 16)
+      RoundedRectangle(cornerRadius: 20)
         .fill(.ultraThinMaterial)
+        .overlay(
+          RoundedRectangle(cornerRadius: 20)
+            .stroke(.white.opacity(0.12), lineWidth: 1.5)
+        )
     )
-    .overlay(
-      RoundedRectangle(cornerRadius: 16)
-        .stroke(.white.opacity(0.1), lineWidth: 1)
-    )
+    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
     .scaleEffect(inputFocused ? 1.02 : 1.0)
     .animation(.spring(response: 0.4, dampingFraction: 0.8), value: inputFocused)
   }
 
   @ViewBuilder
-  private var passwordField: some View {
-    HStack(spacing: 16) {
-      // Icon
+  private var enhancedPasswordField: some View {
+    HStack(spacing: 18) {
+      // Enhanced lock icon
       Image(systemName: "lock.fill")
-        .font(.system(size: 18, weight: .medium))
-        .foregroundStyle(.blue)
-        .frame(width: 24)
+        .font(.system(size: 20, weight: .semibold))
+        .foregroundStyle(
+          LinearGradient(
+            colors: [Color.blueskySecondary, Color.blueskyPrimary],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+          )
+        )
+        .frame(width: 28)
 
-      // Password field
+      // Enhanced password field
       Group {
         if showPassword {
           TextField("App Password", text: $appPassword)
+            .font(.system(size: 18, weight: .medium))
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            .foregroundStyle(.white)
         } else {
           SecureField("App Password", text: $appPassword)
+            .font(.system(size: 18, weight: .medium))
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            .foregroundStyle(.white)
         }
       }
-      .font(.system(size: 16, weight: .medium))
-      .autocapitalization(.none)
-      .autocorrectionDisabled()
-      .foregroundStyle(.white)
       .onTapGesture {
         withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
           inputFocused = true
         }
       }
 
-      // Show/hide password toggle
+      // Enhanced show/hide password toggle
       Button {
-        withAnimation(.easeInOut(duration: 0.2)) {
+        withAnimation(.easeInOut(duration: 0.3)) {
           showPassword.toggle()
         }
-        // Haptic feedback
+        // Enhanced haptic feedback
         HapticManager.shared.impact(.light)
       } label: {
         Image(systemName: showPassword ? "eye.slash.fill" : "eye.fill")
-          .font(.system(size: 16, weight: .medium))
-          .foregroundStyle(.white.opacity(0.6))
+          .font(.system(size: 18, weight: .semibold))
+          .foregroundStyle(.white.opacity(0.7))
+          .frame(width: 28, height: 28)
+          .background(
+            Circle()
+              .fill(.white.opacity(0.1))
+          )
       }
       .buttonStyle(.plain)
     }
-    .padding(.horizontal, 20)
-    .padding(.vertical, 16)
+    .padding(.horizontal, 24)
+    .padding(.vertical, 20)
     .background(
-      RoundedRectangle(cornerRadius: 16)
+      RoundedRectangle(cornerRadius: 20)
         .fill(.ultraThinMaterial)
+        .overlay(
+          RoundedRectangle(cornerRadius: 20)
+            .stroke(.white.opacity(0.12), lineWidth: 1.5)
+        )
     )
-    .overlay(
-      RoundedRectangle(cornerRadius: 16)
-        .stroke(.white.opacity(0.1), lineWidth: 1)
-    )
+    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
     .scaleEffect(inputFocused ? 1.02 : 1.0)
     .animation(.spring(response: 0.4, dampingFraction: 0.8), value: inputFocused)
   }
 
   @ViewBuilder
-  private var loginButton: some View {
+  private var enhancedLoginButton: some View {
     Button {
       Task {
         await performLogin()
       }
     } label: {
-      HStack(spacing: 12) {
+      HStack(spacing: 16) {
         if isLoading {
           ProgressView()
             .progressViewStyle(CircularProgressViewStyle(tint: .white))
-            .scaleEffect(0.8)
+            .scaleEffect(0.9)
         } else {
           Image(systemName: "arrow.right.circle.fill")
-            .font(.system(size: 20, weight: .semibold))
+            .font(.system(size: 24, weight: .semibold))
         }
 
         Text(isLoading ? "Signing In..." : "Sign In to Bluesky")
-          .font(.system(size: 18, weight: .semibold))
+          .font(.system(size: 20, weight: .semibold))
       }
       .foregroundStyle(.white)
       .frame(maxWidth: .infinity)
-      .padding(.vertical, 18)
+      .padding(.vertical, 22)
       .background(
-        RoundedRectangle(cornerRadius: 16)
-          .fill(.blueskyBlue)
+        RoundedRectangle(cornerRadius: 20)
+          .fill(
+            LinearGradient(
+              colors: [Color.blueskyPrimary, Color.blueskySecondary],
+              startPoint: .leading,
+              endPoint: .trailing
+            )
+          )
+          .overlay(
+            RoundedRectangle(cornerRadius: 20)
+              .stroke(.white.opacity(0.25), lineWidth: 1.5)
+          )
       )
-      .overlay(
-        RoundedRectangle(cornerRadius: 16)
-          .stroke(.white.opacity(0.2), lineWidth: 1)
-      )
+      .shadow(color: Color.blueskyPrimary.opacity(0.4), radius: 15, x: 0, y: 8)
     }
     .disabled(handle.isEmpty || appPassword.isEmpty || isLoading)
     .opacity(handle.isEmpty || appPassword.isEmpty ? 0.6 : 1.0)
     .scaleEffect(handle.isEmpty || appPassword.isEmpty ? 0.98 : 1.0)
-    .animation(.easeInOut(duration: 0.2), value: handle.isEmpty || appPassword.isEmpty)
+    .animation(.easeInOut(duration: 0.3), value: handle.isEmpty || appPassword.isEmpty)
     .onTapGesture {
-      // Safe haptic feedback on button tap
+      // Enhanced haptic feedback on button tap
       if hasAppeared {
         HapticManager.shared.impact(.medium)
       }
@@ -340,29 +416,30 @@ public struct AuthView: View {
   }
 
   @ViewBuilder
-  private func errorMessage(_ message: String) -> some View {
-    HStack(spacing: 12) {
+  private func enhancedErrorMessage(_ message: String) -> some View {
+    HStack(spacing: 16) {
       Image(systemName: "exclamationmark.triangle.fill")
         .foregroundStyle(.red)
-        .font(.system(size: 16, weight: .medium))
+        .font(.system(size: 18, weight: .semibold))
 
       Text(message)
-        .font(.system(size: 14, weight: .medium))
+        .font(.system(size: 16, weight: .medium))
         .foregroundStyle(.red)
         .multilineTextAlignment(.leading)
 
       Spacer()
     }
-    .padding(.horizontal, 20)
-    .padding(.vertical, 16)
+    .padding(.horizontal, 24)
+    .padding(.vertical, 20)
     .background(
-      RoundedRectangle(cornerRadius: 12)
-        .fill(.red.opacity(0.1))
+      RoundedRectangle(cornerRadius: 16)
+        .fill(.red.opacity(0.15))
+        .overlay(
+          RoundedRectangle(cornerRadius: 16)
+            .stroke(.red.opacity(0.3), lineWidth: 1.5)
+        )
     )
-    .overlay(
-      RoundedRectangle(cornerRadius: 12)
-        .stroke(.red.opacity(0.2), lineWidth: 1)
-    )
+    .shadow(color: .red.opacity(0.2), radius: 10, x: 0, y: 5)
     .transition(
       .asymmetric(
         insertion: .scale.combined(with: .opacity),
@@ -371,21 +448,27 @@ public struct AuthView: View {
   }
 
   @ViewBuilder
-  private var helpText: some View {
-    VStack(spacing: 8) {
+  private var enhancedHelpText: some View {
+    VStack(spacing: 16) {
       Text("Need help?")
-        .font(.system(size: 14, weight: .medium))
-        .foregroundStyle(.white.opacity(0.7))
+        .font(.system(size: 16, weight: .medium))
+        .foregroundStyle(.white.opacity(0.8))
 
-      HStack(spacing: 16) {
+      HStack(spacing: 24) {
         Button("Create Account") {
           // TODO: Navigate to account creation
           if hasAppeared {
             HapticManager.shared.impact(.light)
           }
         }
-        .font(.system(size: 14, weight: .medium))
-        .foregroundStyle(.indigo)
+        .font(.system(size: 16, weight: .semibold))
+        .foregroundStyle(
+          LinearGradient(
+            colors: [Color.lavenderSecondary, Color.lavenderPrimary],
+            startPoint: .leading,
+            endPoint: .trailing
+          )
+        )
 
         Button("Forgot Password?") {
           // TODO: Navigate to password reset
@@ -393,8 +476,14 @@ public struct AuthView: View {
             HapticManager.shared.impact(.light)
           }
         }
-        .font(.system(size: 14, weight: .medium))
-        .foregroundStyle(.purple)
+        .font(.system(size: 16, weight: .semibold))
+        .foregroundStyle(
+          LinearGradient(
+            colors: [Color.sunsetSecondary, Color.sunsetPrimary],
+            startPoint: .leading,
+            endPoint: .trailing
+          )
+        )
       }
     }
   }
@@ -420,29 +509,20 @@ public struct AuthView: View {
 // MARK: - Preview
 
 #Preview("Light Mode") {
-  @Previewable @State var auth: Auth = .init()
-
   AuthView()
-    .environment(auth)
     .preferredColorScheme(.light)
 }
 
 #Preview("Dark Mode") {
-  @Previewable @State var auth: Auth = .init()
-
   AuthView()
-    .environment(auth)
     .preferredColorScheme(.dark)
 }
 
 #Preview("Sheet Presentation") {
-  @Previewable @State var auth: Auth = .init()
-
   ScrollView {
     Text("Hello World")
   }
   .sheet(isPresented: .constant(true)) {
     AuthView()
-      .environment(auth)
   }
 }
