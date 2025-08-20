@@ -18,6 +18,7 @@ public struct ProfileView: View {
   @State private var fullProfile: Profile?
   @State private var isLoadingProfile = false
   @State private var profileError: Error?
+  @State private var selectedTab: ProfileTab = .posts
 
   public init(profile: Profile, showBack: Bool = true, isCurrentUser: Bool = false) {
     self.profile = profile
@@ -245,37 +246,39 @@ public struct ProfileView: View {
         Spacer()
       }
 
-      // Tab Buttons
-      VStack(spacing: 12) {
-        NavigationLink(
-          value: RouterDestination.profilePosts(profile: profile, filter: .postsWithNoReplies)
-        ) {
-          makeTabButton(
-            title: "Posts", icon: "bubble.fill", color: .themePrimary,
-            count: (fullProfile ?? profile).postsCount)
-        }
-
-        NavigationLink(
-          value: RouterDestination.profilePosts(profile: profile, filter: .userReplies)
-        ) {
-          makeTabButton(
-            title: "Replies", icon: "arrowshape.turn.up.left.fill", color: .themeSecondary,
-            count: nil)
-        }
-
-        NavigationLink(
-          value: RouterDestination.profilePosts(profile: profile, filter: .postsWithMedia)
-        ) {
-          makeTabButton(
-            title: "Media", icon: "photo.fill", color: .themeAccent,
-            count: (fullProfile ?? profile).postsCount > 0
-              ? (fullProfile ?? profile).postsCount : nil)
-        }
-
-        NavigationLink(value: RouterDestination.profileLikes(profile)) {
-          makeTabButton(title: "Likes", icon: "heart.fill", color: .themePrimary, count: nil)
-        }
+      // Horizontal Tab Picker
+      Picker("Content Type", selection: $selectedTab) {
+        Text("Posts").tag(ProfileTab.posts)
+        Text("Replies").tag(ProfileTab.replies)
+        Text("Media").tag(ProfileTab.media)
+        Text("Likes").tag(ProfileTab.likes)
       }
+      .pickerStyle(.segmented)
+      .padding(.horizontal)
+
+      // Tab Content
+      TabView(selection: $selectedTab) {
+        // Posts Tab
+        PostsProfileView(profile: profile, filter: .postsWithNoReplies)
+          .environment(PostFilterService.shared)
+          .tag(ProfileTab.posts)
+
+        // Replies Tab
+        PostsProfileView(profile: profile, filter: .userReplies)
+          .environment(PostFilterService.shared)
+          .tag(ProfileTab.replies)
+
+        // Media Tab
+        PostsProfileView(profile: profile, filter: .postsWithMedia)
+          .environment(PostFilterService.shared)
+          .tag(ProfileTab.media)
+
+        // Likes Tab
+        PostsLikesView(profile: profile)
+          .tag(ProfileTab.likes)
+      }
+      .tabViewStyle(.page(indexDisplayMode: .never))
+      .frame(height: 600)  // Adjust height as needed
     }
   }
 
@@ -293,48 +296,6 @@ public struct ProfileView: View {
       }
     }
     .frame(maxWidth: .infinity, alignment: .leading)
-  }
-
-  private func makeTabButton(title: String, icon: String, color: Color, count: Int?) -> some View {
-    HStack {
-      Image(systemName: icon)
-        .foregroundColor(.white)
-        .shadow(color: .white, radius: 3)
-        .padding(12)
-        .background(
-          LinearGradient(
-            colors: [color, color.opacity(0.7)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing)
-        )
-        .frame(width: 40, height: 40)
-        .glowingRoundedRectangle()
-
-      VStack(alignment: .leading, spacing: 2) {
-        Text(title)
-          .font(.title3)
-          .fontWeight(.semibold)
-          .foregroundColor(.primary)
-
-        if let count = count {
-          Text("\(count)")
-            .font(.caption)
-            .foregroundColor(.secondary)
-        }
-      }
-
-      Spacer()
-
-      Image(systemName: "chevron.right")
-        .font(.caption)
-        .foregroundColor(.secondary)
-    }
-    .padding(.vertical, 8)
-    .padding(.horizontal, 12)
-    .background(
-      RoundedRectangle(cornerRadius: 12)
-        .fill(LinearGradient.themeSubtle)
-    )
   }
 
   // MARK: - Fetch Full Profile
@@ -372,6 +333,14 @@ public struct ProfileView: View {
   }
 
   // The toggleFollow method and its related state variables are removed as per the edit hint.
+}
+
+// MARK: - Profile Tab Enum
+enum ProfileTab: Int, CaseIterable {
+  case posts = 0
+  case replies = 1
+  case media = 2
+  case likes = 3
 }
 
 // MARK: - Stat Item
