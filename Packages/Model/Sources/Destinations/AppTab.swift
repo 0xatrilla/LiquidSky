@@ -17,6 +17,7 @@ public enum AppTab: String, TabType {
     case .profile: return "Profile"
     case .settings: return "Settings"
     case .compose: return "New Post"
+
     }
   }
 
@@ -27,6 +28,7 @@ public enum AppTab: String, TabType {
     case .profile: return "person"
     case .settings: return "gearshape"
     case .compose: return "square.and.pencil"
+
     }
   }
 }

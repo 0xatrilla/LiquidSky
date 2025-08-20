@@ -124,8 +124,11 @@ public class UnifiedSearchService: ObservableObject {
     guard let client = client else { return [] }
 
     do {
-      let results = try await client.protoClient.searchActors(matching: query, limit: 20)
-      return results.actors.map { actor in
+      var allResults: [Profile] = []
+
+      // First, search by the exact query (this will find exact handle matches and some display name matches)
+      let exactResults = try await client.protoClient.searchActors(matching: query, limit: 20)
+      let exactProfiles = exactResults.actors.map { actor in
         Profile(
           did: actor.actorDID,
           handle: actor.actorHandle,
@@ -142,6 +145,64 @@ public class UnifiedSearchService: ObservableObject {
           isMuted: actor.viewer?.isMuted == true
         )
       }
+      allResults.append(contentsOf: exactProfiles)
+
+      // If the query doesn't look like a handle (doesn't start with @ and doesn't contain .),
+      // also search for it as a potential display name
+      if !query.hasPrefix("@") && !query.contains(".") && query.count > 2 {
+        // Search for display names that might contain the query
+        // Note: This is a workaround since Bluesky API doesn't directly support display name search
+        // We'll search for variations that might match display names
+        let displayNameVariations = [
+          query,
+          query.lowercased(),
+          query.capitalized,
+        ]
+
+        for variation in displayNameVariations {
+          do {
+            let displayResults = try await client.protoClient.searchActors(
+              matching: variation, limit: 10)
+            let displayProfiles = displayResults.actors.map { actor in
+              Profile(
+                did: actor.actorDID,
+                handle: actor.actorHandle,
+                displayName: actor.displayName,
+                avatarImageURL: actor.avatarImageURL,
+                description: actor.description,
+                followersCount: 0,
+                followingCount: 0,
+                postsCount: 0,
+                isFollowing: actor.viewer?.followingURI != nil,
+                isFollowedBy: actor.viewer?.followedByURI != nil,
+                isBlocked: actor.viewer?.isBlocked == true,
+                isBlocking: actor.viewer?.blockingURI != nil,
+                isMuted: actor.viewer?.isMuted == true
+              )
+            }
+
+            // Only add profiles that aren't already in our results and have matching display names
+            for profile in displayProfiles {
+              if !allResults.contains(where: { $0.did == profile.did })
+                && profile.displayName?.localizedCaseInsensitiveContains(query) == true
+              {
+                allResults.append(profile)
+              }
+            }
+          } catch {
+            // Continue with other variations if one fails
+            continue
+          }
+        }
+      }
+
+      // Remove duplicates and limit results
+      let uniqueResults = Array(Set(allResults.map { $0.did })).prefix(20).compactMap { did in
+        allResults.first { $0.did == did }
+      }
+
+      return Array(uniqueResults)
+
     } catch {
       print("Error searching users: \(error)")
       return []
