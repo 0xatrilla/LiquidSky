@@ -66,6 +66,7 @@ struct FeedTabNavigationModifier: ViewModifier {
         .navigationBarTitleDisplayMode(.large)
     case .compose:
       content
+
     }
   }
 }
@@ -84,6 +85,7 @@ extension AppTab {
       SettingsView()
     case .compose:
       EmptyView()
+
     }
   }
 }
