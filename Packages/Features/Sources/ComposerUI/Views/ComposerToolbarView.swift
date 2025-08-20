@@ -18,7 +18,7 @@ struct ComposerToolbarView: ToolbarContent {
     ToolbarItem(placement: .keyboard) {
       PhotosPicker(selection: $selectedPhotos, matching: .images) {
         Image(systemName: "photo")
-          .foregroundStyle(.blue)
+          .foregroundColor(.blue)
       }
       .onChange(of: selectedPhotos) { _, newValue in
         // TODO: Handle selected photos
@@ -29,7 +29,7 @@ struct ComposerToolbarView: ToolbarContent {
     ToolbarItem(placement: .keyboard) {
       PhotosPicker(selection: $selectedVideos, matching: .videos) {
         Image(systemName: "film")
-          .foregroundStyle(.blue)
+          .foregroundColor(.blue)
       }
       .onChange(of: selectedVideos) { _, newValue in
         // TODO: Handle selected videos
@@ -42,7 +42,7 @@ struct ComposerToolbarView: ToolbarContent {
         showCamera = true
       } label: {
         Image(systemName: "camera")
-          .foregroundStyle(.blue)
+          .foregroundColor(.blue)
       }
       .sheet(isPresented: $showCamera) {
         CameraView { image in
@@ -59,7 +59,7 @@ struct ComposerToolbarView: ToolbarContent {
         insertText("@")
       } label: {
         Image(systemName: "at")
-          .foregroundStyle(postFilterService.canMentionUser("") ? .blue : .gray)
+          .foregroundColor(postFilterService.canMentionUser("") ? .blue : .gray)
       }
       .disabled(!postFilterService.canMentionUser(""))
     }
@@ -69,14 +69,14 @@ struct ComposerToolbarView: ToolbarContent {
         insertText("#")
       } label: {
         Image(systemName: "tag")
-          .foregroundStyle(.blue)
+          .foregroundColor(.blue)
       }
     }
 
     ToolbarItem(placement: .keyboard) {
       let text = String(text.characters)
       Text("\(300 - text.count)")
-        .foregroundStyle(text.count > 250 ? .red : .blue)
+        .foregroundColor(text.count > 250 ? .red : .blue)
         .font(.subheadline)
         .contentTransition(.numericText(value: Double(text.count)))
         .monospacedDigit()

@@ -18,32 +18,34 @@ struct ComposerTextEditorView: View {
   var body: some View {
     ZStack(alignment: .topLeading) {
       VStack(spacing: 0) {
-        TextEditor(text: $text, selection: $selection)
-          .textInputFormattingControlVisibility(.hidden, for: .all)
-          .font(.system(size: 20))
-          .frame(maxWidth: .infinity)
-          .padding()
-          .focused($isFocused)
-          .textEditorStyle(.plain)
-          .disabled(sendState == .loading)
-          .attributedTextFormattingDefinition(ComposerFormattingDefinition())
-          .onAppear {
-            isFocused = true
-            setupAutocompleteService()
-          }
-          .onChange(of: text, initial: true) { oldValue, newValue in
-            isPlaceholder = newValue.characters.isEmpty
-            processor.processText(&text)
-            checkForAutocomplete()
-          }
-
-        if isPlaceholder {
-          Text("What's on your mind?")
+        ZStack(alignment: .topLeading) {
+          TextEditor(text: $text, selection: $selection)
+            .textInputFormattingControlVisibility(.hidden, for: .all)
             .font(.system(size: 20))
-            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity)
             .padding()
-            .padding(.top, 6)
-            .padding(.leading, 8)
+            .focused($isFocused)
+            .textEditorStyle(.plain)
+            .disabled(sendState == .loading)
+            .attributedTextFormattingDefinition(ComposerFormattingDefinition())
+            .onAppear {
+              isFocused = true
+              setupAutocompleteService()
+            }
+            .onChange(of: text, initial: true) { oldValue, newValue in
+              isPlaceholder = newValue.characters.isEmpty
+              processor.processText(&text)
+              checkForAutocomplete()
+            }
+
+          if isPlaceholder {
+            Text("What's on your mind?")
+              .font(.system(size: 20))
+              .foregroundStyle(.secondary)
+              .padding()
+              .padding(.top, 8)
+              .allowsHitTesting(false)
+          }
         }
 
         // Autocomplete overlay
