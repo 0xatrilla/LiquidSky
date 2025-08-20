@@ -196,6 +196,30 @@ struct LiquidSkyApp: App {
           ProfileView(profile: profile, isCurrentUser: false)
             .environment(appState.client)
             .environment(appState.currentUser)
+        case .feed(let feed):
+          // For now, show a placeholder view - we'll implement proper feed view later
+          VStack {
+            Text("Feed: \(feed.displayName)")
+              .font(.title)
+            Text("URI: \(feed.uri)")
+              .font(.caption)
+              .foregroundStyle(.secondary)
+          }
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
+        case .post(let post):
+          // For now, show a placeholder view - we'll implement proper post view later
+          VStack {
+            Text("Post")
+              .font(.title)
+            Text("URI: \(post.uri)")
+              .font(.caption)
+              .foregroundStyle(.secondary)
+            if !post.content.isEmpty {
+              Text(post.content)
+                .padding()
+            }
+          }
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
       }
       .onAppear {
