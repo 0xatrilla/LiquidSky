@@ -35,6 +35,7 @@ struct AppTabView: View {
     }
     .searchable(text: $searchText)
     .tint(.themePrimary)
+    .tabBarMinimizeBehavior(.onScrollDown)
     .onChange(
       of: router.selectedTab,
       { oldTab, newTab in

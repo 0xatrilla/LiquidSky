@@ -35,7 +35,6 @@ public struct FeedsListView: View {
     }
     .screenContainer()
     .scrollDismissesKeyboard(.immediately)
-    // Enable proper scroll behavior and tab bar collapse
     .scrollContentBackground(.hidden)
     .scrollIndicators(.hidden)
     .task(id: filter) {
@@ -43,7 +42,7 @@ public struct FeedsListView: View {
       await loadFeedsForCurrentFilter()
     }
     .onAppear {
-      // No initialization needed for local filtering
+      // No initialization needed here
     }
   }
 
