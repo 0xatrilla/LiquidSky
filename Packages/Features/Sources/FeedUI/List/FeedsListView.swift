@@ -16,15 +16,9 @@ public struct FeedsListView: View {
 
   @State var isRecentFeedExpanded: Bool = true
 
-  @State var isInSearch: Bool = false
-  @State var searchText: String = ""
-
   @State var error: Error?
 
-  @FocusState var isSearchFocused: Bool
-
   public init() {
-    // No initialization needed for local filtering
   }
 
   public var body: some View {
@@ -36,39 +30,27 @@ public struct FeedsListView: View {
           await fetchSuggestedFeed()
         }
       }
-      if !isInSearch {
-        FeedsListRecentSection(isRecentFeedExpanded: $isRecentFeedExpanded)
-      }
+      FeedsListRecentSection(isRecentFeedExpanded: $isRecentFeedExpanded)
       feedsSection
     }
     .screenContainer()
     .scrollDismissesKeyboard(.immediately)
+    // Enable proper scroll behavior and tab bar collapse
+    .scrollContentBackground(.hidden)
+    .scrollIndicators(.hidden)
     .task(id: filter) {
-      guard !isInSearch else { return }
       print("Filter changed to: \(filter)")
       await loadFeedsForCurrentFilter()
     }
     .onAppear {
       // No initialization needed for local filtering
     }
-    .onChange(of: searchText) {
-      // Local filtering is handled in the view body
-      // No need to call external search service
-    }
-    .modifier(FeedsListNavigationBarModifier())
   }
 
   private var headerView: some View {
     FeedsListTitleView(
-      filter: $filter,
-      searchText: $searchText,
-      isInSearch: $isInSearch,
-      isSearchFocused: $isSearchFocused
+      filter: $filter
     )
-    .onChange(of: isInSearch, initial: false) {
-      guard !isInSearch else { return }
-      Task { await fetchSuggestedFeed() }
-    }
     .onChange(of: currentUser.savedFeeds.count) {
       print("Saved feeds count changed: \(currentUser.savedFeeds.count)")
       switch filter {
@@ -95,7 +77,7 @@ public struct FeedsListView: View {
         }
         .padding()
         .frame(maxWidth: .infinity)
-      } else if feeds.isEmpty && searchText.isEmpty {
+      } else if feeds.isEmpty {
         VStack(spacing: 16) {
           Image(
             systemName: filter == .myFeeds
@@ -120,37 +102,8 @@ public struct FeedsListView: View {
         .padding()
         .frame(maxWidth: .infinity)
       } else {
-        // Show filtered feeds based on search text
-        let filteredFeeds =
-          searchText.isEmpty
-          ? feeds
-          : feeds.filter { feed in
-            feed.displayName.localizedCaseInsensitiveContains(searchText)
-              || feed.description?.localizedCaseInsensitiveContains(searchText) == true
-          }
-
-        if filteredFeeds.isEmpty && !searchText.isEmpty {
-          // No feeds match the search
-          VStack(spacing: 16) {
-            Image(systemName: "magnifyingglass")
-              .font(.system(size: 48))
-              .foregroundColor(.secondary)
-
-            Text("No feeds found")
-              .font(.title2)
-              .fontWeight(.semibold)
-
-            Text("Try adjusting your search terms")
-              .font(.body)
-              .foregroundColor(.secondary)
-          }
-          .padding()
-          .frame(maxWidth: .infinity)
-        } else {
-          // Show filtered feeds
-          ForEach(filteredFeeds) { feed in
-            FeedRowView(feed: feed)
-          }
+        ForEach(feeds, id: \.uri) { feed in
+          FeedRowView(feed: feed)
         }
       }
     }
@@ -228,21 +181,5 @@ extension FeedsListView {
         self.feeds = []
       }
     }
-  }
-}
-
-// MARK: - Navigation Bar Modifier
-
-struct FeedsListNavigationBarModifier: ViewModifier {
-  func body(content: Content) -> some View {
-    #if os(iOS)
-      content
-        .navigationBarTitleDisplayMode(.large)
-        .navigationTitle("Discover")
-        .navigationBarHidden(false)
-    #else
-      content
-        .navigationTitle("Discover")
-    #endif
   }
 }

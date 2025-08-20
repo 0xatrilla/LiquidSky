@@ -4,6 +4,7 @@ import AuthUI
 import Client
 import ComposerUI
 import Destinations
+import FeedUI
 import MediaUI
 import Models
 import SwiftUI
@@ -38,6 +39,10 @@ public struct SheetDestinations: ViewModifier {
           .onDisappear {
             print("SheetDestinations: Auth sheet container disappeared")
           }
+        case .feedsList:
+          FeedsListView()
+            .environment(client)
+            .environment(currentUser)
         case .fullScreenMedia(let images, let preloadedImage, let namespace):
           FullScreenMediaView(
             images: images,

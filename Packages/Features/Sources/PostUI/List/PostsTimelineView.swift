@@ -1,17 +1,33 @@
 @preconcurrency import ATProtoKit
+import AppRouter
 import Client
 import DesignSystem
+import Destinations
 import Models
 import SwiftUI
 import User
 
 public struct PostsTimelineView: View {
   @Environment(BSkyClient.self) var client
+  @Environment(AppRouter.self) var router
 
   public init() {}
 
   public var body: some View {
     PostListView(datasource: self)
+      .navigationTitle("Following")
+      .navigationBarTitleDisplayMode(.large)
+      .toolbar {
+        ToolbarItem(placement: .topBarTrailing) {
+          Button(action: {
+            router.presentedSheet = .composer(mode: .newPost)
+          }) {
+            Image(systemName: "square.and.pencil")
+              .font(.title2)
+              .foregroundColor(.themePrimary)
+          }
+        }
+      }
   }
 }
 

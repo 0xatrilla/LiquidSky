@@ -11,12 +11,6 @@ import User
 public struct PostListView: View {
   let datasource: PostsListViewDatasource
   @State private var state: PostsListViewState = .uninitialized
-  @State private var searchText = ""
-  @State private var isInSearch = false
-  @State private var searchResults = SearchResults()
-  @State private var isSearching = false
-  @State private var searchService: UnifiedSearchService?
-  @FocusState var isSearchFocused: Bool
   @Environment(AppRouter.self) var router
   @Environment(BSkyClient.self) var client
 
@@ -29,15 +23,8 @@ public struct PostListView: View {
 
   public var body: some View {
     VStack(spacing: 0) {
-      // Search Results Overlay (when searching)
-      if !searchText.isEmpty {
-        searchResultsOverlay
-      }
-
       // Feed view with header inside ScrollView
       feedListView
-        .opacity(searchText.isEmpty ? 1.0 : 0.3)
-        .allowsHitTesting(searchText.isEmpty)
     }
     .screenContainer()
     .scrollDismissesKeyboard(.immediately)
@@ -47,93 +34,9 @@ public struct PostListView: View {
         state = await datasource.loadPosts(with: state)
       }
     }
-    .onAppear {
-      setupSearchService()
-    }
     .refreshable {
       state = .loading
       state = await datasource.loadPosts(with: state)
-    }
-    .onChange(of: searchText) { _, newValue in
-      if !newValue.isEmpty {
-        Task {
-          await performSearch()
-        }
-      } else {
-        clearSearch()
-      }
-    }
-  }
-
-  private var headerView: some View {
-    HStack(alignment: .center) {
-      // Title on the left (static, no shrinking)
-      VStack(alignment: .leading, spacing: 2) {
-        Text(datasource.title)
-          .headerTitleShadow()
-          .font(.system(size: 34, weight: .bold))
-      }
-      .offset(x: isInSearch ? -200 : 0)
-      .opacity(isInSearch ? 0 : 1)
-
-      Spacer()
-
-      // Search bar on the right (static, no shrinking)
-      searchBarView
-        .padding(.leading, isInSearch ? -120 : 0)
-        .contentShape(Rectangle())
-        .onTapGesture {
-          withAnimation(.bouncy) {
-            isInSearch.toggle()
-            isSearchFocused = true
-          }
-        }
-        .transition(.slide)
-    }
-    .animation(.bouncy, value: isInSearch)
-    .padding(.horizontal, 16)
-    .padding(.top, 8)
-  }
-
-  private var searchBarView: some View {
-    // Always show the full search bar instead of collapsing
-    GlassEffectContainer {
-      HStack {
-        HStack {
-          Image(systemName: "magnifyingglass")
-          TextField("Search Users...", text: $searchText)
-            .focused($isSearchFocused)
-            .allowsHitTesting(isInSearch)
-            .onChange(of: searchText) { _, newValue in
-              if !newValue.isEmpty {
-                Task {
-                  await performSearch()
-                }
-              } else {
-                clearSearch()
-              }
-            }
-        }
-        .frame(maxWidth: isInSearch ? .infinity : 100)
-        .padding()
-        .glassEffect(in: Capsule())
-
-        if isInSearch {
-          Button {
-            withAnimation {
-              isInSearch.toggle()
-              isSearchFocused = false
-              searchText = ""
-              clearSearch()
-            }
-          } label: {
-            Image(systemName: "xmark")
-              .frame(width: 50, height: 50)
-              .foregroundStyle(.blue)
-              .glassEffect(in: Circle())
-          }
-        }
-      }
     }
   }
 
@@ -141,9 +44,6 @@ public struct PostListView: View {
     ScrollViewReader { proxy in
       ScrollView {
         LazyVStack(spacing: 16) {
-          // Header at the top of the ScrollView
-          headerView
-
           switch state {
           case .loading, .uninitialized:
             placeholderView
@@ -194,36 +94,6 @@ public struct PostListView: View {
         // Header will scroll naturally with content
       }
     }
-  }
-
-  private func setupSearchService() {
-    // Use the client from environment
-    searchService = UnifiedSearchService(client: client)
-  }
-
-  private func performSearch() async {
-    guard let searchService = searchService else { return }
-
-    isSearching = true
-
-    // Search for all types but we'll only display users
-    await searchService.search(query: searchText)
-
-    // Update our local state with only user results
-    await MainActor.run {
-      searchResults = SearchResults(
-        posts: [],
-        users: searchService.searchResults.users,
-        feeds: []
-      )
-      isSearching = false
-    }
-  }
-
-  private func clearSearch() {
-    searchText = ""
-    searchResults = SearchResults()
-    searchService?.clearSearch()
   }
 
   private func filteredPosts(_ posts: [PostItem]) -> [PostItem] {
@@ -384,77 +254,6 @@ public struct PostListView: View {
         .redacted(reason: .placeholder)
         .allowsHitTesting(false)
     }
-  }
-
-  private var searchResultsOverlay: some View {
-    VStack(spacing: 0) {
-      if isSearching {
-        // Loading state
-        HStack(spacing: 12) {
-          ProgressView()
-            .scaleEffect(0.8)
-          Text("Searching...")
-            .font(.body)
-            .foregroundColor(.secondary)
-          Spacer()
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(.ultraThinMaterial)
-        .cornerRadius(12)
-        .padding(.horizontal, 16)
-        .padding(.bottom, 12)
-      } else if searchResults.hasResults {
-        // Search results
-        ScrollView {
-          LazyVStack(spacing: 0) {
-            // Users section only
-            if !searchResults.users.isEmpty {
-              SearchSectionHeader(title: "Users", count: searchResults.users.count)
-              ForEach(searchResults.users) { user in
-                UserSearchResultRow(user: user)
-                  .onTapGesture {
-                    onUserTap(user)
-                  }
-              }
-            }
-          }
-          .padding(.horizontal, 16)
-          .padding(.vertical, 12)
-        }
-        .background(.ultraThinMaterial)
-        .cornerRadius(12)
-        .padding(.horizontal, 16)
-        .padding(.bottom, 12)
-        .frame(maxHeight: 400)
-      } else if !searchText.isEmpty {
-        // No results state
-        HStack(spacing: 12) {
-          Image(systemName: "magnifyingglass")
-            .foregroundColor(.secondary)
-          Text("No results found")
-            .font(.body)
-            .foregroundColor(.secondary)
-          Spacer()
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(.ultraThinMaterial)
-        .cornerRadius(12)
-        .padding(.horizontal, 16)
-        .padding(.bottom, 12)
-      }
-    }
-  }
-
-  // MARK: - Search Result Row Components
-
-  private func onUserTap(_ user: Profile) {
-    // Navigate to user profile
-    // print("Navigate to user: \(user.handle)")
-    // Clear search and navigate to profile
-    clearSearch()
-    router.navigateTo(.profile(user))
   }
 }
 
