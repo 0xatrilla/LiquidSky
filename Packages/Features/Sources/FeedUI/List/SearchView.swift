@@ -215,12 +215,14 @@ public struct SearchView: View {
                 SearchSectionHeader(title: "Users", count: results.users.count)
                 ForEach(results.users) { user in
                   Button(action: {
-                    // Navigate to user profile by switching to profile tab
-                    router.selectedTab = .profile
-                    // Store the user to navigate to in UserDefaults for now
-                    // This is a temporary solution until we can implement proper navigation
-                    UserDefaults.standard.set(user.handle, forKey: "search_navigate_to_user")
-                    print("Navigate to user: \(user.handle)")
+                    // Navigate to user profile by presenting as sheet
+                    // The search results already contain Profile objects, so use them directly
+                    guard !user.did.isEmpty, !user.handle.isEmpty else {
+                      return
+                    }
+
+                    // Present the profile sheet
+                    router.presentedSheet = .profile(user)
                   }) {
                     UserSearchResultRow(user: user)
                   }
@@ -233,12 +235,17 @@ public struct SearchView: View {
                 SearchSectionHeader(title: "Feeds", count: results.feeds.count)
                 ForEach(results.feeds) { feed in
                   Button(action: {
-                    // Navigate to feed by switching to feed tab
-                    router.selectedTab = .feed
-                    // Store the feed to navigate to in UserDefaults for now
-                    // This is a temporary solution until we can implement proper navigation
-                    UserDefaults.standard.set(feed.uri, forKey: "search_navigate_to_feed")
-                    print("Navigate to feed: \(feed.displayName)")
+                    // Navigate to feed by presenting as sheet
+                    let feedItem = FeedItem(
+                      uri: feed.uri,
+                      displayName: feed.displayName,
+                      description: feed.description,
+                      avatarImageURL: feed.avatarURL,
+                      creatorHandle: feed.creatorHandle,
+                      likesCount: feed.likesCount,
+                      liked: feed.isLiked
+                    )
+                    router.presentedSheet = .feed(feedItem)
                   }) {
                     FeedSearchResultRow(feed: feed)
                   }
@@ -251,12 +258,9 @@ public struct SearchView: View {
                 SearchSectionHeader(title: "Posts", count: results.posts.count)
                 ForEach(results.posts) { post in
                   Button(action: {
-                    // Navigate to post by switching to feed tab (posts are displayed in feeds)
-                    router.selectedTab = .feed
-                    // Store the post to navigate to in UserDefaults for now
-                    // This is a temporary solution until we can implement proper navigation
-                    UserDefaults.standard.set(post.uri, forKey: "search_navigate_to_post")
-                    print("Navigate to post: \(post.uri)")
+                    // Navigate to post by presenting as sheet
+                    // The post is already a PostItem, so we can use it directly
+                    router.presentedSheet = .post(post)
                   }) {
                     PostSearchResultRow(post: post)
                   }

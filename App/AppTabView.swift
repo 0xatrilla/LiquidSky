@@ -1,12 +1,12 @@
 import AppRouter
+import AuthUI
+import ComposerUI
 import DesignSystem
 import Destinations
 import FeedUI
-import SwiftUI
-import AuthUI
 import MediaUI
-import ComposerUI
 import ProfileUI
+import SwiftUI
 
 struct AppTabView: View {
   @Environment(AppRouter.self) var router
@@ -67,14 +67,40 @@ struct AppTabView: View {
         ComposerView(mode: composerMode)
       case .profile(let profile):
         ProfileView(profile: profile, isCurrentUser: false)
+      case .feed(let feed):
+        // For now, show a placeholder view - we'll implement proper feed view later
+        VStack {
+          Text("Feed: \(feed.displayName)")
+            .font(.title)
+          Text("URI: \(feed.uri)")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+      case .post(let post):
+        // For now, show a placeholder view - we'll implement proper post view later
+        VStack {
+          Text("Post")
+            .font(.title)
+          Text("URI: \(post.uri)")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+          if !post.content.isEmpty {
+            Text(post.content)
+              .font(.body)
+              .padding()
+          }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
       }
     }
   }
 }
 
 // MARK: - Helper Functions
-private extension AppTabView {
-  func convertToComposerMode(_ destinationMode: ComposerDestinationMode) -> ComposerMode {
+extension AppTabView {
+  fileprivate func convertToComposerMode(_ destinationMode: ComposerDestinationMode) -> ComposerMode
+  {
     switch destinationMode {
     case .newPost:
       return .newPost

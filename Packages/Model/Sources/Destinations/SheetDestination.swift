@@ -24,4 +24,6 @@ public enum SheetDestination: SheetType, Hashable, Identifiable {
     namespace: Namespace.ID)
   case composer(mode: ComposerDestinationMode)
   case profile(Profile)
+  case feed(FeedItem)
+  case post(PostItem)
 }
