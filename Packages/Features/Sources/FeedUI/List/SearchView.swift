@@ -1,12 +1,16 @@
+import AppRouter
 import ATProtoKit
 import Client
 import DesignSystem
+import Destinations
 import Models
 import SwiftUI
 
 public struct SearchView: View {
   @State private var searchService: UnifiedSearchService
   @State private var searchText: String = ""
+  @Environment(AppRouter.self) var router
+  @Environment(BSkyClient.self) var client
 
   public init() {
     self._searchService = State(initialValue: UnifiedSearchService())
@@ -38,6 +42,10 @@ public struct SearchView: View {
           await searchService.search(query: searchText)
         }
       }
+    }
+    .onAppear {
+      // Set the client when the view appears
+      searchService.client = client
     }
   }
 
@@ -98,21 +106,43 @@ public struct SearchView: View {
   private func searchResultsView(results: SearchResults) -> some View {
     VStack(spacing: 0) {
       if results.hasResults {
-        SearchResultsView(
-          searchResults: results,
-          onUserTap: { user in
-            // Handle user tap - navigate to profile
-            print("User tapped: \(user.handle)")
-          },
-          onFeedTap: { feed in
-            // Handle feed tap - navigate to feed
-            print("Feed tapped: \(feed.displayName)")
-          },
-          onPostTap: { post in
-            // Handle post tap - navigate to post detail
-            print("Post tapped: \(post.uri)")
+        ScrollView {
+          LazyVStack(spacing: 16) {
+            // Users section
+            if !results.users.isEmpty {
+              SearchSectionHeader(title: "Users", count: results.users.count)
+              ForEach(results.users) { user in
+                NavigationLink(value: RouterDestination.profile(user)) {
+                  UserSearchResultRow(user: user)
+                }
+                .buttonStyle(.plain)
+              }
+            }
+
+            // Feeds section
+            if !results.feeds.isEmpty {
+              SearchSectionHeader(title: "Feeds", count: results.feeds.count)
+              ForEach(results.feeds) { feed in
+                NavigationLink(value: RouterDestination.feed(createFeedItem(from: feed))) {
+                  FeedSearchResultRow(feed: feed)
+                }
+                .buttonStyle(.plain)
+              }
+            }
+
+            // Posts section
+            if !results.posts.isEmpty {
+              SearchSectionHeader(title: "Posts", count: results.posts.count)
+              ForEach(results.posts) { post in
+                NavigationLink(value: RouterDestination.post(post)) {
+                  PostSearchResultRow(post: post)
+                }
+                .buttonStyle(.plain)
+              }
+            }
           }
-        )
+          .padding(.horizontal, 16)
+        }
       } else {
         noResultsView
       }
@@ -171,6 +201,20 @@ public struct SearchView: View {
       searchTerm: "feeds:"
     ),
   ]
+
+  // MARK: - Helper Functions
+
+  private func createFeedItem(from feedSearchResult: FeedSearchResult) -> FeedItem {
+    return FeedItem(
+      uri: feedSearchResult.uri,
+      displayName: feedSearchResult.displayName,
+      description: feedSearchResult.description,
+      avatarImageURL: feedSearchResult.avatarURL,
+      creatorHandle: feedSearchResult.creatorHandle,
+      likesCount: feedSearchResult.likesCount,
+      liked: feedSearchResult.isLiked
+    )
+  }
 }
 
 // MARK: - Search Category Model
@@ -180,6 +224,152 @@ private struct SearchCategory {
   let description: String
   let icon: String
   let searchTerm: String
+}
+
+// MARK: - Search UI Components
+
+private struct SearchSectionHeader: View {
+  let title: String
+  let count: Int
+
+  var body: some View {
+    HStack {
+      Text(title)
+        .font(.headline)
+        .fontWeight(.semibold)
+
+      Spacer()
+
+      Text("\(count)")
+        .font(.caption)
+        .foregroundColor(.secondary)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(8)
+    }
+    .padding(.top, 8)
+  }
+}
+
+private struct UserSearchResultRow: View {
+  let user: Profile
+
+  var body: some View {
+    HStack(spacing: 12) {
+      // Avatar
+      AsyncImage(url: user.avatarImageURL) { phase in
+        switch phase {
+        case .success(let image):
+          image
+            .resizable()
+            .scaledToFit()
+        default:
+          Circle()
+            .fill(Color.gray.opacity(0.3))
+        }
+      }
+      .frame(width: 40, height: 40)
+      .clipShape(Circle())
+
+      // User info
+      VStack(alignment: .leading, spacing: 2) {
+        Text(user.displayName ?? user.handle)
+          .font(.body)
+          .fontWeight(.medium)
+
+        Text("@\(user.handle)")
+          .font(.caption)
+          .foregroundColor(.secondary)
+
+        if let description = user.description, !description.isEmpty {
+          Text(description)
+            .font(.caption)
+            .foregroundColor(.secondary)
+            .lineLimit(2)
+        }
+      }
+
+      Spacer()
+    }
+    .padding(.vertical, 8)
+    .padding(.horizontal, 12)
+    .background(Color.gray.opacity(0.05))
+    .cornerRadius(12)
+    .overlay(
+      RoundedRectangle(cornerRadius: 12)
+        .stroke(Color.gray.opacity(0.2), lineWidth: 0.5)
+    )
+  }
+}
+
+
+
+private struct PostSearchResultRow: View {
+  let post: PostItem
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 8) {
+      // Author info
+      HStack(spacing: 8) {
+        AsyncImage(url: post.author.avatarImageURL) { phase in
+          switch phase {
+          case .success(let image):
+            image
+              .resizable()
+              .scaledToFit()
+          default:
+            Circle()
+              .fill(Color.gray.opacity(0.3))
+          }
+        }
+        .frame(width: 24, height: 24)
+        .clipShape(Circle())
+
+        Text(post.author.displayName ?? post.author.handle)
+          .font(.caption)
+          .fontWeight(.medium)
+
+        Text("@\(post.author.handle)")
+          .font(.caption)
+          .foregroundColor(.secondary)
+
+        Spacer()
+
+        Text(post.indexedAt.relativeFormatted)
+          .font(.caption)
+          .foregroundColor(.secondary)
+      }
+
+      // Post content
+      Text(post.content)
+        .font(.body)
+        .lineLimit(3)
+
+      // Engagement metrics
+      HStack(spacing: 16) {
+        Label("\(post.replyCount)", systemImage: "bubble.left")
+          .font(.caption)
+          .foregroundColor(.secondary)
+
+        Label("\(post.repostCount)", systemImage: "arrow.2.squarepath")
+          .font(.caption)
+          .foregroundColor(.secondary)
+
+        Label("\(post.likeCount)", systemImage: "heart")
+          .font(.caption)
+          .foregroundColor(.secondary)
+      }
+    }
+    .padding(.vertical, 8)
+    .padding(.horizontal, 12)
+    .background(Color.gray.opacity(0.05))
+    .cornerRadius(12)
+    .overlay(
+      RoundedRectangle(cornerRadius: 12)
+        .stroke(Color.gray.opacity(0.2), lineWidth: 0.5)
+    )
+  }
 }
 
 #Preview {

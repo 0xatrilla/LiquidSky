@@ -221,6 +221,8 @@ private struct PostSearchResultRow: View {
   }
 }
 
+
+
 #Preview {
   SearchResultsView(searchResults: SearchResults())
 }
