@@ -31,11 +31,8 @@ public struct ComposerAutocompleteView: View {
           HStack(spacing: 8) {
             // User suggestions (max 3 for compact UI)
             ForEach(autocompleteService.userSuggestions.prefix(3)) { user in
-              CompactSuggestionButton(
-                title: user.displayName ?? user.handle,
-                subtitle: "@\(user.handle)",
-                icon: "person.circle.fill",
-                iconColor: .blue,
+              CompactUserSuggestionButton(
+                user: user,
                 action: {
                   onUserSelected(user)
                 }
@@ -139,6 +136,69 @@ private struct CompactSuggestionButton: View {
             .lineLimit(1)
 
           Text(subtitle)
+            .font(.caption2)
+            .foregroundColor(.secondary)
+            .lineLimit(1)
+        }
+      }
+      .padding(.horizontal, 10)
+      .padding(.vertical, 6)
+      .background(
+        RoundedRectangle(cornerRadius: 10)
+          .fill(.ultraThinMaterial)
+          .overlay(
+            RoundedRectangle(cornerRadius: 10)
+              .stroke(.white.opacity(0.15), lineWidth: 0.5)
+          )
+          .background(
+            RoundedRectangle(cornerRadius: 10)
+              .fill(.ultraThinMaterial.opacity(0.3))
+              .blur(radius: 4)
+          )
+      )
+      .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 1)
+    }
+    .buttonStyle(.plain)
+  }
+}
+
+// MARK: - Compact User Suggestion Button with Avatar
+
+private struct CompactUserSuggestionButton: View {
+  let user: UserSuggestion
+  let action: () -> Void
+
+  var body: some View {
+    Button(action: action) {
+      HStack(spacing: 6) {
+        // User Avatar
+        AsyncImage(url: user.avatarURL) { phase in
+          switch phase {
+          case .success(let image):
+            image
+              .resizable()
+              .aspectRatio(contentMode: .fill)
+              .frame(width: 20, height: 20)
+              .clipShape(Circle())
+          case .failure(_), .empty:
+            Image(systemName: "person.circle.fill")
+              .font(.system(size: 20))
+              .foregroundColor(.blue)
+          @unknown default:
+            Image(systemName: "person.circle.fill")
+              .font(.system(size: 20))
+              .foregroundColor(.blue)
+          }
+        }
+
+        VStack(alignment: .leading, spacing: 1) {
+          Text(user.displayName ?? user.handle)
+            .font(.caption)
+            .fontWeight(.medium)
+            .foregroundColor(.primary)
+            .lineLimit(1)
+
+          Text("@\(user.handle)")
             .font(.caption2)
             .foregroundColor(.secondary)
             .lineLimit(1)
