@@ -23,4 +23,5 @@ public enum SheetDestination: SheetType, Hashable, Identifiable {
     media: Media,
     namespace: Namespace.ID)
   case composer(mode: ComposerDestinationMode)
+  case profile(Profile)
 }

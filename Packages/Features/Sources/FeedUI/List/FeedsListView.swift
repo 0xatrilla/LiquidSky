@@ -42,7 +42,7 @@ public struct FeedsListView: View {
       await loadFeedsForCurrentFilter()
     }
     .onAppear {
-      // No initialization needed here
+      checkForSearchNavigation()
     }
   }
 
@@ -180,5 +180,46 @@ extension FeedsListView {
         self.feeds = []
       }
     }
+  }
+  
+  // MARK: - Search Navigation
+  private func checkForSearchNavigation() {
+    // Check if we have a search navigation target stored
+    if let feedURI = UserDefaults.standard.string(forKey: "search_navigate_to_feed") {
+      // Clear the stored value immediately to prevent re-navigation
+      UserDefaults.standard.removeObject(forKey: "search_navigate_to_feed")
+      
+      // Navigate to the specific feed
+      Task {
+        await navigateToFeed(feedURI)
+      }
+    } else if let postURI = UserDefaults.standard.string(forKey: "search_navigate_to_post") {
+      // Clear the stored value immediately to prevent re-navigation
+      UserDefaults.standard.removeObject(forKey: "search_navigate_to_post")
+      
+      // Navigate to the specific post
+      Task {
+        await navigateToPost(postURI)
+      }
+    }
+  }
+  
+  private func navigateToFeed(_ feedURI: String) async {
+    // Find the feed in the current feeds list
+    if let feed = feeds.first(where: { $0.uri == feedURI }) {
+      // Navigate to the feed using the router
+      await MainActor.run {
+        // For now, just print the action - we'll implement proper navigation later
+        print("Navigate to feed: \(feed.displayName)")
+      }
+    } else {
+      // Feed not found in current list, try to fetch it
+      print("Feed not found in current list: \(feedURI)")
+    }
+  }
+  
+  private func navigateToPost(_ postURI: String) async {
+    // For now, just print the action - we'll implement proper navigation later
+    print("Navigate to post: \(postURI)")
   }
 }

@@ -3,6 +3,10 @@ import DesignSystem
 import Destinations
 import FeedUI
 import SwiftUI
+import AuthUI
+import MediaUI
+import ComposerUI
+import ProfileUI
 
 struct AppTabView: View {
   @Environment(AppRouter.self) var router
@@ -36,16 +40,47 @@ struct AppTabView: View {
     .searchable(text: $searchText)
     .tint(.themePrimary)
     .tabBarMinimizeBehavior(.onScrollDown)
-    .onChange(
-      of: router.selectedTab,
-      { oldTab, newTab in
-        if newTab == .compose {
-          router.presentedSheet = .composer(mode: .newPost)
-          DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            router.selectedTab = oldTab
-          }
-        }
-      })
+    .sheet(item: $router.presentedSheet) { sheetDestination in
+      switch sheetDestination {
+      case .auth:
+        AuthView()
+      case .feedsList:
+        FeedsListView()
+      case .fullScreenMedia(let images, let preloadedImage, let namespace):
+        FullScreenMediaView(
+          images: images,
+          preloadedImage: preloadedImage,
+          namespace: namespace
+        )
+      case .fullScreenProfilePicture(let imageURL, let namespace):
+        FullScreenProfilePictureView(
+          imageURL: imageURL,
+          namespace: namespace
+        )
+      case .fullScreenVideo(let media, let namespace):
+        FullScreenVideoView(
+          media: media,
+          namespace: namespace
+        )
+      case .composer(let mode):
+        let composerMode = convertToComposerMode(mode)
+        ComposerView(mode: composerMode)
+      case .profile(let profile):
+        ProfileView(profile: profile, isCurrentUser: false)
+      }
+    }
+  }
+}
+
+// MARK: - Helper Functions
+private extension AppTabView {
+  func convertToComposerMode(_ destinationMode: ComposerDestinationMode) -> ComposerMode {
+    switch destinationMode {
+    case .newPost:
+      return .newPost
+    case .reply(let post):
+      return .reply(post)
+    }
   }
 }
 
