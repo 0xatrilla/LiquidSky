@@ -7,6 +7,7 @@ import Destinations
 import FeedUI
 import MediaUI
 import Models
+import ProfileUI
 import SwiftUI
 import User
 
@@ -76,6 +77,10 @@ public struct SheetDestinations: ViewModifier {
                 .environment(router)
             }
           }
+        case .profile(let profile):
+          ProfileView(profile: profile, isCurrentUser: false)
+            .environment(client)
+            .environment(currentUser)
         }
       }
       .onChange(of: router.presentedSheet) {

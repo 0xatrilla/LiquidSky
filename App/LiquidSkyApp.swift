@@ -11,6 +11,7 @@ import MediaUI
 import Models
 import Nuke
 import NukeUI
+import ProfileUI
 import SwiftUI
 import User
 import WidgetKit
@@ -191,6 +192,10 @@ struct LiquidSkyApp: App {
                 .environment(router)
             }
           }
+        case .profile(let profile):
+          ProfileView(profile: profile, isCurrentUser: false)
+            .environment(appState.client)
+            .environment(appState.currentUser)
         }
       }
       .onAppear {
