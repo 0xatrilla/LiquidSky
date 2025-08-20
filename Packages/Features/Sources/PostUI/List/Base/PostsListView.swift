@@ -28,6 +28,8 @@ public struct PostListView: View {
     }
     .screenContainer()
     .scrollDismissesKeyboard(.immediately)
+    .scrollContentBackground(.hidden)
+    .scrollIndicators(.hidden)
     .task {
       if case .uninitialized = state {
         state = .loading

@@ -36,9 +36,7 @@ struct AppTabRootView: View {
             }
           }
         }
-        // Enable proper scroll behavior and tab bar collapse
-        .scrollContentBackground(.hidden)
-        .scrollIndicators(.hidden)
+
     }
   }
 }
