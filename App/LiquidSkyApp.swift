@@ -6,6 +6,7 @@ import Client
 import ComposerUI
 import DesignSystem
 import Destinations
+import FeedUI
 import MediaUI
 import Models
 import Nuke
@@ -153,6 +154,10 @@ struct LiquidSkyApp: App {
             .onDisappear {
               print("Direct sheet: Enhanced login screen disappeared")
             }
+        case .feedsList:
+          FeedsListView()
+            .environment(appState.client)
+            .environment(appState.currentUser)
         case .fullScreenMedia(let images, let preloadedImage, let namespace):
           FullScreenMediaView(
             images: images,

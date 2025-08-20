@@ -1,6 +1,8 @@
 @preconcurrency import ATProtoKit
+import AppRouter
 import Client
 import DesignSystem
+import Destinations
 import Models
 import SwiftData
 import SwiftUI
@@ -9,6 +11,7 @@ import User
 public struct PostsFeedView: View {
   @Environment(BSkyClient.self) var client
   @Environment(\.modelContext) var modelContext
+  @Environment(AppRouter.self) var router
 
   private let feedItem: FeedItem
 
@@ -18,6 +21,19 @@ public struct PostsFeedView: View {
 
   public var body: some View {
     PostListView(datasource: self)
+      .navigationTitle(feedItem.displayName)
+      .navigationBarTitleDisplayMode(.large)
+      .toolbar {
+        ToolbarItem(placement: .topBarTrailing) {
+          Button(action: {
+            router.presentedSheet = .composer(mode: .newPost)
+          }) {
+            Image(systemName: "square.and.pencil")
+              .font(.title2)
+              .foregroundColor(.themePrimary)
+          }
+        }
+      }
       .onAppear {
         updateRecentlyViewed()
       }

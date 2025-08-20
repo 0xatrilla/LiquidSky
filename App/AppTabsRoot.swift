@@ -1,10 +1,10 @@
 import AppRouter
 import Auth
+import Client
 import DesignSystem
 import Destinations
 import FeedUI
 import Models
-import Client
 import NotificationsUI
 import PostUI
 import ProfileUI
@@ -12,28 +12,69 @@ import SettingsUI
 import SwiftUI
 
 struct AppTabRootView: View {
-  @Environment(AppRouter.self) var router
-
+  let router: AppRouter
   let tab: AppTab
 
   var body: some View {
     @Bindable var router = router
 
-    GeometryReader { _ in
-      NavigationStack(path: $router[tab]) {
-        tab.rootView
-          .navigationBarHidden(true)
-          .withAppDestinations()
-          .environment(\.currentTab, tab)
-      }
+    NavigationStack(path: $router[tab]) {
+      tab.rootView()
+        .withAppDestinations()
+        .environment(\.currentTab, tab)
+        .modifier(FeedTabNavigationModifier(tab: tab))
+        .toolbar {
+          ToolbarItem(placement: .topBarTrailing) {
+            if tab == .feed {
+              Button(action: {
+                router.presentedSheet = .composer(mode: .newPost)
+              }) {
+                Image(systemName: "square.and.pencil")
+                  .font(.title2)
+                  .foregroundColor(.themePrimary)
+              }
+            }
+          }
+        }
+        // Enable proper scroll behavior and tab bar collapse
+        .scrollContentBackground(.hidden)
+        .scrollIndicators(.hidden)
     }
-    .ignoresSafeArea()
+  }
+}
+
+// MARK: - Navigation Modifier
+
+struct FeedTabNavigationModifier: ViewModifier {
+  let tab: AppTab
+
+  func body(content: Content) -> some View {
+    switch tab {
+    case .feed:
+      content
+        .navigationTitle("Discover")
+        .navigationBarTitleDisplayMode(.large)
+    case .profile:
+      content
+        .navigationTitle("Profile")
+        .navigationBarTitleDisplayMode(.large)
+    case .notification:
+      content
+        .navigationTitle("Notifications")
+        .navigationBarTitleDisplayMode(.large)
+    case .settings:
+      content
+        .navigationTitle("Settings")
+        .navigationBarTitleDisplayMode(.large)
+    case .compose:
+      content
+    }
   }
 }
 
 extension AppTab {
   @ViewBuilder
-  fileprivate var rootView: some View {
+  fileprivate func rootView() -> some View {
     switch self {
     case .feed:
       FeedsListView()

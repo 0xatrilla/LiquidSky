@@ -1,25 +1,40 @@
 import AppRouter
 import DesignSystem
 import Destinations
+import FeedUI
 import SwiftUI
 
 struct AppTabView: View {
   @Environment(AppRouter.self) var router
-  let tabs: [AppTab] = AppTab.allCases
+  @State private var searchText: String = ""
 
   var body: some View {
     @Bindable var router = router
-    TabView(selection: $router.selectedTab) {
-      ForEach(AppTab.allCases) { tab in
-        Tab(value: tab, role: tab == .compose ? .search : .none) {
-          AppTabRootView(tab: tab)
-        } label: {
-          Label(tab.title, systemImage: tab.icon)
+    TabView {
+      Tab("Feed", systemImage: "square.stack") {
+        AppTabRootView(router: router, tab: .feed)
+      }
+      Tab("Notifications", systemImage: "bell") {
+        AppTabRootView(router: router, tab: .notification)
+      }
+      Tab("Profile", systemImage: "person") {
+        AppTabRootView(router: router, tab: .profile)
+      }
+      Tab("Settings", systemImage: "gearshape") {
+        AppTabRootView(router: router, tab: .settings)
+      }
+
+      // Native search tab in tab bar
+      Tab(role: .search) {
+        NavigationStack {
+          SearchView()
+            .navigationTitle("Search")
+            .navigationBarTitleDisplayMode(.large)
         }
       }
     }
-            .tint(.themePrimary)
-    .tabBarMinimizeBehavior(.onScrollDown)
+    .searchable(text: $searchText)
+    .tint(.themePrimary)
     .onChange(
       of: router.selectedTab,
       { oldTab, newTab in
