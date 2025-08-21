@@ -15,70 +15,69 @@ public struct NotificationsListView: View {
   public init() {}
 
   public var body: some View {
-    NavigationView {
-      ZStack {
-        // Simple background
-        Color.clear
+    ZStack {
+      // Simple background
+      Color.clear
 
-        ScrollView {
-          LazyVStack(spacing: 0) {
-            // Notifications content
-            if notificationsGroups.isEmpty {
-              // Empty state
-              VStack(spacing: 20) {
-                Image(systemName: "bell.slash")
-                  .font(.system(size: 48))
-                  .foregroundStyle(.secondary)
-                  .padding(.bottom, 8)
+      ScrollView {
+        LazyVStack(spacing: 0) {
+          // Notifications content
+          if notificationsGroups.isEmpty {
+            // Empty state
+            VStack(spacing: 20) {
+              Image(systemName: "bell.slash")
+                .font(.system(size: 48))
+                .foregroundStyle(.secondary)
+                .padding(.bottom, 8)
 
-                Text("No notifications yet")
-                  .font(.title2)
-                  .fontWeight(.semibold)
-                  .foregroundStyle(.primary)
+              Text("No notifications yet")
+                .font(.title2)
+                .fontWeight(.semibold)
+                .foregroundStyle(.primary)
 
-                Text("When you get notifications, they'll appear here")
-                  .font(.subheadline)
-                  .foregroundStyle(.secondary)
-                  .multilineTextAlignment(.center)
+              Text("When you get notifications, they'll appear here")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 40)
+            .padding(.horizontal, 20)
+            .padding(.horizontal, 16)
+          } else {
+            // Notifications list
+            LazyVStack(spacing: 0) {
+              ForEach(notificationsGroups, id: \.id) { group in
+                NotificationRow(group: group)
               }
-              .frame(maxWidth: .infinity)
-              .padding(.vertical, 40)
-              .padding(.horizontal, 20)
-              .padding(.horizontal, 16)
-            } else {
-              // Notifications list
-              LazyVStack(spacing: 0) {
-                ForEach(notificationsGroups, id: \.id) { group in
-                  NotificationRow(group: group)
-                }
 
-                // Load more indicator
-                if cursor != nil {
-                  HStack {
-                    Spacer()
-                    ProgressView()
-                      .scaleEffect(0.8)
-                      .padding(.vertical, 16)
-                    Spacer()
-                  }
-                  .padding(.vertical, 20)
-                  .task {
-                    await fetchNotifications()
-                  }
+              // Load more indicator
+              if cursor != nil {
+                HStack {
+                  Spacer()
+                  ProgressView()
+                    .scaleEffect(0.8)
+                    .padding(.vertical, 16)
+                  Spacer()
+                }
+                .padding(.vertical, 20)
+                .task {
+                  await fetchNotifications()
                 }
               }
             }
           }
         }
-        .modifier(NavigationBarModifier())
-        .task {
-          cursor = nil
-          await fetchNotifications()
-        }
-        .refreshable {
-          cursor = nil
-          await fetchNotifications()
-        }
+      }
+      .navigationTitle("Notifications")
+      .navigationBarTitleDisplayMode(.large)
+      .task {
+        cursor = nil
+        await fetchNotifications()
+      }
+      .refreshable {
+        cursor = nil
+        await fetchNotifications()
       }
     }
   }
@@ -102,22 +101,6 @@ public struct NotificationsListView: View {
     } catch {
       print(error)
     }
-  }
-}
-
-// MARK: - Navigation Bar Modifier
-
-struct NavigationBarModifier: ViewModifier {
-  func body(content: Content) -> some View {
-    #if os(iOS)
-      content
-        .navigationBarTitleDisplayMode(.large)
-        .navigationTitle("Notifications")
-        .navigationBarHidden(false)
-    #else
-      content
-        .navigationTitle("Notifications")
-    #endif
   }
 }
 
