@@ -31,44 +31,39 @@ public struct SettingsView: View {
   }
 
   public var body: some View {
-    NavigationView {
-      ScrollView {
-        VStack(spacing: 24) {
-          // Header
-          HeaderView(title: "Settings", showBack: false)
-            .padding(.horizontal, 16)
+    ScrollView {
+      VStack(spacing: 24) {
+        // Current Account Header
+        CurrentAccountHeader()
+          .padding(.horizontal, 16)
+          .onTapGesture {
+            showingAccountSwitcher = true
+          }
 
-          // Current Account Header
-          CurrentAccountHeader()
-            .padding(.horizontal, 16)
-            .onTapGesture {
-              showingAccountSwitcher = true
-            }
+        // Account Section
+        accountSection
 
-          // Account Section
-          accountSection
+        // Display Section
+        displaySection
 
-          // Display Section
-          displaySection
+        // Content Section
+        contentSection
 
-          // Content Section
-          contentSection
+        // Media Section
+        mediaSection
 
-          // Media Section
-          mediaSection
+        // About Section
+        aboutSection
 
-          // About Section
-          aboutSection
-
-          // Sign Out Button
-          signOutButton
-            .padding(.horizontal, 16)
-            .padding(.bottom, 32)
-        }
+        // Sign Out Button
+        signOutButton
+          .padding(.horizontal, 16)
+          .padding(.bottom, 32)
       }
-      .background(Color(.systemGroupedBackground))
-      .navigationBarHidden(true)
     }
+    .background(Color(.systemGroupedBackground))
+    .navigationTitle("Settings")
+    .navigationBarTitleDisplayMode(.large)
     .alert("Reset Settings", isPresented: $showingResetAlert) {
       Button("Cancel", role: .cancel) {}
       Button("Reset", role: .destructive) {
