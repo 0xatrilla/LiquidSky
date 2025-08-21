@@ -87,20 +87,20 @@ struct AppTabView: View {
                   .foregroundStyle(.blue)
               }
             }
-
+            
             VStack(alignment: .leading, spacing: 4) {
               Text(feed.displayName)
                 .font(.title2)
                 .fontWeight(.semibold)
-
+              
               Text("by @\(feed.creatorHandle)")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             }
-
+            
             Spacer()
           }
-
+          
           // Feed description
           if let description = feed.description, !description.isEmpty {
             Text(description)
@@ -108,23 +108,23 @@ struct AppTabView: View {
               .lineLimit(nil)
               .multilineTextAlignment(.leading)
           }
-
+          
           // Feed stats
           HStack(spacing: 24) {
             HStack(spacing: 4) {
               Image(systemName: "heart")
               Text("\(feed.likesCount)")
             }
-
+            
             HStack(spacing: 4) {
               Image(systemName: "list.bullet")
               Text("Feed")
             }
           }
           .foregroundStyle(.secondary)
-
+          
           Spacer()
-
+          
           Button("Done") {
             router.presentedSheet = nil
           }
@@ -151,46 +151,46 @@ struct AppTabView: View {
                   .frame(width: 48, height: 48)
               }
             }
-
+            
             VStack(alignment: .leading, spacing: 4) {
               Text(post.author.displayName ?? post.author.handle)
                 .font(.headline)
                 .fontWeight(.semibold)
-
+              
               Text("@\(post.author.handle)")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             }
-
+            
             Spacer()
           }
-
+          
           // Post content
           Text(post.content)
             .font(.body)
             .lineLimit(nil)
-
+          
           // Post stats
           HStack(spacing: 24) {
             HStack(spacing: 4) {
               Image(systemName: "heart")
               Text("\(post.likeCount)")
             }
-
+            
             HStack(spacing: 4) {
               Image(systemName: "arrow.2.squarepath")
               Text("\(post.repostCount)")
             }
-
+            
             HStack(spacing: 4) {
               Image(systemName: "bubble.left")
               Text("\(post.replyCount)")
             }
           }
           .foregroundStyle(.secondary)
-
+          
           Spacer()
-
+          
           Button("Done") {
             router.presentedSheet = nil
           }
