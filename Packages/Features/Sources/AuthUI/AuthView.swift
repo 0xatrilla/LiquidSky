@@ -39,7 +39,27 @@ public struct AuthView: View {
         }
         .padding(.horizontal, 24)
       }
-      .background(Color(.systemGroupedBackground))
+      .background(
+        ZStack {
+          // Base background (bottom layer)
+          Color(.systemGroupedBackground)
+            .ignoresSafeArea()
+
+          // Static gradient background (on top of base)
+          LinearGradient(
+            colors: [
+              Color.blueskyPrimary.opacity(0.1),
+              Color.blueskyPrimary.opacity(0.05),
+              Color.clear,
+              Color.blueskyPrimary.opacity(0.05),
+              Color.blueskyPrimary.opacity(0.1),
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+          )
+          .ignoresSafeArea()
+        }
+      )
       .navigationBarTitleDisplayMode(.inline)
       .navigationBarBackButtonHidden()
       .sheet(isPresented: $showingSafari) {
