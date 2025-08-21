@@ -197,29 +197,138 @@ struct LiquidSkyApp: App {
             .environment(appState.client)
             .environment(appState.currentUser)
         case .feed(let feed):
-          // For now, show a placeholder view - we'll implement proper feed view later
-          VStack {
-            Text("Feed: \(feed.displayName)")
-              .font(.title)
-            Text("URI: \(feed.uri)")
-              .font(.caption)
-              .foregroundStyle(.secondary)
-          }
-          .frame(maxWidth: .infinity, maxHeight: .infinity)
-        case .post(let post):
-          // For now, show a placeholder view - we'll implement proper post view later
-          VStack {
-            Text("Post")
-              .font(.title)
-            Text("URI: \(post.uri)")
-              .font(.caption)
-              .foregroundStyle(.secondary)
-            if !post.content.isEmpty {
-              Text(post.content)
-                .padding()
+          // Simple feed view to avoid compilation errors
+          VStack(spacing: 20) {
+            // Feed header
+            HStack {
+              AsyncImage(url: feed.avatarImageURL) { phase in
+                switch phase {
+                case .success(let image):
+                  image
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 64, height: 64)
+                    .clipShape(Circle())
+                default:
+                  Image(systemName: "list.bullet.circle.fill")
+                    .font(.system(size: 64))
+                    .foregroundStyle(.blue)
+                }
+              }
+
+              VStack(alignment: .leading, spacing: 4) {
+                Text(feed.displayName)
+                  .font(.title2)
+                  .fontWeight(.semibold)
+
+                Text("by @\(feed.creatorHandle)")
+                  .font(.subheadline)
+                  .foregroundStyle(.secondary)
+              }
+
+              Spacer()
             }
+
+            // Feed description
+            if let description = feed.description, !description.isEmpty {
+              Text(description)
+                .font(.body)
+                .lineLimit(nil)
+                .multilineTextAlignment(.leading)
+            }
+
+            // Feed stats
+            HStack(spacing: 24) {
+              HStack(spacing: 4) {
+                Image(systemName: "heart")
+                Text("\(feed.likesCount)")
+              }
+
+              HStack(spacing: 4) {
+                Image(systemName: "list.bullet")
+                Text("Feed")
+              }
+            }
+            .foregroundStyle(.secondary)
+
+            Spacer()
+
+            Button("Done") {
+              router.presentedSheet = nil
+            }
+            .buttonStyle(.borderedProminent)
           }
-          .frame(maxWidth: .infinity, maxHeight: .infinity)
+          .padding()
+          .environment(appState.client)
+          .environment(appState.currentUser)
+        case .post(let post):
+          // Simple post view to avoid compilation errors
+          VStack(spacing: 20) {
+            // Author info
+            HStack {
+              AsyncImage(url: post.author.avatarImageURL) { phase in
+                switch phase {
+                case .success(let image):
+                  image
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 48, height: 48)
+                    .clipShape(Circle())
+                default:
+                  Image(systemName: "person.circle.fill")
+                    .font(.title)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 48, height: 48)
+                }
+              }
+
+              VStack(alignment: .leading, spacing: 4) {
+                Text(post.author.displayName ?? post.author.handle)
+                  .font(.headline)
+                  .fontWeight(.semibold)
+
+                Text("@\(post.author.handle)")
+                  .font(.subheadline)
+                  .foregroundStyle(.secondary)
+              }
+
+              Spacer()
+            }
+
+            // Post content
+            Text(post.content)
+              .font(.body)
+              .lineLimit(nil)
+
+            // Post stats
+            HStack(spacing: 24) {
+              HStack(spacing: 4) {
+                Image(systemName: "heart")
+                Text("\(post.likeCount)")
+              }
+
+              HStack(spacing: 4) {
+                Image(systemName: "arrow.2.squarepath")
+                Text("\(post.repostCount)")
+              }
+
+              HStack(spacing: 4) {
+                Image(systemName: "bubble.left")
+                Text("\(post.replyCount)")
+              }
+            }
+            .foregroundStyle(.secondary)
+
+            Spacer()
+
+            Button("Done") {
+              router.presentedSheet = nil
+            }
+            .buttonStyle(.borderedProminent)
+          }
+          .padding()
+          .environment(appState.client)
+          .environment(appState.currentUser)
         }
       }
       .onAppear {
