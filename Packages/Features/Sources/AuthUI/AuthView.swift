@@ -3,489 +3,318 @@ import Auth
 import Client
 import DesignSystem
 import Models
+import SafariServices
 import SwiftUI
 
 public struct AuthView: View {
   @Environment(Auth.self) private var auth
   @Environment(\.colorScheme) private var colorScheme
+  @Environment(\.dismiss) private var dismiss
 
   @State private var handle: String = ""
   @State private var appPassword: String = ""
   @State private var error: String? = nil
   @State private var isLoading = false
-  @State private var animateGradient = false
   @State private var showPassword = false
-  @State private var inputFocused = false
-  @State private var hasAppeared = false
+  @FocusState private var isHandleFocused: Bool
+  @FocusState private var isPasswordFocused: Bool
 
   public init() {}
 
   public var body: some View {
-    ZStack {
-      // Enhanced animated background with iOS 26 design
-      backgroundGradient
-
+    NavigationView {
       ScrollView {
-        VStack(spacing: 40) {
-          Spacer(minLength: 80)
+        VStack(spacing: 0) {
+          // Header section
+          headerSection
 
-          // Enhanced branding section with iOS 26 styling
-          brandingSection
+          // Form section
+          formSection
 
-          // Modern login card with enhanced glass morphism
-          loginCard
+          // Action section
+          actionSection
 
-          Spacer(minLength: 60)
+          // Help section
+          helpSection
         }
-        .padding(.horizontal, 28)
+        .padding(.horizontal, 24)
       }
-    }
-    .ignoresSafeArea(.container, edges: .top)
-    .preferredColorScheme(.dark)  // Force dark mode for better glass effect
-    .onAppear {
-      print("AuthView: onAppear called - starting initialization")
-      hasAppeared = true
-      withAnimation(.easeInOut(duration: 3).repeatForever(autoreverses: true)) {
-        animateGradient = true
-      }
-    }
-    .onDisappear {
-      print("AuthView: onDisappear called")
-      hasAppeared = false
-    }
-  }
-
-  // MARK: - Enhanced Background Gradient
-
-  @ViewBuilder
-  private var backgroundGradient: some View {
-    ZStack {
-      // iOS 26 enhanced gradient background
-      LinearGradient(
-        colors: [
-          Color.blueskyPrimary.opacity(0.9),
-          Color.blueskySecondary.opacity(0.7),
-          Color.blueskyAccent.opacity(0.5),
-        ],
-        startPoint: animateGradient ? .topLeading : .bottomTrailing,
-        endPoint: animateGradient ? .bottomTrailing : .topLeading
-      )
-      .ignoresSafeArea()
-
-      // Enhanced floating orbs with iOS 26 blur effects
-      floatingOrbs
-
-      // Subtle noise texture for depth
-      noiseTexture
-    }
-  }
-
-  @ViewBuilder
-  private var floatingOrbs: some View {
-    ZStack {
-      // Large primary orb
-      Circle()
-        .fill(.white.opacity(0.08))
-        .frame(width: 240, height: 240)
-        .blur(radius: 50)
-        .offset(x: -120, y: -240)
-        .scaleEffect(animateGradient ? 1.3 : 0.7)
-
-      // Medium secondary orb
-      Circle()
-        .fill(Color.blueskySecondary.opacity(0.12))
-        .frame(width: 180, height: 180)
-        .blur(radius: 40)
-        .offset(x: 140, y: 120)
-        .scaleEffect(animateGradient ? 0.7 : 1.3)
-
-      // Small accent orb
-      Circle()
-        .fill(Color.blueskyAccent.opacity(0.15))
-        .frame(width: 120, height: 120)
-        .blur(radius: 30)
-        .offset(x: -100, y: 180)
-        .scaleEffect(animateGradient ? 1.2 : 0.8)
-
-      // Micro orbs for detail
-      ForEach(0..<6, id: \.self) { index in
-        Circle()
-          .fill(.white.opacity(0.06))
-          .frame(width: 20 + CGFloat(index * 10), height: 20 + CGFloat(index * 10))
-          .blur(radius: 15)
-          .offset(
-            x: CGFloat.random(in: -150...150),
-            y: CGFloat.random(in: -300...300)
-          )
-          .scaleEffect(animateGradient ? 1.1 : 0.9)
-      }
-    }
-    .animation(.easeInOut(duration: 8).repeatForever(autoreverses: true), value: animateGradient)
-  }
-
-  @ViewBuilder
-  private var noiseTexture: some View {
-    Rectangle()
-      .fill(.white.opacity(0.02))
-      .blendMode(.overlay)
-      .ignoresSafeArea()
-  }
-
-  // MARK: - Enhanced Branding Section
-
-  @ViewBuilder
-  private var brandingSection: some View {
-    VStack(spacing: 24) {
-      // Enhanced app icon with iOS 26 glass effect
-      ZStack {
-        // Outer glow ring
-        Circle()
-          .fill(.white.opacity(0.1))
-          .frame(width: 100, height: 100)
-          .blur(radius: 20)
-
-        // Main glass container
-        Circle()
-          .fill(.white.opacity(0.15))
-          .frame(width: 88, height: 88)
-          .background(.ultraThinMaterial)
-          .clipShape(Circle())
-          .overlay(
-            Circle()
-              .stroke(.white.opacity(0.25), lineWidth: 1.5)
-          )
-          .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
-
-        // Icon with enhanced styling
-        Image(systemName: "cloud.sun.fill")
-          .font(.system(size: 40, weight: .medium, design: .rounded))
-          .foregroundStyle(
-            LinearGradient(
-              colors: [.white, Color.blueskySecondary],
-              startPoint: .topLeading,
-              endPoint: .bottomTrailing
-            )
-          )
-          .symbolEffect(.bounce, options: .repeating)
+      .background(Color(.systemGroupedBackground))
+      .navigationBarTitleDisplayMode(.inline)
+      .navigationBarBackButtonHidden()
+      .sheet(isPresented: $showingSafari) {
+        if let url = safariURL {
+          SafariView(url: url)
+        }
       }
 
-      // Enhanced app title with iOS 26 typography
-      VStack(spacing: 12) {
-        Text("LiquidSky")
-          .font(.system(size: 42, weight: .heavy, design: .rounded))
-          .foregroundStyle(
-            LinearGradient(
-              colors: [.white, .white.opacity(0.9)],
-              startPoint: .top,
-              endPoint: .bottom
-            )
-          )
-          .shadow(color: .black.opacity(0.4), radius: 4, x: 0, y: 3)
+    }
+    .navigationViewStyle(.stack)
+  }
 
-        Text("Connect to the decentralized web")
-          .font(.system(size: 18, weight: .medium, design: .default))
-          .foregroundStyle(.white.opacity(0.85))
+  // MARK: - Header Section
+
+  @ViewBuilder
+  private var headerSection: some View {
+    VStack(spacing: 32) {
+      Spacer(minLength: 40)
+
+      // App icon
+      Image("cloud")
+        .resizable()
+        .scaledToFit()
+        .frame(width: 90, height: 90)
+        .foregroundStyle(.white)
+        .shadow(color: Color.blueskyPrimary.opacity(0.8), radius: 15, x: 0, y: 0)
+        .shadow(color: Color.blueskyPrimary.opacity(0.6), radius: 25, x: 0, y: 0)
+        .shadow(color: Color.blueskyPrimary.opacity(0.4), radius: 35, x: 0, y: 0)
+
+      // Title and subtitle
+      VStack(spacing: 8) {
+        Text("Welcome to LiquidSky")
+          .font(.largeTitle)
+          .fontWeight(.bold)
+          .multilineTextAlignment(.center)
+
+        Text("Sign in to your Bluesky account to get started")
+          .font(.body)
+          .foregroundStyle(.secondary)
           .multilineTextAlignment(.center)
           .lineLimit(2)
       }
+
+      Spacer(minLength: 20)
     }
   }
 
-  // MARK: - Enhanced Login Card
+  // MARK: - Form Section
 
   @ViewBuilder
-  private var loginCard: some View {
-    VStack(spacing: 32) {
-      // Enhanced header with iOS 26 typography
-      VStack(spacing: 12) {
-        Text("Welcome Back")
-          .font(.system(size: 32, weight: .bold, design: .rounded))
-          .foregroundStyle(.white)
+  private var formSection: some View {
+    VStack(spacing: 24) {
+      // Handle field
+      VStack(alignment: .leading, spacing: 8) {
+        Text("Handle or Email")
+          .font(.headline)
+          .foregroundStyle(.primary)
 
-        Text("Sign in to your Bluesky account")
-          .font(.system(size: 18, weight: .medium))
-          .foregroundStyle(.white.opacity(0.8))
-      }
+        HStack(spacing: 12) {
+          Image(systemName: "at")
+            .font(.body)
+            .foregroundStyle(.secondary)
+            .frame(width: 20)
 
-      // Enhanced form fields with iOS 26 styling
-      VStack(spacing: 24) {
-        // Enhanced handle field
-        enhancedInputField(
-          icon: "at",
-          placeholder: "john@bsky.social",
-          text: $handle
-        )
-
-        // Enhanced password field
-        enhancedPasswordField
-      }
-
-      // Enhanced login button
-      enhancedLoginButton
-
-      // Enhanced error message
-      if let error {
-        enhancedErrorMessage(error)
-      }
-
-      // Enhanced help text
-      enhancedHelpText
-    }
-    .padding(36)
-    .background(
-      RoundedRectangle(cornerRadius: 28)
-        .fill(.ultraThinMaterial)
-        .overlay(
-          RoundedRectangle(cornerRadius: 28)
-            .stroke(.white.opacity(0.15), lineWidth: 1.5)
-        )
-    )
-    .shadow(color: .black.opacity(0.15), radius: 30, x: 0, y: 15)
-    .scaleEffect(inputFocused ? 1.02 : 1.0)
-    .animation(.spring(response: 0.6, dampingFraction: 0.8), value: inputFocused)
-  }
-
-  @ViewBuilder
-  private func enhancedInputField(
-    icon: String,
-    placeholder: String,
-    text: Binding<String>
-  ) -> some View {
-    HStack(spacing: 18) {
-      // Enhanced icon with iOS 26 styling
-      Image(systemName: icon)
-        .font(.system(size: 20, weight: .semibold))
-        .foregroundStyle(
-          LinearGradient(
-            colors: [Color.blueskySecondary, Color.blueskyPrimary],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-          )
-        )
-        .frame(width: 28)
-
-      // Enhanced input field
-      TextField(placeholder, text: text)
-        .font(.system(size: 18, weight: .medium))
-        .textInputAutocapitalization(.never)
-        .autocorrectionDisabled()
-        .foregroundStyle(.white)
-        .onTapGesture {
-          withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-            inputFocused = true
-          }
-        }
-
-      Spacer()
-    }
-    .padding(.horizontal, 24)
-    .padding(.vertical, 20)
-    .background(
-      RoundedRectangle(cornerRadius: 20)
-        .fill(.ultraThinMaterial)
-        .overlay(
-          RoundedRectangle(cornerRadius: 20)
-            .stroke(.white.opacity(0.12), lineWidth: 1.5)
-        )
-    )
-    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
-    .scaleEffect(inputFocused ? 1.02 : 1.0)
-    .animation(.spring(response: 0.4, dampingFraction: 0.8), value: inputFocused)
-  }
-
-  @ViewBuilder
-  private var enhancedPasswordField: some View {
-    HStack(spacing: 18) {
-      // Enhanced lock icon
-      Image(systemName: "lock.fill")
-        .font(.system(size: 20, weight: .semibold))
-        .foregroundStyle(
-          LinearGradient(
-            colors: [Color.blueskySecondary, Color.blueskyPrimary],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-          )
-        )
-        .frame(width: 28)
-
-      // Enhanced password field
-      Group {
-        if showPassword {
-          TextField("App Password", text: $appPassword)
-            .font(.system(size: 18, weight: .medium))
+          TextField("john@bsky.social", text: $handle)
+            .textFieldStyle(.plain)
+            .font(.body)
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
-            .foregroundStyle(.white)
-        } else {
-          SecureField("App Password", text: $appPassword)
-            .font(.system(size: 18, weight: .medium))
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled()
-            .foregroundStyle(.white)
+            .keyboardType(.emailAddress)
+            .focused($isHandleFocused)
         }
-      }
-      .onTapGesture {
-        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-          inputFocused = true
-        }
-      }
-
-      // Enhanced show/hide password toggle
-      Button {
-        withAnimation(.easeInOut(duration: 0.3)) {
-          showPassword.toggle()
-        }
-        // Enhanced haptic feedback
-        HapticManager.shared.impact(.light)
-      } label: {
-        Image(systemName: showPassword ? "eye.slash.fill" : "eye.fill")
-          .font(.system(size: 18, weight: .semibold))
-          .foregroundStyle(.white.opacity(0.7))
-          .frame(width: 28, height: 28)
-          .background(
-            Circle()
-              .fill(.white.opacity(0.1))
-          )
-      }
-      .buttonStyle(.plain)
-    }
-    .padding(.horizontal, 24)
-    .padding(.vertical, 20)
-    .background(
-      RoundedRectangle(cornerRadius: 20)
-        .fill(.ultraThinMaterial)
-        .overlay(
-          RoundedRectangle(cornerRadius: 20)
-            .stroke(.white.opacity(0.12), lineWidth: 1.5)
-        )
-    )
-    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
-    .scaleEffect(inputFocused ? 1.02 : 1.0)
-    .animation(.spring(response: 0.4, dampingFraction: 0.8), value: inputFocused)
-  }
-
-  @ViewBuilder
-  private var enhancedLoginButton: some View {
-    Button {
-      Task {
-        await performLogin()
-      }
-    } label: {
-      HStack(spacing: 16) {
-        if isLoading {
-          ProgressView()
-            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-            .scaleEffect(0.9)
-        } else {
-          Image(systemName: "arrow.right.circle.fill")
-            .font(.system(size: 24, weight: .semibold))
-        }
-
-        Text(isLoading ? "Signing In..." : "Sign In to Bluesky")
-          .font(.system(size: 20, weight: .semibold))
-      }
-      .foregroundStyle(.white)
-      .frame(maxWidth: .infinity)
-      .padding(.vertical, 22)
-      .background(
-        RoundedRectangle(cornerRadius: 20)
-          .fill(
-            LinearGradient(
-              colors: [Color.blueskyPrimary, Color.blueskySecondary],
-              startPoint: .leading,
-              endPoint: .trailing
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(
+          RoundedRectangle(cornerRadius: 12)
+            .fill(Color(.systemBackground))
+            .overlay(
+              RoundedRectangle(cornerRadius: 12)
+                .stroke(
+                  isHandleFocused ? Color.blueskyPrimary : Color(.separator),
+                  lineWidth: isHandleFocused ? 2 : 1)
             )
-          )
-          .overlay(
-            RoundedRectangle(cornerRadius: 20)
-              .stroke(.white.opacity(0.25), lineWidth: 1.5)
-          )
-      )
-      .shadow(color: Color.blueskyPrimary.opacity(0.4), radius: 15, x: 0, y: 8)
-    }
-    .disabled(handle.isEmpty || appPassword.isEmpty || isLoading)
-    .opacity(handle.isEmpty || appPassword.isEmpty ? 0.6 : 1.0)
-    .scaleEffect(handle.isEmpty || appPassword.isEmpty ? 0.98 : 1.0)
-    .animation(.easeInOut(duration: 0.3), value: handle.isEmpty || appPassword.isEmpty)
-    .onTapGesture {
-      // Enhanced haptic feedback on button tap
-      if hasAppeared {
-        HapticManager.shared.impact(.medium)
+        )
+      }
+
+      // App Password field
+      VStack(alignment: .leading, spacing: 8) {
+        Text("App Password")
+          .font(.headline)
+          .foregroundStyle(.primary)
+
+        HStack(spacing: 12) {
+          Image(systemName: "lock")
+            .font(.body)
+            .foregroundStyle(.secondary)
+            .frame(width: 20)
+
+          Group {
+            if showPassword {
+              TextField("Enter your app password", text: $appPassword)
+                .textFieldStyle(.plain)
+            } else {
+              SecureField("Enter your app password", text: $appPassword)
+            }
+          }
+          .font(.body)
+          .textInputAutocapitalization(.never)
+          .autocorrectionDisabled()
+          .focused($isPasswordFocused)
+
+          Button {
+            withAnimation(.easeInOut(duration: 0.2)) {
+              showPassword.toggle()
+            }
+            // Safe haptic feedback
+            safeHapticFeedback(.light)
+          } label: {
+            Image(systemName: showPassword ? "eye.slash" : "eye")
+              .font(.body)
+              .foregroundStyle(.secondary)
+              .frame(width: 24, height: 24)
+          }
+          .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(
+          RoundedRectangle(cornerRadius: 12)
+            .fill(Color(.systemBackground))
+            .overlay(
+              RoundedRectangle(cornerRadius: 12)
+                .stroke(
+                  isPasswordFocused ? Color.blueskyPrimary : Color(.separator),
+                  lineWidth: isPasswordFocused ? 2 : 1)
+            )
+        )
+      }
+
+      // Error message
+      if let error {
+        HStack(spacing: 8) {
+          Image(systemName: "exclamationmark.triangle.fill")
+            .foregroundStyle(.red)
+            .font(.caption)
+
+          Text(error)
+            .font(.caption)
+            .foregroundStyle(.red)
+            .multilineTextAlignment(.leading)
+
+          Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(
+          RoundedRectangle(cornerRadius: 8)
+            .fill(.red.opacity(0.1))
+        )
+        .transition(
+          .asymmetric(
+            insertion: .scale.combined(with: .opacity),
+            removal: .scale.combined(with: .opacity)
+          ))
       }
     }
   }
 
-  @ViewBuilder
-  private func enhancedErrorMessage(_ message: String) -> some View {
-    HStack(spacing: 16) {
-      Image(systemName: "exclamationmark.triangle.fill")
-        .foregroundStyle(.red)
-        .font(.system(size: 18, weight: .semibold))
-
-      Text(message)
-        .font(.system(size: 16, weight: .medium))
-        .foregroundStyle(.red)
-        .multilineTextAlignment(.leading)
-
-      Spacer()
-    }
-    .padding(.horizontal, 24)
-    .padding(.vertical, 20)
-    .background(
-      RoundedRectangle(cornerRadius: 16)
-        .fill(.red.opacity(0.15))
-        .overlay(
-          RoundedRectangle(cornerRadius: 16)
-            .stroke(.red.opacity(0.3), lineWidth: 1.5)
-        )
-    )
-    .shadow(color: .red.opacity(0.2), radius: 10, x: 0, y: 5)
-    .transition(
-      .asymmetric(
-        insertion: .scale.combined(with: .opacity),
-        removal: .scale.combined(with: .opacity)
-      ))
-  }
+  // MARK: - Action Section
 
   @ViewBuilder
-  private var enhancedHelpText: some View {
+  private var actionSection: some View {
     VStack(spacing: 16) {
-      Text("Need help?")
-        .font(.system(size: 16, weight: .medium))
-        .foregroundStyle(.white.opacity(0.8))
-
-      HStack(spacing: 24) {
-        Button("Create Account") {
-          // TODO: Navigate to account creation
-          if hasAppeared {
-            HapticManager.shared.impact(.light)
-          }
+      // Sign in button
+      Button {
+        Task {
+          await performLogin()
         }
-        .font(.system(size: 16, weight: .semibold))
-        .foregroundStyle(
-          LinearGradient(
-            colors: [Color.lavenderSecondary, Color.lavenderPrimary],
-            startPoint: .leading,
-            endPoint: .trailing
-          )
-        )
-
-        Button("Forgot Password?") {
-          // TODO: Navigate to password reset
-          if hasAppeared {
-            HapticManager.shared.impact(.light)
+      } label: {
+        HStack(spacing: 12) {
+          if isLoading {
+            ProgressView()
+              .progressViewStyle(CircularProgressViewStyle(tint: .white))
+              .scaleEffect(0.8)
+          } else {
+            Image(systemName: "arrow.right")
+              .font(.body)
+              .fontWeight(.semibold)
           }
+
+          Text(isLoading ? "Signing In..." : "Sign In")
+            .font(.headline)
+            .fontWeight(.semibold)
         }
-        .font(.system(size: 16, weight: .semibold))
-        .foregroundStyle(
-          LinearGradient(
-            colors: [Color.sunsetSecondary, Color.sunsetPrimary],
-            startPoint: .leading,
-            endPoint: .trailing
-          )
+        .foregroundStyle(.white)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
+        .background(
+          RoundedRectangle(cornerRadius: 12)
+            .fill(canSignIn ? Color.blueskyPrimary : Color.secondary)
         )
       }
+      .disabled(!canSignIn || isLoading)
+      .buttonStyle(.plain)
+
+      // Help text
+      Text("You'll need to create an app password in your Bluesky account settings")
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .multilineTextAlignment(.center)
+        .lineLimit(3)
     }
+  }
+
+  // MARK: - Help Section
+
+  @ViewBuilder
+  private var helpSection: some View {
+    VStack(spacing: 24) {
+      Divider()
+
+      VStack(spacing: 16) {
+        Text("Need help?")
+          .font(.headline)
+          .foregroundStyle(.primary)
+
+        HStack(spacing: 24) {
+          Button("Create Account") {
+            safeHapticFeedback(.light)
+            openBlueskyWebsite(url: "https://bsky.app/join")
+          }
+          .font(.body)
+          .foregroundStyle(Color.blueskyPrimary)
+          .buttonStyle(.plain)
+
+          Button("Forgot Password?") {
+            safeHapticFeedback(.light)
+            openBlueskyWebsite(url: "https://bsky.app/forgot-password")
+          }
+          .font(.body)
+          .foregroundStyle(Color.blueskyPrimary)
+          .buttonStyle(.plain)
+        }
+      }
+
+      Spacer(minLength: 40)
+    }
+  }
+
+  // MARK: - Computed Properties
+
+  private var canSignIn: Bool {
+    !handle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+      && !appPassword.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+  }
+
+  // MARK: - Helper Methods
+
+  private func safeHapticFeedback(_ style: ImpactStyle) {
+    // Safe haptic feedback with error handling
+    do {
+      HapticManager.shared.impact(style)
+    } catch {
+      // Silently fail if haptic feedback fails
+      print("Haptic feedback failed: \(error)")
+    }
+  }
+
+  @State private var showingSafari = false
+  @State private var safariURL: URL?
+
+  private func openBlueskyWebsite(url: String) {
+    guard let url = URL(string: url) else { return }
+    safariURL = url
+    showingSafari = true
   }
 
   // MARK: - Login Logic
@@ -494,8 +323,11 @@ public struct AuthView: View {
     isLoading = true
     error = nil
 
+    let trimmedHandle = handle.trimmingCharacters(in: .whitespacesAndNewlines)
+    let trimmedPassword = appPassword.trimmingCharacters(in: .whitespacesAndNewlines)
+
     do {
-      try await auth.authenticate(handle: handle, appPassword: appPassword)
+      try await auth.authenticate(handle: trimmedHandle, appPassword: trimmedPassword)
     } catch {
       withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
         self.error = error.localizedDescription
@@ -503,6 +335,22 @@ public struct AuthView: View {
     }
 
     isLoading = false
+  }
+}
+
+// MARK: - Safari View Wrapper
+
+struct SafariView: UIViewControllerRepresentable {
+  let url: URL
+
+  func makeUIViewController(context: Context) -> SFSafariViewController {
+    let safariVC = SFSafariViewController(url: url)
+    safariVC.preferredControlTintColor = UIColor(Color.blueskyPrimary)
+    return safariVC
+  }
+
+  func updateUIViewController(_ uiViewController: SFSafariViewController, context: Context) {
+    // No updates needed
   }
 }
 
@@ -519,7 +367,7 @@ public struct AuthView: View {
 }
 
 #Preview("Sheet Presentation") {
-  ScrollView {
+  NavigationView {
     Text("Hello World")
   }
   .sheet(isPresented: .constant(true)) {
