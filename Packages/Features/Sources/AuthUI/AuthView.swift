@@ -16,6 +16,8 @@ public struct AuthView: View {
   @State private var error: String? = nil
   @State private var isLoading = false
   @State private var showPassword = false
+  @State private var keyboardHeight: CGFloat = 0
+  @State private var isKeyboardVisible = false
   @FocusState private var isHandleFocused: Bool
   @FocusState private var isPasswordFocused: Bool
 
@@ -24,20 +26,27 @@ public struct AuthView: View {
   public var body: some View {
     NavigationView {
       ScrollView {
-        VStack(spacing: 0) {
+        VStack(spacing: isKeyboardVisible ? 8 : 0) {
           // Header section
           headerSection
+            .padding(.top, isKeyboardVisible ? 10 : 40)
+            .padding(.bottom, isKeyboardVisible ? 15 : 32)
 
           // Form section
           formSection
+            .padding(.vertical, isKeyboardVisible ? 8 : 24)
 
           // Action section
           actionSection
+            .padding(.vertical, isKeyboardVisible ? 8 : 24)
 
           // Help section
           helpSection
+            .padding(.top, isKeyboardVisible ? 8 : 32)
+            .padding(.bottom, isKeyboardVisible ? 8 : 16)
         }
         .padding(.horizontal, 24)
+        .animation(.easeInOut(duration: 0.3), value: isKeyboardVisible)
       }
       .background(
         ZStack {
@@ -67,6 +76,26 @@ public struct AuthView: View {
           SafariView(url: url)
         }
       }
+      .onReceive(
+        NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
+      ) { notification in
+        if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey]
+          as? CGRect
+        {
+          keyboardHeight = keyboardFrame.height
+          withAnimation(.easeInOut(duration: 0.3)) {
+            isKeyboardVisible = true
+          }
+        }
+      }
+      .onReceive(
+        NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
+      ) { _ in
+        keyboardHeight = 0
+        withAnimation(.easeInOut(duration: 0.3)) {
+          isKeyboardVisible = false
+        }
+      }
 
     }
     .navigationViewStyle(.stack)
@@ -76,34 +105,45 @@ public struct AuthView: View {
 
   @ViewBuilder
   private var headerSection: some View {
-    VStack(spacing: 32) {
-      Spacer(minLength: 40)
+    VStack(spacing: isKeyboardVisible ? 12 : 32) {
+      if !isKeyboardVisible {
+        Spacer(minLength: 40)
+      }
 
       // App icon
       Image("cloud")
         .resizable()
         .scaledToFit()
-        .frame(width: 90, height: 90)
+        .frame(width: isKeyboardVisible ? 60 : 90, height: isKeyboardVisible ? 60 : 90)
         .foregroundStyle(.white)
-        .shadow(color: Color.blueskyPrimary.opacity(0.8), radius: 15, x: 0, y: 0)
-        .shadow(color: Color.blueskyPrimary.opacity(0.6), radius: 25, x: 0, y: 0)
-        .shadow(color: Color.blueskyPrimary.opacity(0.4), radius: 35, x: 0, y: 0)
+        .shadow(
+          color: Color.blueskyPrimary.opacity(0.8), radius: isKeyboardVisible ? 10 : 15, x: 0, y: 0
+        )
+        .shadow(
+          color: Color.blueskyPrimary.opacity(0.6), radius: isKeyboardVisible ? 15 : 25, x: 0, y: 0
+        )
+        .shadow(
+          color: Color.blueskyPrimary.opacity(0.4), radius: isKeyboardVisible ? 20 : 35, x: 0, y: 0)
 
       // Title and subtitle
-      VStack(spacing: 8) {
+      VStack(spacing: isKeyboardVisible ? 4 : 8) {
         Text("Welcome to LiquidSky")
-          .font(.largeTitle)
+          .font(isKeyboardVisible ? .title2 : .largeTitle)
           .fontWeight(.bold)
           .multilineTextAlignment(.center)
 
-        Text("Sign in to your Bluesky account to get started")
-          .font(.body)
-          .foregroundStyle(.secondary)
-          .multilineTextAlignment(.center)
-          .lineLimit(2)
+        if !isKeyboardVisible {
+          Text("Sign in to your Bluesky account to get started")
+            .font(.body)
+            .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
+            .lineLimit(2)
+        }
       }
 
-      Spacer(minLength: 20)
+      if !isKeyboardVisible {
+        Spacer(minLength: 20)
+      }
     }
   }
 
@@ -111,7 +151,7 @@ public struct AuthView: View {
 
   @ViewBuilder
   private var formSection: some View {
-    VStack(spacing: 24) {
+    VStack(spacing: isKeyboardVisible ? 16 : 24) {
       // Handle field
       VStack(alignment: .leading, spacing: 8) {
         Text("Handle or Email")
@@ -232,7 +272,7 @@ public struct AuthView: View {
 
   @ViewBuilder
   private var actionSection: some View {
-    VStack(spacing: 16) {
+    VStack(spacing: isKeyboardVisible ? 12 : 16) {
       // Sign in button
       Button {
         Task {
