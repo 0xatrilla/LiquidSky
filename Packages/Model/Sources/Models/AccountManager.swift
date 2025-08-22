@@ -11,12 +11,6 @@ public final class AccountManager {
 
   public init() {
     loadAccounts()
-
-    // Debug: Clear duplicate accounts on startup
-    if accounts.count > 1 {
-      print("AccountManager: Found \(accounts.count) accounts, clearing duplicates...")
-      clearAllAccounts()
-    }
   }
 
   public func addAccount(_ account: Account) {
