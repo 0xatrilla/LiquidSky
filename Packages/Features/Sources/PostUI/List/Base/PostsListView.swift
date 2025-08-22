@@ -300,12 +300,13 @@ private struct ReplyChainView: View {
             }
 
             // Thread line connector (theme-aware line connecting posts in the chain)
-            if index < posts.count - 1 {
+            // Only show thread lines for replies, not for the first post in a thread
+            if index < posts.count - 1 && post.isReplyTo {
               Rectangle()
                 .fill(LinearGradient.themeGradient)
                 .frame(width: 2)
                 .frame(maxHeight: .infinity)
-                .padding(.top, 12)  // Start below the avatar
+                .padding(.top, -20)  // Start well above the avatar to connect with parent post above
                 .padding(.bottom, 8)  // Extend to connect with next post
             }
           }
