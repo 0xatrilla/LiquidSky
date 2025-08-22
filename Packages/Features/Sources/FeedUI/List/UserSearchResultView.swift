@@ -32,7 +32,7 @@ public struct UserSearchResultView: View {
         .frame(width: 50, height: 50)
         .clipShape(Circle())
         .onTapGesture {
-          router.presentedSheet = .profile(profile)
+          router.navigateTo(.profile(profile))
         }
       } else {
         Circle()
@@ -79,7 +79,7 @@ public struct UserSearchResultView: View {
     .padding(.vertical, 8)
     .contentShape(Rectangle())
     .onTapGesture {
-      router.presentedSheet = .profile(profile)
+      router.navigateTo(.profile(profile))
     }
   }
 }

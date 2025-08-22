@@ -470,7 +470,7 @@ private struct ReplyChainView: View {
             }
             .shadow(color: .shadowPrimary.opacity(0.3), radius: 2)
             .onTapGesture {
-              router.presentedSheet = .profile(post.author)
+              router.navigateTo(.profile(post.author))
             }
 
             // Thread line connector (theme-aware line connecting posts in the chain)
@@ -501,7 +501,7 @@ private struct ReplyChainView: View {
             }
             .lineLimit(1)
             .onTapGesture {
-              router.presentedSheet = .profile(post.author)
+              router.navigateTo(.profile(post.author))
             }
 
             // Reply indicator
@@ -539,7 +539,7 @@ private struct ReplyChainView: View {
               .environment(postDataControllerProvider.get(for: post, client: client))
           }
           .onTapGesture {
-            router.presentedSheet = .post(post)
+            router.navigateTo(.post(post))
           }
         }
         .padding(.horizontal, 8)
