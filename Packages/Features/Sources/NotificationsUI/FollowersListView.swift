@@ -12,6 +12,7 @@ public struct FollowersListView: View {
   @Environment(AppRouter.self) var router
   @Environment(BSkyClient.self) var client
   @Environment(\.dismiss) private var dismiss
+  @State private var followerProfiles: [Profile] = []
 
   public init(followers: [AppBskyLexicon.Actor.ProfileViewDefinition]) {
     self.followers = followers
@@ -48,15 +49,9 @@ public struct FollowersListView: View {
           .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
           List {
-            ForEach(followers, id: \.actorDID) { follower in
-              FollowerRowView(follower: follower)
+            ForEach(followerProfiles, id: \.did) { profile in
+              FollowerRowView(profile: profile)
                 .onTapGesture {
-                  let profile = Profile(
-                    did: follower.actorDID,
-                    handle: follower.actorHandle,
-                    displayName: follower.displayName,
-                    avatarImageURL: follower.avatarImageURL
-                  )
                   dismiss()
                   router.navigateTo(.profile(profile))
                 }
@@ -75,16 +70,53 @@ public struct FollowersListView: View {
         }
       }
     }
+    .task {
+      await loadFollowerProfiles()
+    }
+  }
+
+  private func loadFollowerProfiles() async {
+    var profiles: [Profile] = []
+
+    for follower in followers {
+      do {
+        // Get the full profile with following status
+        let profileData = try await client.protoClient.getProfile(for: follower.actorDID)
+
+        // Use the existing extension to convert to our Profile model
+        let profileModel = profileData.profile
+
+        profiles.append(profileModel)
+      } catch {
+        print("Error loading profile for \(follower.actorDID): \(error)")
+
+        // Fallback to basic profile if we can't get the full one
+        let fallbackProfile = Profile(
+          did: follower.actorDID,
+          handle: follower.actorHandle,
+          displayName: follower.displayName,
+          avatarImageURL: follower.avatarImageURL,
+          isFollowing: false,  // Default to not following
+          isFollowedBy: true  // They are following the current user
+        )
+
+        profiles.append(fallbackProfile)
+      }
+    }
+
+    await MainActor.run {
+      self.followerProfiles = profiles
+    }
   }
 }
 
 private struct FollowerRowView: View {
-  let follower: AppBskyLexicon.Actor.ProfileViewDefinition
+  let profile: Profile
 
   var body: some View {
     HStack(spacing: 12) {
       // Avatar
-      if let avatarURL = follower.avatarImageURL {
+      if let avatarURL = profile.avatarImageURL {
         AsyncImage(url: avatarURL) { image in
           image
             .resizable()
@@ -107,27 +139,18 @@ private struct FollowerRowView: View {
 
       // User info
       VStack(alignment: .leading, spacing: 4) {
-        Text(follower.displayName ?? follower.actorHandle)
+        Text(profile.displayName ?? profile.handle)
           .font(.headline)
           .foregroundStyle(.primary)
 
-        Text("@\(follower.actorHandle)")
+        Text("@\(profile.handle)")
           .font(.subheadline)
           .foregroundStyle(.secondary)
       }
 
       Spacer()
 
-      // Follow button - convert to Profile model and use proper FollowButton
-      let profile = Profile(
-        did: follower.actorDID,
-        handle: follower.actorHandle,
-        displayName: follower.displayName,
-        avatarImageURL: follower.avatarImageURL,
-        isFollowing: false,  // New followers are typically not being followed by the current user
-        isFollowedBy: true  // They are following the current user
-      )
-
+      // Follow button - now uses the actual following status
       FollowButton(profile: profile, size: .small)
     }
     .padding(.vertical, 8)
