@@ -16,6 +16,8 @@ public struct SheetDestinations: ViewModifier {
   let auth: Auth
   let client: BSkyClient?
   let currentUser: CurrentUser?
+  let postDataControllerProvider: PostContextProvider
+  let settingsService: SettingsService
 
   public func body(content: Content) -> some View {
     content
@@ -27,6 +29,7 @@ public struct SheetDestinations: ViewModifier {
           Group {
             AuthView()
               .environment(auth)
+              .environment(router)
               .onAppear {
                 print("SheetDestinations: AuthView appeared successfully")
               }
@@ -44,22 +47,26 @@ public struct SheetDestinations: ViewModifier {
           FeedsListView()
             .environment(client)
             .environment(currentUser)
+            .environment(router)
         case .fullScreenMedia(let images, let preloadedImage, let namespace):
           FullScreenMediaView(
             images: images,
             preloadedImage: preloadedImage,
             namespace: namespace
           )
+          .environment(router)
         case .fullScreenProfilePicture(let imageURL, let namespace):
           FullScreenProfilePictureView(
             imageURL: imageURL,
             namespace: namespace
           )
+          .environment(router)
         case .fullScreenVideo(let media, let namespace):
           FullScreenVideoViewWrapper(
             media: media,
             namespace: namespace
           )
+          .environment(router)
         case .composer(let mode):
           if let client, let currentUser {
             switch mode {
@@ -81,6 +88,9 @@ public struct SheetDestinations: ViewModifier {
           ProfileView(profile: profile, isCurrentUser: false)
             .environment(client)
             .environment(currentUser)
+            .environment(router)
+            .environment(postDataControllerProvider)
+            .environment(settingsService)
         case .feed(let feed):
           // Simple feed view to avoid compilation errors
           VStack(spacing: 20) {
@@ -146,6 +156,9 @@ public struct SheetDestinations: ViewModifier {
           .padding()
           .environment(client)
           .environment(currentUser)
+          .environment(router)
+          .environment(postDataControllerProvider)
+          .environment(settingsService)
         case .post(let post):
           // Simple post view to avoid compilation errors
           VStack(spacing: 20) {
@@ -214,6 +227,9 @@ public struct SheetDestinations: ViewModifier {
           .padding()
           .environment(client)
           .environment(currentUser)
+          .environment(router)
+          .environment(postDataControllerProvider)
+          .environment(settingsService)
         }
       }
       .onChange(of: router.presentedSheet) {
@@ -227,14 +243,18 @@ extension View {
     router: Binding<AppRouter>,
     auth: Auth,
     client: BSkyClient? = nil,
-    currentUser: CurrentUser? = nil
+    currentUser: CurrentUser? = nil,
+    postDataControllerProvider: PostContextProvider,
+    settingsService: SettingsService
   ) -> some View {
     modifier(
       SheetDestinations(
         router: router,
         auth: auth,
         client: client,
-        currentUser: currentUser
+        currentUser: currentUser,
+        postDataControllerProvider: postDataControllerProvider,
+        settingsService: settingsService
       ))
   }
 }
