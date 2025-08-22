@@ -16,61 +16,80 @@ struct AppTabView: View {
   @State private var searchText: String = ""
   @State private var selectedTab: AppTab = .feed
 
-  var body: some View {
+  public var body: some View {
     @Bindable var router = router
 
-    // Unified NavigationStack at app level - follows IceCubesApp's pattern
-    NavigationStack(path: $router[.feed]) {  // Use feed tab's navigation path as the main one
-      TabView {
-        Tab("Feed", systemImage: "square.stack") {
+    TabView(selection: $router.selectedTab) {
+      // Feed
+      Tab(value: AppTab.feed) {
+        NavigationStack(path: $router[.feed]) {
           FeedsListView()
-            .onAppear { selectedTab = .feed }
+            .navigationTitle("Discover")
+            .navigationBarTitleDisplayMode(.large)
+            .withAppDestinations()
         }
-
-        Tab("Notifications", systemImage: "bell") {
-          NotificationsListView()
-            .onAppear { selectedTab = .notification }
-        }
-
-        Tab("Profile", systemImage: "person") {
-          CurrentUserView()
-            .onAppear { selectedTab = .profile }
-        }
-
-        Tab("Settings", systemImage: "gearshape") {
-          SettingsView()
-            .onAppear { selectedTab = .settings }
-        }
-
-        // Native search tab in tab bar
-        Tab(role: .search) {
-          Text("Search")
-            .onAppear { selectedTab = .compose }
-        }
+        .searchable(text: $searchText)
+        .onAppear { selectedTab = .feed }
+      } label: {
+        Label("Feed", systemImage: "square.stack")
       }
-      .searchable(text: $searchText)
-      .tint(.themePrimary)
-      .tabBarMinimizeBehavior(.onScrollDown)
-      .withAppDestinations()  // Apply navigation destinations once at app level
-      .navigationTitle(navigationTitle)
-      .navigationBarTitleDisplayMode(.large)
+
+      // Notifications
+      Tab(value: AppTab.notification) {
+        NavigationStack(path: $router[.notification]) {
+          NotificationsListView()
+            .navigationTitle("Notifications")
+            .navigationBarTitleDisplayMode(.large)
+            .withAppDestinations()
+        }
+        .onAppear { selectedTab = .notification }
+      } label: {
+        Label("Notifications", systemImage: "bell")
+      }
+
+      // Profile
+      Tab(value: AppTab.profile) {
+        NavigationStack(path: $router[.profile]) {
+          CurrentUserView()
+            .navigationTitle("Profile")
+            .navigationBarTitleDisplayMode(.large)
+            .withAppDestinations()
+        }
+        .onAppear { selectedTab = .profile }
+      } label: {
+        Label("Profile", systemImage: "person")
+      }
+
+      // Settings
+      Tab(value: AppTab.settings) {
+        NavigationStack(path: $router[.settings]) {
+          SettingsView()
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.large)
+            .withAppDestinations()
+        }
+        .onAppear { selectedTab = .settings }
+      } label: {
+        Label("Settings", systemImage: "gearshape")
+      }
+
+      // Native search tab in tab bar
+      Tab(value: AppTab.compose, role: .search) {
+        NavigationStack(path: $router[.compose]) {
+          Text("Search")
+            .navigationTitle("Search")
+            .navigationBarTitleDisplayMode(.large)
+            .withAppDestinations()
+        }
+        .onAppear { selectedTab = .compose }
+      } label: {
+        Label("Search", systemImage: "magnifyingglass")
+      }
     }
+    .tint(.themePrimary)
   }
 
-  private var navigationTitle: String {
-    switch selectedTab {
-    case .feed:
-      return "Discover"
-    case .notification:
-      return "Notifications"
-    case .profile:
-      return "Profile"
-    case .settings:
-      return "Settings"
-    case .compose:
-      return "Search"
-    }
-  }
+
 }
 
 #Preview {

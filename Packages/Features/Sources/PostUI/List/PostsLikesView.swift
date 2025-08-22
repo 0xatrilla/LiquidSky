@@ -21,26 +21,22 @@ public struct PostsLikesView: View {
 
 // MARK: - Datasource
 extension PostsLikesView: @MainActor PostsListViewDatasource {
-  var title: String {
+  public var title: String {
     "Likes"
   }
 
-  func loadPosts(with state: PostsListViewState) async -> PostsListViewState {
-    do {
-      switch state {
-      case .uninitialized, .loading, .error:
-        let feed = try await client.protoClient.getActorLikes(by: profile.did)
-        return .loaded(
-          posts: await PostListView.processFeed(feed.feed, client: client.protoClient),
-          cursor: feed.cursor)
-      case .loaded(let posts, let cursor):
-        let feed = try await client.protoClient.getActorLikes(
-          by: profile.did, limit: nil, cursor: cursor)
-        let newPosts = await PostListView.processFeed(feed.feed, client: client.protoClient)
-        return .loaded(posts: posts + newPosts, cursor: feed.cursor)
-      }
-    } catch {
-      return .error(error)
+  public func loadPosts(with state: PostsListViewState) async throws -> PostsListViewState {
+    switch state {
+    case .uninitialized, .loading, .error:
+      let feed = try await client.protoClient.getActorLikes(by: profile.did)
+      return .loaded(
+        posts: await processFeed(feed.feed, client: client.protoClient),
+        cursor: feed.cursor)
+    case .loaded(let posts, let cursor):
+      let feed = try await client.protoClient.getActorLikes(
+        by: profile.did, limit: nil, cursor: cursor)
+      let newPosts = await processFeed(feed.feed, client: client.protoClient)
+      return .loaded(posts: posts + newPosts, cursor: feed.cursor)
     }
   }
 }

@@ -1,65 +1,46 @@
-import ATProtoKit
-import AppRouter
 import Client
 import DesignSystem
 import Models
-import PostUI
 import SwiftUI
 
-/// Notifications list view following IceCubesApp's proven implementation
-/// Provides seamless notification handling and better user experience
 public struct NotificationsListView: View {
-  @Environment(BSkyClient.self) private var client
-
+  @Environment(BSkyClient.self) var client
   @State private var notificationsGroups: [NotificationsGroup] = []
   @State private var cursor: String?
   @State private var isLoading = false
   @State private var error: Error?
+  @State private var showingSummary = false
+  @State private var summaryText: String?
+  @State private var newNotificationsCount = 0
+  @State private var previousNotificationsCount = 0
+
+  @StateObject private var simpleSummaryService = SimpleSummaryService()
 
   public init() {}
 
   public var body: some View {
-    ZStack {
-      // Background
-      Color(.systemGroupedBackground)
-        .ignoresSafeArea()
-
-      if notificationsGroups.isEmpty && !isLoading {
-        // Empty state
-        VStack(spacing: 20) {
-          Image(systemName: "bell.slash")
-            .font(.system(size: 48))
-            .foregroundStyle(.secondary)
-            .padding(.bottom, 8)
-
-          Text("No notifications yet")
-            .font(.title2)
-            .fontWeight(.semibold)
-            .foregroundStyle(.primary)
-
-          Text("When you get notifications, they'll appear here")
+    VStack(spacing: 0) {
+      if isLoading && notificationsGroups.isEmpty {
+        VStack(spacing: 16) {
+          ProgressView()
+            .scaleEffect(1.2)
+          Text("Loading notifications...")
             .font(.subheadline)
             .foregroundStyle(.secondary)
-            .multilineTextAlignment(.center)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 40)
-        .padding(.horizontal, 20)
-      } else if let error = error {
-        // Error state
-        VStack(spacing: 20) {
-          Image(systemName: "exclamationmark.triangle")
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+      } else if let error = error, (error as? CancellationError) == nil {
+        VStack(spacing: 16) {
+          Image(systemName: "exclamationmark.triangle.fill")
             .font(.system(size: 48))
             .foregroundStyle(.red)
-            .padding(.bottom, 8)
 
-          Text("Failed to load notifications")
+          Text("Error Loading Notifications")
             .font(.title2)
             .fontWeight(.semibold)
-            .foregroundStyle(.primary)
 
           Text(error.localizedDescription)
-            .font(.subheadline)
+            .font(.body)
             .foregroundStyle(.secondary)
             .multilineTextAlignment(.center)
 
@@ -70,33 +51,51 @@ public struct NotificationsListView: View {
           }
           .buttonStyle(.borderedProminent)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 40)
-        .padding(.horizontal, 20)
+        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+      } else if notificationsGroups.isEmpty {
+        VStack(spacing: 16) {
+          Image(systemName: "bell.slash")
+            .font(.system(size: 48))
+            .foregroundStyle(.secondary)
+
+          Text("No Notifications")
+            .font(.title2)
+            .fontWeight(.semibold)
+
+          Text("You're all caught up!")
+            .font(.body)
+            .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
+        }
+        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
       } else {
-        // Notifications list
         ScrollView {
-          LazyVStack(spacing: 0) {
-            ForEach(notificationsGroups) { group in
-              NotificationRow(group: group)
-                .id(group.id)
+          LazyVStack(spacing: 16) {
+            // Show summary button if there are 10+ new notifications
+            if newNotificationsCount >= 10 {
+              SummaryButtonView(itemCount: newNotificationsCount) {
+                showingSummary = true
+              }
+              .padding(.horizontal, 16)
             }
 
-            // Load more indicator
-            if cursor != nil && !isLoading {
-              HStack {
-                Spacer()
-                ProgressView()
-                  .scaleEffect(0.8)
-                  .padding(.vertical, 16)
-                Spacer()
+            ForEach(notificationsGroups) { group in
+              NotificationRow(group: group)
+            }
+
+            if let cursor = cursor {
+              Button("Load More") {
+                Task {
+                  await fetchNotifications()
+                }
               }
-              .padding(.vertical, 20)
-              .task {
-                await fetchNotifications()
-              }
+              .buttonStyle(.bordered)
+              .padding()
             }
           }
+          .padding(.vertical, 16)
         }
       }
     }
@@ -109,8 +108,27 @@ public struct NotificationsListView: View {
       // Prevent multiple simultaneous refreshes
       guard !isLoading else { return }
 
+      // Track previous notification count to detect new ones
+      previousNotificationsCount = notificationsGroups.count
+
       cursor = nil
       await fetchNotifications()
+
+      // Check for new notifications and offer summary if 10+
+      newNotificationsCount = notificationsGroups.count - previousNotificationsCount
+      if newNotificationsCount >= 10 {
+        await offerSummary(for: Array(notificationsGroups.prefix(newNotificationsCount)))
+      }
+    }
+    .sheet(isPresented: $showingSummary) {
+      if let summaryText = summaryText {
+        SummarySheetView(
+          title: "Notifications Summary",
+          summary: summaryText,
+          itemCount: newNotificationsCount,
+          onDismiss: { showingSummary = false }
+        )
+      }
     }
   }
 
@@ -139,6 +157,7 @@ public struct NotificationsListView: View {
       // Handle cancellation gracefully
       if (error as? CancellationError) != nil {
         // Task was cancelled, don't show error
+        isLoading = false
         return
       }
       print("Failed to fetch notifications: \(error)")
@@ -147,14 +166,20 @@ public struct NotificationsListView: View {
 
     isLoading = false
   }
+
+  private func offerSummary(for newNotifications: [NotificationsGroup]) async {
+    let summary = await simpleSummaryService.summarizeNewNotifications(newNotifications.count)
+    summaryText = summary
+    showingSummary = true
+  }
 }
 
 // MARK: - Notification Row
 
-struct NotificationRow: View {
+public struct NotificationRow: View {
   let group: NotificationsGroup
 
-  var body: some View {
+  public var body: some View {
     VStack(alignment: .leading, spacing: 0) {
       switch group.type {
       case .reply:
