@@ -74,7 +74,7 @@ struct LiquidSkyApp: App {
             .withTheme()
             .themeAware()
             .withSheetDestinations(
-              router: .constant(router), auth: auth, client: client, currentUser: currentUser
+              router: .constant(router), auth: auth, client: client, currentUser: currentUser, postDataControllerProvider: postDataControllerProvider, settingsService: settingsService
             )
             .onAppear {
               print("LiquidSkyApp: Showing authenticated state")
@@ -165,22 +165,26 @@ struct LiquidSkyApp: App {
           FeedsListView()
             .environment(appState.client)
             .environment(appState.currentUser)
+            .environment(router)
         case .fullScreenMedia(let images, let preloadedImage, let namespace):
           FullScreenMediaView(
             images: images,
             preloadedImage: preloadedImage,
             namespace: namespace
           )
+          .environment(router)
         case .fullScreenProfilePicture(let imageURL, let namespace):
           FullScreenProfilePictureView(
             imageURL: imageURL,
             namespace: namespace
           )
+          .environment(router)
         case .fullScreenVideo(let media, let namespace):
           FullScreenVideoViewWrapper(
             media: media,
             namespace: namespace
           )
+          .environment(router)
         case .composer(let mode):
           if let client = appState.client, let currentUser = appState.currentUser {
             switch mode {
@@ -202,6 +206,7 @@ struct LiquidSkyApp: App {
           ProfileView(profile: profile, isCurrentUser: false)
             .environment(appState.client)
             .environment(appState.currentUser)
+            .environment(router)
         case .feed(let feed):
           // Simple feed view to avoid compilation errors
           VStack(spacing: 20) {
@@ -267,6 +272,7 @@ struct LiquidSkyApp: App {
           .padding()
           .environment(appState.client)
           .environment(appState.currentUser)
+          .environment(router)
         case .post(let post):
           // Simple post view to avoid compilation errors
           VStack(spacing: 20) {
@@ -335,6 +341,7 @@ struct LiquidSkyApp: App {
           .padding()
           .environment(appState.client)
           .environment(appState.currentUser)
+          .environment(router)
         }
       }
       .onAppear {
