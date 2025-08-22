@@ -36,7 +36,10 @@ let package = Package(
   targets: [
     .target(
       name: "FeedUI",
-      dependencies: baseDeps
+      dependencies: baseDeps,
+      linkerSettings: [
+        .linkedFramework("FoundationModels", .when(platforms: [.iOS]))
+      ]
     ),
     .testTarget(
       name: "FeedUITests",
