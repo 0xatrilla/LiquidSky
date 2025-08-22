@@ -55,7 +55,7 @@ public struct SimpleSearchView: View {
                   likesCount: feed.likesCount,
                   liked: feed.isLiked
                 )
-                router.presentedSheet = .feed(feedItem)
+                router.navigateTo(.feed(feedItem))
               } label: {
                 FeedRow(feed: feed)
               }
@@ -69,7 +69,7 @@ public struct SimpleSearchView: View {
           Section("Posts") {
             ForEach(searchService.searchResults.posts) { post in
               Button {
-                router.presentedSheet = .post(post)
+                router.navigateTo(.post(post))
               } label: {
                 PostRow(post: post)
               }

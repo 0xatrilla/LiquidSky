@@ -312,7 +312,7 @@ public struct SearchView: View {
               LazyVStack(spacing: 8) {
                 ForEach(results.feeds) { feed in
                   Button(action: {
-                    // Navigate to feed by presenting as sheet
+                    // Navigate to feed using proper navigation
                     let feedItem = FeedItem(
                       uri: feed.uri,
                       displayName: feed.displayName,
@@ -322,7 +322,7 @@ public struct SearchView: View {
                       likesCount: feed.likesCount,
                       liked: feed.isLiked
                     )
-                    router.presentedSheet = .feed(feedItem)
+                    router.navigateTo(.feed(feedItem))
                   }) {
                     FeedSearchResultRow(feed: feed)
                   }
@@ -339,9 +339,9 @@ public struct SearchView: View {
               LazyVStack(spacing: 8) {
                 ForEach(results.posts) { post in
                   Button(action: {
-                    // Navigate to post by presenting as sheet
+                    // Navigate to post using proper navigation
                     // The post is already a PostItem, so we can use it directly
-                    router.presentedSheet = .post(post)
+                    router.navigateTo(.post(post))
                   }) {
                     PostSearchResultRow(post: post)
                   }
