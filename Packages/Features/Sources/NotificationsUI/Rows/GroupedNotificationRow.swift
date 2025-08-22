@@ -61,9 +61,22 @@ public struct GroupedNotificationRow: View {
 
         // Post content if available
         if let postItem = group.postItem {
-          PostRowBodyView(post: postItem)
-            .lineLimit(3)
-          PostRowEmbedView(post: postItem)
+          // For reply notifications, show the reply content, not the original post
+          if group.type == .reply {
+            // Show the reply content (the actual reply, not what was replied to)
+            if !postItem.content.isEmpty {
+              Text(postItem.content)
+                .font(.body)
+                .foregroundStyle(.primary)
+                .lineLimit(3)
+                .multilineTextAlignment(.leading)
+            }
+          } else {
+            // For other notification types, show the post content as before
+            PostRowBodyView(post: postItem)
+              .lineLimit(3)
+            PostRowEmbedView(post: postItem)
+          }
         }
       }
     }

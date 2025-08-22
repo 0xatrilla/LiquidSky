@@ -26,14 +26,17 @@ public struct NotificationsGroup: Identifiable {
     // Sort notifications by date (newest first)
     let sortedNotifications = notifications.sorted { $0.indexedAt > $1.indexedAt }
 
-    // Fetch post data for post-related notifications
-    let postsURIs =
-      Array(
-        Set(
-          sortedNotifications
-            .filter { $0.reason != .follow && $0.reason != .starterpackjoined }
-            .compactMap { $0.reasonSubjectURI }
-        ))
+    // For reply notifications, we need to fetch the reply posts themselves, not the posts being replied to
+    let replyURIs = sortedNotifications
+      .filter { $0.reason == .reply }
+      .compactMap { $0.uri }  // Use notification.uri for replies (the actual reply post)
+    
+    let otherPostURIs = sortedNotifications
+      .filter { $0.reason != .follow && $0.reason != .starterpackjoined && $0.reason != .reply }
+      .compactMap { $0.reasonSubjectURI }  // Use reasonSubjectURI for other types
+    
+    let allURIs = replyURIs + otherPostURIs
+    let postsURIs = Array(Set(allURIs))
 
     var postItems: [PostItem] = []
     if !postsURIs.isEmpty {
@@ -55,7 +58,14 @@ public struct NotificationsGroup: Identifiable {
         groupedNotifications[reason, default: [:]][key, default: []].append(notification)
       } else {
         // Create individual groups for non-grouped notifications
-        let postItem = postItems.first(where: { $0.uri == notification.reasonSubjectURI })
+        let postItem: PostItem?
+        if reason == .reply {
+          // For replies, use the notification.uri (the actual reply post)
+          postItem = postItems.first(where: { $0.uri == notification.uri })
+        } else {
+          // For other types, use reasonSubjectURI (the post being acted upon)
+          postItem = postItems.first(where: { $0.uri == notification.reasonSubjectURI })
+        }
 
         groups.append(
           NotificationsGroup(
@@ -72,7 +82,16 @@ public struct NotificationsGroup: Identifiable {
     // Add grouped notifications
     for (reason, subjectGroups) in groupedNotifications {
       for (subjectURI, notifications) in subjectGroups {
-        let postItem = postItems.first(where: { $0.uri == subjectURI })
+        let postItem: PostItem?
+        if reason == .reply {
+          // For replies, we need to get the actual reply posts, not group by subject
+          // Since replies don't group, this shouldn't happen, but handle it safely
+          let replyURIs = notifications.compactMap { $0.uri }
+          postItem = postItems.first(where: { replyURIs.contains($0.uri) })
+        } else {
+          // For other types, use reasonSubjectURI (the post being acted upon)
+          postItem = postItems.first(where: { $0.uri == subjectURI })
+        }
 
         groups.append(
           NotificationsGroup(

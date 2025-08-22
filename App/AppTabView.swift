@@ -14,6 +14,7 @@ import SwiftUI
 struct AppTabView: View {
   @Environment(AppRouter.self) var router
   @State private var searchText: String = ""
+  @State private var selectedTab: AppTab = .feed
 
   var body: some View {
     @Bindable var router = router
@@ -23,36 +24,51 @@ struct AppTabView: View {
       TabView {
         Tab("Feed", systemImage: "square.stack") {
           FeedsListView()
-            .navigationTitle("Discover")
-            .navigationBarTitleDisplayMode(.large)
+            .onAppear { selectedTab = .feed }
         }
+
         Tab("Notifications", systemImage: "bell") {
           NotificationsListView()
-            .navigationTitle("Notifications")
-            .navigationBarTitleDisplayMode(.large)
+            .onAppear { selectedTab = .notification }
         }
+
         Tab("Profile", systemImage: "person") {
           CurrentUserView()
-            .navigationTitle("Profile")
-            .navigationBarTitleDisplayMode(.large)
+            .onAppear { selectedTab = .profile }
         }
+
         Tab("Settings", systemImage: "gearshape") {
           SettingsView()
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.large)
+            .onAppear { selectedTab = .settings }
         }
 
         // Native search tab in tab bar
         Tab(role: .search) {
           Text("Search")
-            .navigationTitle("Search")
-            .navigationBarTitleDisplayMode(.large)
+            .onAppear { selectedTab = .compose }
         }
       }
       .searchable(text: $searchText)
       .tint(.themePrimary)
       .tabBarMinimizeBehavior(.onScrollDown)
       .withAppDestinations()  // Apply navigation destinations once at app level
+      .navigationTitle(navigationTitle)
+      .navigationBarTitleDisplayMode(.large)
+    }
+  }
+
+  private var navigationTitle: String {
+    switch selectedTab {
+    case .feed:
+      return "Discover"
+    case .notification:
+      return "Notifications"
+    case .profile:
+      return "Profile"
+    case .settings:
+      return "Settings"
+    case .compose:
+      return "Search"
     }
   }
 }
