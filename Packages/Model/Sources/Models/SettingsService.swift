@@ -71,4 +71,14 @@ public final class SettingsService {
     get { settings.preloadImages }
     set { settings.preloadImages = newValue }
   }
+
+  public var aiSummariesEnabled: Bool {
+    get { settings.aiSummariesEnabled }
+    set { settings.aiSummariesEnabled = newValue }
+  }
+
+  public var aiDeviceExperimentalEnabled: Bool {
+    get { settings.aiDeviceExperimentalEnabled }
+    set { settings.aiDeviceExperimentalEnabled = newValue }
+  }
 }

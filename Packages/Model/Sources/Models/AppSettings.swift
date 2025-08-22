@@ -38,6 +38,16 @@ public final class AppSettings {
     didSet { UserDefaults.standard.set(showSensitiveContent, forKey: "showSensitiveContent") }
   }
 
+  // MARK: - Intelligence Settings
+  public var aiSummariesEnabled: Bool {
+    didSet { UserDefaults.standard.set(aiSummariesEnabled, forKey: "aiSummariesEnabled") }
+  }
+
+  // Device experimental gate for Apple Intelligence usage on physical devices
+  public var aiDeviceExperimentalEnabled: Bool {
+    didSet { UserDefaults.standard.set(aiDeviceExperimentalEnabled, forKey: "aiDeviceExperimentalEnabled") }
+  }
+
   // MARK: - Media Settings
   public var imageQuality: ImageQuality {
     didSet { UserDefaults.standard.set(imageQuality.rawValue, forKey: "imageQuality") }
@@ -65,6 +75,10 @@ public final class AppSettings {
     self.autoPlayVideos = UserDefaults.standard.object(forKey: "autoPlayVideos") as? Bool ?? true
     self.showSensitiveContent =
       UserDefaults.standard.object(forKey: "showSensitiveContent") as? Bool ?? false
+    self.aiSummariesEnabled =
+      UserDefaults.standard.object(forKey: "aiSummariesEnabled") as? Bool ?? false
+    self.aiDeviceExperimentalEnabled =
+      UserDefaults.standard.object(forKey: "aiDeviceExperimentalEnabled") as? Bool ?? false
     self.imageQuality =
       ImageQuality(rawValue: UserDefaults.standard.string(forKey: "imageQuality") ?? "high")
       ?? .high
@@ -86,6 +100,8 @@ public final class AppSettings {
     compactMode = false
     autoPlayVideos = true
     showSensitiveContent = false
+    aiSummariesEnabled = false
+    aiDeviceExperimentalEnabled = false
     imageQuality = .high
     preloadImages = true
   }

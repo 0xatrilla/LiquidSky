@@ -38,7 +38,7 @@ let package = Package(
       name: "FeedUI",
       dependencies: baseDeps,
       linkerSettings: [
-        .linkedFramework("FoundationModels", .when(platforms: [.iOS]))
+        .unsafeFlags(["-weak_framework", "FoundationModels"], .when(platforms: [.iOS]))
       ]
     ),
     .testTarget(

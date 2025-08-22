@@ -26,7 +26,9 @@ struct NewPostIntent: AppIntent {
 
   func perform() async throws -> some IntentResult {
     // Notify the running app to present the composer when foregrounded
-    NotificationCenter.default.post(name: .openComposerNewPostFromShortcut, object: nil)
+    await MainActor.run {
+      NotificationCenter.default.post(name: .openComposerNewPostFromShortcut, object: nil)
+    }
     return .result()
   }
 }
@@ -42,7 +44,9 @@ struct CheckNotificationsIntent: AppIntent {
   nonisolated static var openAppWhenRun: Bool { true }
 
   func perform() async throws -> some IntentResult {
-    NotificationCenter.default.post(name: .openNotificationsFromShortcut, object: nil)
+    await MainActor.run {
+      NotificationCenter.default.post(name: .openNotificationsFromShortcut, object: nil)
+    }
     return .result()
   }
 }
@@ -58,7 +62,9 @@ struct SearchUsersIntent: AppIntent {
   nonisolated static var openAppWhenRun: Bool { true }
 
   func perform() async throws -> some IntentResult {
-    NotificationCenter.default.post(name: .openSearchFromShortcut, object: nil)
+    await MainActor.run {
+      NotificationCenter.default.post(name: .openSearchFromShortcut, object: nil)
+    }
     return .result()
   }
 }
@@ -74,7 +80,9 @@ struct ViewProfileIntent: AppIntent {
   nonisolated static var openAppWhenRun: Bool { true }
 
   func perform() async throws -> some IntentResult {
-    NotificationCenter.default.post(name: .openProfileFromShortcut, object: nil)
+    await MainActor.run {
+      NotificationCenter.default.post(name: .openProfileFromShortcut, object: nil)
+    }
     return .result()
   }
 }
@@ -90,7 +98,9 @@ struct CheckFeedIntent: AppIntent {
   nonisolated static var openAppWhenRun: Bool { true }
 
   func perform() async throws -> some IntentResult {
-    NotificationCenter.default.post(name: .openFeedFromShortcut, object: nil)
+    await MainActor.run {
+      NotificationCenter.default.post(name: .openFeedFromShortcut, object: nil)
+    }
     return .result()
   }
 }

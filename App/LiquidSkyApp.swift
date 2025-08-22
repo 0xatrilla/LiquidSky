@@ -425,7 +425,7 @@ struct LiquidSkyApp: App {
 
       // Publish follower count to widget after profile is fetched
       Task {
-        if let profile = await currentUser.profile {
+        if let profile = currentUser.profile {
           let defaults = UserDefaults(suiteName: "group.com.acxtrilla.LiquidSky")
           defaults?.set(profile.profile.followersCount, forKey: "widget.followers.count")
 

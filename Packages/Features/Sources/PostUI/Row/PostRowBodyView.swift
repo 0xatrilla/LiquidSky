@@ -51,16 +51,15 @@ struct ClickablePostText: View {
     mentionPattern.enumerateMatches(in: text, range: range) { match, _, _ in
       guard let match = match else { return }
 
-      let nsRange = match.range(at: 1)  // Capture group for the handle without @
-      let handleRange = Range(nsRange, in: text)!
-      let handle = String(text[handleRange])
+      // Capture group for the handle without @ (optional, not used yet)
+      let nsHandleRange = match.range(at: 1)
+      if let handleRange = Range(nsHandleRange, in: text) {
+        _ = String(text[handleRange])
+      }
 
-      // Style the entire mention (@handle)
-      let mentionStart = text.index(text.startIndex, offsetBy: match.range.location)
-      let mentionEnd = text.index(mentionStart, offsetBy: match.range.length)
-      let mentionRange = mentionStart..<mentionEnd
-
-      if let attributedRange = Range(NSRange(mentionRange, in: text), in: attributedString) {
+      // Style the entire mention (@handle) using a safe conversion
+      if let fullRange = Range(match.range, in: text),
+         let attributedRange = Range(NSRange(fullRange, in: text), in: attributedString) {
         attributedString[attributedRange].foregroundColor = .themePrimary
         attributedString[attributedRange].underlineStyle = .single
       }
@@ -78,11 +77,11 @@ struct ClickablePostText: View {
       guard let match = match else { return }
 
       let nsRange = match.range(at: 1)  // Capture group for the handle without @
-      let handleRange = Range(nsRange, in: text)!
-      let handle = String(text[handleRange])
-
-      // For now, just print the handle - navigation will be implemented later
-      print("Tapped on mention: @\(handle)")
+      if let handleRange = Range(nsRange, in: text) {
+        let handle = String(text[handleRange])
+        // For now, just print the handle - navigation will be implemented later
+        print("Tapped on mention: @\(handle)")
+      }
 
       // TODO: Implement navigation to profile when AppRouter is available
       // This will require:
