@@ -29,7 +29,9 @@ struct ComposerToolbarView: ToolbarContent {
       }
       .onChange(of: selectedPhotos) { _, newValue in
         // TODO: Handle selected photos
+        #if DEBUG
         print("Selected photos: \(newValue.count)")
+        #endif
       }
     }
 
@@ -40,7 +42,9 @@ struct ComposerToolbarView: ToolbarContent {
       }
       .onChange(of: selectedVideos) { _, newValue in
         // TODO: Handle selected videos
+        #if DEBUG
         print("Selected videos: \(newValue.count)")
+        #endif
       }
     }
 
@@ -54,7 +58,9 @@ struct ComposerToolbarView: ToolbarContent {
       .sheet(isPresented: $showCamera) {
         CameraView { image in
           // TODO: Handle captured image
+          #if DEBUG
           print("Captured image")
+          #endif
         }
       }
     }

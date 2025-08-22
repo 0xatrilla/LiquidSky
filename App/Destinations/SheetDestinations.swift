@@ -22,26 +22,38 @@ public struct SheetDestinations: ViewModifier {
   public func body(content: Content) -> some View {
     content
       .sheet(item: $router.presentedSheet) { presentedSheet in
+        #if DEBUG
         let _ = print("SheetDestinations: Creating sheet for \(presentedSheet)")
+        #endif
         switch presentedSheet {
         case .auth:
+          #if DEBUG
           let _ = print("SheetDestinations: Creating AuthView")
+          #endif
           Group {
             AuthView()
               .environment(auth)
               .environment(router)
               .onAppear {
+                #if DEBUG
                 print("SheetDestinations: AuthView appeared successfully")
+                #endif
               }
               .onDisappear {
+                #if DEBUG
                 print("SheetDestinations: AuthView disappeared")
+                #endif
               }
           }
           .onAppear {
+            #if DEBUG
             print("SheetDestinations: Auth sheet container appeared")
+            #endif
           }
           .onDisappear {
+            #if DEBUG
             print("SheetDestinations: Auth sheet container disappeared")
+            #endif
           }
         case .feedsList:
           FeedsListView()
@@ -233,7 +245,9 @@ public struct SheetDestinations: ViewModifier {
         }
       }
       .onChange(of: router.presentedSheet) {
+        #if DEBUG
         print("SheetDestinations: Sheet changed")
+        #endif
       }
   }
 }

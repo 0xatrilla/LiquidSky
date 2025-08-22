@@ -30,7 +30,9 @@ struct LiquidSkyApp: App {
   @State var settingsService: SettingsService = .shared
 
   init() {
+    #if DEBUG
     print("LiquidSkyApp: Initializing...")
+    #endif
 
     // Initialize accountManager first
     let accountManager = AccountManager()
@@ -40,7 +42,9 @@ struct LiquidSkyApp: App {
     self.auth = Auth(accountManager: accountManager)
 
     ImagePipeline.shared = ImagePipeline(configuration: .withDataCache)
+    #if DEBUG
     print("LiquidSkyApp: ImagePipeline configured")
+    #endif
     // Note: ImageQualityService configuration moved to avoid potential deadlocks
   }
 
@@ -77,7 +81,9 @@ struct LiquidSkyApp: App {
               router: .constant(router), auth: auth, client: client, currentUser: currentUser, postDataControllerProvider: postDataControllerProvider, settingsService: settingsService
             )
             .onAppear {
+              #if DEBUG
               print("LiquidSkyApp: Showing authenticated state")
+              #endif
             }
             .onReceive(NotificationCenter.default.publisher(for: .openComposerNewPostFromShortcut))
           { _ in
@@ -129,37 +135,51 @@ struct LiquidSkyApp: App {
               .foregroundColor(.secondary)
 
             Button("Show Auth Screen") {
+              #if DEBUG
               print("Manual auth button tapped")
+              #endif
               router.presentedSheet = .auth
             }
             .buttonStyle(.borderedProminent)
             .padding()
           }
           .onAppear {
+            #if DEBUG
             print("LiquidSkyApp: Showing unauthenticated state")
+            #endif
           }
         case .error(let error):
           Text("Error: \(error.localizedDescription)")
             .onAppear {
+              #if DEBUG
               print("LiquidSkyApp: Showing error state: \(error)")
+              #endif
             }
         }
       }
       .modelContainer(for: RecentFeedItem.self)
       .sheet(item: $router.presentedSheet) { presentedSheet in
+        #if DEBUG
         let _ = print("Direct sheet: Creating sheet for \(presentedSheet)")
+        #endif
         switch presentedSheet {
         case .auth:
+          #if DEBUG
           let _ = print("Direct sheet: Creating auth view")
+          #endif
           AuthView()
             .environment(auth)
             .environment(accountManager)
             .environment(router)
             .onAppear {
+              #if DEBUG
               print("Direct sheet: Auth view appeared successfully")
+              #endif
             }
             .onDisappear {
+              #if DEBUG
               print("Direct sheet: Auth view disappeared")
+              #endif
             }
         case .feedsList:
           FeedsListView()
@@ -345,47 +365,69 @@ struct LiquidSkyApp: App {
         }
       }
       .onAppear {
+        #if DEBUG
         print("LiquidSkyApp: App appeared")
+        #endif
         // Safety check for auth
+        #if DEBUG
         print("Auth is properly initialized: \(auth)")
+        #endif
 
         // Ensure auth screen shows if no configuration exists
         if auth.configuration == nil && router.presentedSheet != .auth {
+          #if DEBUG
           print("Fallback: Ensuring auth screen is shown")
+          #endif
           router.presentedSheet = .auth
         }
       }
       .task(id: scenePhase) {
+        #if DEBUG
         print("LiquidSkyApp: Scene phase changed to: \(scenePhase)")
+        #endif
         if scenePhase == .active {
+          #if DEBUG
           print("LiquidSkyApp: Scene became active")
+          #endif
           // Session restoration is now handled in the main task
           // No need to refresh here as it could interfere with the restoration process
         }
       }
       .task {
+        #if DEBUG
         print("LiquidSkyApp: Main task started")
+        #endif
 
         // Wait for initial session restoration attempt
+        #if DEBUG
         print("Waiting for initial session restoration...")
+        #endif
         await auth.restoreSession()
 
         // Check if we have an initial configuration after restoration attempt
         if auth.configuration == nil {
+          #if DEBUG
           print("No initial configuration after restoration, showing auth screen")
+          #endif
           await MainActor.run {
             appState = .unauthenticated
             router.presentedSheet = .auth
+            #if DEBUG
             print("Auth screen requested after failed restoration")
+            #endif
           }
         } else {
+          #if DEBUG
           print("Initial configuration found after restoration, proceeding with authentication")
+          #endif
         }
 
         for await configuration in auth.configurationUpdates {
+          #if DEBUG
           print(
             "LiquidSkyApp: Received configuration update: \(configuration != nil ? "available" : "nil")"
           )
+          #endif
           if let configuration {
             // Keep the auth sheet visible while we're setting up the environment
             // Only clear it after authentication is fully complete
@@ -393,35 +435,53 @@ struct LiquidSkyApp: App {
 
             // Now that authentication is complete, clear the auth sheet
             if router.presentedSheet == .auth {
+              #if DEBUG
               print("Authentication complete, clearing auth sheet")
+              #endif
               router.presentedSheet = nil
             }
           } else {
+            #if DEBUG
             print("No configuration available, showing auth screen")
+            #endif
             appState = .unauthenticated
             router.presentedSheet = .auth
+            #if DEBUG
             print("Auth sheet requested after configuration update")
+            #endif
           }
         }
       }
       .onChange(of: router.presentedSheet) {
+        #if DEBUG
         print(
           "LiquidSkyApp: Sheet changed to \(router.presentedSheet != nil ? "\(router.presentedSheet!)" : "nil")"
         )
+        #endif
       }
     }
   }
 
   private func refreshEnvWith(configuration: ATProtocolConfiguration) async {
+    #if DEBUG
     print("refreshEnvWith: Starting environment refresh...")
+    #endif
     do {
+      #if DEBUG
       print("Creating BSkyClient...")
+      #endif
       let client = try await BSkyClient(configuration: configuration)
+      #if DEBUG
       print("BSkyClient created successfully")
+      #endif
 
+      #if DEBUG
       print("Creating CurrentUser...")
+      #endif
       let currentUser = try await CurrentUser(client: client)
+      #if DEBUG
       print("CurrentUser created successfully")
+      #endif
 
       // Publish follower count to widget after profile is fetched
       Task {
@@ -436,15 +496,23 @@ struct LiquidSkyApp: App {
         }
       }
 
+      #if DEBUG
       print("Configuring ImageQualityService...")
+      #endif
       // Configure image quality service after authentication is complete
       ImageQualityService.shared.configureImagePipeline()
+      #if DEBUG
       print("ImageQualityService configured successfully")
+      #endif
 
+      #if DEBUG
       print("Setting app state to authenticated...")
+      #endif
       await MainActor.run {
         appState = .authenticated(client: client, currentUser: currentUser)
+        #if DEBUG
         print("App state set to authenticated successfully")
+        #endif
       }
 
       // Publish initial notification data to widget
@@ -461,16 +529,22 @@ struct LiquidSkyApp: App {
         )
       }
     } catch {
+      #if DEBUG
       print("refreshEnvWith failed: \(error)")
+      #endif
       // Don't set to unauthenticated while auth sheet is showing
       // This prevents the "Unauthenticated" screen from appearing
       if router.presentedSheet != .auth {
         await MainActor.run {
           appState = .unauthenticated
+          #if DEBUG
           print("App state set to unauthenticated due to error")
+          #endif
         }
       } else {
+        #if DEBUG
         print("Auth sheet is showing, keeping current state to avoid 'Unauthenticated' screen")
+        #endif
       }
     }
   }

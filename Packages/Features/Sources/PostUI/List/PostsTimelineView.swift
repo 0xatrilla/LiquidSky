@@ -43,16 +43,20 @@ extension PostsTimelineView: @MainActor PostsListViewDatasource {
       let feed = try await client.protoClient.getTimeline()
 
       // Debug logging to identify the issue
+      #if DEBUG
       print("Timeline feed received: \(feed.feed.count) posts")
       if let firstPost = feed.feed.first {
         print("First post structure: \(firstPost)")
         print("First post URI: \(firstPost.post.postItem.uri)")
         print("First post author: \(firstPost.post.author.actorHandle)")
       }
+      #endif
 
       // Validate feed data before processing
       guard !feed.feed.isEmpty else {
+        #if DEBUG
         print("Timeline feed is empty")
+        #endif
         throw NSError(
           domain: "TimelineError", code: 1,
           userInfo: [NSLocalizedDescriptionKey: "No posts found in timeline"])
@@ -60,7 +64,9 @@ extension PostsTimelineView: @MainActor PostsListViewDatasource {
 
       // Try to process the feed with enhanced error handling
       let posts = await processFeed(feed.feed, client: client.protoClient)
+      #if DEBUG
       print("Successfully processed \(posts.count) posts from timeline")
+      #endif
 
       return .loaded(posts: posts, cursor: feed.cursor)
     case .loaded(let posts, let cursor):

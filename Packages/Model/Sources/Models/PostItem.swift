@@ -75,30 +75,38 @@ extension AppBskyLexicon.Feed.FeedViewPostDefinition {
 
     if let reason = reason {
       // Check if this is a repost
+      #if DEBUG
       print("PostsListView: Repost detected, investigating structure...")
       print("PostsListView: Reason type: \(type(of: reason))")
       print("PostsListView: Reason description: \(reason)")
+      #endif
 
       // Try to extract repost information from ATProtoKit
       // Since we don't know the exact type, let's use reflection to find the structure
       let mirror = Mirror(reflecting: reason)
+      #if DEBUG
       print("PostsListView: Reason mirror children:")
       for child in mirror.children {
         print("PostsListView: - \(child.label ?? "nil"): \(child.value)")
       }
+      #endif
 
       // Try to extract the repost author from the reason field
       // Based on ATProtoKit structure, the reason should contain author information
       if let repostAuthor = extractRepostAuthor(from: reason) {
         repostedByProfile = repostAuthor
+        #if DEBUG
         print(
           "PostsListView: Successfully extracted repost author: \(repostedByProfile?.displayName ?? repostedByProfile?.handle ?? "unknown")"
         )
         print(
           "PostsListView: Repost author details - DID: \(repostedByProfile?.did ?? "nil"), Handle: \(repostedByProfile?.handle ?? "nil")"
         )
+        #endif
       } else {
+        #if DEBUG
         print("PostsListView: Failed to extract repost author, using placeholder")
+        #endif
         // Fallback to placeholder if we can't extract the real author
         repostedByProfile = Profile(
           did: "did:placeholder:repost",
@@ -129,8 +137,10 @@ extension AppBskyLexicon.Feed.FeedViewPostDefinition {
 
     // Debug reply detection
     if postItem.hasReply {
+      #if DEBUG
       print(
         "PostsListView: Reply detected for post \(postItem.uri) - hasReply: \(postItem.hasReply)")
+      #endif
     }
 
     return postItem
@@ -228,33 +238,47 @@ extension PostItem {
 
 // Helper function to extract repost author from the reason field
 private func extractRepostAuthor(from reason: Any) -> Profile? {
+  #if DEBUG
   print("PostsListView: Starting repost author extraction...")
+  #endif
 
   // Use reflection to find the author information in the reason field
   let mirror = Mirror(reflecting: reason)
+  #if DEBUG
   print("PostsListView: Reason object type: \(type(of: reason))")
   print("PostsListView: Reason object description: \(reason)")
+  #endif
 
   // Look for common patterns in ATProtoKit repost structures
   for child in mirror.children {
     if let label = child.label {
+      #if DEBUG
       print("PostsListView: Examining child: \(label) = \(child.value)")
+      #endif
 
       // Check if this child contains the author information
       if label == "by" || label == "author" || label == "reposter" || label == "actor" {
+        #if DEBUG
         print("PostsListView: Found potential author field: \(label)")
+        #endif
         // This should contain the author profile
         if let authorProfile = extractProfileFromValue(child.value) {
+          #if DEBUG
           print("PostsListView: Successfully extracted profile from \(label)")
+          #endif
           return authorProfile
         } else {
+          #if DEBUG
           print("PostsListView: Failed to extract profile from \(label)")
+          #endif
         }
       }
 
       // Handle the nested ReasonRepostUnion structure
       if label == "reasonRepost" {
+        #if DEBUG
         print("PostsListView: Found reasonRepost field, extracting author from nested structure")
+        #endif
         if let repostReason = child.value as? AppBskyLexicon.Feed.ReasonRepostDefinition {
           // Extract the author from the nested by field
           let repostAuthor = repostReason.by
@@ -264,32 +288,44 @@ private func extractRepostAuthor(from reason: Any) -> Profile? {
             displayName: repostAuthor.displayName,
             avatarImageURL: repostAuthor.avatarImageURL
           )
+          #if DEBUG
           print(
             "PostsListView: Successfully extracted profile from reasonRepost.by: \(profile.displayName ?? profile.handle)"
           )
+          #endif
           return profile
         } else {
+          #if DEBUG
           print("PostsListView: Failed to cast reasonRepost to ReasonRepostDefinition")
+          #endif
         }
       }
     }
   }
 
+  #if DEBUG
   print(
     "PostsListView: No direct author field found, trying to extract from entire reason structure")
+  #endif
   // If we can't find the author directly, try to extract from the entire reason structure
   if let authorProfile = extractProfileFromValue(reason) {
+    #if DEBUG
     print("PostsListView: Successfully extracted profile from entire reason structure")
+    #endif
     return authorProfile
   }
 
+  #if DEBUG
   print("PostsListView: Failed to extract profile from entire reason structure")
+  #endif
   return nil
 }
 
 // Helper function to extract Profile from various ATProtoKit types
 private func extractProfileFromValue(_ value: Any) -> Profile? {
+  #if DEBUG
   print("PostsListView: Extracting profile from value type: \(type(of: value))")
+  #endif
 
   let mirror = Mirror(reflecting: value)
 
@@ -300,39 +336,53 @@ private func extractProfileFromValue(_ value: Any) -> Profile? {
 
   for child in mirror.children {
     if let label = child.label {
+      #if DEBUG
       print("PostsListView: Profile field: \(label) = \(child.value)")
+      #endif
 
       switch label {
       case "did", "actorDID", "actorDid":
         if let stringValue = child.value as? String {
           did = stringValue
+          #if DEBUG
           print("PostsListView: Found DID: \(stringValue)")
+          #endif
         }
       case "handle", "actorHandle", "actorHandle":
         if let stringValue = child.value as? String {
           handle = stringValue
+          #if DEBUG
           print("PostsListView: Found handle: \(stringValue)")
+          #endif
         }
       case "displayName", "display_name":
         if let stringValue = child.value as? String {
           displayName = stringValue
+          #if DEBUG
           print("PostsListView: Found displayName: \(stringValue)")
+          #endif
         }
       case "avatar", "avatarImageURL", "avatarURL":
         if let urlValue = child.value as? URL {
           avatarImageURL = urlValue
+          #if DEBUG
           print("PostsListView: Found avatar: \(urlValue)")
+          #endif
         }
       default:
+        #if DEBUG
         print("PostsListView: Unhandled field: \(label)")
+        #endif
         break
       }
     }
   }
 
+  #if DEBUG
   print(
     "PostsListView: Profile extraction result - DID: \(did ?? "nil"), Handle: \(handle ?? "nil"), DisplayName: \(displayName ?? "nil")"
   )
+  #endif
 
   // Only return a profile if we have the essential fields
   if let did = did, let handle = handle {
@@ -342,11 +392,15 @@ private func extractProfileFromValue(_ value: Any) -> Profile? {
       displayName: displayName,
       avatarImageURL: avatarImageURL
     )
+    #if DEBUG
     print(
       "PostsListView: Successfully created profile for: \(profile.displayName ?? profile.handle)")
+    #endif
     return profile
   }
 
+  #if DEBUG
   print("PostsListView: Failed to create profile - missing essential fields")
+  #endif
   return nil
 }
