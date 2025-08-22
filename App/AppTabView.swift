@@ -14,7 +14,6 @@ import SwiftUI
 struct AppTabView: View {
   @Environment(AppRouter.self) var router
   @Environment(BSkyClient.self) var client
-  @State private var searchText: String = ""
   @State private var selectedTab: AppTab = .feed
 
   public var body: some View {
@@ -29,7 +28,6 @@ struct AppTabView: View {
             .navigationBarTitleDisplayMode(.large)
             .withAppDestinations()
         }
-        .searchable(text: $searchText)
         .onAppear { selectedTab = .feed }
       } label: {
         Label("Feed", systemImage: "square.stack")
