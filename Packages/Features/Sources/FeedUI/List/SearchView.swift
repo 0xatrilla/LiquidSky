@@ -24,45 +24,43 @@ public struct SearchView: View {
   }
 
   public var body: some View {
-    NavigationView {
-      VStack(spacing: 0) {
-        // Search header with liquid glass effect
-        searchHeader
+    VStack(spacing: 0) {
+      // Search header with liquid glass effect
+      searchHeader
 
-        // Filter buttons with liquid glass effect
-        filterButtons
+      // Filter buttons with liquid glass effect
+      filterButtons
 
-        // Search results
-        searchResultsView
-      }
-      .navigationTitle("Search")
-      .navigationBarTitleDisplayMode(.large)
-      .background(
-        LinearGradient(
-          colors: [.primary, .secondary],
-          startPoint: .top,
-          endPoint: .bottom
-        )
+      // Search results
+      searchResultsView
+    }
+    .navigationTitle("Search")
+    .navigationBarTitleDisplayMode(.large)
+    .background(
+      LinearGradient(
+        colors: [.primary, .secondary],
+        startPoint: .top,
+        endPoint: .bottom
       )
-      .onChange(of: searchText) { _, newValue in
-        if !newValue.isEmpty {
-          generateSearchSuggestions(for: newValue)
-          Task {
-            await performSearch()
-          }
-        } else {
-          searchSuggestions = []
-          showSuggestions = false
-          searchResults = nil
+    )
+    .onChange(of: searchText) { _, newValue in
+      if !newValue.isEmpty {
+        generateSearchSuggestions(for: newValue)
+        Task {
+          await performSearch()
         }
+      } else {
+        searchSuggestions = []
+        showSuggestions = false
+        searchResults = nil
       }
-      .onAppear {
-        // Set the client when the view appears
-        searchService.client = client
-        if !searchText.isEmpty {
-          Task {
-            await performSearch()
-          }
+    }
+    .onAppear {
+      // Set the client when the view appears
+      searchService.client = client
+      if !searchText.isEmpty {
+        Task {
+          await performSearch()
         }
       }
     }

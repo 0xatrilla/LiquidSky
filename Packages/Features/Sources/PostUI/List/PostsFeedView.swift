@@ -23,7 +23,6 @@ public struct PostsFeedView: View {
     PostListView(datasource: self)
       .navigationTitle(feedItem.displayName)
       .navigationBarTitleDisplayMode(.large)
-      .toolbar(.visible, for: .tabBar)
       .toolbar {
         ToolbarItem(placement: .topBarTrailing) {
           Button(action: {
