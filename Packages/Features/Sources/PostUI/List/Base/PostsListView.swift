@@ -37,8 +37,20 @@ public struct PostListView: View {
       }
     }
     .refreshable {
+      // Prevent multiple simultaneous refreshes
+      guard case .loaded = state else { return }
+
       state = .loading
-      state = await datasource.loadPosts(with: state)
+      do {
+        state = await datasource.loadPosts(with: state)
+      } catch {
+        // Handle refresh errors gracefully
+        if (error as? CancellationError) != nil {
+          // Task was cancelled, don't show error
+          return
+        }
+        state = .error(error)
+      }
     }
   }
 
@@ -73,10 +85,13 @@ public struct PostListView: View {
                 .font(.title2)
                 .fontWeight(.semibold)
 
-              Text(error.localizedDescription)
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
+              // Don't show "cancelled" for cancellation errors
+              if (error as? CancellationError) == nil {
+                Text(error.localizedDescription)
+                  .font(.body)
+                  .foregroundStyle(.secondary)
+                  .multilineTextAlignment(.center)
+              }
 
               Button("Try Again") {
                 Task {

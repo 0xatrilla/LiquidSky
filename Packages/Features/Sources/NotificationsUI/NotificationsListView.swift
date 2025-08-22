@@ -106,6 +106,9 @@ public struct NotificationsListView: View {
       await fetchNotifications()
     }
     .refreshable {
+      // Prevent multiple simultaneous refreshes
+      guard !isLoading else { return }
+
       cursor = nil
       await fetchNotifications()
     }
@@ -133,6 +136,11 @@ public struct NotificationsListView: View {
         self.cursor = response.cursor
       }
     } catch {
+      // Handle cancellation gracefully
+      if (error as? CancellationError) != nil {
+        // Task was cancelled, don't show error
+        return
+      }
       print("Failed to fetch notifications: \(error)")
       self.error = error
     }
