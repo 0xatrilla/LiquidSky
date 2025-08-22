@@ -1,17 +1,21 @@
 import ATProtoKit
 import AppRouter
+import Client
 import DesignSystem
 import Destinations
 import Models
 import PostUI
 import SwiftUI
 
+/// Grouped notification row following IceCubesApp's proven implementation
+/// Provides seamless navigation and better user experience for grouped notifications
 public struct GroupedNotificationRow: View {
   let group: NotificationsGroup
 
   @Namespace private var namespace
   @Environment(AppRouter.self) var router
-  let actionText: (Int) -> String  // Closure to generate action text based on count
+  @Environment(BSkyClient.self) var client
+  let actionText: (Int) -> String
   @State private var showingFollowersList = false
 
   public init(group: NotificationsGroup, actionText: @escaping (Int) -> String) {
@@ -20,8 +24,8 @@ public struct GroupedNotificationRow: View {
   }
 
   public var body: some View {
-    HStack(alignment: .top, spacing: 8) {
-      // Avatar stack
+    HStack(alignment: .top, spacing: 12) {
+      // Avatar stack with notification type indicator
       ZStack(alignment: .bottomTrailing) {
         avatarsView
 
@@ -58,10 +62,7 @@ public struct GroupedNotificationRow: View {
         // Post content if available
         if let postItem = group.postItem {
           PostRowBodyView(post: postItem)
-        }
-
-        // Embed if available
-        if let postItem = group.postItem, let embed = postItem.embed {
+            .lineLimit(3)
           PostRowEmbedView(post: postItem)
         }
       }
@@ -69,13 +70,14 @@ public struct GroupedNotificationRow: View {
     .padding(.horizontal, 16)
     .padding(.vertical, 12)
     .background(Color(.systemBackground))
+    .contentShape(Rectangle())
     .onTapGesture {
+      print("🔍 Debug: GroupedNotificationRow tapped!")
       handleNotificationTap()
     }
     .sheet(isPresented: $showingFollowersList) {
       FollowersListView(
         followers: group.notifications.map { notification in
-          // Pass the basic profile data we need
           notification.author
         }
       )
@@ -85,6 +87,14 @@ public struct GroupedNotificationRow: View {
   }
 
   private func handleNotificationTap() {
+    print("🔍 Debug: GroupedNotificationRow handleNotificationTap called for type: \(group.type)")
+
+    // Special handling for multiple followers (show sheet)
+    if group.type == .follow && group.notifications.count > 1 {
+      showingFollowersList = true
+      return
+    }
+
     switch group.type {
     case .follow:
       // Handle follower notifications
@@ -97,15 +107,45 @@ public struct GroupedNotificationRow: View {
           displayName: notification.author.displayName,
           avatarImageURL: notification.author.avatarImageURL
         )
+        print("🔍 Debug: Navigating directly to profile: \(profile.handle)")
         router.navigateTo(.profile(profile))
-      } else {
-        // Multiple followers - show the Liquid Glass sheet
-        showingFollowersList = true
       }
+
+    case .like, .repost:
+      // Handle post-related notifications with direct navigation
+      if let postItem = group.postItem {
+        print("🔍 Debug: Navigating directly to post: \(postItem.uri)")
+        router.navigateTo(.post(postItem))
+      } else {
+        // Fallback to profile of first user
+        if let firstNotification = group.notifications.first {
+          let profile = Profile(
+            did: firstNotification.author.actorDID,
+            handle: firstNotification.author.actorHandle,
+            displayName: firstNotification.author.displayName,
+            avatarImageURL: firstNotification.author.avatarImageURL
+          )
+          router.navigateTo(.profile(profile))
+        }
+      }
+
     default:
       // Handle other notification types
       if let postItem = group.postItem {
+        // Navigate directly to post (no sheet)
+        print("🔍 Debug: Navigating directly to post: \(postItem.uri)")
         router.navigateTo(.post(postItem))
+      } else {
+        // Fallback to profile of first user
+        if let firstNotification = group.notifications.first {
+          let profile = Profile(
+            did: firstNotification.author.actorDID,
+            handle: firstNotification.author.actorHandle,
+            displayName: firstNotification.author.displayName,
+            avatarImageURL: firstNotification.author.avatarImageURL
+          )
+          router.navigateTo(.profile(profile))
+        }
       }
     }
   }
@@ -122,12 +162,12 @@ public struct GroupedNotificationRow: View {
           image
             .resizable()
             .scaledToFit()
-            .frame(width: 32, height: 32)
+            .frame(width: 36, height: 36)
             .clipShape(Circle())
         } placeholder: {
           Circle()
             .fill(.gray.opacity(0.2))
-            .frame(width: 32, height: 32)
+            .frame(width: 36, height: 36)
         }
         .overlay {
           Circle()
@@ -135,12 +175,14 @@ public struct GroupedNotificationRow: View {
         }
         .shadow(color: .shadowPrimary.opacity(0.3), radius: 2)
         .onTapGesture {
+          // Allow avatar taps for profile navigation
           let profile = Profile(
             did: notification.author.actorDID,
             handle: notification.author.actorHandle,
             displayName: notification.author.displayName,
             avatarImageURL: notification.author.avatarImageURL
           )
+          print("🔍 Debug: Navigating directly to profile: \(profile.handle)")
           router.navigateTo(.profile(profile))
         }
       }

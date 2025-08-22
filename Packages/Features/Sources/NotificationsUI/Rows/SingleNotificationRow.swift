@@ -7,6 +7,8 @@ import Models
 import PostUI
 import SwiftUI
 
+/// Single notification row following IceCubesApp's proven implementation
+/// Provides seamless navigation and better user experience
 public struct SingleNotificationRow: View {
   let notification: AppBskyLexicon.Notification.Notification
   let postItem: PostItem?
@@ -14,7 +16,6 @@ public struct SingleNotificationRow: View {
   @Namespace private var namespace
   @Environment(AppRouter.self) var router
   @Environment(BSkyClient.self) var client
-  @Environment(PostContextProvider.self) var postDataControllerProvider
   let actionText: String
 
   public init(
@@ -26,32 +27,40 @@ public struct SingleNotificationRow: View {
   }
 
   public var body: some View {
-    HStack(alignment: .top, spacing: 8) {
-      // Avatar
-      AsyncImage(url: notification.author.avatarImageURL) { image in
-        image
-          .resizable()
-          .scaledToFit()
-          .frame(width: 40, height: 40)
-          .clipShape(Circle())
-      } placeholder: {
-        Circle()
-          .fill(.gray.opacity(0.2))
-          .frame(width: 40, height: 40)
-      }
-      .overlay {
-        Circle()
-          .stroke(LinearGradient.avatarBorder, lineWidth: 1)
-      }
-      .shadow(color: .shadowPrimary.opacity(0.3), radius: 2)
-      .onTapGesture {
-        let profile = Profile(
-          did: notification.author.actorDID,
-          handle: notification.author.actorHandle,
-          displayName: notification.author.displayName,
-          avatarImageURL: notification.author.avatarImageURL
+    HStack(alignment: .top, spacing: 12) {
+      // Avatar with notification type indicator
+      ZStack(alignment: .bottomTrailing) {
+        AsyncImage(url: notification.author.avatarImageURL) { image in
+          image
+            .resizable()
+            .scaledToFit()
+            .frame(width: 44, height: 44)
+            .clipShape(Circle())
+        } placeholder: {
+          Circle()
+            .fill(.gray.opacity(0.2))
+            .frame(width: 44, height: 44)
+        }
+        .overlay {
+          Circle()
+            .stroke(LinearGradient.avatarBorder, lineWidth: 1)
+        }
+        .shadow(color: .shadowPrimary.opacity(0.3), radius: 2)
+
+        // Notification type icon
+        NotificationIconView(
+          icon: notification.reason.iconName,
+          color: notification.reason.color
         )
-        router.navigateTo(.profile(profile))
+        .background(
+          Circle()
+            .fill(.white)
+            .shadow(color: .shadowPrimary.opacity(0.3), radius: 2)
+        )
+      }
+      .onTapGesture {
+        // Allow avatar taps for profile navigation
+        navigateToProfile()
       }
 
       // Content
@@ -77,17 +86,71 @@ public struct SingleNotificationRow: View {
         // Post content if available
         if let postItem {
           PostRowBodyView(post: postItem)
+            .lineLimit(3)
           PostRowEmbedView(post: postItem)
         }
       }
     }
     .padding(.horizontal, 16)
     .padding(.vertical, 12)
+    .background(Color(.systemBackground))
     .contentShape(Rectangle())
     .onTapGesture {
-      if let postItem {
-        router.navigateTo(.post(postItem))
+      print("🔍 Debug: SingleNotificationRow tapped!")
+      handleNotificationTap()
+    }
+  }
+
+  private func handleNotificationTap() {
+    print(
+      "🔍 Debug: SingleNotificationRow handleNotificationTap called for reason: \(notification.reason)"
+    )
+
+    // Add haptic feedback for better UX
+    HapticManager.shared.impact(.light)
+
+    switch notification.reason {
+    case .follow:
+      navigateToProfile()
+
+    case .like, .repost, .reply, .mention, .quote:
+      navigateToPost()
+
+    case .starterpackjoined, .verified, .unverified:
+      navigateToProfile()
+
+    default:
+      // Try post first, fallback to profile
+      if postItem != nil {
+        navigateToPost()
+      } else {
+        navigateToProfile()
       }
+    }
+  }
+
+  private func navigateToProfile() {
+    let profile = Profile(
+      did: notification.author.actorDID,
+      handle: notification.author.actorHandle,
+      displayName: notification.author.displayName,
+      avatarImageURL: notification.author.avatarImageURL
+    )
+
+    // Direct navigation should now work with unified navigation stack
+    print("🔍 Debug: Navigating directly to profile: \(profile.handle)")
+    router.navigateTo(.profile(profile))
+  }
+
+  private func navigateToPost() {
+    if let postItem {
+      print("🔍 Debug: Navigating directly to post: \(postItem.uri)")
+
+      // Direct navigation should now work with unified navigation stack
+      router.navigateTo(.post(postItem))
+    } else {
+      print("🔍 Debug: No postItem found, falling back to profile")
+      navigateToProfile()
     }
   }
 }

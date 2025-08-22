@@ -6,83 +6,117 @@ import Models
 import PostUI
 import SwiftUI
 
+/// Notifications list view following IceCubesApp's proven implementation
+/// Provides seamless notification handling and better user experience
 public struct NotificationsListView: View {
   @Environment(BSkyClient.self) private var client
 
   @State private var notificationsGroups: [NotificationsGroup] = []
   @State private var cursor: String?
+  @State private var isLoading = false
+  @State private var error: Error?
 
   public init() {}
 
   public var body: some View {
     ZStack {
-      // Simple background
-      Color.clear
+      // Background
+      Color(.systemGroupedBackground)
+        .ignoresSafeArea()
 
-      ScrollView {
-        LazyVStack(spacing: 0) {
-          // Notifications content
-          if notificationsGroups.isEmpty {
-            // Empty state
-            VStack(spacing: 20) {
-              Image(systemName: "bell.slash")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
-                .padding(.bottom, 8)
+      if notificationsGroups.isEmpty && !isLoading {
+        // Empty state
+        VStack(spacing: 20) {
+          Image(systemName: "bell.slash")
+            .font(.system(size: 48))
+            .foregroundStyle(.secondary)
+            .padding(.bottom, 8)
 
-              Text("No notifications yet")
-                .font(.title2)
-                .fontWeight(.semibold)
-                .foregroundStyle(.primary)
+          Text("No notifications yet")
+            .font(.title2)
+            .fontWeight(.semibold)
+            .foregroundStyle(.primary)
 
-              Text("When you get notifications, they'll appear here")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
+          Text("When you get notifications, they'll appear here")
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 40)
+        .padding(.horizontal, 20)
+      } else if let error = error {
+        // Error state
+        VStack(spacing: 20) {
+          Image(systemName: "exclamationmark.triangle")
+            .font(.system(size: 48))
+            .foregroundStyle(.red)
+            .padding(.bottom, 8)
+
+          Text("Failed to load notifications")
+            .font(.title2)
+            .fontWeight(.semibold)
+            .foregroundStyle(.primary)
+
+          Text(error.localizedDescription)
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
+
+          Button("Try Again") {
+            Task {
+              await fetchNotifications()
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 40)
-            .padding(.horizontal, 20)
-            .padding(.horizontal, 16)
-          } else {
-            // Notifications list
-            LazyVStack(spacing: 0) {
-              ForEach(notificationsGroups, id: \.id) { group in
-                NotificationRow(group: group)
-              }
+          }
+          .buttonStyle(.borderedProminent)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 40)
+        .padding(.horizontal, 20)
+      } else {
+        // Notifications list
+        ScrollView {
+          LazyVStack(spacing: 0) {
+            ForEach(notificationsGroups) { group in
+              NotificationRow(group: group)
+                .id(group.id)
+            }
 
-              // Load more indicator
-              if cursor != nil {
-                HStack {
-                  Spacer()
-                  ProgressView()
-                    .scaleEffect(0.8)
-                    .padding(.vertical, 16)
-                  Spacer()
-                }
-                .padding(.vertical, 20)
-                .task {
-                  await fetchNotifications()
-                }
+            // Load more indicator
+            if cursor != nil && !isLoading {
+              HStack {
+                Spacer()
+                ProgressView()
+                  .scaleEffect(0.8)
+                  .padding(.vertical, 16)
+                Spacer()
+              }
+              .padding(.vertical, 20)
+              .task {
+                await fetchNotifications()
               }
             }
           }
         }
       }
-      .navigationTitle("Notifications")
-      .navigationBarTitleDisplayMode(.large)
-      .task {
-        cursor = nil
-        await fetchNotifications()
-      }
-      .refreshable {
-        cursor = nil
-        await fetchNotifications()
-      }
+    }
+    .navigationTitle("Notifications")
+    .navigationBarTitleDisplayMode(.large)
+    .task {
+      await fetchNotifications()
+    }
+    .refreshable {
+      cursor = nil
+      await fetchNotifications()
     }
   }
 
   private func fetchNotifications() async {
+    guard !isLoading else { return }
+
+    isLoading = true
+    error = nil
+
     do {
       if let cursor {
         let response = try await client.protoClient.listNotifications(
@@ -99,8 +133,11 @@ public struct NotificationsListView: View {
         self.cursor = response.cursor
       }
     } catch {
-      print(error)
+      print("Failed to fetch notifications: \(error)")
+      self.error = error
     }
+
+    isLoading = false
   }
 }
 
