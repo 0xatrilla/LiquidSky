@@ -13,6 +13,7 @@ import SwiftUI
 
 struct AppTabView: View {
   @Environment(AppRouter.self) var router
+  @Environment(BSkyClient.self) var client
   @State private var searchText: String = ""
   @State private var selectedTab: AppTab = .feed
 
@@ -76,9 +77,7 @@ struct AppTabView: View {
       // Native search tab in tab bar
       Tab(value: AppTab.compose, role: .search) {
         NavigationStack(path: $router[.compose]) {
-          Text("Search")
-            .navigationTitle("Search")
-            .navigationBarTitleDisplayMode(.large)
+          SimpleSearchView(client: client)
             .withAppDestinations()
         }
         .onAppear { selectedTab = .compose }

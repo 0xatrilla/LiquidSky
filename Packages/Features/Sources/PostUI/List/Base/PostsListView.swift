@@ -185,7 +185,6 @@ public struct PostListView<T: PostsListViewDatasource>: View {
       .scrollDismissesKeyboard(.immediately)
       .scrollContentBackground(.hidden)
       .scrollIndicators(.hidden)
-      .toolbarBackground(.automatic, for: .tabBar)
       .task {
         if case .uninitialized = state {
           state = .loading

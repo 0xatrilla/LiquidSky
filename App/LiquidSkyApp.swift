@@ -93,7 +93,7 @@ struct LiquidSkyApp: App {
             }
             .onReceive(NotificationCenter.default.publisher(for: .openSearchFromShortcut)) { _ in
               Task { @MainActor in
-                router.selectedTab = .feed
+                router.selectedTab = .compose
               }
             }
             .onReceive(NotificationCenter.default.publisher(for: .openProfileFromShortcut)) { _ in
