@@ -25,7 +25,7 @@ public struct SummaryButtonView: View {
       HStack(spacing: 8) {
         Image(systemName: "sparkles")
           .font(.subheadline)
-          .foregroundColor(.blueskyPrimary)
+          .symbolRenderingMode(.multicolor)
 
         Text("AI Summary")
           .font(.subheadline)

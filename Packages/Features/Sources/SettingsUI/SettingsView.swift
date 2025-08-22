@@ -49,6 +49,9 @@ public struct SettingsView: View {
         // Content Section
         contentSection
 
+        // Intelligence Section
+        intelligenceSection
+
         // Media Section
         mediaSection
 
@@ -88,6 +91,35 @@ public struct SettingsView: View {
       AccountSwitcherView()
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
+    }
+  }
+
+  // MARK: - Intelligence Section
+  private var intelligenceSection: some View {
+    VStack(spacing: 16) {
+      SettingsSectionHeader(title: "Intelligence", icon: "sparkles", color: .purple)
+
+      SettingsToggleRow(
+        title: "AI Summaries (Experimental)",
+        subtitle: "Generate concise summaries of feeds using Apple Intelligence when available",
+        icon: "sparkles",
+        iconColor: .purple,
+        isOn: $settingsService.aiSummariesEnabled
+      )
+
+      SettingsToggleRow(
+        title: "Enable on Device (Experimental)",
+        subtitle: "Allows Apple Intelligence to run on your device if supported (iOS 26+). May be unstable on some configurations.",
+        icon: "iphone",
+        iconColor: .purple,
+        isOn: $settingsService.aiDeviceExperimentalEnabled
+      )
+
+      Text("Requires iOS 26.0 and an Apple Intelligence–supported device. This is for testing and may crash on some setups. Turn off if you see instability.")
+        .font(.caption)
+        .foregroundColor(.secondary)
+        .multilineTextAlignment(.leading)
+        .padding(.horizontal, 16)
     }
   }
 
