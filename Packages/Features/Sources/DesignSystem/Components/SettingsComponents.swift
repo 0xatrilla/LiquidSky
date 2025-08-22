@@ -5,28 +5,38 @@ public struct SettingsSectionHeader: View {
   let title: String
   let icon: String
   let color: Color
+  let useMulticolor: Bool
 
-  public init(title: String, icon: String, color: Color = .themePrimary) {
+  public init(title: String, icon: String, color: Color = .themePrimary, useMulticolor: Bool = false) {
     self.title = title
     self.icon = icon
     self.color = color
+    self.useMulticolor = useMulticolor
   }
 
   public var body: some View {
     HStack(spacing: 12) {
-      Image(systemName: icon)
-        .font(.title2)
-        .foregroundColor(.white)
-        .frame(width: 32, height: 32)
-        .background(
-          LinearGradient(
-            colors: [color, color.opacity(0.7)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-          )
+      Group {
+        if useMulticolor {
+          Image(systemName: icon)
+            .font(.title2)
+            .symbolRenderingMode(.multicolor)
+        } else {
+          Image(systemName: icon)
+            .font(.title2)
+            .foregroundColor(.white)
+        }
+      }
+      .frame(width: 32, height: 32)
+      .background(
+        LinearGradient(
+          colors: [color, color.opacity(0.7)],
+          startPoint: .topLeading,
+          endPoint: .bottomTrailing
         )
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-        .glowingRoundedRectangle(cornerRadius: 8)
+      )
+      .clipShape(RoundedRectangle(cornerRadius: 8))
+      .glowingRoundedRectangle(cornerRadius: 8)
 
       Text(title)
         .font(.title3)
@@ -46,6 +56,7 @@ public struct SettingsToggleRow: View {
   let subtitle: String?
   let icon: String
   let iconColor: Color
+  let useMulticolor: Bool
   @Binding var isOn: Bool
 
   public init(
@@ -53,21 +64,31 @@ public struct SettingsToggleRow: View {
     subtitle: String? = nil,
     icon: String,
     iconColor: Color = .blue,
+    useMulticolor: Bool = false,
     isOn: Binding<Bool>
   ) {
     self.title = title
     self.subtitle = subtitle
     self.icon = icon
     self.iconColor = iconColor
+    self.useMulticolor = useMulticolor
     self._isOn = isOn
   }
 
   public var body: some View {
     HStack(spacing: 16) {
-      Image(systemName: icon)
-        .font(.title3)
-        .foregroundColor(iconColor)
-        .frame(width: 24, height: 24)
+      Group {
+        if useMulticolor {
+          Image(systemName: icon)
+            .font(.title3)
+            .symbolRenderingMode(.multicolor)
+        } else {
+          Image(systemName: icon)
+            .font(.title3)
+            .foregroundColor(iconColor)
+        }
+      }
+      .frame(width: 24, height: 24)
 
       VStack(alignment: .leading, spacing: 2) {
         Text(title)

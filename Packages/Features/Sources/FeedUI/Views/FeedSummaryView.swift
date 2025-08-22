@@ -29,11 +29,19 @@ public struct FeedSummaryView: View {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack(spacing: 8) {
-                                    Image(systemName: isAIPowered ? "sparkles" : "doc.text.magnifyingglass")
-                                        .font(.title2)
-                                        .foregroundStyle(isAIPowered ? .purple : .blue)
-                                        .scaleEffect(isAnimating ? 1.1 : 1.0)
-                                        .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: isAnimating)
+                                    if isAIPowered {
+                                        Image(systemName: "sparkles")
+                                            .font(.title2)
+                                            .symbolRenderingMode(.multicolor)
+                                            .scaleEffect(isAnimating ? 1.1 : 1.0)
+                                            .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: isAnimating)
+                                    } else {
+                                        Image(systemName: "doc.text.magnifyingglass")
+                                            .font(.title2)
+                                            .foregroundStyle(.blue)
+                                            .scaleEffect(isAnimating ? 1.1 : 1.0)
+                                            .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: isAnimating)
+                                    }
                                     
                                     Text("Feed Summary")
                                         .font(.title)

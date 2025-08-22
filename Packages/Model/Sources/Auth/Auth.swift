@@ -186,14 +186,22 @@ public final class Auth: @unchecked Sendable {
     do {
       print("Auth: Attempting to restore existing session...")
 
-      // Check if we have an active account
-      guard let activeAccountId = accountManager.activeAccountId else {
-        print("Auth: No active account found, cannot restore session")
+      // Determine target account: prefer active, else fall back to first stored
+      var targetAccountId: UUID?
+      if let activeId = accountManager.activeAccountId {
+        targetAccountId = activeId
+      } else if let firstAccount = accountManager.accounts.first {
+        print("Auth: No active account found, falling back to first stored account: \(firstAccount.handle)")
+        // Mark it active for consistency across app components
+        try? await accountManager.switchToAccount(firstAccount.id)
+        targetAccountId = firstAccount.id
+      } else {
+        print("Auth: No accounts available, cannot restore session")
         return
       }
 
-      // Get the active account
-      guard let activeAccount = accountManager.accounts.first(where: { $0.id == activeAccountId })
+      // Get the target account
+      guard let activeAccount = accountManager.accounts.first(where: { $0.id == targetAccountId })
       else {
         print("Auth: Active account not found in account list")
         return
@@ -213,7 +221,7 @@ public final class Auth: @unchecked Sendable {
       // Update our state
       self.ATProtoKeychain = accountKeychain
       self.configuration = configuration
-      self.currentAccountId = activeAccountId
+      self.currentAccountId = targetAccountId
 
       // Trigger the authentication flow
       configurationContinuation.yield(configuration)

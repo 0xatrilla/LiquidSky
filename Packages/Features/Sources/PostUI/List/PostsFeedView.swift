@@ -49,9 +49,9 @@ public struct PostsFeedView: View {
               .background(.ultraThinMaterial)
               .clipShape(Capsule())
             } else {
-              Image(systemName: "doc.text.magnifyingglass")
+              Image(systemName: "sparkles")
                 .font(.title2)
-                .foregroundColor(.themePrimary)
+                .symbolRenderingMode(.multicolor)
             }
           }
           .disabled(isGeneratingSummary)

@@ -41,7 +41,7 @@ public struct SummarySheetView: View {
             HStack {
               Image(systemName: "sparkles")
                 .font(.title2)
-                .foregroundColor(.blueskyPrimary)
+                .symbolRenderingMode(.multicolor)
 
               Text(title)
                 .font(.title2)

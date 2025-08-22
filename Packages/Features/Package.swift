@@ -85,7 +85,10 @@ let package = Package(
     ),
     .target(
       name: "ComposerUI",
-      dependencies: baseDeps
+      dependencies: baseDeps,
+      linkerSettings: [
+        .unsafeFlags(["-weak_framework", "FoundationModels"], .when(platforms: [.iOS]))
+      ]
     ),
     .target(
       name: "DesignSystem",

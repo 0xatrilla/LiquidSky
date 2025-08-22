@@ -3,6 +3,9 @@ import DesignSystem
 import Models
 import PhotosUI
 import SwiftUI
+#if canImport(FoundationModels)
+import FoundationModels
+#endif
 
 struct ComposerToolbarView: ToolbarContent {
   @Binding var text: AttributedString
@@ -13,6 +16,10 @@ struct ComposerToolbarView: ToolbarContent {
   @State private var selectedPhotos: [PhotosPickerItem] = []
   @State private var selectedVideos: [PhotosPickerItem] = []
   @State private var showCamera = false
+  @State private var showingAIPrompt = false
+  @State private var aiPrompt: String = ""
+  @State private var isAIGenerating = false
+  @State private var aiError: String?
 
   var body: some ToolbarContent {
     ToolbarItem(placement: .keyboard) {
@@ -73,6 +80,26 @@ struct ComposerToolbarView: ToolbarContent {
       }
     }
 
+    // AI Compose
+    ToolbarItem(placement: .keyboard) {
+      Button {
+        showingAIPrompt = true
+      } label: {
+        Image(systemName: "sparkles")
+          .symbolRenderingMode(.multicolor)
+      }
+      .disabled(!aiComposeAvailable())
+      .sheet(isPresented: $showingAIPrompt) {
+        AIPromptSheet(
+          prompt: $aiPrompt,
+          isGenerating: $isAIGenerating,
+          errorMessage: $aiError,
+          onCancel: { showingAIPrompt = false },
+          onGenerate: { Task { await composeWithAI() } }
+        )
+      }
+    }
+
     ToolbarItem(placement: .keyboard) {
       let text = String(text.characters)
       Text("\(300 - text.count)")
@@ -91,6 +118,85 @@ struct ComposerToolbarView: ToolbarContent {
     let currentText = String(text.characters)
     let newText = currentText + string
     text = AttributedString(newText)
+  }
+
+  // MARK: - AI Compose Helpers
+
+  private func aiComposeAvailable() -> Bool {
+    let aiEnabledByUser = SettingsService.shared.aiSummariesEnabled
+    #if targetEnvironment(simulator)
+    let aiGatedOK = aiEnabledByUser
+    #else
+    let aiGatedOK = aiEnabledByUser && SettingsService.shared.aiDeviceExperimentalEnabled
+    #endif
+    #if canImport(FoundationModels)
+    if #available(iOS 26.0, *) {
+      return aiGatedOK
+    } else {
+      return false
+    }
+    #else
+    return false
+    #endif
+  }
+
+  private func dismissAIPrompt() {
+    showingAIPrompt = false
+    aiPrompt = ""
+    isAIGenerating = false
+    aiError = nil
+  }
+
+  private func appendToComposer(_ generated: String) {
+    let current = String(text.characters)
+    let combined = current.isEmpty ? generated : current + "\n" + generated
+    text = AttributedString(combined)
+  }
+
+  private func composeWithAI() async {
+    guard aiComposeAvailable() else {
+      aiError = "Apple Intelligence not available. Enable AI in Settings or use a supported device (iOS 26+)."
+      return
+    }
+
+    #if canImport(FoundationModels)
+    if #available(iOS 26.0, *) {
+      isAIGenerating = true
+      defer { isAIGenerating = false }
+
+      let userPrompt = aiPrompt.trimmingCharacters(in: .whitespacesAndNewlines)
+      let instructions = userPrompt.isEmpty ? "Write a brief, engaging social post about today's highlights." : userPrompt
+
+      let systemPrompt = """
+      You are an assistant that writes short, engaging social media posts for Bluesky.
+      Constraints:
+      - Keep under 300 characters
+      - Clear, friendly tone; avoid hashtags unless requested
+      - No emojis unless explicitly asked
+      - Output plain text only suitable to paste directly as a post
+      """
+
+      let session = LanguageModelSession { systemPrompt }
+      do {
+        #if DEBUG
+        print("AI Compose: Requesting response for prompt: \(instructions)")
+        #endif
+        let response = try await session.respond(to: instructions)
+        let generated = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
+        await MainActor.run {
+          appendToComposer(generated)
+          dismissAIPrompt()
+        }
+      } catch {
+        #if DEBUG
+        print("AI Compose: Error: \(error)")
+        #endif
+        await MainActor.run {
+          aiError = "Failed to generate text. Please try again."
+        }
+      }
+    }
+    #endif
   }
 }
 

@@ -97,13 +97,14 @@ public struct SettingsView: View {
   // MARK: - Intelligence Section
   private var intelligenceSection: some View {
     VStack(spacing: 16) {
-      SettingsSectionHeader(title: "Intelligence", icon: "sparkles", color: .purple)
+      SettingsSectionHeader(title: "Intelligence", icon: "sparkles", color: .purple, useMulticolor: true)
 
       SettingsToggleRow(
         title: "AI Summaries (Experimental)",
         subtitle: "Generate concise summaries of feeds using Apple Intelligence when available",
         icon: "sparkles",
         iconColor: .purple,
+        useMulticolor: true,
         isOn: $settingsService.aiSummariesEnabled
       )
 
