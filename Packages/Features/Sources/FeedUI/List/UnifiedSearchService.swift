@@ -115,7 +115,9 @@ public class UnifiedSearchService: ObservableObject {
         )
       }
     } catch {
+      #if DEBUG
       print("Error searching posts: \(error)")
+      #endif
       return []
     }
   }
@@ -204,7 +206,9 @@ public class UnifiedSearchService: ObservableObject {
       return Array(uniqueResults)
 
     } catch {
+      #if DEBUG
       print("Error searching users: \(error)")
+      #endif
       return []
     }
   }
@@ -226,7 +230,9 @@ public class UnifiedSearchService: ObservableObject {
         )
       }
     } catch {
+      #if DEBUG
       print("Error searching feeds: \(error)")
+      #endif
       return []
     }
   }

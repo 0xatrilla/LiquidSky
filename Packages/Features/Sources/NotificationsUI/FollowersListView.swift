@@ -88,7 +88,9 @@ public struct FollowersListView: View {
 
         profiles.append(profileModel)
       } catch {
+        #if DEBUG
         print("Error loading profile for \(follower.actorDID): \(error)")
+        #endif
 
         // Fallback to basic profile if we can't get the full one
         let fallbackProfile = Profile(

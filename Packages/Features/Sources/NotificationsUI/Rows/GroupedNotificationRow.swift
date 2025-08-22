@@ -85,7 +85,9 @@ public struct GroupedNotificationRow: View {
     .background(Color(.systemBackground))
     .contentShape(Rectangle())
     .onTapGesture {
+      #if DEBUG
       print("🔍 Debug: GroupedNotificationRow tapped!")
+      #endif
       handleNotificationTap()
     }
     .sheet(isPresented: $showingFollowersList) {
@@ -100,7 +102,9 @@ public struct GroupedNotificationRow: View {
   }
 
   private func handleNotificationTap() {
+    #if DEBUG
     print("🔍 Debug: GroupedNotificationRow handleNotificationTap called for type: \(group.type)")
+    #endif
 
     // Special handling for multiple followers (show sheet)
     if group.type == .follow && group.notifications.count > 1 {
@@ -120,14 +124,18 @@ public struct GroupedNotificationRow: View {
           displayName: notification.author.displayName,
           avatarImageURL: notification.author.avatarImageURL
         )
+        #if DEBUG
         print("🔍 Debug: Navigating directly to profile: \(profile.handle)")
+        #endif
         router.navigateTo(.profile(profile))
       }
 
     case .like, .repost:
       // Handle post-related notifications with direct navigation
       if let postItem = group.postItem {
+        #if DEBUG
         print("🔍 Debug: Navigating directly to post: \(postItem.uri)")
+        #endif
         router.navigateTo(.post(postItem))
       } else {
         // Fallback to profile of first user
@@ -195,7 +203,9 @@ public struct GroupedNotificationRow: View {
             displayName: notification.author.displayName,
             avatarImageURL: notification.author.avatarImageURL
           )
+          #if DEBUG
           print("🔍 Debug: Navigating directly to profile: \(profile.handle)")
+          #endif
           router.navigateTo(.profile(profile))
         }
       }

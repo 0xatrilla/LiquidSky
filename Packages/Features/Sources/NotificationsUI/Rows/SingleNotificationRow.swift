@@ -109,15 +109,19 @@ public struct SingleNotificationRow: View {
     .background(Color(.systemBackground))
     .contentShape(Rectangle())
     .onTapGesture {
+      #if DEBUG
       print("🔍 Debug: SingleNotificationRow tapped!")
+      #endif
       handleNotificationTap()
     }
   }
 
   private func handleNotificationTap() {
+    #if DEBUG
     print(
       "🔍 Debug: SingleNotificationRow handleNotificationTap called for reason: \(notification.reason)"
     )
+    #endif
 
     // Add haptic feedback for better UX
     HapticManager.shared.impact(.light)
@@ -151,18 +155,24 @@ public struct SingleNotificationRow: View {
     )
 
     // Direct navigation should now work with unified navigation stack
+    #if DEBUG
     print("🔍 Debug: Navigating directly to profile: \(profile.handle)")
+    #endif
     router.navigateTo(.profile(profile))
   }
 
   private func navigateToPost() {
     if let postItem {
+      #if DEBUG
       print("🔍 Debug: Navigating directly to post: \(postItem.uri)")
+      #endif
 
       // Direct navigation should now work with unified navigation stack
       router.navigateTo(.post(postItem))
     } else {
+      #if DEBUG
       print("🔍 Debug: No postItem found, falling back to profile")
+      #endif
       navigateToProfile()
     }
   }

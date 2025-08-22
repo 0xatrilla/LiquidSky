@@ -18,7 +18,9 @@ public struct FeedsListTitleView: View {
       Menu {
         ForEach(FeedsListFilter.allCases) { filterOption in
           Button(action: {
+            #if DEBUG
             print("Filter selected: \(filterOption)")
+            #endif
             withAnimation(.easeInOut(duration: 0.2)) {
               self.filter = filterOption
             }

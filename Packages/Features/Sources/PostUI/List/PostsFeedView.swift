@@ -117,7 +117,9 @@ public struct PostsFeedView: View {
         }
       }
     } catch {
+      #if DEBUG
       print("Failed to generate summary: \(error)")
+      #endif
       await MainActor.run {
         currentSummary = "Unable to generate summary at this time. Please try again later."
         showingSummary = true
@@ -138,24 +140,38 @@ extension PostsFeedView: @MainActor PostsListViewDatasource {
   }
 
   public func loadPosts(with state: PostsListViewState) async throws -> PostsListViewState {
+    #if DEBUG
     print("PostsFeedView: Starting to load posts for feed: \(feedItem.displayName)")
     print("PostsFeedView: Feed URI: \(feedItem.uri)")
     print("PostsFeedView: Current state: \(state)")
+    #endif
 
     switch state {
     case .uninitialized, .loading, .error:
+      #if DEBUG
       print("PostsFeedView: Fetching initial feed data...")
+      #endif
       let feed = try await client.protoClient.getFeed(by: feedItem.uri, cursor: nil)
+      #if DEBUG
       print("PostsFeedView: Successfully fetched feed with \(feed.feed.count) posts")
+      #endif
       let processedPosts = await processFeed(feed.feed, client: client.protoClient)
+      #if DEBUG
       print("PostsFeedView: Processed \(processedPosts.count) posts")
+      #endif
       return .loaded(posts: processedPosts, cursor: feed.cursor)
     case .loaded(let posts, let cursor):
+      #if DEBUG
       print("PostsFeedView: Loading more posts with cursor: \(cursor ?? "nil")")
+      #endif
       let feed = try await client.protoClient.getFeed(by: feedItem.uri, cursor: cursor)
+      #if DEBUG
       print("PostsFeedView: Successfully fetched more posts: \(feed.feed.count)")
+      #endif
       let processedPosts = await processFeed(feed.feed, client: client.protoClient)
+      #if DEBUG
       print("PostsFeedView: Processed \(processedPosts.count) additional posts")
+      #endif
       return .loaded(posts: posts + processedPosts, cursor: feed.cursor)
     }
   }

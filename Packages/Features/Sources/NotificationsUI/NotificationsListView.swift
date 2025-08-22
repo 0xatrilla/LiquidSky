@@ -160,7 +160,9 @@ public struct NotificationsListView: View {
         isLoading = false
         return
       }
+      #if DEBUG
       print("Failed to fetch notifications: \(error)")
+      #endif
       self.error = error
     }
 

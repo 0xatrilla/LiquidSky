@@ -10,13 +10,21 @@ public final class BSkyClient: Sendable {
   public init(configuration: ATProtocolConfiguration) async throws {
     self.configuration = configuration
     do {
+      #if DEBUG
       print("Initializing ATProtoKit...")
+      #endif
       self.protoClient = await ATProtoKit(sessionConfiguration: configuration)
+      #if DEBUG
       print("ATProtoKit initialized successfully")
+      #endif
       self.blueskyClient = ATProtoBluesky(atProtoKitInstance: protoClient)
+      #if DEBUG
       print("ATProtoBluesky initialized successfully")
+      #endif
     } catch {
+      #if DEBUG
       print("BSkyClient initialization failed: \(error)")
+      #endif
       throw error
     }
   }

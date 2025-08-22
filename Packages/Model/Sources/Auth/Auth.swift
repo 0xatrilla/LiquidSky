@@ -37,18 +37,26 @@ public final class Auth: @unchecked Sendable {
     if let activeAccountId = accountManager.activeAccountId,
       let activeAccount = accountManager.accounts.first(where: { $0.id == activeAccountId })
     {
+      #if DEBUG
       print("Auth: Found active account: \(activeAccount.handle)")
+      #endif
       self.currentAccountId = activeAccountId
       self.ATProtoKeychain = AppleSecureKeychain(identifier: activeAccount.keychainIdentifier)
+      #if DEBUG
       print("Auth: Initialized with existing account: \(activeAccount.handle)")
+      #endif
     } else if let firstAccount = accountManager.accounts.first {
       // Fallback to first account if no active account set
+      #if DEBUG
       print("Auth: No active account, using first available account: \(firstAccount.handle)")
+      #endif
       self.currentAccountId = firstAccount.id
       self.ATProtoKeychain = AppleSecureKeychain(identifier: firstAccount.keychainIdentifier)
     } else {
       // No accounts - will show auth screen
+      #if DEBUG
       print("Auth: No accounts found, creating new keychain")
+      #endif
       self.ATProtoKeychain = AppleSecureKeychain(identifier: UUID())
     }
 
@@ -85,11 +93,15 @@ public final class Auth: @unchecked Sendable {
   }
 
   public func addAccount(handle: String, appPassword: String) async throws -> Account {
+    #if DEBUG
     print("Auth: Starting addAccount for handle: \(handle)")
+    #endif
 
     // Check if account already exists
     if accountManager.accounts.contains(where: { $0.handle == handle }) {
+      #if DEBUG
       print("Auth: Account with handle \(handle) already exists")
+      #endif
       throw AuthError.accountAlreadyExists
     }
 
@@ -98,43 +110,65 @@ public final class Auth: @unchecked Sendable {
     let newAccountKeychain = AppleSecureKeychain(identifier: newAccountId)
     let configuration = ATProtocolConfiguration(keychainProtocol: newAccountKeychain)
 
+    #if DEBUG
     print("Auth: Created new keychain with identifier: \(newAccountId)")
+    #endif
 
     // Authenticate with the new account
     do {
+      #if DEBUG
       print("Auth: Attempting authentication...")
+      #endif
       try await configuration.authenticate(with: handle, password: appPassword)
+      #if DEBUG
       print("Auth: Authentication successful")
+      #endif
     } catch {
+      #if DEBUG
       print("Auth: Authentication failed with error: \(error)")
+      #endif
       throw AuthError.invalidCredentials
     }
 
     // Get user session to extract profile info
+    #if DEBUG
     print("Auth: Creating ATProtoKit client...")
+    #endif
     let protoClient = await ATProtoKit(sessionConfiguration: configuration)
 
+    #if DEBUG
     print("Auth: Attempting to get user session...")
+    #endif
     guard let session = try await protoClient.getUserSession() else {
+      #if DEBUG
       print("Auth: Failed to get user session - session is nil")
+      #endif
       throw AuthError.authenticationFailed
     }
+    #if DEBUG
     print("Auth: Got user session for handle: \(session.handle), DID: \(session.sessionDID)")
+    #endif
 
     // Fetch full profile data including avatar and display name
     var displayName: String?
     var avatarUrl: String?
 
     do {
+      #if DEBUG
       print("Auth: Fetching profile data for \(session.handle)")
+      #endif
       let profileData = try await protoClient.getProfile(for: session.sessionDID)
       displayName = profileData.displayName
       avatarUrl = profileData.avatarImageURL?.absoluteString
+      #if DEBUG
       print(
         "Auth: Successfully fetched profile - displayName: \(displayName ?? "nil"), avatarUrl: \(avatarUrl ?? "nil")"
       )
+      #endif
     } catch {
+      #if DEBUG
       print("Auth: Failed to fetch profile data: \(error)")
+      #endif
       // Continue with nil values if profile fetch fails
     }
 
@@ -147,7 +181,9 @@ public final class Auth: @unchecked Sendable {
       keychainIdentifier: newAccountId
     )
 
+    #if DEBUG
     print("Auth: Created account object for \(session.handle)")
+    #endif
 
     // Add to account manager (this sets it as active)
     accountManager.addAccount(account)
@@ -184,30 +220,40 @@ public final class Auth: @unchecked Sendable {
   /// Attempts to restore an existing session from stored credentials
   public func restoreSession() async {
     do {
+      #if DEBUG
       print("Auth: Attempting to restore existing session...")
+      #endif
 
       // Determine target account: prefer active, else fall back to first stored
       var targetAccountId: UUID?
       if let activeId = accountManager.activeAccountId {
         targetAccountId = activeId
       } else if let firstAccount = accountManager.accounts.first {
+        #if DEBUG
         print("Auth: No active account found, falling back to first stored account: \(firstAccount.handle)")
+        #endif
         // Mark it active for consistency across app components
         try? await accountManager.switchToAccount(firstAccount.id)
         targetAccountId = firstAccount.id
       } else {
+        #if DEBUG
         print("Auth: No accounts available, cannot restore session")
+        #endif
         return
       }
 
       // Get the target account
       guard let activeAccount = accountManager.accounts.first(where: { $0.id == targetAccountId })
       else {
+        #if DEBUG
         print("Auth: Active account not found in account list")
+        #endif
         return
       }
 
+      #if DEBUG
       print("Auth: Attempting to restore session for account: \(activeAccount.handle)")
+      #endif
 
       // Create keychain for the active account
       let accountKeychain = AppleSecureKeychain(identifier: activeAccount.keychainIdentifier)
@@ -216,7 +262,9 @@ public final class Auth: @unchecked Sendable {
       // Try to refresh the session without requiring user input
       try await configuration.refreshSession()
 
+      #if DEBUG
       print("Auth: Successfully restored existing session for \(activeAccount.handle)")
+      #endif
 
       // Update our state
       self.ATProtoKeychain = accountKeychain
@@ -226,7 +274,9 @@ public final class Auth: @unchecked Sendable {
       // Trigger the authentication flow
       configurationContinuation.yield(configuration)
     } catch {
+      #if DEBUG
       print("Auth: Failed to restore existing session: \(error)")
+      #endif
       // Session restoration failed, user will need to authenticate
       self.configuration = nil
       configurationContinuation.yield(nil)
@@ -247,9 +297,13 @@ public final class Auth: @unchecked Sendable {
       self.configuration = configuration
       configurationContinuation.yield(configuration)
     } catch {
+      #if DEBUG
       print("Auth refresh failed: \(error)")
+      #endif
       // Handle no session token gracefully
+      #if DEBUG
       print("No session token found, user needs to authenticate")
+      #endif
       // Don't crash, just set to unauthenticated
       self.configuration = nil
       configurationContinuation.yield(nil)

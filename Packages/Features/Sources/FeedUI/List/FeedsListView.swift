@@ -38,7 +38,9 @@ public struct FeedsListView: View {
     .scrollContentBackground(.hidden)
     .scrollIndicators(.hidden)
     .task(id: filter) {
+      #if DEBUG
       print("Filter changed to: \(filter)")
+      #endif
       await loadFeedsForCurrentFilter()
     }
     .onAppear {
@@ -51,7 +53,9 @@ public struct FeedsListView: View {
       filter: $filter
     )
     .onChange(of: currentUser.savedFeeds.count) {
+      #if DEBUG
       print("Saved feeds count changed: \(currentUser.savedFeeds.count)")
+      #endif
       switch filter {
       case .suggested:
         feeds = feeds.filter { feed in
@@ -126,35 +130,47 @@ extension FeedsListView {
   private func fetchSuggestedFeed() async {
     error = nil
     do {
+      #if DEBUG
       print("Fetching suggested feeds...")
+      #endif
       let feeds = try await client.protoClient.getPopularFeedGenerators(matching: nil)
+      #if DEBUG
       print("Suggested feeds API response: \(feeds)")
       print("Suggested feeds received: \(feeds.feeds.count)")
+      #endif
 
       let feedItems = feeds.feeds.map { $0.feedItem }.filter { feed in
         !currentUser.savedFeeds.contains { $0.value == feed.uri }
       }
 
+      #if DEBUG
       print("Filtered suggested feeds: \(feedItems.count)")
       print("Feed items: \(feedItems.map { $0.displayName })")
+      #endif
 
       withAnimation {
         self.feeds = feedItems
       }
     } catch {
+      #if DEBUG
       print("Error fetching suggested feeds: \(error)")
+      #endif
       self.error = error
     }
   }
 
   private func fetchMyFeeds() async {
     do {
+      #if DEBUG
       print("Fetching my feeds...")
       print("Saved feeds count: \(currentUser.savedFeeds.count)")
       print("Saved feeds URIs: \(currentUser.savedFeeds.map { $0.value })")
+      #endif
 
       guard !currentUser.savedFeeds.isEmpty else {
+        #if DEBUG
         print("No saved feeds to fetch")
+        #endif
         withAnimation {
           self.feeds = []
         }
@@ -163,18 +179,24 @@ extension FeedsListView {
 
       let feeds = try await client.protoClient.getFeedGenerators(
         by: currentUser.savedFeeds.map { $0.value })
+      #if DEBUG
       print("My feeds API response: \(feeds)")
       print("My feeds received: \(feeds.feeds.count)")
+      #endif
 
       let feedItems = feeds.feeds.map { $0.feedItem }
+      #if DEBUG
       print("Processed my feeds: \(feedItems.count)")
       print("Feed items: \(feedItems.map { $0.displayName })")
+      #endif
 
       withAnimation {
         self.feeds = feedItems
       }
     } catch {
+      #if DEBUG
       print("Error fetching my feeds: \(error)")
+      #endif
       // Don't set error state for my feeds, just show empty state
       withAnimation {
         self.feeds = []

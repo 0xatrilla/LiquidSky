@@ -68,7 +68,9 @@ public class UserSearchService: ObservableObject {
         )
       }
     } catch {
+      #if DEBUG
       print("Error searching users: \(error)")
+      #endif
       return []
     }
   }
