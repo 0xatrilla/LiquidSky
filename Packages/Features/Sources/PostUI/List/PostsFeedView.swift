@@ -23,6 +23,7 @@ public struct PostsFeedView: View {
     PostListView(datasource: self)
       .navigationTitle(feedItem.displayName)
       .navigationBarTitleDisplayMode(.large)
+      .toolbar(.visible, for: .tabBar)
       .toolbar {
         ToolbarItem(placement: .topBarTrailing) {
           Button(action: {
@@ -61,35 +62,30 @@ public struct PostsFeedView: View {
 
 // MARK: - Datasource
 extension PostsFeedView: @MainActor PostsListViewDatasource {
-  var title: String {
+  public var title: String {
     feedItem.displayName
   }
 
-  func loadPosts(with state: PostsListViewState) async -> PostsListViewState {
-    do {
-      print("PostsFeedView: Starting to load posts for feed: \(feedItem.displayName)")
-      print("PostsFeedView: Feed URI: \(feedItem.uri)")
-      print("PostsFeedView: Current state: \(state)")
+  public func loadPosts(with state: PostsListViewState) async throws -> PostsListViewState {
+    print("PostsFeedView: Starting to load posts for feed: \(feedItem.displayName)")
+    print("PostsFeedView: Feed URI: \(feedItem.uri)")
+    print("PostsFeedView: Current state: \(state)")
 
-      switch state {
-      case .uninitialized, .loading, .error:
-        print("PostsFeedView: Fetching initial feed data...")
-        let feed = try await client.protoClient.getFeed(by: feedItem.uri, cursor: nil)
-        print("PostsFeedView: Successfully fetched feed with \(feed.feed.count) posts")
-        let processedPosts = await PostListView.processFeed(feed.feed, client: client.protoClient)
-        print("PostsFeedView: Processed \(processedPosts.count) posts")
-        return .loaded(posts: processedPosts, cursor: feed.cursor)
-      case .loaded(let posts, let cursor):
-        print("PostsFeedView: Loading more posts with cursor: \(cursor ?? "nil")")
-        let feed = try await client.protoClient.getFeed(by: feedItem.uri, cursor: cursor)
-        print("PostsFeedView: Successfully fetched more posts: \(feed.feed.count)")
-        let processedPosts = await PostListView.processFeed(feed.feed, client: client.protoClient)
-        print("PostsFeedView: Processed \(processedPosts.count) additional posts")
-        return .loaded(posts: posts + processedPosts, cursor: feed.cursor)
-      }
-    } catch {
-      print("PostsFeedView: Error loading posts: \(error)")
-      return .error(error)
+    switch state {
+    case .uninitialized, .loading, .error:
+      print("PostsFeedView: Fetching initial feed data...")
+      let feed = try await client.protoClient.getFeed(by: feedItem.uri, cursor: nil)
+      print("PostsFeedView: Successfully fetched feed with \(feed.feed.count) posts")
+      let processedPosts = await processFeed(feed.feed, client: client.protoClient)
+      print("PostsFeedView: Processed \(processedPosts.count) posts")
+      return .loaded(posts: processedPosts, cursor: feed.cursor)
+    case .loaded(let posts, let cursor):
+      print("PostsFeedView: Loading more posts with cursor: \(cursor ?? "nil")")
+      let feed = try await client.protoClient.getFeed(by: feedItem.uri, cursor: cursor)
+      print("PostsFeedView: Successfully fetched more posts: \(feed.feed.count)")
+      let processedPosts = await processFeed(feed.feed, client: client.protoClient)
+      print("PostsFeedView: Processed \(processedPosts.count) additional posts")
+      return .loaded(posts: posts + processedPosts, cursor: feed.cursor)
     }
   }
 }

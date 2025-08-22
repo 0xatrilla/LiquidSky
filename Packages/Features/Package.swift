@@ -76,7 +76,9 @@ let package = Package(
     ),
     .target(
       name: "NotificationsUI",
-      dependencies: baseDeps + ["PostUI"]
+      dependencies: baseDeps + [
+        "PostUI"
+      ]
     ),
     .target(
       name: "ComposerUI",
@@ -86,6 +88,7 @@ let package = Package(
       name: "DesignSystem",
       dependencies: [
         .product(name: "Destinations", package: "Model"),
+        .product(name: "Models", package: "Model"),
         "AppRouter",
       ],
       swiftSettings: [
