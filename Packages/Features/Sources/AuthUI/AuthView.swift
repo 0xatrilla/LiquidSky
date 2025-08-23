@@ -387,7 +387,8 @@ public struct AuthView: View {
     let trimmedPassword = appPassword.trimmingCharacters(in: .whitespacesAndNewlines)
 
     do {
-      try await auth.authenticate(handle: trimmedHandle, appPassword: trimmedPassword)
+      // Use addAccount to persist the account and its keychain identifier
+      _ = try await auth.addAccount(handle: trimmedHandle, appPassword: trimmedPassword)
     } catch {
       withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
         self.error = error.localizedDescription
