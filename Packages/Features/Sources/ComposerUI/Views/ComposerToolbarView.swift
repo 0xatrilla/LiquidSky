@@ -155,7 +155,24 @@ struct ComposerToolbarView: ToolbarContent {
 
   private func appendToComposer(_ generated: String) {
     let current = String(text.characters)
-    let combined = current.isEmpty ? generated : current + "\n" + generated
+    let needsNewline = !current.isEmpty
+    let newlineCost = needsNewline ? 1 : 0
+
+    // Remaining character budget up to Bluesky's 300 character limit
+    let remaining = max(0, 300 - current.count - newlineCost)
+
+    if remaining == 0 {
+      // No room to append anything
+      #if DEBUG
+      print("AI Compose: No remaining characters to append.")
+      #endif
+      aiError = "Post length limit reached (300 characters)."
+      return
+    }
+
+    // Truncate AI output to fit remaining budget
+    let clipped = String(generated.prefix(remaining))
+    let combined = needsNewline ? current + "\n" + clipped : clipped
     text = AttributedString(combined)
   }
 
