@@ -99,9 +99,9 @@ LiquidSky is a native iOS client for [Bluesky](https://bsky.social), the decentr
 
 ## 🚧 **In Progress Features**
 
- - [ ] **Multi-Account Support**: Switch between multiple Bluesky accounts
+ - [x] **Multi-Account Support**: Switch between multiple Bluesky accounts
         
- - [ ] **Advanced Search**: Enhanced search with filters and suggestions
+ - [x] **Advanced Search**: Enhanced search with filters and suggestions
     
  - [ ] **Bookmarks**: Save and organize favorite posts
     
