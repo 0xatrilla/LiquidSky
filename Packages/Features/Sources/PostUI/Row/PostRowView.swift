@@ -10,11 +10,13 @@ import User
 extension EnvironmentValues {
   @Entry public var isQuote: Bool = false
   @Entry public var isFocused: Bool = false
+  @Entry public var isThreadContext: Bool = false
 }
 
 public struct PostRowView: View {
   @Environment(\.isQuote) var isQuote
   @Environment(\.isFocused) var isFocused
+  @Environment(\.isThreadContext) var isThreadContext
   @Environment(\.sizeCategory) var sizeCategory
   @Environment(SettingsService.self) var settingsService
 
@@ -160,11 +162,9 @@ public struct PostRowView: View {
   // Determine if we're in a thread context (viewing replies to a specific post)
   // vs. a feed context (viewing individual posts from different users)
   private var isInThreadContext: Bool {
-    // We're in a thread context if:
-    // 1. This post is focused (main post in PostDetailView)
-    // 2. We're viewing a thread (PostDetailView) - this is determined by the parent view
-    // 3. NOT in a feed view where posts are individual and unrelated
-    return isFocused
+    // Explicitly provided by parent views (e.g., PostDetailView)
+    // Ensures thread lines render for all replies within a thread view
+    return isThreadContext
   }
 
   // Fetch the immediate parent of this post for inline display in feed

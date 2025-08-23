@@ -39,6 +39,8 @@ public struct PostDetailView: View {
           .frame(height: 300)
           .listRowSeparator(.hidden)
       }
+      // Mark this view as a thread context so PostRowView renders thread lines
+      .environment(\.isThreadContext, true)
       .screenContainer()
       .task {
         await fetchThread()
