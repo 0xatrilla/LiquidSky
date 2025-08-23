@@ -77,6 +77,7 @@ struct LiquidSkyApp: App {
             .id(auth.currentAccountId)  // CRITICAL: Forces complete view recreation on account switch
             .withTheme()
             .themeAware()
+            .modelContainer(for: RecentFeedItem.self)
             .withSheetDestinations(
               router: .constant(router), auth: auth, client: client, currentUser: currentUser, postDataControllerProvider: postDataControllerProvider, settingsService: settingsService
             )
@@ -157,7 +158,6 @@ struct LiquidSkyApp: App {
             }
         }
       }
-      .modelContainer(for: RecentFeedItem.self)
       .sheet(item: $router.presentedSheet) { presentedSheet in
         #if DEBUG
         let _ = print("Direct sheet: Creating sheet for \(presentedSheet)")

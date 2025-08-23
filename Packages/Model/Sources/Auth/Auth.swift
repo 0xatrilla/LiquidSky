@@ -63,10 +63,7 @@ public final class Auth: @unchecked Sendable {
     // Initialize configuration with the keychain
     self.configuration = ATProtocolConfiguration(keychainProtocol: self.ATProtoKeychain)
 
-    // Try to restore existing session on initialization
-    Task {
-      await restoreSession()
-    }
+    // Note: Session restoration is orchestrated by the app on startup to avoid duplicate work.
   }
 
   public func switchAccount(to accountId: UUID) async throws {
