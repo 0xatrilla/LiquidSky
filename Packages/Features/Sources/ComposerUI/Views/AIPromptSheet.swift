@@ -1,4 +1,5 @@
 import SwiftUI
+import DesignSystem
 
 struct AIPromptSheet: View {
     @Binding var prompt: String
@@ -11,21 +12,26 @@ struct AIPromptSheet: View {
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Tell AI what to write")
-                    .font(.headline)
+                HStack(spacing: 8) {
+                    Image(systemName: "wand.and.stars")
+                        .symbolRenderingMode(.multicolor)
+                    Text("Tell AI what to write")
+                        .font(.headline)
+                }
 
-                ZStack(alignment: .topLeading) {
-                    TextEditor(text: Binding(get: { prompt }, set: { prompt = $0 }))
-                        .frame(minHeight: 120)
-                        .padding(8)
-                        .background(.ultraThinMaterial)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                GlassEffectContainer(cornerRadius: 16) {
+                    ZStack(alignment: .topLeading) {
+                        TextEditor(text: Binding(get: { prompt }, set: { prompt = $0 }))
+                            .frame(minHeight: 140)
+                            .padding(8)
+                            .background(Color.clear)
 
-                    if prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        Text("Describe what you want to post…")
-                            .foregroundStyle(.secondary)
-                            .padding(.top, 16)
-                            .padding(.leading, 14)
+                        if prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            Text("Describe what you want to post…")
+                                .foregroundStyle(.secondary)
+                                .padding(.top, 16)
+                                .padding(.leading, 14)
+                        }
                     }
                 }
 
