@@ -12,7 +12,7 @@ let package = Package(
     .library(name: "Auth", targets: ["Auth"]),
     .library(name: "User", targets: ["User"]),
     .library(name: "Destinations", targets: ["Destinations"]),
-    .library(name: "InAppPurchase", targets: ["InAppPurchase"]),
+
   ],
   dependencies: [
     .package(url: "https://github.com/MasterJ93/ATProtoKit", from: "0.28.0"),
@@ -59,9 +59,6 @@ let package = Package(
       name: "Destinations",
       dependencies: ["Models", "AppRouter"]
     ),
-    .target(
-      name: "InAppPurchase",
-      dependencies: []
-    ),
+
   ]
 )

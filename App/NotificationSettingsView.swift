@@ -1,6 +1,5 @@
 import SwiftUI
 import WidgetKit
-import InAppPurchase
 
 struct NotificationSettingsView: View {
   @Environment(\.dismiss) private var dismiss
