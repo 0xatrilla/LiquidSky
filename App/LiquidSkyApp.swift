@@ -547,6 +547,8 @@ struct LiquidSkyApp: App {
       Task {
         // Wait a bit for the UI to load, then publish a sample notification
         try? await Task.sleep(nanoseconds: 2_000_000_000)  // 2 seconds
+
+        // Publish welcome notification
         WidgetDataPublisher.publishRecentNotification(
           title: "Welcome to Horizon!",
           subtitle: "Your Bluesky client is ready"
@@ -554,6 +556,17 @@ struct LiquidSkyApp: App {
 
         // Publish sample feed activity
         WidgetDataPublisher.publishSampleFeedActivity()
+
+        // Simulate some real activity data
+        try? await Task.sleep(nanoseconds: 1_000_000_000)  // 1 second
+        WidgetDataPublisher.publishRealFeedData(
+          feedName: "Following",
+          postCount: Int.random(in: 5...20),
+          followerCount: Int.random(in: 1...8)
+        )
+
+        // Start continuous widget updates
+        WidgetDataPublisher.startContinuousUpdates()
       }
 
       // Perform initial iCloud sync

@@ -107,53 +107,50 @@ struct RecentNotificationWidgetView: View {
   @Environment(\.widgetFamily) var family
 
   var body: some View {
-    ZStack {
-      // Background
-      Color(.systemBackground)
-
-      VStack(alignment: .leading, spacing: 8) {
-        HStack {
-          // Icon
-          Image(systemName: entry.type.icon)
-            .font(.title2)
-            .foregroundColor(entry.type.color)
-
-          Spacer()
-
-          // Time
-          Text(entry.date, style: .time)
-            .font(.caption2)
-            .foregroundColor(.secondary)
-        }
-
-        // Title
-        Text(entry.title)
-          .font(.headline)
-          .fontWeight(.semibold)
-          .lineLimit(2)
-          .foregroundColor(.primary)
-
-        // Subtitle
-        Text(entry.subtitle)
-          .font(.caption)
-          .foregroundColor(.secondary)
-          .lineLimit(family == .systemSmall ? 2 : 3)
+    VStack(alignment: .leading, spacing: 8) {
+      HStack {
+        // Icon
+        Image(systemName: entry.type.icon)
+          .font(.title2)
+          .foregroundColor(entry.type.color)
 
         Spacer()
 
-        // Action hint
-        HStack {
-          Text("Tap to view")
-            .font(.caption2)
-            .foregroundColor(.blue)
-          Spacer()
-          Image(systemName: "arrow.right")
-            .font(.caption2)
-            .foregroundColor(.blue)
-        }
+        // Time
+        Text(entry.date, style: .time)
+          .font(.caption2)
+          .foregroundColor(.secondary)
       }
-      .padding()
+
+      // Title
+      Text(entry.title)
+        .font(.headline)
+        .fontWeight(.semibold)
+        .lineLimit(2)
+        .foregroundColor(.primary)
+
+      // Subtitle
+      Text(entry.subtitle)
+        .font(.caption)
+        .foregroundColor(.secondary)
+        .lineLimit(family == .systemSmall ? 2 : 3)
+
+      Spacer()
+
+      // Action hint
+      HStack {
+        Text("Tap to view")
+          .font(.caption2)
+          .foregroundColor(.blue)
+        Spacer()
+        Image(systemName: "arrow.right")
+          .font(.caption2)
+          .foregroundColor(.blue)
+      }
     }
+    .padding()
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    .background(Color(.systemBackground))
     .widgetURL(URL(string: "horizon://notifications"))
   }
 }

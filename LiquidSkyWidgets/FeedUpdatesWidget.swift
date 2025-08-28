@@ -69,111 +69,104 @@ struct FeedUpdatesWidgetView: View {
   @Environment(\.widgetFamily) var family
 
   var body: some View {
-    ZStack {
-      // Background
-      LinearGradient(
-        colors: [Color.orange.opacity(0.8), Color.red.opacity(0.6)],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-      )
+    VStack(alignment: .leading, spacing: 8) {
+      // Header
+      HStack {
+        Image(systemName: "chart.line.uptrend.xyaxis")
+          .font(.title2)
+          .foregroundColor(.blue)
 
-      VStack(alignment: .leading, spacing: 8) {
-        // Header
-        HStack {
-          Image(systemName: "chart.line.uptrend.xyaxis")
-            .font(.title2)
-            .foregroundColor(.white)
-
-          Text(entry.feedName)
-            .font(.headline)
-            .fontWeight(.semibold)
-            .foregroundColor(.white)
-
-          Spacer()
-
-          Text(entry.date, style: .time)
-            .font(.caption2)
-            .foregroundColor(.white.opacity(0.8))
-        }
+        Text(entry.feedName)
+          .font(.headline)
+          .fontWeight(.semibold)
+          .foregroundColor(.primary)
 
         Spacer()
 
-        // Activity stats
-        if family == .systemLarge {
-          VStack(spacing: 12) {
-            ActivityRow(
-              icon: "doc.text",
-              label: "Recent Posts",
-              value: entry.recentPosts,
-              color: .white
-            )
+        Text(entry.date, style: .time)
+          .font(.caption2)
+          .foregroundColor(.secondary)
+      }
 
-            ActivityRow(
-              icon: "person.badge.plus",
-              label: "New Followers",
-              value: entry.newFollowers,
-              color: .white
-            )
+      Spacer()
 
-            ActivityRow(
-              icon: "chart.bar",
-              label: "Total Activity",
-              value: entry.totalActivity,
-              color: .white
-            )
-          }
-        } else {
-          // Compact view for small/medium
-          HStack(spacing: 16) {
-            VStack {
-              Text("\(entry.recentPosts)")
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-              Text("Posts")
-                .font(.caption)
-                .foregroundColor(.white.opacity(0.8))
-            }
+      // Activity stats
+      if family == .systemLarge {
+        VStack(spacing: 12) {
+          ActivityRow(
+            icon: "doc.text",
+            label: "Recent Posts",
+            value: entry.recentPosts,
+            color: .primary
+          )
 
-            VStack {
-              Text("\(entry.newFollowers)")
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-              Text("Followers")
-                .font(.caption)
-                .foregroundColor(.white.opacity(0.8))
-            }
+          ActivityRow(
+            icon: "person.badge.plus",
+            label: "New Followers",
+            value: entry.newFollowers,
+            color: .primary
+          )
 
-            if family == .systemMedium {
-              VStack {
-                Text("\(entry.totalActivity)")
-                  .font(.title2)
-                  .fontWeight(.bold)
-                  .foregroundColor(.white)
-                Text("Activity")
-                  .font(.caption)
-                  .foregroundColor(.white.opacity(0.8))
-              }
-            }
-          }
+          ActivityRow(
+            icon: "chart.bar",
+            label: "Total Activity",
+            value: entry.totalActivity,
+            color: .primary
+          )
         }
+      } else {
+        // Compact view for small/medium
+        HStack(spacing: 16) {
+          VStack {
+            Text("\(entry.recentPosts)")
+              .font(.title2)
+              .fontWeight(.bold)
+              .foregroundColor(.primary)
+            Text("Posts")
+              .font(.caption)
+              .foregroundColor(.secondary)
+          }
 
-        Spacer()
+          VStack {
+            Text("\(entry.newFollowers)")
+              .font(.title2)
+              .fontWeight(.bold)
+              .foregroundColor(.primary)
+            Text("Followers")
+              .font(.caption)
+              .foregroundColor(.secondary)
+          }
 
-        // Action hint
-        HStack {
-          Text("Tap to view feed")
-            .font(.caption2)
-            .foregroundColor(.white.opacity(0.9))
-          Spacer()
-          Image(systemName: "arrow.right")
-            .font(.caption2)
-            .foregroundColor(.white.opacity(0.9))
+          if family == .systemMedium {
+            VStack {
+              Text("\(entry.totalActivity)")
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(.primary)
+              Text("Activity")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            }
+          }
         }
       }
-      .padding()
+
+      Spacer()
+
+      // Action hint
+      HStack {
+        Text("Tap to view feed")
+          .font(.caption2)
+          .foregroundColor(.blue)
+        Spacer()
+        Image(systemName: "arrow.right")
+          .font(.caption2)
+          .foregroundColor(.blue)
+      }
     }
+    .padding()
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    .background(Color(.systemBackground))
     .widgetURL(URL(string: "horizon://feed/\(entry.feedName)"))
   }
 }

@@ -48,37 +48,30 @@ struct FollowerCountWidgetView: View {
   @Environment(\.widgetFamily) var family
 
   var body: some View {
-    ZStack {
-      // Background gradient
-      LinearGradient(
-        colors: [Color.blue.opacity(0.8), Color.purple.opacity(0.6)],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-      )
+    VStack(spacing: 8) {
+      // Follower count
+      Text("\(entry.followerCount)")
+        .font(fontForFamily())
+        .fontWeight(.bold)
+        .foregroundColor(.primary)
 
-      VStack(spacing: 8) {
-        // Follower count
-        Text("\(entry.followerCount)")
-          .font(fontForFamily())
-          .fontWeight(.bold)
-          .foregroundColor(.white)
+      // Label
+      Text("Followers")
+        .font(.caption)
+        .fontWeight(.medium)
+        .foregroundColor(.secondary)
 
-        // Label
-        Text("Followers")
-          .font(.caption)
-          .fontWeight(.medium)
-          .foregroundColor(.white.opacity(0.9))
-
-        // Username (only show in medium size)
-        if family == .systemMedium {
-          Text("@\(entry.username)")
-            .font(.caption2)
-            .foregroundColor(.white.opacity(0.7))
-            .lineLimit(1)
-        }
+      // Username (only show in medium size)
+      if family == .systemMedium {
+        Text("@\(entry.username)")
+          .font(.caption2)
+          .foregroundColor(.secondary)
+          .lineLimit(1)
       }
-      .padding()
     }
+    .padding()
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .background(Color(.systemBackground))
     .widgetURL(URL(string: "horizon://profile/\(entry.username)"))
   }
 

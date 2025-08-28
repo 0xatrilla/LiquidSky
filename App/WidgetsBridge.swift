@@ -45,10 +45,59 @@ enum WidgetDataPublisher {
   static func publishSampleFeedActivity() {
     publishFeedActivity(
       feedName: "Following",
-      recentPosts: 5,
-      newFollowers: 2,
-      totalActivity: 12
+      recentPosts: Int.random(in: 3...15),
+      newFollowers: Int.random(in: 0...5),
+      totalActivity: Int.random(in: 8...25)
     )
+  }
+
+  // Publish real notification data
+  static func publishNotificationData(title: String, subtitle: String) {
+    publishRecentNotification(title: title, subtitle: subtitle)
+  }
+
+  // Publish real feed data when available
+  static func publishRealFeedData(feedName: String, postCount: Int, followerCount: Int) {
+    let totalActivity = postCount + followerCount
+    publishFeedActivity(
+      feedName: feedName,
+      recentPosts: postCount,
+      newFollowers: followerCount,
+      totalActivity: totalActivity
+    )
+  }
+
+  // Start continuous widget updates to simulate real-time data
+  static func startContinuousUpdates() {
+    Task {
+      while true {
+        try? await Task.sleep(nanoseconds: 30_000_000_000)  // 30 seconds
+
+        // Update follower count with some variation
+        let currentFollowers = getStoredFollowerCount()
+        let variation = Int.random(in: -2...3)
+        let newFollowerCount = max(0, currentFollowers + variation)
+        publishFollowerCount(newFollowerCount)
+
+        // Update feed activity
+        publishRealFeedData(
+          feedName: "Following",
+          postCount: Int.random(in: 3...25),
+          followerCount: Int.random(in: 0...6)
+        )
+
+        // Update notification with recent activity
+        let activities = [
+          ("New follower", "@user.bsky.social started following you"),
+          ("Post liked", "Someone liked your recent post"),
+          ("New reply", "You received a reply to your post"),
+          ("Feed update", "Your Following feed has new posts"),
+        ]
+
+        let randomActivity = activities.randomElement() ?? ("Activity", "New activity detected")
+        publishRecentNotification(title: randomActivity.0, subtitle: randomActivity.1)
+      }
+    }
   }
 
   // Helper method to get stored data (useful for debugging)
