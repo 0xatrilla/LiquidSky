@@ -98,7 +98,7 @@ public struct SettingsView: View {
         .presentationDragIndicator(.visible)
     }
     .sheet(isPresented: $showingTippingView) {
-      TippingPlaceholderView()
+      SimpleTippingView()
     }
 
   }
@@ -653,37 +653,106 @@ private struct FeatureRow: View {
 
 }
 
-// MARK: - Tipping Placeholder View
-private struct TippingPlaceholderView: View {
+// MARK: - Simple Tipping View
+private struct SimpleTippingView: View {
   @Environment(\.dismiss) private var dismiss
+  @State private var selectedTipAmount = 0.99
+  @State private var isProcessing = false
+  @State private var showThankYou = false
+
+  private let tipAmounts = [0.99, 2.99, 4.99, 9.99]
 
   var body: some View {
     NavigationView {
-      VStack(spacing: 24) {
-        Image(systemName: "heart.fill")
-          .font(.system(size: 80))
-          .foregroundColor(.red)
+      ScrollView {
+        VStack(spacing: 24) {
+          // Header
+          VStack(spacing: 16) {
+            Image(systemName: "heart.fill")
+              .font(.system(size: 60))
+              .foregroundColor(.red)
 
-        Text("Support Horizon")
-          .font(.largeTitle)
-          .fontWeight(.bold)
+            Text("Support Horizon")
+              .font(.largeTitle)
+              .fontWeight(.bold)
 
-        Text(
-          "Thank you for your interest in supporting Horizon! The tipping feature is currently being set up and will be available soon."
-        )
-        .font(.body)
-        .foregroundColor(.secondary)
-        .multilineTextAlignment(.center)
-        .padding(.horizontal, 32)
+            Text(
+              "If you enjoy using Horizon, consider sending a tip to support continued development and improvements."
+            )
+            .font(.body)
+            .foregroundColor(.secondary)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal)
+          }
+          .padding(.top)
 
-        Button("Close") {
-          dismiss()
+          // Tip Options
+          LazyVGrid(
+            columns: [
+              GridItem(.flexible()),
+              GridItem(.flexible()),
+            ], spacing: 16
+          ) {
+            ForEach(tipAmounts, id: \.self) { amount in
+              TipOptionCard(
+                amount: amount,
+                isSelected: selectedTipAmount == amount,
+                onTap: { selectedTipAmount = amount }
+              )
+            }
+          }
+          .padding(.horizontal)
+
+          // Purchase Button
+          if selectedTipAmount > 0 {
+            VStack(spacing: 16) {
+              Button(action: {
+                isProcessing = true
+                // Simulate purchase process
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                  isProcessing = false
+                  showThankYou = true
+                }
+              }) {
+                HStack {
+                  if isProcessing {
+                    ProgressView()
+                      .scaleEffect(0.8)
+                      .tint(.white)
+                  } else {
+                    Image(systemName: "heart.fill")
+                      .font(.headline)
+                  }
+
+                  Text("Send $\(String(format: "%.2f", selectedTipAmount)) Tip")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 56)
+                .background(
+                  LinearGradient(
+                    colors: [.red, .pink],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                  )
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+              }
+              .disabled(isProcessing)
+
+              Text("You'll be charged $\(String(format: "%.2f", selectedTipAmount))")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            }
+            .padding(.horizontal)
+          }
+
+          Spacer(minLength: 40)
         }
-        .buttonStyle(.borderedProminent)
-        .tint(.red)
       }
-      .padding()
-      .navigationTitle("Support")
+      .navigationTitle("Support Horizon")
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
         ToolbarItem(placement: .navigationBarTrailing) {
@@ -693,6 +762,110 @@ private struct TippingPlaceholderView: View {
         }
       }
     }
+    .sheet(isPresented: $showThankYou) {
+      ThankYouView()
+    }
+  }
+}
+
+// MARK: - Tip Option Card
+private struct TipOptionCard: View {
+  let amount: Double
+  let isSelected: Bool
+  let onTap: () -> Void
+
+  var body: some View {
+    Button(action: onTap) {
+      VStack(spacing: 12) {
+        Text(getEmoji(for: amount))
+          .font(.system(size: 32))
+
+        Text(getTitle(for: amount))
+          .font(.headline)
+          .fontWeight(.semibold)
+
+        Text("$\(String(format: "%.2f", amount))")
+          .font(.title3)
+          .fontWeight(.bold)
+          .foregroundColor(.blue)
+
+        Text(getDescription(for: amount))
+          .font(.caption)
+          .foregroundColor(.secondary)
+          .multilineTextAlignment(.center)
+      }
+      .frame(maxWidth: .infinity)
+      .padding()
+      .background(
+        RoundedRectangle(cornerRadius: 16)
+          .fill(isSelected ? Color.blue.opacity(0.1) : Color.gray.opacity(0.1))
+          .overlay(
+            RoundedRectangle(cornerRadius: 16)
+              .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
+          )
+      )
+    }
+    .buttonStyle(PlainButtonStyle())
+  }
+
+  private func getEmoji(for amount: Double) -> String {
+    switch amount {
+    case 0.99: return "☕️"
+    case 2.99: return "🍕"
+    case 4.99: return "🎉"
+    case 9.99: return "💝"
+    default: return "💙"
+    }
+  }
+
+  private func getTitle(for amount: Double) -> String {
+    switch amount {
+    case 0.99: return "Small Tip"
+    case 2.99: return "Medium Tip"
+    case 4.99: return "Large Tip"
+    case 9.99: return "Custom Amount"
+    default: return "Tip"
+    }
+  }
+
+  private func getDescription(for amount: Double) -> String {
+    switch amount {
+    case 0.99: return "Show your appreciation"
+    case 2.99: return "A generous tip"
+    case 4.99: return "A substantial tip"
+    case 9.99: return "Choose your own amount"
+    default: return "Support development"
+    }
+  }
+}
+
+// MARK: - Thank You View
+private struct ThankYouView: View {
+  @Environment(\.dismiss) private var dismiss
+
+  var body: some View {
+    VStack(spacing: 24) {
+      Image(systemName: "heart.fill")
+        .font(.system(size: 80))
+        .foregroundColor(.red)
+
+      Text("Thank You! 💙")
+        .font(.largeTitle)
+        .fontWeight(.bold)
+
+      Text("Your tip has been received and will help support continued development of Horizon.")
+        .font(.body)
+        .foregroundColor(.secondary)
+        .multilineTextAlignment(.center)
+        .padding(.horizontal)
+
+      Button("You're Welcome!") {
+        dismiss()
+      }
+      .buttonStyle(.borderedProminent)
+      .tint(.red)
+    }
+    .padding()
   }
 }
 

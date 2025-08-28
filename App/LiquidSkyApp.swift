@@ -35,7 +35,7 @@ struct LiquidSkyApp: App {
 
   // New services
   @State var pushNotificationService: PushNotificationService = .shared
-  @State var cloudKitSyncService: CloudKitSyncService = .shared
+  // @State var cloudKitSyncService: CloudKitSyncService = .shared
   @State var inAppPurchaseService: InAppPurchaseService = .shared
 
   init() {
@@ -72,7 +72,7 @@ struct LiquidSkyApp: App {
             .environment(settingsService)
             .environment(ColorThemeManager.shared)
             .environment(pushNotificationService)
-            .environment(cloudKitSyncService)
+            // .environment(cloudKitSyncService)
             .environment(inAppPurchaseService)
         case .authenticated(let client, let currentUser):
           AppTabView()
@@ -87,7 +87,7 @@ struct LiquidSkyApp: App {
             .environment(settingsService)
             .environment(ColorThemeManager.shared)
             .environment(pushNotificationService)
-            .environment(cloudKitSyncService)
+            // .environment(cloudKitSyncService)
             .environment(inAppPurchaseService)
             .id(auth.currentAccountId)  // CRITICAL: Forces complete view recreation on account switch
             .withTheme()
@@ -194,7 +194,7 @@ struct LiquidSkyApp: App {
             .environment(accountManager)
             .environment(router)
             .environment(pushNotificationService)
-            .environment(cloudKitSyncService)
+            // .environment(cloudKitSyncService)
             .onAppear {
               #if DEBUG
                 print("Direct sheet: Auth view appeared successfully")
@@ -514,7 +514,7 @@ struct LiquidSkyApp: App {
 
       // Set user ID for CloudKit sync
       if let profile = currentUser.profile {
-        cloudKitSyncService.setCurrentUserId(profile.profile.did)
+        // cloudKitSyncService.setCurrentUserId(profile.profile.did)
       }
 
       // Publish follower count to widget after profile is fetched
@@ -566,7 +566,7 @@ struct LiquidSkyApp: App {
 
       // Perform initial iCloud sync
       Task {
-        await cloudKitSyncService.performFullSync()
+        // await cloudKitSyncService.performFullSync()
       }
     } catch {
       #if DEBUG
