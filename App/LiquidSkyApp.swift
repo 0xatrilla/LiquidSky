@@ -520,14 +520,7 @@ struct LiquidSkyApp: App {
       // Publish follower count to widget after profile is fetched
       Task {
         if let profile = currentUser.profile {
-          let defaults = UserDefaults(suiteName: "group.com.acxtrilla.LiquidSky")
-          defaults?.set(profile.profile.followersCount, forKey: "widget.followers.count")
-          defaults?.set(profile.profile.handle, forKey: "widget.username")
-
-          // Reload widget timeline
-          if #available(iOS 14.0, *) {
-            WidgetCenter.shared.reloadTimelines(ofKind: "FollowerCountWidget")
-          }
+          WidgetDataPublisher.publishFollowerCount(profile.profile.followersCount)
         }
       }
 
@@ -554,14 +547,13 @@ struct LiquidSkyApp: App {
       Task {
         // Wait a bit for the UI to load, then publish a sample notification
         try? await Task.sleep(nanoseconds: 2_000_000_000)  // 2 seconds
-        NotificationCenter.default.post(
-          name: .notificationsUpdated,
-          object: nil,
-          userInfo: [
-            "title": "Welcome to Horizon!",
-            "subtitle": "Your Bluesky client is ready",
-          ]
+        WidgetDataPublisher.publishRecentNotification(
+          title: "Welcome to Horizon!",
+          subtitle: "Your Bluesky client is ready"
         )
+
+        // Publish sample feed activity
+        WidgetDataPublisher.publishSampleFeedActivity()
       }
 
       // Perform initial iCloud sync
