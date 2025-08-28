@@ -55,7 +55,7 @@ public struct PostsFeedView: View {
             }
           }
           .disabled(isGeneratingSummary)
-          
+
           // Compose button
           Button(action: {
             router.presentedSheet = .composer(mode: .newPost)
@@ -84,33 +84,57 @@ public struct PostsFeedView: View {
   }
 
   private func updateRecentlyViewed() {
-    do {
-      try modelContext.delete(
-        model: RecentFeedItem.self,
-        where: #Predicate { feed in
-          feed.uri == feedItem.uri
-        })
-      modelContext.insert(
-        RecentFeedItem(
+    // Safely update recently viewed feeds
+    Task { @MainActor in
+      do {
+        // First, try to find existing items to delete
+        let fetchDescriptor = FetchDescriptor<RecentFeedItem>(
+          predicate: #Predicate<RecentFeedItem> { item in
+            item.uri == feedItem.uri
+          }
+        )
+
+        let existingItems = try modelContext.fetch(fetchDescriptor)
+
+        // Delete existing items if found
+        for item in existingItems {
+          modelContext.delete(item)
+        }
+
+        // Insert new item
+        let newItem = RecentFeedItem(
           uri: feedItem.uri,
           name: feedItem.displayName,
           avatarImageURL: feedItem.avatarImageURL,
           lastViewedAt: Date()
         )
-      )
-      try modelContext.save()
-    } catch {}
+        modelContext.insert(newItem)
+
+        // Save changes
+        try modelContext.save()
+
+        #if DEBUG
+          print("PostsFeedView: Successfully updated recently viewed feed: \(feedItem.displayName)")
+        #endif
+      } catch {
+        #if DEBUG
+          print("PostsFeedView: Failed to update recently viewed feed: \(error)")
+        #endif
+        // Don't crash the app if this fails - it's not critical functionality
+      }
+    }
   }
-  
+
   private func generateSummary() async {
     isGeneratingSummary = true
     defer { isGeneratingSummary = false }
-    
+
     // Get current posts from the PostListView datasource
     do {
       let state = try await loadPosts(with: .uninitialized)
       if case .loaded(let posts, _) = state {
-        let summary = await FeedSummaryService.shared.summarizeFeedPosts(posts, feedName: feedItem.displayName)
+        let summary = await FeedSummaryService.shared.summarizeFeedPosts(
+          posts, feedName: feedItem.displayName)
         await MainActor.run {
           currentSummary = summary
           showingSummary = true
@@ -118,7 +142,7 @@ public struct PostsFeedView: View {
       }
     } catch {
       #if DEBUG
-      print("Failed to generate summary: \(error)")
+        print("Failed to generate summary: \(error)")
       #endif
       await MainActor.run {
         currentSummary = "Unable to generate summary at this time. Please try again later."
@@ -126,7 +150,7 @@ public struct PostsFeedView: View {
       }
     }
   }
-  
+
   private func getCurrentPostCount() -> Int {
     // This is a simple fallback - in a real implementation you might want to track this
     return 0
@@ -141,36 +165,36 @@ extension PostsFeedView: @MainActor PostsListViewDatasource {
 
   public func loadPosts(with state: PostsListViewState) async throws -> PostsListViewState {
     #if DEBUG
-    print("PostsFeedView: Starting to load posts for feed: \(feedItem.displayName)")
-    print("PostsFeedView: Feed URI: \(feedItem.uri)")
-    print("PostsFeedView: Current state: \(state)")
+      print("PostsFeedView: Starting to load posts for feed: \(feedItem.displayName)")
+      print("PostsFeedView: Feed URI: \(feedItem.uri)")
+      print("PostsFeedView: Current state: \(state)")
     #endif
 
     switch state {
     case .uninitialized, .loading, .error:
       #if DEBUG
-      print("PostsFeedView: Fetching initial feed data...")
+        print("PostsFeedView: Fetching initial feed data...")
       #endif
       let feed = try await client.protoClient.getFeed(by: feedItem.uri, cursor: nil)
       #if DEBUG
-      print("PostsFeedView: Successfully fetched feed with \(feed.feed.count) posts")
+        print("PostsFeedView: Successfully fetched feed with \(feed.feed.count) posts")
       #endif
       let processedPosts = await processFeed(feed.feed, client: client.protoClient)
       #if DEBUG
-      print("PostsFeedView: Processed \(processedPosts.count) posts")
+        print("PostsFeedView: Processed \(processedPosts.count) posts")
       #endif
       return .loaded(posts: processedPosts, cursor: feed.cursor)
     case .loaded(let posts, let cursor):
       #if DEBUG
-      print("PostsFeedView: Loading more posts with cursor: \(cursor ?? "nil")")
+        print("PostsFeedView: Loading more posts with cursor: \(cursor ?? "nil")")
       #endif
       let feed = try await client.protoClient.getFeed(by: feedItem.uri, cursor: cursor)
       #if DEBUG
-      print("PostsFeedView: Successfully fetched more posts: \(feed.feed.count)")
+        print("PostsFeedView: Successfully fetched more posts: \(feed.feed.count)")
       #endif
       let processedPosts = await processFeed(feed.feed, client: client.protoClient)
       #if DEBUG
-      print("PostsFeedView: Processed \(processedPosts.count) additional posts")
+        print("PostsFeedView: Processed \(processedPosts.count) additional posts")
       #endif
       return .loaded(posts: posts + processedPosts, cursor: feed.cursor)
     }
