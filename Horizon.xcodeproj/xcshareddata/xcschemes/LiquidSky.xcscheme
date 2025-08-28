@@ -68,9 +68,18 @@
             BlueprintIdentifier = "9F2142222CE9DAA1004167D7"
             BuildableName = "LiquidSky.app"
             BlueprintName = "LiquidSky"
-            ReferencedContainer = "container:LiquidSky.xcodeproj">
+            ReferencedContainer = "container:Horizon.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "9F2142222CE9DAA1004167D7"
+            BuildableName = "LiquidSky.app"
+            BlueprintName = "LiquidSky"
+            ReferencedContainer = "container:LiquidSky.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -88,6 +97,15 @@
             ReferencedContainer = "container:LiquidSky.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "9F2142222CE9DAA1004167D7"
+            BuildableName = "LiquidSky.app"
+            BlueprintName = "LiquidSky"
+            ReferencedContainer = "container:LiquidSky.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

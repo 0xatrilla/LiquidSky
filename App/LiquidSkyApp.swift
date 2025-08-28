@@ -14,11 +14,15 @@ import NukeUI
 import ProfileUI
 import SwiftUI
 import User
+import UserNotifications
 import WidgetKit
 
 @main
 struct LiquidSkyApp: App {
   @Environment(\.scenePhase) var scenePhase
+
+  // Add AppDelegate
+  @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
   @State var appState: AppState = .resuming
   @State var accountManager: AccountManager
@@ -29,9 +33,13 @@ struct LiquidSkyApp: App {
   @State var imageQualityService: ImageQualityService = .shared
   @State var settingsService: SettingsService = .shared
 
+  // New services
+  @State var pushNotificationService: PushNotificationService = .shared
+  @State var cloudKitSyncService: CloudKitSyncService = .shared
+
   init() {
     #if DEBUG
-    print("LiquidSkyApp: Initializing...")
+      print("LiquidSkyApp: Initializing...")
     #endif
 
     // Initialize accountManager first
@@ -43,7 +51,7 @@ struct LiquidSkyApp: App {
 
     ImagePipeline.shared = ImagePipeline(configuration: .withDataCache)
     #if DEBUG
-    print("LiquidSkyApp: ImagePipeline configured")
+      print("LiquidSkyApp: ImagePipeline configured")
     #endif
     // Note: ImageQualityService configuration moved to avoid potential deadlocks
   }
@@ -62,6 +70,8 @@ struct LiquidSkyApp: App {
             .environment(imageQualityService)
             .environment(settingsService)
             .environment(ColorThemeManager.shared)
+            .environment(pushNotificationService)
+            .environment(cloudKitSyncService)
         case .authenticated(let client, let currentUser):
           AppTabView()
             .environment(client)
@@ -74,16 +84,20 @@ struct LiquidSkyApp: App {
             .environment(imageQualityService)
             .environment(settingsService)
             .environment(ColorThemeManager.shared)
+            .environment(pushNotificationService)
+            .environment(cloudKitSyncService)
             .id(auth.currentAccountId)  // CRITICAL: Forces complete view recreation on account switch
             .withTheme()
             .themeAware()
             .modelContainer(for: RecentFeedItem.self)
             .withSheetDestinations(
-              router: .constant(router), auth: auth, client: client, currentUser: currentUser, postDataControllerProvider: postDataControllerProvider, settingsService: settingsService
+              router: .constant(router), auth: auth, client: client, currentUser: currentUser,
+              postDataControllerProvider: postDataControllerProvider,
+              settingsService: settingsService
             )
             .onAppear {
               #if DEBUG
-              print("LiquidSkyApp: Showing authenticated state")
+                print("LiquidSkyApp: Showing authenticated state")
               #endif
             }
             .onReceive(NotificationCenter.default.publisher(for: .openComposerNewPostFromShortcut))
@@ -129,6 +143,11 @@ struct LiquidSkyApp: App {
                 }
               }
             }
+            .onReceive(NotificationCenter.default.publisher(for: .notificationTapped)) {
+              notification in
+              // Handle push notification taps
+              handleNotificationTap(notification)
+            }
         case .unauthenticated:
           VStack {
             Text("Unauthenticated")
@@ -137,7 +156,7 @@ struct LiquidSkyApp: App {
 
             Button("Show Auth Screen") {
               #if DEBUG
-              print("Manual auth button tapped")
+                print("Manual auth button tapped")
               #endif
               router.presentedSheet = .auth
             }
@@ -146,39 +165,41 @@ struct LiquidSkyApp: App {
           }
           .onAppear {
             #if DEBUG
-            print("LiquidSkyApp: Showing unauthenticated state")
+              print("LiquidSkyApp: Showing unauthenticated state")
             #endif
           }
         case .error(let error):
           Text("Error: \(error.localizedDescription)")
             .onAppear {
               #if DEBUG
-              print("LiquidSkyApp: Showing error state: \(error)")
+                print("LiquidSkyApp: Showing error state: \(error)")
               #endif
             }
         }
       }
       .sheet(item: $router.presentedSheet) { presentedSheet in
         #if DEBUG
-        let _ = print("Direct sheet: Creating sheet for \(presentedSheet)")
+          let _ = print("Direct sheet: Creating sheet for \(presentedSheet)")
         #endif
         switch presentedSheet {
         case .auth:
           #if DEBUG
-          let _ = print("Direct sheet: Creating auth view")
+            let _ = print("Direct sheet: Creating auth view")
           #endif
           AuthView()
             .environment(auth)
             .environment(accountManager)
             .environment(router)
+            .environment(pushNotificationService)
+            .environment(cloudKitSyncService)
             .onAppear {
               #if DEBUG
-              print("Direct sheet: Auth view appeared successfully")
+                print("Direct sheet: Auth view appeared successfully")
               #endif
             }
             .onDisappear {
               #if DEBUG
-              print("Direct sheet: Auth view disappeared")
+                print("Direct sheet: Auth view disappeared")
               #endif
             }
         case .feedsList:
@@ -366,28 +387,33 @@ struct LiquidSkyApp: App {
       }
       .onAppear {
         #if DEBUG
-        print("LiquidSkyApp: App appeared")
+          print("LiquidSkyApp: App appeared")
         #endif
         // Safety check for auth
         #if DEBUG
-        print("Auth is properly initialized: \(auth)")
+          print("Auth is properly initialized: \(auth)")
         #endif
 
         // Ensure auth screen shows if no configuration exists
         if auth.configuration == nil && router.presentedSheet != .auth {
           #if DEBUG
-          print("Fallback: Ensuring auth screen is shown")
+            print("Fallback: Ensuring auth screen is shown")
           #endif
           router.presentedSheet = .auth
+        }
+
+        // Request push notification permissions
+        Task {
+          await requestPushNotificationPermissions()
         }
       }
       .task(id: scenePhase) {
         #if DEBUG
-        print("LiquidSkyApp: Scene phase changed to: \(scenePhase)")
+          print("LiquidSkyApp: Scene phase changed to: \(scenePhase)")
         #endif
         if scenePhase == .active {
           #if DEBUG
-          print("LiquidSkyApp: Scene became active")
+            print("LiquidSkyApp: Scene became active")
           #endif
           // Session restoration is now handled in the main task
           // No need to refresh here as it could interfere with the restoration process
@@ -395,38 +421,38 @@ struct LiquidSkyApp: App {
       }
       .task {
         #if DEBUG
-        print("LiquidSkyApp: Main task started")
+          print("LiquidSkyApp: Main task started")
         #endif
 
         // Wait for initial session restoration attempt
         #if DEBUG
-        print("Waiting for initial session restoration...")
+          print("Waiting for initial session restoration...")
         #endif
         await auth.restoreSession()
 
         // Check if we have an initial configuration after restoration attempt
         if auth.configuration == nil {
           #if DEBUG
-          print("No initial configuration after restoration, showing auth screen")
+            print("No initial configuration after restoration, showing auth screen")
           #endif
           await MainActor.run {
             appState = .unauthenticated
             router.presentedSheet = .auth
             #if DEBUG
-            print("Auth screen requested after failed restoration")
+              print("Auth screen requested after failed restoration")
             #endif
           }
         } else {
           #if DEBUG
-          print("Initial configuration found after restoration, proceeding with authentication")
+            print("Initial configuration found after restoration, proceeding with authentication")
           #endif
         }
 
         for await configuration in auth.configurationUpdates {
           #if DEBUG
-          print(
-            "LiquidSkyApp: Received configuration update: \(configuration != nil ? "available" : "nil")"
-          )
+            print(
+              "LiquidSkyApp: Received configuration update: \(configuration != nil ? "available" : "nil")"
+            )
           #endif
           if let configuration {
             // Keep the auth sheet visible while we're setting up the environment
@@ -436,27 +462,27 @@ struct LiquidSkyApp: App {
             // Now that authentication is complete, clear the auth sheet
             if router.presentedSheet == .auth {
               #if DEBUG
-              print("Authentication complete, clearing auth sheet")
+                print("Authentication complete, clearing auth sheet")
               #endif
               router.presentedSheet = nil
             }
           } else {
             #if DEBUG
-            print("No configuration available, showing auth screen")
+              print("No configuration available, showing auth screen")
             #endif
             appState = .unauthenticated
             router.presentedSheet = .auth
             #if DEBUG
-            print("Auth sheet requested after configuration update")
+              print("Auth sheet requested after configuration update")
             #endif
           }
         }
       }
       .onChange(of: router.presentedSheet) {
         #if DEBUG
-        print(
-          "LiquidSkyApp: Sheet changed to \(router.presentedSheet != nil ? "\(router.presentedSheet!)" : "nil")"
-        )
+          print(
+            "LiquidSkyApp: Sheet changed to \(router.presentedSheet != nil ? "\(router.presentedSheet!)" : "nil")"
+          )
         #endif
       }
     }
@@ -464,30 +490,36 @@ struct LiquidSkyApp: App {
 
   private func refreshEnvWith(configuration: ATProtocolConfiguration) async {
     #if DEBUG
-    print("refreshEnvWith: Starting environment refresh...")
+      print("refreshEnvWith: Starting environment refresh...")
     #endif
     do {
       #if DEBUG
-      print("Creating BSkyClient...")
+        print("Creating BSkyClient...")
       #endif
       let client = try await BSkyClient(configuration: configuration)
       #if DEBUG
-      print("BSkyClient created successfully")
+        print("BSkyClient created successfully")
       #endif
 
       #if DEBUG
-      print("Creating CurrentUser...")
+        print("Creating CurrentUser...")
       #endif
       let currentUser = try await CurrentUser(client: client)
       #if DEBUG
-      print("CurrentUser created successfully")
+        print("CurrentUser created successfully")
       #endif
+
+      // Set user ID for CloudKit sync
+      if let profile = currentUser.profile {
+        cloudKitSyncService.setCurrentUserId(profile.profile.did)
+      }
 
       // Publish follower count to widget after profile is fetched
       Task {
         if let profile = currentUser.profile {
           let defaults = UserDefaults(suiteName: "group.com.acxtrilla.LiquidSky")
           defaults?.set(profile.profile.followersCount, forKey: "widget.followers.count")
+          defaults?.set(profile.profile.handle, forKey: "widget.username")
 
           // Reload widget timeline
           if #available(iOS 14.0, *) {
@@ -497,21 +529,21 @@ struct LiquidSkyApp: App {
       }
 
       #if DEBUG
-      print("Configuring ImageQualityService...")
+        print("Configuring ImageQualityService...")
       #endif
       // Configure image quality service after authentication is complete
       ImageQualityService.shared.configureImagePipeline()
       #if DEBUG
-      print("ImageQualityService configured successfully")
+        print("ImageQualityService configured successfully")
       #endif
 
       #if DEBUG
-      print("Setting app state to authenticated...")
+        print("Setting app state to authenticated...")
       #endif
       await MainActor.run {
         appState = .authenticated(client: client, currentUser: currentUser)
         #if DEBUG
-        print("App state set to authenticated successfully")
+          print("App state set to authenticated successfully")
         #endif
       }
 
@@ -528,9 +560,14 @@ struct LiquidSkyApp: App {
           ]
         )
       }
+
+      // Perform initial iCloud sync
+      Task {
+        await cloudKitSyncService.performFullSync()
+      }
     } catch {
       #if DEBUG
-      print("refreshEnvWith failed: \(error)")
+        print("refreshEnvWith failed: \(error)")
       #endif
       // Don't set to unauthenticated while auth sheet is showing
       // This prevents the "Unauthenticated" screen from appearing
@@ -538,14 +575,48 @@ struct LiquidSkyApp: App {
         await MainActor.run {
           appState = .unauthenticated
           #if DEBUG
-          print("App state set to unauthenticated due to error")
+            print("App state set to unauthenticated due to error")
           #endif
         }
       } else {
         #if DEBUG
-        print("Auth sheet is showing, keeping current state to avoid 'Unauthenticated' screen")
+          print("Auth sheet is showing, keeping current state to avoid 'Unauthenticated' screen")
         #endif
       }
+    }
+  }
+
+  // MARK: - Push Notification Methods
+
+  private func requestPushNotificationPermissions() async {
+    let granted = await pushNotificationService.requestPermission()
+    if granted {
+      print("PushNotificationService: Permission granted")
+    } else {
+      print("PushNotificationService: Permission denied")
+    }
+  }
+
+  private func handleNotificationTap(_ notification: Notification) {
+    guard let userInfo = notification.userInfo else { return }
+
+    // Handle different types of notifications
+    if let type = userInfo["type"] as? String {
+      switch type {
+      case "follow":
+        router.selectedTab = .notification
+      case "like", "repost", "reply":
+        // Navigate to the specific post if we have the URI
+        if let postUri = userInfo["postUri"] as? String {
+          // TODO: Navigate to specific post
+          router.selectedTab = .feed
+        }
+      default:
+        router.selectedTab = .notification
+      }
+    } else {
+      // Default to notifications tab
+      router.selectedTab = .notification
     }
   }
 }
