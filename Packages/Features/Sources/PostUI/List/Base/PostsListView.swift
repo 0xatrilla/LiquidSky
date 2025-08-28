@@ -542,6 +542,36 @@ private struct ReplyChainView: View {
           .onTapGesture {
             router.navigateTo(.post(post))
           }
+          .swipeActions(edge: .leading, allowsFullSwipe: true) {
+            // Like action (left swipe)
+            Button(action: {
+              Task {
+                await postDataControllerProvider.get(for: post, client: client).toggleLike()
+              }
+            }) {
+              Label("Like", systemImage: "heart.fill")
+            }
+            .tint(.red)
+
+            // Reply action (left swipe)
+            Button(action: {
+              router.presentedSheet = .composer(mode: .reply(post))
+            }) {
+              Label("Reply", systemImage: "bubble.left.fill")
+            }
+            .tint(.blue)
+          }
+          .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            // Repost action (right swipe)
+            Button(action: {
+              Task {
+                await postDataControllerProvider.get(for: post, client: client).toggleRepost()
+              }
+            }) {
+              Label("Repost", systemImage: "quote.bubble.fill")
+            }
+            .tint(.green)
+          }
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)

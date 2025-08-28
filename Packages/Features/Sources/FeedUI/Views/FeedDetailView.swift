@@ -345,5 +345,34 @@ private struct PostRowView: View {
     }
     .padding()
     .background(RoundedRectangle(cornerRadius: 12).fill(.ultraThinMaterial))
+    .swipeActions(edge: .leading, allowsFullSwipe: true) {
+      // Like action (left swipe)
+      Button(action: {
+        // Note: This would need proper PostContext to work
+        // For now, just show the action
+      }) {
+        Label("Like", systemImage: "heart.fill")
+      }
+      .tint(.red)
+
+      // Reply action (left swipe)
+      Button(action: {
+        // Note: This would need proper router to work
+        // For now, just show the action
+      }) {
+        Label("Reply", systemImage: "bubble.left.fill")
+      }
+      .tint(.blue)
+    }
+    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+      // Repost action (right swipe)
+      Button(action: {
+        // Note: This would need proper PostContext to work
+        // For now, just show the action
+      }) {
+        Label("Repost", systemImage: "quote.bubble.fill")
+      }
+      .tint(.green)
+    }
   }
 }
