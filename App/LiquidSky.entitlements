@@ -16,11 +16,11 @@
 	<string>$(TeamIdentifierPrefix)$(CFBundleIdentifier)</string>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.com.acxtrilla.LiquidSky</string>
+		<string>group.com.acxtrilla.Horizon</string>
 	</array>
 	<key>keychain-access-groups</key>
 	<array>
-		<string>$(AppIdentifierPrefix)com.acxtrilla.LiquidSky</string>
+		<string>$(AppIdentifierPrefix)com.acxtrilla.Horizon</string>
 	</array>
 </dict>
 </plist>

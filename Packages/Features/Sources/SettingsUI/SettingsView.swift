@@ -1,5 +1,6 @@
 import Auth
 import DesignSystem
+import InAppPurchase
 import Models
 import SwiftUI
 import UIKit
@@ -9,6 +10,7 @@ public struct SettingsView: View {
   @Environment(Auth.self) var auth
   @Environment(CurrentUser.self) var currentUser
   @Environment(AccountManager.self) var accountManager
+  @Environment private var purchaseService: InAppPurchaseService
   @State private var settingsService = SettingsService.shared
   @State private var colorThemeManager = ColorThemeManager.shared
   @State private var showingResetAlert = false
@@ -17,6 +19,7 @@ public struct SettingsView: View {
   @State private var showingAppIconPicker = false
   @State private var showingAcknowledgementsSheet = false
   @State private var showingAccountSwitcher = false
+  @State private var showingTippingView = false
 
   public init() {}
 
@@ -55,6 +58,9 @@ public struct SettingsView: View {
         // Media Section
         mediaSection
 
+        // Support Section
+        supportSection
+
         // About Section
         aboutSection
 
@@ -91,6 +97,10 @@ public struct SettingsView: View {
       AccountSwitcherView()
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
+    }
+    .sheet(isPresented: $showingTippingView) {
+      TippingView()
+        .environment(purchaseService)
     }
   }
 
@@ -273,6 +283,64 @@ public struct SettingsView: View {
         iconColor: .blue,
         isOn: $settingsService.preloadImages
       )
+    }
+  }
+
+  // MARK: - Support Section
+  private var supportSection: some View {
+    VStack(spacing: 16) {
+      SettingsSectionHeader(title: "Support", icon: "heart.fill", color: .red)
+
+      SettingsNavigationRow(
+        title: "Send a Tip",
+        subtitle: "Support continued development",
+        icon: "heart.fill",
+        iconColor: .red
+      ) {
+        showingTippingView = true
+      }
+
+      // Quick tip stats
+      if !purchaseService.getPurchaseHistory().isEmpty {
+        VStack(spacing: 8) {
+          HStack {
+            Text("Total Tips Sent")
+            Spacer()
+            Text("\(purchaseService.getPurchaseHistory().count)")
+              .fontWeight(.semibold)
+          }
+
+          HStack {
+            Text("Total Amount")
+            Spacer()
+            Text(formatCurrency(purchaseService.getTotalTipsAmount()))
+              .fontWeight(.semibold)
+              .foregroundColor(.blue)
+          }
+
+          if let lastDate = purchaseService.getLastTipDate() {
+            HStack {
+              Text("Last Tip")
+              Spacer()
+              Text(lastDate, style: .date)
+                .fontWeight(.semibold)
+            }
+          }
+        }
+        .font(.caption)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(Color.gray.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+      }
+
+      Text(
+        "Tips help cover development costs and motivate continued improvements to Horizon."
+      )
+      .font(.caption2)
+      .foregroundColor(.secondary)
+      .multilineTextAlignment(.center)
+      .padding(.horizontal, 16)
     }
   }
 
@@ -612,6 +680,13 @@ private struct FeatureRow: View {
 
       Spacer()
     }
+  }
+
+  private func formatCurrency(_ amount: Double) -> String {
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .currency
+    formatter.locale = Locale.current
+    return formatter.string(from: NSNumber(value: amount)) ?? "$0.00"
   }
 }
 

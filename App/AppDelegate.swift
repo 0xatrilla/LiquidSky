@@ -39,7 +39,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     if let title = userInfo["title"] as? String,
       let subtitle = userInfo["subtitle"] as? String
     {
-      let defaults = UserDefaults(suiteName: "group.com.acxtrilla.LiquidSky")
+      let defaults = UserDefaults(suiteName: "group.com.acxtrilla.Horizon")
       defaults?.set(title, forKey: "widget.recent.notification.title")
       defaults?.set(subtitle, forKey: "widget.recent.notification.subtitle")
 

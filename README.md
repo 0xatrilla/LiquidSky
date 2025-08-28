@@ -1,75 +1,32 @@
 
 <img width="102" height="102" alt="generated-image" src="https://github.com/user-attachments/assets/0a74b4eb-7bec-4e10-ab57-9a1b8bb0ab4e" />
 
-# LiquidSky 
+# Horizon
 
+A beautiful, modern Bluesky client for iOS built with SwiftUI and the AT Protocol.
 
-A modern, beautiful Bluesky client for iOS built with SwiftUI and the latest iOS 26 SDK features.
+![Horizon Screenshot](https://example.com/horizon-screenshot.png)
 
-## 🌟 About
+## ✨ **Features**
 
-LiquidSky is a native iOS client for [Bluesky](https://bsky.social), the decentralized social network built on the AT Protocol. This project showcases modern iOS development practices with a focus on beautiful, fluid UI powered by the latest SwiftUI capabilities.
+### 🎨 **Core Features**
+- **Modern SwiftUI Interface**: Beautiful, native iOS design with Liquid Glass effects
+- **AT Protocol Integration**: Full Bluesky API support via ATProtoKit
+- **Real-time Updates**: Live feed updates and notifications
+- **Media Support**: Rich media handling with inline videos and images
+- **Push Notifications**: Real-time notifications for new activity
+- **iCloud Sync**: Cross-device synchronization of preferences and data
+- **Rich Widgets**: Home screen widgets for quick access to activity
+- **In-App Purchases**: Support development with optional tips
 
-## 📸 Screenshots
-
-<img width="250" height="500" alt="IMG_0883" src="https://github.com/user-attachments/assets/0674d7da-573b-426d-b244-5047f80df2560" />
-<img width="250" height="500" alt="IMG_0884" src="https://github.com/user-attachments/assets/c2ff8ef8-1a2e-4e86-a0c8-314f0f40df2560" />
-<img width="250" height="500" alt="IMG_0885" src="https://github.com/user-attachments/assets/1dde5a4e-7b7c-461f-9635-cac54cae753d" />
-<img width="250" height="500" alt="IMG_0887" src="https://github.com/user-attachments/assets/6044d7da-573b-426d-b244-5047f80df2560" />
-
-
-### ✨ Core Features
-
-- **🧊 Liquid Glass UI**: Leverages iOS 26's new Liquid Glass effects for a stunning, modern interface
-- **🚀 Native Performance**: Built entirely in SwiftUI for smooth, responsive interactions
-- **🏗️ Modular Architecture**: Clean separation between UI and business logic using Swift Package Manager
-- **🔗 AT Protocol Integration**: Full support for Bluesky's decentralized social features
-- **🔐 Secure Authentication**: Login with app passwords, stored securely in iOS Keychain
-- **🎨 Beautiful Design System**: Custom components with consistent blue theme matching Bluesky brand
-- **🔔 Push Notifications**: Real-time push notification delivery for social interactions
-- **☁️ iCloud Sync**: Seamless data synchronization across all your Apple devices
-- **📱 Rich Widgets**: Beautiful home screen widgets for quick access to your Bluesky data
-
-## ✅ **Implemented Features**
-
-### 🔐 **Authentication & User Management**
-- **Secure Login**: App password authentication with iOS Keychain
-- **Session Management**: Automatic token refresh and session persistence
-- **User Profiles**: Complete profile viewing with bio, stats, and relationship status
-- **Current User**: Full profile management and settings access
-
-### 📱 **Feed & Timeline**
-- **Following Timeline**: View posts from people you follow
-- **Custom Feeds**: Browse and explore custom Bluesky feeds
-- **Feed Discovery**: Search and discover new feeds
-- **Recent Feeds**: Quick access to recently viewed feeds
-- **Pull-to-Refresh**: Swipe down to refresh feed content
-- **Infinite Scrolling**: Seamless pagination for continuous browsing
-
-### 📝 **Post System**
-- **Post Composition**: Create new posts with rich text editor
-- **Reply System**: Reply to posts with threaded conversations
-- **Post Actions**: Like, repost, and interact with posts
-- **Post Threads**: View complete conversation threads
-- **Post Detail**: Full post viewing with context
-- **Media Support**: Posts with images, videos, and external links
-
-### 🎥 **Advanced Media System**
-- **Inline Video Playback**: Videos play directly in the feed
-- **Smart Autoplay**: Intelligent video playback management
-- **Video Controls**: Play/pause, mute, progress bar, and seeking
-- **Performance Optimization**: Limits concurrent videos for smooth performance
-- **Image Support**: High-quality image loading and display
-- **Media Grid**: Beautiful media layouts for multiple images/videos
-- **Full-Screen Media**: Immersive media viewing experience
-
-### 👤 **Profile & Social Features**
-- **Profile Viewing**: Complete user profiles with stats and bio
-- **Profile Posts**: View posts, replies, media, and threads by user
-- **Profile Likes**: See what posts a user has liked
-- **Relationship Status**: Following, followers, blocking, and muting indicators
-- **Profile Sharing**: Share profiles with custom share text
-- **Avatar Management**: Profile picture display and management
+### 📱 **Social Features**
+- **Timeline Viewing**: Browse your home timeline and custom feeds
+- **Post Creation**: Compose and publish posts with media attachments
+- **Interactions**: Like, repost, and reply to posts
+- **Profile Management**: View and edit your profile
+- **Feed Management**: Create and manage custom feeds
+- **User Search**: Find and follow other users
+- **Content Filtering**: Customizable content preferences
 
 ### ⚙️ **Settings & Customization**
 - **Theme Management**: Light, dark, and system theme support
@@ -78,88 +35,83 @@ LiquidSky is a native iOS client for [Bluesky](https://bsky.social), the decentr
 - **Privacy Controls**: Mentions, replies, and quote permissions
 - **Notification Settings**: Push and email notification preferences
 - **Content Filters**: Sensitive content and media playback controls
+- **In-App Purchases**: Support development with optional tips
+
+### 💝 **Support & Tipping**
+- **Multiple Tip Amounts**: Choose from small, medium, large, or custom tip amounts
+- **Secure Transactions**: Apple's StoreKit handles all payment processing
+- **Purchase History**: View your tipping history and total support
+- **Restore Purchases**: Easily restore previous purchases across devices
+- **Development Support**: Tips help cover costs and motivate improvements
 
 ### 🔔 **Notifications**
-- **Real-time Notifications**: Like, follow, repost, and mention alerts
-- **Push Notifications**: Instant delivery of social interactions
-- **Notification Grouping**: Smart grouping of similar notifications
-- **Notification Types**: Different icons and colors for various activities
-- **Quick Actions**: Respond directly from notifications
+- **Push Notifications**: Real-time alerts for new activity
 - **Background Processing**: Handle notifications even when app is closed
+- **Deep Linking**: Navigate directly to content from notifications
+- **Customizable**: Choose which notifications to receive
 
 ### ☁️ **iCloud Integration**
-- **Cross-Device Sync**: Sync preferences and settings across all devices
-- **User Preferences**: Automatically sync theme, video settings, and display options
-- **Feed Subscriptions**: Keep your custom feed list in sync
+- **Cross-Device Sync**: Keep preferences in sync across all your devices
+- **User Preferences**: Theme, video settings, and display options
+- **Feed Subscriptions**: Your custom feed list stays synchronized
 - **Block Lists**: Maintain consistent blocking across devices
 - **Secure Storage**: All data encrypted and stored in your private iCloud
 - **Automatic Sync**: Background synchronization when changes occur
 
 ### 📱 **Home Screen Widgets**
 - **Follower Count Widget**: Beautiful display of your current follower count
-- **Recent Notifications**: Show your latest Bluesky activity
+- **Recent Notifications**: Show your latest Bluesky activity with smart type detection
 - **Feed Updates**: Monitor activity from your favorite feeds
-- **Multiple Sizes**: Small, medium, and large widget options
+- **Multiple Sizes**: Support for small, medium, and large widget sizes
 - **Real-time Updates**: Widgets refresh automatically with new data
 - **Deep Linking**: Tap widgets to jump directly into the app
 
-### 🎨 **Design System**
-- **Custom Components**: Reusable UI components with consistent styling
-- **Blue Theme**: Beautiful blue color scheme matching Bluesky brand
-- **Glass Effects**: Modern translucent and blur effects
-- **Responsive Design**: Adaptive layouts for different screen sizes
-- **Accessibility**: VoiceOver support and accessibility features
-- **Animations**: Smooth transitions and micro-interactions
+## 🏗️ **Architecture**
 
-### 📱 **Navigation & UX**
-- **Tab Navigation**: Feed, Profile, Notifications, and Settings tabs
-- **Sheet Presentations**: Modal views for composer and media
-- **Deep Linking**: Navigate directly to posts, profiles, and feeds
-- **Gesture Support**: Swipe gestures and intuitive interactions
-- **Search**: Find feeds, users, and content quickly
+### **Modern SwiftUI Architecture**
+- **SwiftUI 5.0**: Latest iOS UI framework with Liquid Glass effects
+- **Swift Observation**: Native state management with `@Observable`
+- **Async/Await**: Modern concurrency throughout the app
+- **SwiftData**: Local data persistence with automatic sync
+- **Modular Design**: Feature-based package organization
 
-## 🚧 **In Progress Features**
+### **AT Protocol Integration**
+- **ATProtoKit**: Official Bluesky client library
+- **Real-time Streaming**: Live updates via WebSocket connections
+- **Rich Media Support**: Images, videos, and custom content
+- **Feed Management**: Custom algorithm feeds and lists
+- **User Management**: Profile editing and account management
 
- - [x] **Multi-Account Support**: Switch between multiple Bluesky accounts
-        
- - [x] **Advanced Search**: Enhanced search with filters and suggestions
-    
- - [x] **Push Notifications**: Real-time push notification delivery
-    
- - [x] **iCloud Sync**: Cross-device data synchronization
-    
- - [x] **Enhanced Widgets**: Beautiful home screen widgets
-    
- - [ ] **Bookmarks**: Save and organize favorite posts
-    
- - [ ] **Offline Support**: Cache content for offline viewing
-    
- - [ ] **Advanced Widgets**: Interactive widgets with quick actions
-    
+### **Push Notification Architecture**
+- **UserNotifications Framework**: Native iOS notification system
+- **Background Processing**: Handle notifications when app is closed
+- **Deep Linking**: Navigate to specific content from notifications
+- **Custom Categories**: Different notification types for different actions
+- **Permission Management**: Graceful handling of notification permissions
 
-## 🛠️ **Technical Details**
+### **iCloud Sync Architecture**
+- **CloudKit Framework**: Apple's cloud database service
+- **Private Database**: Secure, user-specific data storage
+- **Automatic Sync**: Background synchronization of changes
+- **Conflict Resolution**: Smart merging of conflicting data
+- **Offline Support**: Local caching with sync when online
 
-### Requirements
+### **Widget Architecture**
+- **WidgetKit**: Native iOS widget framework
+- **Timeline Provider**: Efficient data updates
+- **App Groups**: Shared data between app and widgets
+- **Deep Linking**: Navigate from widgets to app
+- **Multiple Sizes**: Support for all widget sizes
 
-- **iOS 26.0+** 
-- **Xcode 26.0+** with iOS 26 SDK
-- **Swift 6.2+**
+### **StoreKit Architecture**
+- **StoreKit 2**: Modern in-app purchase framework
+- **Product Management**: Dynamic product loading and display
+- **Transaction Handling**: Secure purchase processing and verification
+- **Purchase History**: Local storage and Apple's receipt validation
+- **Restore Purchases**: Cross-device purchase restoration
+- **Testing**: StoreKit configuration for development and testing
 
-### Architecture
-
-LiquidSky follows a modular architecture with two main Swift packages:
-
-- **Features Package**: All UI components and views
-  - AuthUI, FeedUI, PostUI, ProfileUI, SettingsUI, NotificationsUI, MediaUI, ComposerUI
-  - Custom DesignSystem with reusable components
-  
-- **Model Package**: Core business logic and data
-  - Network layer (AT Protocol client via ATProtoKit)
-  - Data models and state management
-  - Authentication and user management
-  - SwiftData integration for local storage
-
-### Key Technologies
+## 🛠️ **Key Technologies**
 
 - **SwiftUI** with iOS 26's Liquid Glass effects
 - **Swift Observation** framework for state management
@@ -171,53 +123,41 @@ LiquidSky follows a modular architecture with two main Swift packages:
 - **Push Notifications** for real-time updates
 - **CloudKit** for iCloud data synchronization
 - **WidgetKit** for home screen widgets
+- **StoreKit** for in-app purchases and tipping
 
-### Push Notification Architecture
+## 🚀 **Getting Started**
 
-- **UserNotifications Framework**: Native iOS push notification handling
-- **Background Processing**: Handle notifications when app is closed
-- **Deep Linking**: Navigate to specific content from notifications
-- **Permission Management**: Graceful handling of notification permissions
-- **Widget Integration**: Update widgets when notifications arrive
+### **Prerequisites**
+- Xcode 16.0+
+- iOS 17.0+
+- Apple Developer Account (for push notifications and iCloud)
 
-### iCloud Sync Architecture
+### **Installation**
+1. Clone the repository
+2. Open `Horizon.xcodeproj` in Xcode
+3. Configure your signing and capabilities
+4. Build and run on device or simulator
 
-- **CloudKit**: Apple's cloud database service
-- **Private Database**: Secure user data storage
-- **Automatic Sync**: Background synchronization
-- **Conflict Resolution**: Handle data conflicts gracefully
-- **Offline Support**: Queue changes when offline
-
-### Widget Architecture
-
-- **WidgetKit**: Native iOS widget framework
-- **Timeline Provider**: Efficient data updates
-- **App Groups**: Shared data between app and widgets
-- **Deep Linking**: Navigate from widgets to app
-- **Multiple Sizes**: Support for all widget sizes
+### **Configuration**
+1. **Push Notifications**: Enable in Signing & Capabilities
+2. **iCloud**: Configure CloudKit container
+3. **App Groups**: Set up for widget data sharing
+4. **StoreKit**: Add configuration file for testing
 
 ## 🤝 **Contributing**
 
-While this is currently a personal exploration project, feedback and ideas are welcome! Feel free to:
-- Open issues for bugs or feature requests
-- Share UI/UX suggestions
-- Discuss architectural improvements
-- Contribute to the codebase
+We welcome contributions! Please see our contributing guidelines for details.
 
 ## 📄 **License**
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🌟 **What Makes LiquidSky Special**
+## 🙏 **Acknowledgments**
 
-LiquidSky isn't just another Bluesky client - it's a showcase of modern iOS development:
+- **Bluesky Team** for the AT Protocol and ATProtoKit
+- **Apple** for SwiftUI and the iOS platform
+- **Community** for feedback and testing
 
-- **🎨 Beautiful Design**: Stunning UI that rivals the best social media apps
-- **⚡ Performance**: Optimized for smooth scrolling and video playback
-- **🔒 Privacy-First**: Secure authentication and data handling
-- **🌐 Open Protocol**: Built on the decentralized AT Protocol
-- **📱 Native Experience**: Leverages the latest iOS capabilities
-- **🏗️ Clean Architecture**: Well-structured, maintainable codebase
-- **🔔 Real-time Updates**: Push notifications for instant social interaction
-- **☁️ Seamless Sync**: Your data follows you across all devices
-- **📱 Rich Widgets**: Beautiful home screen integration
+---
+
+**Horizon** - Where the sky meets the horizon of possibilities. 🌅

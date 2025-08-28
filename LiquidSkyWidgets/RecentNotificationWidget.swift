@@ -8,8 +8,8 @@ struct RecentNotificationWidget: Widget {
     StaticConfiguration(kind: kind, provider: RecentNotificationTimelineProvider()) { entry in
       RecentNotificationWidgetView(entry: entry)
     }
-    .configurationDisplayName("Recent Notification")
-    .description("Shows your most recent Bluesky notification")
+    .configurationDisplayName("Recent Activity")
+    .description("Show your latest Bluesky activity")
     .supportedFamilies([.systemSmall, .systemMedium])
   }
 }
@@ -19,7 +19,7 @@ struct RecentNotificationTimelineProvider: TimelineProvider {
     RecentNotificationEntry(
       date: Date(),
       title: "New follower",
-      subtitle: "@username started following you",
+      subtitle: "@user.bsky.social started following you",
       type: .follow
     )
   }
@@ -28,7 +28,7 @@ struct RecentNotificationTimelineProvider: TimelineProvider {
     let entry = RecentNotificationEntry(
       date: Date(),
       title: "New follower",
-      subtitle: "@username started following you",
+      subtitle: "@user.bsky.social started following you",
       type: .follow
     )
     completion(entry)
@@ -37,10 +37,10 @@ struct RecentNotificationTimelineProvider: TimelineProvider {
   func getTimeline(
     in context: Context, completion: @escaping (Timeline<RecentNotificationEntry>) -> Void
   ) {
-    let defaults = UserDefaults(suiteName: "group.com.acxtrilla.LiquidSky")
-    let title = defaults?.string(forKey: "widget.recent.notification.title") ?? "No notifications"
+    let defaults = UserDefaults(suiteName: "group.com.acxtrilla.Horizon")
+    let title = defaults?.string(forKey: "widget.recent.notification.title") ?? "No recent activity"
     let subtitle =
-      defaults?.string(forKey: "widget.recent.notification.subtitle") ?? "Check back later"
+      defaults?.string(forKey: "widget.recent.notification.subtitle") ?? "Check your notifications"
 
     // Determine notification type from title
     let type = determineNotificationType(from: title)
@@ -51,7 +51,6 @@ struct RecentNotificationTimelineProvider: TimelineProvider {
       subtitle: subtitle,
       type: type
     )
-
     let timeline = Timeline(entries: [entry], policy: .atEnd)
     completion(timeline)
   }
@@ -64,7 +63,7 @@ struct RecentNotificationTimelineProvider: TimelineProvider {
       return .like
     } else if lowercased.contains("repost") {
       return .repost
-    } else if lowercased.contains("reply") || lowercased.contains("mention") {
+    } else if lowercased.contains("reply") {
       return .reply
     } else {
       return .general
@@ -80,39 +79,25 @@ struct RecentNotificationEntry: TimelineEntry {
 }
 
 enum NotificationType {
-  case follow
-  case like
-  case repost
-  case reply
-  case general
+  case follow, like, repost, reply, general
 
   var icon: String {
     switch self {
-    case .follow:
-      return "person.badge.plus"
-    case .like:
-      return "heart.fill"
-    case .repost:
-      return "arrow.2.squarepath"
-    case .reply:
-      return "bubble.left.fill"
-    case .general:
-      return "bell.fill"
+    case .follow: return "person.badge.plus"
+    case .like: return "heart.fill"
+    case .repost: return "arrow.2.squarepath"
+    case .reply: return "bubble.left"
+    case .general: return "bell"
     }
   }
 
   var color: Color {
     switch self {
-    case .follow:
-      return .blue
-    case .like:
-      return .red
-    case .repost:
-      return .green
-    case .reply:
-      return .orange
-    case .general:
-      return .gray
+    case .follow: return .green
+    case .like: return .red
+    case .repost: return .blue
+    case .reply: return .orange
+    case .general: return .gray
     }
   }
 }
@@ -127,54 +112,49 @@ struct RecentNotificationWidgetView: View {
       Color(.systemBackground)
 
       VStack(alignment: .leading, spacing: 8) {
-        // Header with icon and type
         HStack {
+          // Icon
           Image(systemName: entry.type.icon)
-            .font(.system(size: 16))
+            .font(.title2)
             .foregroundColor(entry.type.color)
 
-          Text(entry.type == .general ? "Notification" : String(describing: entry.type).capitalized)
-            .font(.caption2)
-            .fontWeight(.medium)
-            .foregroundColor(.secondary)
-            .textCase(.uppercase)
-            .tracking(0.5)
-
           Spacer()
+
+          // Time
+          Text(entry.date, style: .time)
+            .font(.caption2)
+            .foregroundColor(.secondary)
         }
 
         // Title
         Text(entry.title)
-          .font(.system(size: family == .systemSmall ? 14 : 16, weight: .semibold))
-          .foregroundColor(.primary)
+          .font(.headline)
+          .fontWeight(.semibold)
           .lineLimit(2)
-          .multilineTextAlignment(.leading)
+          .foregroundColor(.primary)
 
         // Subtitle
         Text(entry.subtitle)
           .font(.caption)
           .foregroundColor(.secondary)
-          .lineLimit(family == .systemSmall ? 1 : 2)
-          .multilineTextAlignment(.leading)
+          .lineLimit(family == .systemSmall ? 2 : 3)
 
         Spacer()
 
-        // Timestamp
+        // Action hint
         HStack {
-          Image(systemName: "clock")
+          Text("Tap to view")
             .font(.caption2)
-            .foregroundColor(.tertiary)
-
-          Text(entry.date, style: .relative)
-            .font(.caption2)
-            .foregroundColor(.tertiary)
-
+            .foregroundColor(.blue)
           Spacer()
+          Image(systemName: "arrow.right")
+            .font(.caption2)
+            .foregroundColor(.blue)
         }
       }
       .padding()
     }
-    .widgetURL(URL(string: "liquidsky://notifications"))
+    .widgetURL(URL(string: "horizon://notifications"))
   }
 }
 
@@ -182,16 +162,10 @@ struct RecentNotificationWidgetView: View {
   RecentNotificationWidget()
 } timeline: {
   RecentNotificationEntry(
-    date: Date(),
+    date: .now,
     title: "New follower",
-    subtitle: "@username started following you",
+    subtitle: "@user.bsky.social started following you",
     type: .follow
-  )
-  RecentNotificationEntry(
-    date: Date(),
-    title: "Post liked",
-    subtitle: "@user liked your post",
-    type: .like
   )
 }
 
@@ -199,9 +173,9 @@ struct RecentNotificationWidgetView: View {
   RecentNotificationWidget()
 } timeline: {
   RecentNotificationEntry(
-    date: Date(),
+    date: .now,
     title: "New follower",
-    subtitle: "@username started following you",
+    subtitle: "@user.bsky.social started following you",
     type: .follow
   )
 }

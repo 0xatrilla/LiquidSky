@@ -127,7 +127,7 @@ public struct AuthView: View {
 
       // Title and subtitle
       VStack(spacing: isKeyboardVisible ? 4 : 8) {
-        Text("Welcome to LiquidSky")
+        Text("Welcome to Horizon")
           .font(isKeyboardVisible ? .title2 : .largeTitle)
           .fontWeight(.bold)
           .multilineTextAlignment(.center)

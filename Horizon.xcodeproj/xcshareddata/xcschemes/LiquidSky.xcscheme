@@ -80,6 +80,9 @@
             ReferencedContainer = "container:LiquidSky.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
+      <StoreKitConfigurationFileReference
+         identifier = "../../Configuration.storekit">
+      </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
