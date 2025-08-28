@@ -9,27 +9,27 @@ struct FollowerCountWidget: Widget {
       FollowerCountWidgetView(entry: entry)
     }
     .configurationDisplayName("Follower Count")
-    .description("Shows your current follower count on Bluesky")
+    .description("Display your current follower count")
     .supportedFamilies([.systemSmall, .systemMedium])
   }
 }
 
 struct FollowerCountTimelineProvider: TimelineProvider {
   func placeholder(in context: Context) -> FollowerCountEntry {
-    FollowerCountEntry(date: Date(), followerCount: 1234, username: "@username")
+    FollowerCountEntry(date: Date(), followerCount: 1234, username: "user.bsky.social")
   }
 
   func getSnapshot(in context: Context, completion: @escaping (FollowerCountEntry) -> Void) {
-    let entry = FollowerCountEntry(date: Date(), followerCount: 1234, username: "@username")
+    let entry = FollowerCountEntry(date: Date(), followerCount: 1234, username: "user.bsky.social")
     completion(entry)
   }
 
   func getTimeline(
     in context: Context, completion: @escaping (Timeline<FollowerCountEntry>) -> Void
   ) {
-    let defaults = UserDefaults(suiteName: "group.com.acxtrilla.LiquidSky")
-    let followerCount = defaults?.integer(forKey: "widget.followers.count") ?? 0
-    let username = defaults?.string(forKey: "widget.username") ?? "@username"
+    let defaults = UserDefaults(suiteName: "group.com.acxtrilla.Horizon")
+    let followerCount = defaults?.integer(forKey: "widget.follower.count") ?? 0
+    let username = defaults?.string(forKey: "widget.username") ?? "user.bsky.social"
 
     let entry = FollowerCountEntry(date: Date(), followerCount: followerCount, username: username)
     let timeline = Timeline(entries: [entry], policy: .atEnd)
@@ -49,57 +49,59 @@ struct FollowerCountWidgetView: View {
 
   var body: some View {
     ZStack {
-      // Background with gradient
+      // Background gradient
       LinearGradient(
-        colors: [Color.blue.opacity(0.8), Color.blue.opacity(0.6)],
+        colors: [Color.blue.opacity(0.8), Color.purple.opacity(0.6)],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
       )
 
       VStack(spacing: 8) {
-        // Username
-        Text(entry.username)
+        // Follower count
+        Text("\(entry.followerCount)")
+          .font(fontForFamily())
+          .fontWeight(.bold)
+          .foregroundColor(.white)
+
+        // Label
+        Text("Followers")
           .font(.caption)
           .fontWeight(.medium)
           .foregroundColor(.white.opacity(0.9))
-          .lineLimit(1)
 
-        // Follower count
-        Text("\(entry.followerCount)")
-          .font(.system(size: family == .systemSmall ? 32 : 40, weight: .bold, design: .rounded))
-          .foregroundColor(.white)
-          .minimumScaleFactor(0.5)
-
-        // Label
-        Text("followers")
-          .font(.caption)
-          .fontWeight(.medium)
-          .foregroundColor(.white.opacity(0.8))
-          .textCase(.uppercase)
-          .tracking(0.5)
-
-        // Bluesky logo or icon
-        Image(systemName: "person.3.fill")
-          .font(.system(size: family == .systemSmall ? 16 : 20))
-          .foregroundColor(.white.opacity(0.7))
-          .padding(.top, 4)
+        // Username (only show in medium size)
+        if family == .systemMedium {
+          Text("@\(entry.username)")
+            .font(.caption2)
+            .foregroundColor(.white.opacity(0.7))
+            .lineLimit(1)
+        }
       }
       .padding()
     }
-    .widgetURL(URL(string: "liquidsky://profile"))
+    .widgetURL(URL(string: "horizon://profile/\(entry.username)"))
+  }
+
+  private func fontForFamily() -> Font {
+    switch family {
+    case .systemSmall:
+      return .system(size: 28, weight: .bold, design: .rounded)
+    case .systemMedium:
+      return .system(size: 32, weight: .bold, design: .rounded)
+    default:
+      return .system(size: 28, weight: .bold, design: .rounded)
+    }
   }
 }
 
 #Preview(as: .systemSmall) {
   FollowerCountWidget()
 } timeline: {
-  FollowerCountEntry(date: Date(), followerCount: 1234, username: "@username")
-  FollowerCountEntry(date: Date(), followerCount: 5678, username: "@testuser")
+  FollowerCountEntry(date: .now, followerCount: 1234, username: "user.bsky.social")
 }
 
 #Preview(as: .systemMedium) {
   FollowerCountWidget()
 } timeline: {
-  FollowerCountEntry(date: Date(), followerCount: 1234, username: "@username")
+  FollowerCountEntry(date: .now, followerCount: 1234, username: "user.bsky.social")
 }
-

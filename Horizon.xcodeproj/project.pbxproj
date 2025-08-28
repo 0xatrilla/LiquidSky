@@ -25,6 +25,8 @@
 		9FB136012DEEB30A003D7ABE /* ComposerUI in Frameworks */ = {isa = PBXBuildFile; productRef = 9FB136002DEEB30A003D7ABE /* ComposerUI */; };
 		9FD63DE02CEF1F5B00243D9A /* PostUI in Frameworks */ = {isa = PBXBuildFile; productRef = 9FD63DDF2CEF1F5B00243D9A /* PostUI */; };
 		9FD63DE22CEF20F500243D9A /* AuthUI in Frameworks */ = {isa = PBXBuildFile; productRef = 9FD63DE12CEF20F500243D9A /* AuthUI */; };
+		DB722B902E608A4300644142 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB722B8F2E608A4300644142 /* StoreKit.framework */; };
+		DB722B922E608AB900644142 /* Configuration.storekit in Resources */ = {isa = PBXBuildFile; fileRef = DB722B912E608AB900644142 /* Configuration.storekit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -47,6 +49,8 @@
 		9FAEE3A82CF0994C00F86CDC /* Model */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Model; path = Packages/Model; sourceTree = "<group>"; };
 		DB21B0F42E53F69B00B27D22 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		DB21B0F62E53F69B00B27D22 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		DB722B8F2E608A4300644142 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		DB722B912E608AB900644142 /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Configuration.storekit; sourceTree = "<group>"; };
 		E9FE37002DF0661A00EB0418 /* FeaturesTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = FeaturesTests.xctestplan; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -71,6 +75,7 @@
 				9FA556A32CF49E55008A62B4 /* FeedUI in Frameworks */,
 				9F1552F12CEF35C000DD9F6E /* FeedUI in Frameworks */,
 				9FAEE3BA2CF09BB400F86CDC /* SettingsUI in Frameworks */,
+				DB722B902E608A4300644142 /* StoreKit.framework in Frameworks */,
 				9FB136012DEEB30A003D7ABE /* ComposerUI in Frameworks */,
 				9F1552F32CEF35C000DD9F6E /* PostUI in Frameworks */,
 				9FA3256B2E05439D007BAC14 /* Client in Frameworks */,
@@ -95,6 +100,7 @@
 		9F21421A2CE9DAA1004167D7 = {
 			isa = PBXGroup;
 			children = (
+				DB722B912E608AB900644142 /* Configuration.storekit */,
 				E9FE37002DF0661A00EB0418 /* FeaturesTests.xctestplan */,
 				9F5F5E102CEE46B200A4712C /* LiquidSky-Info.plist */,
 				9F2142252CE9DAA1004167D7 /* App */,
@@ -117,6 +123,7 @@
 		9FAEE3B82CF09BB400F86CDC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				DB722B8F2E608A4300644142 /* StoreKit.framework */,
 				DB21B0F42E53F69B00B27D22 /* WidgetKit.framework */,
 				DB21B0F62E53F69B00B27D22 /* SwiftUI.framework */,
 			);
@@ -182,7 +189,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 9F21421E2CE9DAA1004167D7 /* Build configuration list for PBXProject "LiquidSky" */;
+			buildConfigurationList = 9F21421E2CE9DAA1004167D7 /* Build configuration list for PBXProject "Horizon" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -208,6 +215,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DB722B922E608AB900644142 /* Configuration.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -461,7 +469,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		9F21421E2CE9DAA1004167D7 /* Build configuration list for PBXProject "LiquidSky" */ = {
+		9F21421E2CE9DAA1004167D7 /* Build configuration list for PBXProject "Horizon" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9F2142462CE9DAA3004167D7 /* Debug */,

@@ -7,6 +7,7 @@ import ComposerUI
 import DesignSystem
 import Destinations
 import FeedUI
+import InAppPurchase
 import MediaUI
 import Models
 import Nuke
@@ -36,6 +37,7 @@ struct LiquidSkyApp: App {
   // New services
   @State var pushNotificationService: PushNotificationService = .shared
   @State var cloudKitSyncService: CloudKitSyncService = .shared
+  @State var inAppPurchaseService: InAppPurchaseService = .shared
 
   init() {
     #if DEBUG
@@ -72,6 +74,7 @@ struct LiquidSkyApp: App {
             .environment(ColorThemeManager.shared)
             .environment(pushNotificationService)
             .environment(cloudKitSyncService)
+            .environment(inAppPurchaseService)
         case .authenticated(let client, let currentUser):
           AppTabView()
             .environment(client)
@@ -86,6 +89,7 @@ struct LiquidSkyApp: App {
             .environment(ColorThemeManager.shared)
             .environment(pushNotificationService)
             .environment(cloudKitSyncService)
+            .environment(inAppPurchaseService)
             .id(auth.currentAccountId)  // CRITICAL: Forces complete view recreation on account switch
             .withTheme()
             .themeAware()
@@ -555,7 +559,7 @@ struct LiquidSkyApp: App {
           name: .notificationsUpdated,
           object: nil,
           userInfo: [
-            "title": "Welcome to LiquidSky!",
+            "title": "Welcome to Horizon!",
             "subtitle": "Your Bluesky client is ready",
           ]
         )

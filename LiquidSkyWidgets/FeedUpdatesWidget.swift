@@ -8,9 +8,9 @@ struct FeedUpdatesWidget: Widget {
     StaticConfiguration(kind: kind, provider: FeedUpdatesTimelineProvider()) { entry in
       FeedUpdatesWidgetView(entry: entry)
     }
-    .configurationDisplayName("Feed Updates")
-    .description("Shows recent activity from your feeds")
-    .supportedFamilies([.systemMedium, .systemLarge])
+    .configurationDisplayName("Feed Activity")
+    .description("Monitor activity from your favorite feeds")
+    .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
   }
 }
 
@@ -21,7 +21,7 @@ struct FeedUpdatesTimelineProvider: TimelineProvider {
       feedName: "Following",
       recentPosts: 5,
       newFollowers: 2,
-      unreadCount: 8
+      totalActivity: 12
     )
   }
 
@@ -31,27 +31,26 @@ struct FeedUpdatesTimelineProvider: TimelineProvider {
       feedName: "Following",
       recentPosts: 5,
       newFollowers: 2,
-      unreadCount: 8
+      totalActivity: 12
     )
     completion(entry)
   }
 
   func getTimeline(in context: Context, completion: @escaping (Timeline<FeedUpdatesEntry>) -> Void)
   {
-    let defaults = UserDefaults(suiteName: "group.com.acxtrilla.LiquidSky")
+    let defaults = UserDefaults(suiteName: "group.com.acxtrilla.Horizon")
     let feedName = defaults?.string(forKey: "widget.feed.name") ?? "Following"
     let recentPosts = defaults?.integer(forKey: "widget.feed.recent.posts") ?? 0
     let newFollowers = defaults?.integer(forKey: "widget.feed.new.followers") ?? 0
-    let unreadCount = defaults?.integer(forKey: "widget.feed.unread.count") ?? 0
+    let totalActivity = defaults?.integer(forKey: "widget.feed.total.activity") ?? 0
 
     let entry = FeedUpdatesEntry(
       date: Date(),
       feedName: feedName,
       recentPosts: recentPosts,
       newFollowers: newFollowers,
-      unreadCount: unreadCount
+      totalActivity: totalActivity
     )
-
     let timeline = Timeline(entries: [entry], policy: .atEnd)
     completion(timeline)
   }
@@ -62,7 +61,7 @@ struct FeedUpdatesEntry: TimelineEntry {
   let feedName: String
   let recentPosts: Int
   let newFollowers: Int
-  let unreadCount: Int
+  let totalActivity: Int
 }
 
 struct FeedUpdatesWidgetView: View {
@@ -72,138 +71,161 @@ struct FeedUpdatesWidgetView: View {
   var body: some View {
     ZStack {
       // Background
-      Color(.systemBackground)
+      LinearGradient(
+        colors: [Color.orange.opacity(0.8), Color.red.opacity(0.6)],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+      )
 
-      VStack(alignment: .leading, spacing: 12) {
+      VStack(alignment: .leading, spacing: 8) {
         // Header
         HStack {
-          Image(systemName: "list.bullet.circle.fill")
+          Image(systemName: "chart.line.uptrend.xyaxis")
             .font(.title2)
-            .foregroundColor(.blue)
+            .foregroundColor(.white)
 
           Text(entry.feedName)
             .font(.headline)
             .fontWeight(.semibold)
-            .foregroundColor(.primary)
+            .foregroundColor(.white)
 
           Spacer()
 
-          if entry.unreadCount > 0 {
-            Text("\(entry.unreadCount)")
-              .font(.caption)
-              .fontWeight(.bold)
-              .foregroundColor(.white)
-              .padding(.horizontal, 8)
-              .padding(.vertical, 4)
-              .background(Color.red)
-              .clipShape(Capsule())
-          }
+          Text(entry.date, style: .time)
+            .font(.caption2)
+            .foregroundColor(.white.opacity(0.8))
         }
 
+        Spacer()
+
+        // Activity stats
         if family == .systemLarge {
-          // Large widget shows more details
-          VStack(spacing: 16) {
-            // Recent posts
-            HStack {
-              Image(systemName: "doc.text")
-                .foregroundColor(.green)
-              VStack(alignment: .leading) {
-                Text("\(entry.recentPosts)")
-                  .font(.title2)
-                  .fontWeight(.bold)
-                Text("Recent Posts")
-                  .font(.caption)
-                  .foregroundColor(.secondary)
-              }
-              Spacer()
-            }
+          VStack(spacing: 12) {
+            ActivityRow(
+              icon: "doc.text",
+              label: "Recent Posts",
+              value: entry.recentPosts,
+              color: .white
+            )
 
-            // New followers
-            HStack {
-              Image(systemName: "person.badge.plus")
-                .foregroundColor(.blue)
-              VStack(alignment: .leading) {
-                Text("\(entry.newFollowers)")
-                  .font(.title2)
-                  .fontWeight(.bold)
-                Text("New Followers")
-                  .font(.caption)
-                  .foregroundColor(.secondary)
-              }
-              Spacer()
-            }
+            ActivityRow(
+              icon: "person.badge.plus",
+              label: "New Followers",
+              value: entry.newFollowers,
+              color: .white
+            )
 
-            // Activity chart placeholder
-            HStack {
-              ForEach(0..<7, id: \.self) { index in
-                RoundedRectangle(cornerRadius: 2)
-                  .fill(Color.blue.opacity(Double.random(in: 0.3...1.0)))
-                  .frame(height: 40)
-              }
-            }
-            .padding(.top, 8)
+            ActivityRow(
+              icon: "chart.bar",
+              label: "Total Activity",
+              value: entry.totalActivity,
+              color: .white
+            )
           }
         } else {
-          // Medium widget shows compact info
-          HStack(spacing: 20) {
+          // Compact view for small/medium
+          HStack(spacing: 16) {
             VStack {
               Text("\(entry.recentPosts)")
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundColor(.green)
+                .foregroundColor(.white)
               Text("Posts")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(.white.opacity(0.8))
             }
 
             VStack {
               Text("\(entry.newFollowers)")
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundColor(.blue)
+                .foregroundColor(.white)
               Text("Followers")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(.white.opacity(0.8))
             }
 
-            Spacer()
+            if family == .systemMedium {
+              VStack {
+                Text("\(entry.totalActivity)")
+                  .font(.title2)
+                  .fontWeight(.bold)
+                  .foregroundColor(.white)
+                Text("Activity")
+                  .font(.caption)
+                  .foregroundColor(.white.opacity(0.8))
+              }
+            }
           }
         }
 
         Spacer()
 
-        // Footer
+        // Action hint
         HStack {
-          Text("Last updated")
+          Text("Tap to view feed")
             .font(.caption2)
-            .foregroundColor(.tertiary)
-
-          Text(entry.date, style: .relative)
-            .font(.caption2)
-            .foregroundColor(.tertiary)
-
+            .foregroundColor(.white.opacity(0.9))
           Spacer()
-
-          Image(systemName: "arrow.up.right")
+          Image(systemName: "arrow.right")
             .font(.caption2)
-            .foregroundColor(.blue)
+            .foregroundColor(.white.opacity(0.9))
         }
       }
       .padding()
     }
-    .widgetURL(URL(string: "liquidsky://feed"))
+    .widgetURL(URL(string: "horizon://feed/\(entry.feedName)"))
   }
+}
+
+struct ActivityRow: View {
+  let icon: String
+  let label: String
+  let value: Int
+  let color: Color
+
+  var body: some View {
+    HStack {
+      Image(systemName: icon)
+        .font(.caption)
+        .foregroundColor(color)
+        .frame(width: 16)
+
+      Text(label)
+        .font(.caption)
+        .foregroundColor(color.opacity(0.8))
+
+      Spacer()
+
+      Text("\(value)")
+        .font(.caption)
+        .fontWeight(.semibold)
+        .foregroundColor(color)
+    }
+  }
+}
+
+#Preview(as: .systemSmall) {
+  FeedUpdatesWidget()
+} timeline: {
+  FeedUpdatesEntry(
+    date: .now,
+    feedName: "Following",
+    recentPosts: 5,
+    newFollowers: 2,
+    totalActivity: 12
+  )
 }
 
 #Preview(as: .systemMedium) {
   FeedUpdatesWidget()
 } timeline: {
   FeedUpdatesEntry(
-    date: Date(),
+    date: .now,
     feedName: "Following",
     recentPosts: 5,
     newFollowers: 2,
-    unreadCount: 8
+    totalActivity: 12
   )
 }
 
@@ -211,11 +233,10 @@ struct FeedUpdatesWidgetView: View {
   FeedUpdatesWidget()
 } timeline: {
   FeedUpdatesEntry(
-    date: Date(),
+    date: .now,
     feedName: "Following",
     recentPosts: 5,
     newFollowers: 2,
-    unreadCount: 8
+    totalActivity: 12
   )
 }
-

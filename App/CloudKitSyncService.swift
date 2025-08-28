@@ -35,7 +35,7 @@ class CloudKitSyncService {
       DispatchQueue.main.async {
         self?.isSignedInToiCloud = status == .available
         if status != .available {
-          self?.errorMessage = "iCloud not available: \(status?.description ?? "Unknown")"
+          self?.errorMessage = "iCloud not available: \(status.rawValue)"
         }
       }
     }
@@ -47,7 +47,9 @@ class CloudKitSyncService {
       object: nil,
       queue: .main
     ) { [weak self] _ in
-      self?.checkiCloudStatus()
+      Task { @MainActor in
+        self?.checkiCloudStatus()
+      }
     }
   }
 
@@ -69,7 +71,19 @@ class CloudKitSyncService {
     do {
       let record = CKRecord(recordType: "UserPreferences")
       record["userId"] = getCurrentUserId()
-      record["preferences"] = preferences
+
+      // Store preferences as individual key-value pairs that CloudKit can handle
+      for (key, value) in preferences {
+        if let stringValue = value as? String {
+          record[key] = stringValue
+        } else if let intValue = value as? Int {
+          record[key] = intValue
+        } else if let boolValue = value as? Bool {
+          record[key] = boolValue
+        } else if let doubleValue = value as? Double {
+          record[key] = doubleValue
+        }
+      }
       record["lastModified"] = Date()
 
       try await privateDatabase.save(record)
@@ -103,7 +117,15 @@ class CloudKitSyncService {
 
       guard let record = records.first else { return nil }
 
-      return record["preferences"] as? [String: Any]
+      // Convert record back to dictionary, excluding system fields
+      var preferences: [String: Any] = [:]
+      for key in record.allKeys() {
+        if key != "userId" && key != "lastModified" {
+          preferences[key] = record[key]
+        }
+      }
+
+      return preferences
     } catch {
       print("CloudKitSyncService: Failed to fetch user preferences: \(error)")
       return nil
@@ -219,7 +241,6 @@ class CloudKitSyncService {
     errorMessage = nil
   }
 }
-
 // MARK: - CloudKit Record Types
 extension CKRecord.RecordType {
   static let userPreferences = "UserPreferences"

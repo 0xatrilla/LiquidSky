@@ -1,4 +1,3 @@
-import ATProtoKit
 import Foundation
 import UserNotifications
 
@@ -6,9 +5,9 @@ import UserNotifications
 class PushNotificationService: NSObject {
   static let shared = PushNotificationService()
 
-  var isRegistered = false
   var authorizationStatus: UNAuthorizationStatus = .notDetermined
   var deviceToken: String?
+  var isRegistered = false
 
   private override init() {
     super.init()
@@ -16,10 +15,12 @@ class PushNotificationService: NSObject {
     checkAuthorizationStatus()
   }
 
+  // MARK: - Permission Management
+
   func requestPermission() async -> Bool {
     do {
       let granted = try await UNUserNotificationCenter.current().requestAuthorization(
-        options: [.alert, .badge, .sound, .provisional]
+        options: [.alert, .badge, .sound]
       )
 
       await MainActor.run {
@@ -38,21 +39,24 @@ class PushNotificationService: NSObject {
   }
 
   func registerForRemoteNotifications() async {
+    // This will be called from the AppDelegate
     await MainActor.run {
-      UIApplication.shared.registerForRemoteNotifications()
+      // The actual registration happens in AppDelegate
+      print("PushNotificationService: Requesting remote notification registration")
     }
   }
 
   func unregisterForRemoteNotifications() {
-    UIApplication.shared.unregisterForRemoteNotifications()
+    // This will be called from the AppDelegate
     deviceToken = nil
     isRegistered = false
   }
 
   func checkAuthorizationStatus() {
-    UNUserNotificationCenter.current().getNotificationSettings { settings in
-      DispatchQueue.main.async {
-        self.authorizationStatus = settings.authorizationStatus
+    UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
+      let status = settings.authorizationStatus
+      Task { @MainActor in
+        self?.authorizationStatus = status
       }
     }
   }
@@ -62,7 +66,7 @@ class PushNotificationService: NSObject {
     self.deviceToken = tokenString
 
     // Store in UserDefaults for widget access
-    let defaults = UserDefaults(suiteName: "group.com.acxtrilla.LiquidSky")
+    let defaults = UserDefaults(suiteName: "group.com.acxtrilla.Horizon")
     defaults?.set(tokenString, forKey: "push.device.token")
 
     // TODO: Send device token to your Bluesky notification service
@@ -89,8 +93,8 @@ class PushNotificationService: NSObject {
 
   func sendTestNotification() {
     scheduleLocalNotification(
-      title: "LiquidSky Test",
-      body: "This is a test push notification from LiquidSky!",
+      title: "Horizon Test",
+      body: "This is a test push notification from Horizon!",
       timeInterval: 2.0
     )
   }

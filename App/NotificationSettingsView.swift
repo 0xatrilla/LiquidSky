@@ -1,13 +1,17 @@
 import SwiftUI
+import WidgetKit
+import InAppPurchase
 
 struct NotificationSettingsView: View {
   @Environment(\.dismiss) private var dismiss
   @Environment(PushNotificationService.self) private var pushNotificationService
   @Environment(CloudKitSyncService.self) private var cloudKitSyncService
+  @Environment private var purchaseService: InAppPurchaseService
 
   @State private var pushNotificationsEnabled = false
   @State private var iCloudSyncEnabled = false
   @State private var showTestNotification = false
+  @State private var showTippingView = false
 
   var body: some View {
     NavigationView {
@@ -231,6 +235,68 @@ struct NotificationSettingsView: View {
             .font(.caption)
           }
         }
+
+        // Tipping Section
+        Section("Support Horizon") {
+          HStack {
+            Image(systemName: "heart.fill")
+              .foregroundColor(.red)
+
+            VStack(alignment: .leading, spacing: 4) {
+              Text("Send a Tip")
+                .font(.headline)
+              Text("Support continued development")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            Button("Tip Now") {
+              showTippingView = true
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.red)
+          }
+
+          // Quick tip stats
+          if !purchaseService.getPurchaseHistory().isEmpty {
+            VStack(spacing: 8) {
+              HStack {
+                Text("Total Tips Sent")
+                Spacer()
+                Text("\(purchaseService.getPurchaseHistory().count)")
+                  .fontWeight(.semibold)
+              }
+
+              HStack {
+                Text("Total Amount")
+                Spacer()
+                Text(formatCurrency(purchaseService.getTotalTipsAmount()))
+                  .fontWeight(.semibold)
+                  .foregroundColor(.blue)
+              }
+
+              if let lastDate = purchaseService.getLastTipDate() {
+                HStack {
+                  Text("Last Tip")
+                  Spacer()
+                  Text(lastDate, style: .date)
+                    .fontWeight(.semibold)
+                }
+              }
+            }
+            .font(.caption)
+            .padding(.top, 4)
+          }
+
+          Text(
+            "Tips help cover development costs and motivate continued improvements to Horizon."
+          )
+          .font(.caption2)
+          .foregroundColor(.secondary)
+          .padding(.top, 4)
+        }
       }
       .navigationTitle("Notifications & Sync")
       .navigationBarTitleDisplayMode(.inline)
@@ -252,6 +318,10 @@ struct NotificationSettingsView: View {
     } message: {
       Text("A test notification has been sent. Check your notification center!")
     }
+    // .sheet(isPresented: $showTippingView) {
+    //   TippingView()
+    //     .environment(purchaseService)
+    // }
   }
 
   private func requestPushNotificationPermission() async {
@@ -260,11 +330,18 @@ struct NotificationSettingsView: View {
       pushNotificationsEnabled = granted
     }
   }
+
+  private func formatCurrency(_ amount: Double) -> String {
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .currency
+    formatter.locale = Locale.current
+    return formatter.string(from: NSNumber(value: amount)) ?? "$0.00"
+  }
 }
 
-#Preview {
-  NotificationSettingsView()
-    .environment(PushNotificationService.shared)
-    .environment(CloudKitSyncService.shared)
-}
-
+// #Preview {
+//   NotificationSettingsView()
+//     .environment(PushNotificationService.shared)
+//     .environment(CloudKitSyncService.shared)
+//     .environment(InAppPurchaseService.shared)
+// }
