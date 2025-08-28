@@ -28,6 +28,11 @@
 		<string>remote-notification</string>
 		<string>processing</string>
 	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.acxtrilla.horizon.refresh</string>
+		<string>com.acxtrilla.horizon.processing</string>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
 </dict>
