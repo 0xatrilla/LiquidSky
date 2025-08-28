@@ -6,5 +6,6 @@ struct LiquidSkyWidgetsBundle: WidgetBundle {
   var body: some Widget {
     FollowerCountWidget()
     RecentNotificationWidget()
+    FeedUpdatesWidget()
   }
 }

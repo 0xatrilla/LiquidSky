@@ -12,10 +12,10 @@ LiquidSky is a native iOS client for [Bluesky](https://bsky.social), the decentr
 
 ## 📸 Screenshots
 
-<img width="250" height="500" alt="IMG_0883" src="https://github.com/user-attachments/assets/0674d7da-573b-426d-b244-5047f80b2560" />
-<img width="250" height="500" alt="IMG_0884" src="https://github.com/user-attachments/assets/c2ff8ef8-1a2e-4e86-a0c8-314f0f40df9f" />
+<img width="250" height="500" alt="IMG_0883" src="https://github.com/user-attachments/assets/0674d7da-573b-426d-b244-5047f80df2560" />
+<img width="250" height="500" alt="IMG_0884" src="https://github.com/user-attachments/assets/c2ff8ef8-1a2e-4e86-a0c8-314f0f40df2560" />
 <img width="250" height="500" alt="IMG_0885" src="https://github.com/user-attachments/assets/1dde5a4e-7b7c-461f-9635-cac54cae753d" />
-<img width="250" height="500" alt="IMG_0887" src="https://github.com/user-attachments/assets/60464b32-cde8-465a-b0cf-e8dd3f664366" />
+<img width="250" height="500" alt="IMG_0887" src="https://github.com/user-attachments/assets/6044d7da-573b-426d-b244-5047f80df2560" />
 
 
 ### ✨ Core Features
@@ -26,6 +26,9 @@ LiquidSky is a native iOS client for [Bluesky](https://bsky.social), the decentr
 - **🔗 AT Protocol Integration**: Full support for Bluesky's decentralized social features
 - **🔐 Secure Authentication**: Login with app passwords, stored securely in iOS Keychain
 - **🎨 Beautiful Design System**: Custom components with consistent blue theme matching Bluesky brand
+- **🔔 Push Notifications**: Real-time push notification delivery for social interactions
+- **☁️ iCloud Sync**: Seamless data synchronization across all your Apple devices
+- **📱 Rich Widgets**: Beautiful home screen widgets for quick access to your Bluesky data
 
 ## ✅ **Implemented Features**
 
@@ -78,9 +81,27 @@ LiquidSky is a native iOS client for [Bluesky](https://bsky.social), the decentr
 
 ### 🔔 **Notifications**
 - **Real-time Notifications**: Like, follow, repost, and mention alerts
+- **Push Notifications**: Instant delivery of social interactions
 - **Notification Grouping**: Smart grouping of similar notifications
 - **Notification Types**: Different icons and colors for various activities
 - **Quick Actions**: Respond directly from notifications
+- **Background Processing**: Handle notifications even when app is closed
+
+### ☁️ **iCloud Integration**
+- **Cross-Device Sync**: Sync preferences and settings across all devices
+- **User Preferences**: Automatically sync theme, video settings, and display options
+- **Feed Subscriptions**: Keep your custom feed list in sync
+- **Block Lists**: Maintain consistent blocking across devices
+- **Secure Storage**: All data encrypted and stored in your private iCloud
+- **Automatic Sync**: Background synchronization when changes occur
+
+### 📱 **Home Screen Widgets**
+- **Follower Count Widget**: Beautiful display of your current follower count
+- **Recent Notifications**: Show your latest Bluesky activity
+- **Feed Updates**: Monitor activity from your favorite feeds
+- **Multiple Sizes**: Small, medium, and large widget options
+- **Real-time Updates**: Widgets refresh automatically with new data
+- **Deep Linking**: Tap widgets to jump directly into the app
 
 ### 🎨 **Design System**
 - **Custom Components**: Reusable UI components with consistent styling
@@ -103,11 +124,17 @@ LiquidSky is a native iOS client for [Bluesky](https://bsky.social), the decentr
         
  - [x] **Advanced Search**: Enhanced search with filters and suggestions
     
+ - [x] **Push Notifications**: Real-time push notification delivery
+    
+ - [x] **iCloud Sync**: Cross-device data synchronization
+    
+ - [x] **Enhanced Widgets**: Beautiful home screen widgets
+    
  - [ ] **Bookmarks**: Save and organize favorite posts
     
  - [ ] **Offline Support**: Cache content for offline viewing
     
- - [ ] **Push Notifications**: Real-time push notification delivery
+ - [ ] **Advanced Widgets**: Interactive widgets with quick actions
     
 
 ## 🛠️ **Technical Details**
@@ -141,7 +168,33 @@ LiquidSky follows a modular architecture with two main Swift packages:
 - **SwiftData** for local data persistence
 - **Nuke/NukeUI** for image loading and caching
 - **AppRouter** for declarative navigation
+- **Push Notifications** for real-time updates
+- **CloudKit** for iCloud data synchronization
+- **WidgetKit** for home screen widgets
 
+### Push Notification Architecture
+
+- **UserNotifications Framework**: Native iOS push notification handling
+- **Background Processing**: Handle notifications when app is closed
+- **Deep Linking**: Navigate to specific content from notifications
+- **Permission Management**: Graceful handling of notification permissions
+- **Widget Integration**: Update widgets when notifications arrive
+
+### iCloud Sync Architecture
+
+- **CloudKit**: Apple's cloud database service
+- **Private Database**: Secure user data storage
+- **Automatic Sync**: Background synchronization
+- **Conflict Resolution**: Handle data conflicts gracefully
+- **Offline Support**: Queue changes when offline
+
+### Widget Architecture
+
+- **WidgetKit**: Native iOS widget framework
+- **Timeline Provider**: Efficient data updates
+- **App Groups**: Shared data between app and widgets
+- **Deep Linking**: Navigate from widgets to app
+- **Multiple Sizes**: Support for all widget sizes
 
 ## 🤝 **Contributing**
 
@@ -165,3 +218,6 @@ LiquidSky isn't just another Bluesky client - it's a showcase of modern iOS deve
 - **🌐 Open Protocol**: Built on the decentralized AT Protocol
 - **📱 Native Experience**: Leverages the latest iOS capabilities
 - **🏗️ Clean Architecture**: Well-structured, maintainable codebase
+- **🔔 Real-time Updates**: Push notifications for instant social interaction
+- **☁️ Seamless Sync**: Your data follows you across all devices
+- **📱 Rich Widgets**: Beautiful home screen integration
