@@ -1,6 +1,5 @@
 import StoreKit
 import SwiftUI
-import InAppPurchase
 
 struct TippingView: View {
   @Environment(\.dismiss) private var dismiss

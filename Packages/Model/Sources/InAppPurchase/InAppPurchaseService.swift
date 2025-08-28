@@ -2,8 +2,8 @@ import Foundation
 import StoreKit
 
 @Observable
-class InAppPurchaseService {
-  static let shared = InAppPurchaseService()
+final class InAppPurchaseService {
+  nonisolated static let shared = InAppPurchaseService()
 
   // Product identifiers for different tip amounts
   enum TipAmount: String, CaseIterable {

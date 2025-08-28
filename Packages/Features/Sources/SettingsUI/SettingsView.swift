@@ -1,6 +1,5 @@
 import Auth
 import DesignSystem
-import InAppPurchase
 import Models
 import SwiftUI
 import UIKit
@@ -10,7 +9,7 @@ public struct SettingsView: View {
   @Environment(Auth.self) var auth
   @Environment(CurrentUser.self) var currentUser
   @Environment(AccountManager.self) var accountManager
-  @Environment private var purchaseService: InAppPurchaseService
+
   @State private var settingsService = SettingsService.shared
   @State private var colorThemeManager = ColorThemeManager.shared
   @State private var showingResetAlert = false
@@ -99,15 +98,16 @@ public struct SettingsView: View {
         .presentationDragIndicator(.visible)
     }
     .sheet(isPresented: $showingTippingView) {
-      TippingView()
-        .environment(purchaseService)
+      TippingPlaceholderView()
     }
+
   }
 
   // MARK: - Intelligence Section
   private var intelligenceSection: some View {
     VStack(spacing: 16) {
-      SettingsSectionHeader(title: "Intelligence", icon: "sparkles", color: .purple, useMulticolor: true)
+      SettingsSectionHeader(
+        title: "Intelligence", icon: "sparkles", color: .purple, useMulticolor: true)
 
       SettingsToggleRow(
         title: "AI Summaries (Experimental)",
@@ -120,17 +120,20 @@ public struct SettingsView: View {
 
       SettingsToggleRow(
         title: "Enable on Device (Experimental)",
-        subtitle: "Allows Apple Intelligence to run on your device if supported (iOS 26+). May be unstable on some configurations.",
+        subtitle:
+          "Allows Apple Intelligence to run on your device if supported (iOS 26+). May be unstable on some configurations.",
         icon: "iphone",
         iconColor: .purple,
         isOn: $settingsService.aiDeviceExperimentalEnabled
       )
 
-      Text("Requires iOS 26.0 and an Apple Intelligence–supported device. This is for testing and may crash on some setups. Turn off if you see instability.")
-        .font(.caption)
-        .foregroundColor(.secondary)
-        .multilineTextAlignment(.leading)
-        .padding(.horizontal, 16)
+      Text(
+        "Requires iOS 26.0 and an Apple Intelligence–supported device. This is for testing and may crash on some setups. Turn off if you see instability."
+      )
+      .font(.caption)
+      .foregroundColor(.secondary)
+      .multilineTextAlignment(.leading)
+      .padding(.horizontal, 16)
     }
   }
 
@@ -298,40 +301,6 @@ public struct SettingsView: View {
         iconColor: .red
       ) {
         showingTippingView = true
-      }
-
-      // Quick tip stats
-      if !purchaseService.getPurchaseHistory().isEmpty {
-        VStack(spacing: 8) {
-          HStack {
-            Text("Total Tips Sent")
-            Spacer()
-            Text("\(purchaseService.getPurchaseHistory().count)")
-              .fontWeight(.semibold)
-          }
-
-          HStack {
-            Text("Total Amount")
-            Spacer()
-            Text(formatCurrency(purchaseService.getTotalTipsAmount()))
-              .fontWeight(.semibold)
-              .foregroundColor(.blue)
-          }
-
-          if let lastDate = purchaseService.getLastTipDate() {
-            HStack {
-              Text("Last Tip")
-              Spacer()
-              Text(lastDate, style: .date)
-                .fontWeight(.semibold)
-            }
-          }
-        }
-        .font(.caption)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .background(Color.gray.opacity(0.1))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
       }
 
       Text(
@@ -682,11 +651,48 @@ private struct FeatureRow: View {
     }
   }
 
-  private func formatCurrency(_ amount: Double) -> String {
-    let formatter = NumberFormatter()
-    formatter.numberStyle = .currency
-    formatter.locale = Locale.current
-    return formatter.string(from: NSNumber(value: amount)) ?? "$0.00"
+}
+
+// MARK: - Tipping Placeholder View
+private struct TippingPlaceholderView: View {
+  @Environment(\.dismiss) private var dismiss
+
+  var body: some View {
+    NavigationView {
+      VStack(spacing: 24) {
+        Image(systemName: "heart.fill")
+          .font(.system(size: 80))
+          .foregroundColor(.red)
+
+        Text("Support Horizon")
+          .font(.largeTitle)
+          .fontWeight(.bold)
+
+        Text(
+          "Thank you for your interest in supporting Horizon! The tipping feature is currently being set up and will be available soon."
+        )
+        .font(.body)
+        .foregroundColor(.secondary)
+        .multilineTextAlignment(.center)
+        .padding(.horizontal, 32)
+
+        Button("Close") {
+          dismiss()
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(.red)
+      }
+      .padding()
+      .navigationTitle("Support")
+      .navigationBarTitleDisplayMode(.inline)
+      .toolbar {
+        ToolbarItem(placement: .navigationBarTrailing) {
+          Button("Done") {
+            dismiss()
+          }
+        }
+      }
+    }
   }
 }
 
