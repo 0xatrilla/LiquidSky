@@ -161,7 +161,7 @@ public struct NotificationsListView: View {
         return
       }
       #if DEBUG
-      print("Failed to fetch notifications: \(error)")
+        print("Failed to fetch notifications: \(error)")
       #endif
       self.error = error
     }
@@ -244,6 +244,12 @@ public struct NotificationRow: View {
           actionText: "unverified their account"
         )
       case .unknown:
+        SingleNotificationRow(
+          notification: group.notifications[0],
+          postItem: group.postItem,
+          actionText: "interacted with your post"
+        )
+      @unknown default:
         SingleNotificationRow(
           notification: group.notifications[0],
           postItem: group.postItem,
