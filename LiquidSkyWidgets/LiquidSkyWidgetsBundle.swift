@@ -2,17 +2,17 @@
 //  LiquidSkyWidgetsBundle.swift
 //  LiquidSkyWidgets
 //
-//  Created by Callum Matthews on 28/08/2025.
+//  Widget bundle for Horizon app
 //
 
-import WidgetKit
 import SwiftUI
+import WidgetKit
 
 @main
 struct LiquidSkyWidgetsBundle: WidgetBundle {
-    var body: some Widget {
-        LiquidSkyWidgets()
-        LiquidSkyWidgetsControl()
-        LiquidSkyWidgetsLiveActivity()
-    }
+  var body: some Widget {
+    FollowerCountWidget()
+    RecentNotificationWidget()
+    FeedUpdatesWidget()
+  }
 }
