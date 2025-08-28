@@ -27,20 +27,7 @@
 		9FD63DE22CEF20F500243D9A /* AuthUI in Frameworks */ = {isa = PBXBuildFile; productRef = 9FD63DE12CEF20F500243D9A /* AuthUI */; };
 		DB722B902E608A4300644142 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB722B8F2E608A4300644142 /* StoreKit.framework */; };
 		DB722B922E608AB900644142 /* Configuration.storekit in Resources */ = {isa = PBXBuildFile; fileRef = DB722B912E608AB900644142 /* Configuration.storekit */; };
-		DB722DB22E60FADA00644142 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB21B0F42E53F69B00B27D22 /* WidgetKit.framework */; };
-		DB722DB32E60FADA00644142 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB21B0F62E53F69B00B27D22 /* SwiftUI.framework */; };
-		DB722DC22E60FADB00644142 /* LiquidSkyWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = DB722DB12E60FADA00644142 /* LiquidSkyWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		DB722DC02E60FADB00644142 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9F21421B2CE9DAA1004167D7 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = DB722DB02E60FADA00644142;
-			remoteInfo = LiquidSkyWidgetsExtension;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		DB21B1072E53F69F00B27D22 /* Embed Foundation Extensions */ = {
@@ -49,7 +36,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				DB722DC22E60FADB00644142 /* LiquidSkyWidgetsExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -65,19 +51,8 @@
 		DB21B0F62E53F69B00B27D22 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		DB722B8F2E608A4300644142 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		DB722B912E608AB900644142 /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Configuration.storekit; sourceTree = "<group>"; };
-		DB722DB12E60FADA00644142 /* LiquidSkyWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LiquidSkyWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E9FE37002DF0661A00EB0418 /* FeaturesTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = FeaturesTests.xctestplan; sourceTree = "<group>"; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		DB722DC32E60FADB00644142 /* Exceptions for "LiquidSkyWidgets" folder in "LiquidSkyWidgetsExtension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = DB722DB02E60FADA00644142 /* LiquidSkyWidgetsExtension */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		9F2142252CE9DAA1004167D7 /* App */ = {
@@ -92,9 +67,6 @@
 		};
 		DB722DB42E60FADA00644142 /* LiquidSkyWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				DB722DC32E60FADB00644142 /* Exceptions for "LiquidSkyWidgets" folder in "LiquidSkyWidgetsExtension" target */,
-			);
 			path = LiquidSkyWidgets;
 			sourceTree = "<group>";
 		};
@@ -127,15 +99,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		DB722DAE2E60FADA00644142 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				DB722DB32E60FADA00644142 /* SwiftUI.framework in Frameworks */,
-				DB722DB22E60FADA00644142 /* WidgetKit.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -159,7 +122,6 @@
 			isa = PBXGroup;
 			children = (
 				9F2142232CE9DAA1004167D7 /* LiquidSky.app */,
-				DB722DB12E60FADA00644142 /* LiquidSkyWidgetsExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -189,7 +151,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				DB722DC12E60FADB00644142 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				9F2142252CE9DAA1004167D7 /* App */,
@@ -219,28 +180,6 @@
 			productReference = 9F2142232CE9DAA1004167D7 /* LiquidSky.app */;
 			productType = "com.apple.product-type.application";
 		};
-		DB722DB02E60FADA00644142 /* LiquidSkyWidgetsExtension */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = DB722DC42E60FADB00644142 /* Build configuration list for PBXNativeTarget "LiquidSkyWidgetsExtension" */;
-			buildPhases = (
-				DB722DAD2E60FADA00644142 /* Sources */,
-				DB722DAE2E60FADA00644142 /* Frameworks */,
-				DB722DAF2E60FADA00644142 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				DB722DB42E60FADA00644142 /* LiquidSkyWidgets */,
-			);
-			name = LiquidSkyWidgetsExtension;
-			packageProductDependencies = (
-			);
-			productName = LiquidSkyWidgetsExtension;
-			productReference = DB722DB12E60FADA00644142 /* LiquidSkyWidgetsExtension.appex */;
-			productType = "com.apple.product-type.app-extension";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -254,9 +193,6 @@
 					9F2142222CE9DAA1004167D7 = {
 						CreatedOnToolsVersion = 16.1;
 					};
-					DB722DB02E60FADA00644142 = {
-						CreatedOnToolsVersion = 26.0;
-					};
 				};
 			};
 			buildConfigurationList = 9F21421E2CE9DAA1004167D7 /* Build configuration list for PBXProject "Horizon" */;
@@ -269,6 +205,8 @@
 			mainGroup = 9F21421A2CE9DAA1004167D7;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				DB3EF7FE2E611961000A1DFA /* XCLocalSwiftPackageReference "Packages/Features" */,
+				DB3EF8092E61197D000A1DFA /* XCLocalSwiftPackageReference "Packages/Model" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9F2142242CE9DAA1004167D7 /* Products */;
@@ -276,7 +214,6 @@
 			projectRoot = "";
 			targets = (
 				9F2142222CE9DAA1004167D7 /* LiquidSky */,
-				DB722DB02E60FADA00644142 /* LiquidSkyWidgetsExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -290,13 +227,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		DB722DAF2E60FADA00644142 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -307,22 +237,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		DB722DAD2E60FADA00644142 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		DB722DC12E60FADB00644142 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = DB722DB02E60FADA00644142 /* LiquidSkyWidgetsExtension */;
-			targetProxy = DB722DC02E60FADB00644142 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		9F2142462CE9DAA3004167D7 /* Debug */ = {
@@ -559,71 +474,6 @@
 			};
 			name = Release;
 		};
-		DB722DC52E60FADB00644142 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = LAXTJRK98P;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = LiquidSkyWidgets/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = LiquidSkyWidgets;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.acxtrilla.horizon.LiquidSkyWidgets;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		DB722DC62E60FADB00644142 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = LAXTJRK98P;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = LiquidSkyWidgets/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = LiquidSkyWidgets;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.acxtrilla.horizon.LiquidSkyWidgets;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -645,88 +495,108 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DB722DC42E60FADB00644142 /* Build configuration list for PBXNativeTarget "LiquidSkyWidgetsExtension" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				DB722DC52E60FADB00644142 /* Debug */,
-				DB722DC62E60FADB00644142 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		DB3EF7FE2E611961000A1DFA /* XCLocalSwiftPackageReference "Packages/Features" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Features;
+		};
+		DB3EF8092E61197D000A1DFA /* XCLocalSwiftPackageReference "Packages/Model" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Model;
+		};
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		9F1552E52CEF35B200DD9F6E /* Auth */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DB3EF8092E61197D000A1DFA /* XCLocalSwiftPackageReference "Packages/Model" */;
 			productName = Auth;
 		};
 		9F1552E72CEF35B200DD9F6E /* Models */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DB3EF8092E61197D000A1DFA /* XCLocalSwiftPackageReference "Packages/Model" */;
 			productName = Models;
 		};
 		9F1552EC2CEF35C000DD9F6E /* AuthUI */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DB3EF7FE2E611961000A1DFA /* XCLocalSwiftPackageReference "Packages/Features" */;
 			productName = AuthUI;
 		};
 		9F1552EE2CEF35C000DD9F6E /* DesignSystem */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DB3EF7FE2E611961000A1DFA /* XCLocalSwiftPackageReference "Packages/Features" */;
 			productName = DesignSystem;
 		};
 		9F1552F02CEF35C000DD9F6E /* FeedUI */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DB3EF7FE2E611961000A1DFA /* XCLocalSwiftPackageReference "Packages/Features" */;
 			productName = FeedUI;
 		};
 		9F1552F22CEF35C000DD9F6E /* PostUI */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DB3EF7FE2E611961000A1DFA /* XCLocalSwiftPackageReference "Packages/Features" */;
 			productName = PostUI;
 		};
 		9F21F9B62CFDC288003B9250 /* MediaUI */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DB3EF7FE2E611961000A1DFA /* XCLocalSwiftPackageReference "Packages/Features" */;
 			productName = MediaUI;
 		};
 		9F21FACA2D00411D003B9250 /* ProfileUI */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DB3EF7FE2E611961000A1DFA /* XCLocalSwiftPackageReference "Packages/Features" */;
 			productName = ProfileUI;
 		};
 		9F5892962CEC703B00798943 /* DesignSystem */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DB3EF7FE2E611961000A1DFA /* XCLocalSwiftPackageReference "Packages/Features" */;
 			productName = DesignSystem;
 		};
 		9F58939C2CEDF04200798943 /* Auth */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DB3EF8092E61197D000A1DFA /* XCLocalSwiftPackageReference "Packages/Model" */;
 			productName = Auth;
 		};
 		9F58939E2CEDF04200798943 /* Models */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DB3EF8092E61197D000A1DFA /* XCLocalSwiftPackageReference "Packages/Model" */;
 			productName = Models;
 		};
 		9FA3256A2E05439D007BAC14 /* Client */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DB3EF8092E61197D000A1DFA /* XCLocalSwiftPackageReference "Packages/Model" */;
 			productName = Client;
 		};
 		9FA557072CF61EE4008A62B4 /* NotificationsUI */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DB3EF7FE2E611961000A1DFA /* XCLocalSwiftPackageReference "Packages/Features" */;
 			productName = NotificationsUI;
 		};
 		9FAEE3B92CF09BB400F86CDC /* SettingsUI */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DB3EF7FE2E611961000A1DFA /* XCLocalSwiftPackageReference "Packages/Features" */;
 			productName = SettingsUI;
 		};
 		9FB136002DEEB30A003D7ABE /* ComposerUI */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DB3EF7FE2E611961000A1DFA /* XCLocalSwiftPackageReference "Packages/Features" */;
 			productName = ComposerUI;
 		};
 		9FD63DDD2CEF1F5B00243D9A /* FeedUI */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DB3EF7FE2E611961000A1DFA /* XCLocalSwiftPackageReference "Packages/Features" */;
 			productName = FeedUI;
 		};
 		9FD63DDF2CEF1F5B00243D9A /* PostUI */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DB3EF7FE2E611961000A1DFA /* XCLocalSwiftPackageReference "Packages/Features" */;
 			productName = PostUI;
 		};
 		9FD63DE12CEF20F500243D9A /* AuthUI */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DB3EF7FE2E611961000A1DFA /* XCLocalSwiftPackageReference "Packages/Features" */;
 			productName = AuthUI;
 		};
 /* End XCSwiftPackageProductDependency section */

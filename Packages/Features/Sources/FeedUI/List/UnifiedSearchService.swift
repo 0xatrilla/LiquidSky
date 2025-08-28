@@ -110,13 +110,13 @@ public class UnifiedSearchService: ObservableObject {
           likeCount: post.likeCount ?? 0,
           likeURI: post.viewer?.likeURI,
           repostURI: post.viewer?.repostURI,
-          embed: post.embed,
+          // embed: post.embed,
           replyRef: post.record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self)?.reply
         )
       }
     } catch {
       #if DEBUG
-      print("Error searching posts: \(error)")
+        print("Error searching posts: \(error)")
       #endif
       return []
     }
@@ -207,7 +207,7 @@ public class UnifiedSearchService: ObservableObject {
 
     } catch {
       #if DEBUG
-      print("Error searching users: \(error)")
+        print("Error searching users: \(error)")
       #endif
       return []
     }
@@ -231,7 +231,7 @@ public class UnifiedSearchService: ObservableObject {
       }
     } catch {
       #if DEBUG
-      print("Error searching feeds: \(error)")
+        print("Error searching feeds: \(error)")
       #endif
       return []
     }

@@ -1,7 +1,7 @@
-import SwiftUI
-import Models
 import Client
 import DesignSystem
+import Models
+import SwiftUI
 
 public struct FeedDetailView: View {
   let feed: FeedItem
@@ -10,17 +10,17 @@ public struct FeedDetailView: View {
   @State private var isLoading = false
   @State private var error: Error?
   @State private var cursor: String?
-  
+
   public init(feed: FeedItem) {
     self.feed = feed
   }
-  
+
   public var body: some View {
     NavigationView {
       VStack(spacing: 0) {
         // Feed Header
         feedHeader
-        
+
         // Content
         if isLoading && posts.isEmpty {
           loadingView
@@ -44,7 +44,7 @@ public struct FeedDetailView: View {
       loadFeedPosts()
     }
   }
-  
+
   // MARK: - Feed Header
   private var feedHeader: some View {
     VStack(spacing: 16) {
@@ -69,20 +69,20 @@ public struct FeedDetailView: View {
               .shadow(color: .shadowPrimary.opacity(0.7), radius: 4)
           }
         }
-        
+
         VStack(alignment: .leading, spacing: 8) {
           Text(feed.displayName)
             .font(.title2)
             .fontWeight(.bold)
             .foregroundStyle(.primary)
-          
+
           if let description = feed.description {
             Text(description)
               .font(.body)
               .foregroundStyle(.secondary)
               .lineLimit(3)
           }
-          
+
           HStack(spacing: 16) {
             VStack {
               Text("\(feed.likesCount)")
@@ -92,7 +92,7 @@ public struct FeedDetailView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             }
-            
+
             VStack {
               Text("@\(feed.creatorHandle)")
                 .font(.caption)
@@ -100,17 +100,17 @@ public struct FeedDetailView: View {
             }
           }
         }
-        
+
         Spacer()
       }
       .padding(.horizontal, 20)
-      
+
       Divider()
         .padding(.horizontal, 20)
     }
     .padding(.vertical, 20)
   }
-  
+
   // MARK: - Posts List
   private var postsList: some View {
     ScrollView {
@@ -119,7 +119,7 @@ public struct FeedDetailView: View {
           PostRowView(post: post)
             .padding(.horizontal, 20)
         }
-        
+
         if !posts.isEmpty && cursor != nil {
           loadMoreButton
         }
@@ -127,7 +127,7 @@ public struct FeedDetailView: View {
       .padding(.vertical, 20)
     }
   }
-  
+
   // MARK: - Loading View
   private var loadingView: some View {
     VStack(spacing: 16) {
@@ -139,23 +139,23 @@ public struct FeedDetailView: View {
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
   }
-  
+
   // MARK: - Error View
   private func errorView(_ error: Error) -> some View {
     VStack(spacing: 16) {
       Image(systemName: "exclamationmark.triangle")
         .font(.system(size: 48))
         .foregroundStyle(.orange)
-      
+
       Text("Failed to load feed")
         .font(.title2)
         .fontWeight(.semibold)
-      
+
       Text(error.localizedDescription)
         .font(.body)
         .foregroundStyle(.secondary)
         .multilineTextAlignment(.center)
-      
+
       Button("Try Again") {
         loadFeedPosts()
       }
@@ -164,7 +164,7 @@ public struct FeedDetailView: View {
     .padding()
     .frame(maxWidth: .infinity, maxHeight: .infinity)
   }
-  
+
   // MARK: - Load More Button
   private var loadMoreButton: some View {
     Button(action: loadMorePosts) {
@@ -182,20 +182,20 @@ public struct FeedDetailView: View {
     .disabled(isLoading)
     .padding(.horizontal, 20)
   }
-  
+
   // MARK: - Data Loading
   private func loadFeedPosts() {
     guard !isLoading else { return }
-    
+
     isLoading = true
     error = nil
-    
+
     Task {
       do {
         let feedData = try await client.protoClient.getFeed(by: feed.uri, cursor: nil)
         // For now, just create placeholder posts since we don't have the PostListView.processFeed method
         let placeholderPosts = createPlaceholderPosts(from: feedData.feed)
-        
+
         await MainActor.run {
           self.posts = placeholderPosts
           self.cursor = feedData.cursor
@@ -209,17 +209,17 @@ public struct FeedDetailView: View {
       }
     }
   }
-  
+
   private func loadMorePosts() {
     guard let cursor = cursor, !isLoading else { return }
-    
+
     isLoading = true
-    
+
     Task {
       do {
         let feedData = try await client.protoClient.getFeed(by: feed.uri, cursor: cursor)
         let placeholderPosts = createPlaceholderPosts(from: feedData.feed)
-        
+
         await MainActor.run {
           self.posts.append(contentsOf: placeholderPosts)
           self.cursor = feedData.cursor
@@ -233,7 +233,7 @@ public struct FeedDetailView: View {
       }
     }
   }
-  
+
   // MARK: - Helper Methods
   private func createPlaceholderPosts(from feed: [Any]) -> [PostItem] {
     // For now, create a simple placeholder post since we don't have the complex feed structure
@@ -262,10 +262,10 @@ public struct FeedDetailView: View {
       likeCount: 0,
       likeURI: nil,
       repostURI: nil,
-      embed: nil,
+      // embed: nil,
       replyRef: nil
     )
-    
+
     return [placeholderPost]
   }
 }
@@ -273,7 +273,7 @@ public struct FeedDetailView: View {
 // MARK: - Post Row View
 private struct PostRowView: View {
   let post: PostItem
-  
+
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {
       // Author info
@@ -293,29 +293,29 @@ private struct PostRowView: View {
               .frame(width: 32, height: 32)
           }
         }
-        
+
         VStack(alignment: .leading, spacing: 2) {
           Text(post.author.displayName ?? post.author.handle)
             .font(.subheadline)
             .fontWeight(.semibold)
-          
+
           Text("@\(post.author.handle)")
             .font(.caption)
             .foregroundStyle(.secondary)
         }
-        
+
         Spacer()
-        
+
         Text(post.indexAtFormatted)
           .font(.caption)
           .foregroundStyle(.tertiary)
       }
-      
+
       // Post content
       Text(post.content)
         .font(.body)
         .lineLimit(6)
-      
+
       // Post stats
       HStack(spacing: 16) {
         HStack(spacing: 4) {
@@ -325,7 +325,7 @@ private struct PostRowView: View {
             .font(.caption)
         }
         .foregroundStyle(.secondary)
-        
+
         HStack(spacing: 4) {
           Image(systemName: "arrow.2.squarepath")
             .font(.caption)
@@ -333,7 +333,7 @@ private struct PostRowView: View {
             .font(.caption)
         }
         .foregroundStyle(.secondary)
-        
+
         HStack(spacing: 4) {
           Image(systemName: "bubble.left")
             .font(.caption)

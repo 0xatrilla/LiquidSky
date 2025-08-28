@@ -1,7 +1,7 @@
 import ATProtoKit
 import Foundation
 
-public struct Profile: Codable, Hashable, Sendable, Identifiable {
+public struct Profile: Codable, Hashable, Equatable, Sendable, Identifiable {
   public var id: String { did }
   public let did: String
   public let handle: String
@@ -45,6 +45,28 @@ public struct Profile: Codable, Hashable, Sendable, Identifiable {
     self.isBlocked = isBlocked
     self.isBlocking = isBlocking
     self.isMuted = isMuted
+  }
+
+  // Convenience initializer for basic profile creation
+  public init(
+    did: String,
+    handle: String,
+    displayName: String?,
+    avatarImageURL: URL?
+  ) {
+    self.did = did
+    self.handle = handle
+    self.displayName = displayName
+    self.avatarImageURL = avatarImageURL
+    self.description = nil
+    self.followersCount = 0
+    self.followingCount = 0
+    self.postsCount = 0
+    self.isFollowing = false
+    self.isFollowedBy = false
+    self.isBlocked = false
+    self.isBlocking = false
+    self.isMuted = false
   }
 }
 

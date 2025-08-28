@@ -191,67 +191,67 @@ public struct PostRowView: View {
 
 }
 
-#Preview {
-  NavigationStack {
-    List {
-      PostRowView(
-        post: .init(
-          uri: "",
-          cid: "",
-          indexedAt: Date(),
-          author: .init(
-            did: "",
-            handle: "dimillian",
-            displayName: "Thomas Ricouard",
-            avatarImageURL: nil),
-          content: "Just some content",
-          replyCount: 10,
-          repostCount: 150,
-          likeCount: 38,
-          likeURI: nil,
-          repostURI: nil,
-          embed: nil,
-          replyRef: nil))
-      PostRowView(
-        post: .init(
-          uri: "",
-          cid: "",
-          indexedAt: Date(),
-          author: .init(
-            did: "",
-            handle: "dimillian",
-            displayName: "Thomas Ricouard",
-            avatarImageURL: nil),
-          content: "Just some content",
-          replyCount: 10,
-          repostCount: 150,
-          likeCount: 38,
-          likeURI: nil,
-          repostURI: nil,
-          embed: nil,
-          replyRef: nil))
-      PostRowEmbedQuoteView(
-        post: .init(
-          uri: "",
-          cid: "",
-          indexedAt: Date(),
-          author: .init(
-            did: "",
-            handle: "dimillian",
-            displayName: "Thomas Ricouard",
-            avatarImageURL: nil),
-          content: "Just some content",
-          replyCount: 10,
-          repostCount: 150,
-          likeCount: 38,
-          likeURI: "",
-          repostURI: "",
-          embed: nil,
-          replyRef: nil))
-    }
-    .listStyle(.plain)
-    .environment(AppRouter(initialTab: .feed))
-    .environment(PostContextProvider())
-    .environment(PostFilterService.shared)
-  }
-}
+// #Preview {
+//   NavigationStack {
+//     List {
+//       PostRowView(
+//         post: .init(
+//           uri: "",
+//           cid: "",
+//           indexedAt: Date(),
+//           author: .init(
+//             did: "",
+//             handle: "dimillian",
+//             displayName: "Thomas Ricouard",
+//             avatarImageURL: nil),
+//           content: "Just some content",
+//           replyCount: 10,
+//           repostCount: 150,
+//           likeCount: 38,
+//           likeURI: nil,
+//           repostURI: nil,
+//           // embed: nil,
+//           replyRef: nil))
+//       PostRowView(
+//         post: .init(
+//           uri: "",
+//           cid: "",
+//           indexedAt: Date(),
+//           author: .init(
+//             did: "",
+//             handle: "dimillian",
+//             displayName: "Thomas Ricouard",
+//             avatarImageURL: nil),
+//           content: "Just some content",
+//           replyCount: 10,
+//           repostCount: 150,
+//           likeCount: 38,
+//           likeURI: nil,
+//           repostURI: nil,
+//           // embed: nil,
+//           replyRef: nil))
+//       PostRowEmbedQuoteView(
+//         post: .init(
+//           uri: "",
+//           cid: "",
+//           indexedAt: Date(),
+//           author: .init(
+//             did: "",
+//             handle: "dimillian",
+//             displayName: "Thomas Ricouard",
+//             avatarImageURL: nil),
+//           content: "Just some content",
+//           replyCount: 10,
+//           repostCount: 150,
+//           likeCount: 38,
+//           likeURI: "",
+//           repostURI: "",
+//           // embed: nil,
+//           replyRef: nil))
+//     }
+//     .listStyle(.plain)
+//     .environment(AppRouter(initialTab: .feed))
+//     .environment(PostContextProvider())
+//     .environment(PostFilterService.shared)
+//   }
+// }
