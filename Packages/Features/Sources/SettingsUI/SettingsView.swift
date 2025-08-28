@@ -1,6 +1,7 @@
 import Auth
 import DesignSystem
 import Models
+import StoreKit
 import SwiftUI
 import UIKit
 import User
@@ -656,11 +657,12 @@ private struct FeatureRow: View {
 // MARK: - Simple Tipping View
 private struct SimpleTippingView: View {
   @Environment(\.dismiss) private var dismiss
-  @State private var selectedTipAmount = 0.99
-  @State private var isProcessing = false
+  @State private var purchaseService = InAppPurchaseService.shared
+  @State private var selectedTipAmount: InAppPurchaseService.TipAmount?
+  @State private var isPurchasing = false
   @State private var showThankYou = false
-
-  private let tipAmounts = [0.99, 2.99, 4.99, 9.99]
+  @State private var showError = false
+  @State private var errorMessage = ""
 
   var body: some View {
     NavigationView {
@@ -687,35 +689,50 @@ private struct SimpleTippingView: View {
           .padding(.top)
 
           // Tip Options
-          LazyVGrid(
-            columns: [
-              GridItem(.flexible()),
-              GridItem(.flexible()),
-            ], spacing: 16
-          ) {
-            ForEach(tipAmounts, id: \.self) { amount in
-              TipOptionCard(
-                amount: amount,
-                isSelected: selectedTipAmount == amount,
-                onTap: { selectedTipAmount = amount }
-              )
+          if purchaseService.isLoading {
+            VStack(spacing: 16) {
+              ProgressView("Loading products...")
+                .frame(maxWidth: .infinity)
             }
+            .padding(.horizontal)
+          } else if purchaseService.products.isEmpty {
+            VStack(spacing: 16) {
+              Text("No products available")
+                .foregroundColor(.secondary)
+            }
+            .padding(.horizontal)
+          } else {
+            LazyVGrid(
+              columns: [
+                GridItem(.flexible()),
+                GridItem(.flexible()),
+              ], spacing: 16
+            ) {
+              ForEach(purchaseService.products, id: \.id) { product in
+                TipOptionCard(
+                  amount: Double(truncating: product.price as NSDecimalNumber),
+                  isSelected: selectedTipAmount?.rawValue == product.id,
+                  onTap: {
+                    selectedTipAmount = InAppPurchaseService.TipAmount(rawValue: product.id)
+                  }
+                )
+              }
+            }
+            .padding(.horizontal)
           }
-          .padding(.horizontal)
 
           // Purchase Button
-          if selectedTipAmount > 0 {
+          if let selectedTip = selectedTipAmount,
+            let product = purchaseService.products.first(where: { $0.id == selectedTip.rawValue })
+          {
             VStack(spacing: 16) {
               Button(action: {
-                isProcessing = true
-                // Simulate purchase process
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                  isProcessing = false
-                  showThankYou = true
+                Task {
+                  await performPurchase(product: product)
                 }
               }) {
                 HStack {
-                  if isProcessing {
+                  if isPurchasing {
                     ProgressView()
                       .scaleEffect(0.8)
                       .tint(.white)
@@ -724,7 +741,7 @@ private struct SimpleTippingView: View {
                       .font(.headline)
                   }
 
-                  Text("Send $\(String(format: "%.2f", selectedTipAmount)) Tip")
+                  Text("Send \(product.displayName)")
                     .font(.headline)
                     .fontWeight(.semibold)
                 }
@@ -740,9 +757,9 @@ private struct SimpleTippingView: View {
                 )
                 .clipShape(RoundedRectangle(cornerRadius: 16))
               }
-              .disabled(isProcessing)
+              .disabled(isPurchasing || purchaseService.purchaseInProgress)
 
-              Text("You'll be charged $\(String(format: "%.2f", selectedTipAmount))")
+              Text("You'll be charged \(product.displayName)")
                 .font(.caption)
                 .foregroundColor(.secondary)
             }
@@ -765,6 +782,30 @@ private struct SimpleTippingView: View {
     .sheet(isPresented: $showThankYou) {
       ThankYouView()
     }
+    .alert("Purchase Error", isPresented: $showError) {
+      Button("OK") {}
+    } message: {
+      Text(errorMessage)
+    }
+    .task {
+      // Load products when view appears
+      await purchaseService.loadProducts()
+    }
+  }
+
+  private func performPurchase(product: Product) async {
+    isPurchasing = true
+
+    let success = await purchaseService.purchase(product)
+
+    if success {
+      showThankYou = true
+    } else {
+      errorMessage = purchaseService.errorMessage ?? "Purchase failed. Please try again."
+      showError = true
+    }
+
+    isPurchasing = false
   }
 }
 
