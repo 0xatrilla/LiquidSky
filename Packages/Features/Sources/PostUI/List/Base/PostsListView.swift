@@ -3,7 +3,6 @@ import AppRouter
 import Client
 import DesignSystem
 import Destinations
-import FeedUI
 import Models
 import SwiftUI
 import User
@@ -614,56 +613,6 @@ private struct UserSearchResultRow: View {
             .font(.caption)
             .foregroundColor(.secondary)
             .lineLimit(2)
-        }
-      }
-
-      Spacer()
-    }
-    .padding(.vertical, 8)
-    .padding(.horizontal, 12)
-    .background(Color.gray.opacity(0.05))
-    .cornerRadius(12)
-    .overlay(
-      RoundedRectangle(cornerRadius: 12)
-        .stroke(Color.gray.opacity(0.2), lineWidth: 0.5)
-    )
-  }
-}
-
-private struct FeedSearchResultRow: View {
-  let feed: FeedSearchResult
-
-  var body: some View {
-    HStack(spacing: 12) {
-      // Feed icon
-      Image(systemName: "list.bullet")
-        .font(.title2)
-        .foregroundColor(.blue)
-        .frame(width: 40, height: 40)
-        .background(Color.blue.opacity(0.1))
-        .clipShape(Circle())
-
-      // Feed info
-      VStack(alignment: .leading, spacing: 2) {
-        Text(feed.displayName)
-          .font(.body)
-          .fontWeight(.medium)
-
-        Text("by @\(feed.creatorHandle)")
-          .font(.caption)
-          .foregroundColor(.secondary)
-
-        if let description = feed.description, !description.isEmpty {
-          Text(description)
-            .font(.caption)
-            .foregroundColor(.secondary)
-            .lineLimit(2)
-        }
-
-        HStack(spacing: 8) {
-          Label("\(feed.likesCount)", systemImage: "heart.fill")
-            .font(.caption)
-            .foregroundColor(.secondary)
         }
       }
 

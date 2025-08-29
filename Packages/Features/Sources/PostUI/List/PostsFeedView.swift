@@ -3,7 +3,6 @@ import AppRouter
 import Client
 import DesignSystem
 import Destinations
-import FeedUI
 import Models
 import SwiftData
 import SwiftUI
@@ -13,9 +12,6 @@ public struct PostsFeedView: View {
   @Environment(BSkyClient.self) var client
   @Environment(\.modelContext) var modelContext
   @Environment(AppRouter.self) var router
-  @State private var isGeneratingSummary = false
-  @State private var showingSummary = false
-  @State private var currentSummary: String?
 
   private let feedItem: FeedItem
 
@@ -29,33 +25,6 @@ public struct PostsFeedView: View {
       .navigationBarTitleDisplayMode(.large)
       .toolbar {
         ToolbarItemGroup(placement: .topBarTrailing) {
-          // Summarize button
-          Button(action: {
-            Task {
-              await generateSummary()
-            }
-          }) {
-            if isGeneratingSummary {
-              HStack(spacing: 6) {
-                ProgressView()
-                  .scaleEffect(0.7)
-                Text("Analyzing...")
-                  .font(.caption2)
-                  .fontWeight(.medium)
-              }
-              .foregroundStyle(.secondary)
-              .padding(.horizontal, 8)
-              .padding(.vertical, 4)
-              .background(.ultraThinMaterial)
-              .clipShape(Capsule())
-            } else {
-              Image(systemName: "sparkles")
-                .font(.title2)
-                .symbolRenderingMode(.multicolor)
-            }
-          }
-          .disabled(isGeneratingSummary)
-
           // Compose button
           Button(action: {
             router.presentedSheet = .composer(mode: .newPost)
@@ -68,18 +37,6 @@ public struct PostsFeedView: View {
       }
       .onAppear {
         updateRecentlyViewed()
-      }
-      .sheet(isPresented: $showingSummary) {
-        if let summary = currentSummary {
-          FeedSummaryView(
-            summary: summary,
-            feedName: feedItem.displayName,
-            postCount: getCurrentPostCount(),
-            onDismiss: {
-              showingSummary = false
-            }
-          )
-        }
       }
   }
 
@@ -125,36 +82,6 @@ public struct PostsFeedView: View {
     }
   }
 
-  private func generateSummary() async {
-    isGeneratingSummary = true
-    defer { isGeneratingSummary = false }
-
-    // Get current posts from the PostListView datasource
-    do {
-      let state = try await loadPosts(with: .uninitialized)
-      if case .loaded(let posts, _) = state {
-        let summary = await FeedSummaryService.shared.summarizeFeedPosts(
-          posts, feedName: feedItem.displayName)
-        await MainActor.run {
-          currentSummary = summary
-          showingSummary = true
-        }
-      }
-    } catch {
-      #if DEBUG
-        print("Failed to generate summary: \(error)")
-      #endif
-      await MainActor.run {
-        currentSummary = "Unable to generate summary at this time. Please try again later."
-        showingSummary = true
-      }
-    }
-  }
-
-  private func getCurrentPostCount() -> Int {
-    // This is a simple fallback - in a real implementation you might want to track this
-    return 0
-  }
 }
 
 // MARK: - Datasource

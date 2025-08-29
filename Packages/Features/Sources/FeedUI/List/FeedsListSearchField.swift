@@ -1,6 +1,5 @@
 import Client
 import DesignSystem
-import FeedUI
 import Models
 import SwiftUI
 
