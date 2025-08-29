@@ -8,6 +8,7 @@ import FeedUI
 import MediaUI
 import Models
 import NotificationsUI
+import PostUI
 import ProfileUI
 import SettingsUI
 import SwiftUI
@@ -36,12 +37,7 @@ private struct iPhoneLayoutView: View {
   @Environment(BSkyClient.self) var client
 
   public var body: some View {
-    TabView(
-      selection: Binding(
-        get: { router.selectedTab },
-        set: { router.selectedTab = $0 }
-      )
-    ) {
+    TabView(selection: $selectedTab) {
       // Feed
       Tab(value: AppTab.feed) {
         NavigationStack(
@@ -50,14 +46,32 @@ private struct iPhoneLayoutView: View {
             set: { router[.feed] = $0 }
           )
         ) {
+          PostsTimelineView()
+            .navigationTitle("Home")
+            .navigationBarTitleDisplayMode(.large)
+            .withAppDestinations()
+        }
+
+      } label: {
+        Label("Feed", systemImage: "house")
+      }
+
+      // Discover
+      Tab(value: AppTab.discover) {
+        NavigationStack(
+          path: Binding(
+            get: { router[.discover] },
+            set: { router[.discover] = $0 }
+          )
+        ) {
           FeedsListView()
             .navigationTitle("Discover")
             .navigationBarTitleDisplayMode(.large)
             .withAppDestinations()
         }
-        .onAppear { selectedTab = .feed }
+
       } label: {
-        Label("Feed", systemImage: "square.stack")
+        Label("Discover", systemImage: "safari")
       }
 
       // Notifications
@@ -73,7 +87,7 @@ private struct iPhoneLayoutView: View {
             .navigationBarTitleDisplayMode(.large)
             .withAppDestinations()
         }
-        .onAppear { selectedTab = .notification }
+
       } label: {
         Label("Notifications", systemImage: "bell")
       }
@@ -91,7 +105,7 @@ private struct iPhoneLayoutView: View {
             .navigationBarTitleDisplayMode(.large)
             .withAppDestinations()
         }
-        .onAppear { selectedTab = .profile }
+
       } label: {
         Label("Profile", systemImage: "person")
       }
@@ -109,7 +123,7 @@ private struct iPhoneLayoutView: View {
             .navigationBarTitleDisplayMode(.large)
             .withAppDestinations()
         }
-        .onAppear { selectedTab = .settings }
+
       } label: {
         Label("Settings", systemImage: "gearshape")
       }
@@ -125,7 +139,7 @@ private struct iPhoneLayoutView: View {
           SimpleSearchView(client: client)
             .withAppDestinations()
         }
-        .onAppear { selectedTab = .compose }
+
       } label: {
         Label("Search", systemImage: "magnifyingglass")
       }
@@ -140,6 +154,7 @@ private struct iPadLayoutView: View {
   @Binding var selectedTab: AppTab
   @State private var showingComposer = false
   @State private var composerMode: ComposerMode = .newPost
+  @State private var navigationPath = NavigationPath()
 
   var body: some View {
     NavigationSplitView {
@@ -147,11 +162,14 @@ private struct iPadLayoutView: View {
       DiscoverSidebarView(
         selectedTab: $selectedTab, showingComposer: $showingComposer, composerMode: $composerMode)
     } content: {
-      // Content area - Main content based on selected tab
-      ContentView(selectedTab: selectedTab, router: router)
+      // Content area - Main content based on selected tab with navigation
+      NavigationStack(path: $navigationPath) {
+        ContentView(selectedTab: selectedTab, router: router, navigationPath: $navigationPath)
+      }
     } detail: {
       // Detail area for post content
-      DetailView()
+      DetailView(navigationPath: $navigationPath)
+        .withAppDestinations()
     }
     .navigationSplitViewStyle(.balanced)
     .sheet(isPresented: $showingComposer) {
@@ -164,136 +182,106 @@ private struct iPadLayoutView: View {
 private struct ContentView: View {
   let selectedTab: AppTab
   let router: AppRouter
+  @Binding var navigationPath: NavigationPath
   @Environment(BSkyClient.self) var client
 
   var body: some View {
     Group {
       switch selectedTab {
       case .feed:
-        NavigationStack(
-          path: Binding(
-            get: { router[.feed] },
-            set: { router[.feed] = $0 }
-          )
-        ) {
-          FeedsListView()
-            .navigationTitle("Discover")
-            .navigationBarTitleDisplayMode(.large)
-            .withAppDestinations()
-        }
-      case .notification:
-        NavigationStack(
-          path: Binding(
-            get: { router[.notification] },
-            set: { router[.notification] = $0 }
-          )
-        ) {
-          NotificationsListView()
-            .navigationTitle("Notifications")
-            .navigationBarTitleDisplayMode(.large)
-            .withAppDestinations()
-        }
-      case .profile:
-        NavigationStack(
-          path: Binding(
-            get: { router[.profile] },
-            set: { router[.profile] = $0 }
-          )
-        ) {
-          CurrentUserView()
-            .navigationTitle("Profile")
-            .navigationBarTitleDisplayMode(.large)
-            .withAppDestinations()
-        }
-      case .settings:
-        NavigationStack(
-          path: Binding(
-            get: { router[.settings] },
-            set: { router[.settings] = $0 }
-          )
-        ) {
-          SettingsView()
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.large)
-            .withAppDestinations()
-        }
-      case .compose:
-        NavigationStack(
-          path: Binding(
-            get: { router[.compose] },
-            set: { router[.compose] = $0 }
-          )
-        ) {
-          SimpleSearchView(client: client)
-            .withAppDestinations()
-        }
+        PostsTimelineView()
+          .navigationTitle("Home")
+          .navigationBarTitleDisplayMode(.large)
+          .withAppDestinations()
       case .discover:
-        NavigationStack(
-          path: Binding(
-            get: { router[.discover] },
-            set: { router[.discover] = $0 }
-          )
-        ) {
-          FeedsListView()
-            .navigationTitle("Discover")
-            .navigationBarTitleDisplayMode(.large)
-            .withAppDestinations()
-        }
+        FeedsListView()
+          .navigationTitle("Discover")
+          .navigationBarTitleDisplayMode(.large)
+          .withAppDestinations()
+      case .notification:
+        NotificationsListView()
+          .navigationTitle("Notifications")
+          .navigationBarTitleDisplayMode(.large)
+          .withAppDestinations()
+      case .profile:
+        CurrentUserView()
+          .navigationTitle("Profile")
+          .navigationBarTitleDisplayMode(.large)
+          .withAppDestinations()
+      case .settings:
+        SettingsView()
+          .navigationTitle("Settings")
+          .navigationBarTitleDisplayMode(.large)
+          .withAppDestinations()
+      case .compose:
+        SimpleSearchView(client: client)
+          .withAppDestinations()
       }
     }
     .navigationTitle(selectedTab.displayName)
+    .onChange(of: selectedTab) { oldValue, newValue in
+      print("ContentView: selectedTab changed from \(oldValue) to \(newValue)")
+    }
   }
 }
 
 // MARK: - Detail View
 private struct DetailView: View {
+  @Binding var navigationPath: NavigationPath
+  @Environment(BSkyClient.self) var client
+
   var body: some View {
-    VStack(spacing: 20) {
-      Image(systemName: "rectangle.on.rectangle")
-        .font(.system(size: 80))
+    NavigationStack(path: $navigationPath) {
+      // Default content when no navigation has occurred
+      VStack(spacing: 20) {
+        Image(systemName: "rectangle.on.rectangle")
+          .font(.system(size: 80))
+          .foregroundColor(.secondary)
+
+        Text("Select a post to view details")
+          .font(.title)
+          .foregroundColor(.secondary)
+
+        Text(
+          "This area will show post details, replies, and related content when you select a post from the feed."
+        )
+        .font(.body)
         .foregroundColor(.secondary)
+        .multilineTextAlignment(.center)
+        .padding(.horizontal, 40)
 
-      Text("Select a post to view details")
-        .font(.title)
-        .foregroundColor(.secondary)
+        VStack(spacing: 12) {
+          Text("iPad Features:")
+            .font(.title2)
+            .foregroundColor(.primary)
 
-      Text(
-        "This area will show post details, replies, and related content when you select a post from the feed."
-      )
-      .font(.body)
-      .foregroundColor(.secondary)
-      .multilineTextAlignment(.center)
-      .padding(.horizontal, 40)
-
-      VStack(spacing: 12) {
-        Text("iPad Features:")
-          .font(.title2)
-          .foregroundColor(.primary)
-
-        VStack(alignment: .leading, spacing: 8) {
-          FeatureRow(
-            icon: "sidebar.left", title: "Sidebar Navigation",
-            description: "Quick access to all sections")
-          FeatureRow(
-            icon: "keyboard", title: "Keyboard Shortcuts",
-            description: "Navigate with ⌘+number keys")
-          FeatureRow(
-            icon: "trackpad", title: "Trackpad Support",
-            description: "Enhanced gestures and navigation")
-          FeatureRow(
-            icon: "menubar", title: "Menu Bar", description: "Access common actions from the top")
-          FeatureRow(
-            icon: "rectangle.split.3x3", title: "Multi-column Layout",
-            description: "Optimal use of large screen")
+          VStack(alignment: .leading, spacing: 8) {
+            FeatureRow(
+              icon: "sidebar.left", title: "Sidebar Navigation",
+              description: "Quick access to all sections")
+            FeatureRow(
+              icon: "keyboard", title: "Keyboard Shortcuts",
+              description: "Navigate with ⌘+number keys")
+            FeatureRow(
+              icon: "trackpad", title: "Trackpad Support",
+              description: "Enhanced gestures and navigation")
+            FeatureRow(
+              icon: "menubar", title: "Menu Bar", description: "Access common actions from the top")
+            FeatureRow(
+              icon: "rectangle.split.3x3", title: "Multi-column Layout",
+              description: "Optimal use of large screen")
+          }
+          .padding(.horizontal, 20)
         }
-        .padding(.horizontal, 20)
-      }
-      .padding(.top, 20)
+        .padding(.top, 20)
 
-      Spacer()
+        Spacer()
+      }
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
+      .background(Color(.systemGroupedBackground))
+      .navigationTitle("Detail")
     }
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .background(Color(.systemGroupedBackground))
+    .withAppDestinations()
   }
 }
 
@@ -375,12 +363,18 @@ private struct DiscoverSidebarView: View {
 
       // Navigation Links
       VStack(spacing: 2) {
-        Button(action: { selectedTab = .feed }) {
+        Button(action: {
+          print("Sidebar: Home button tapped, setting selectedTab to .feed")
+          selectedTab = .feed
+        }) {
           SidebarRow(icon: "house.fill", title: "Home", isSelected: selectedTab == .feed)
         }
         .buttonStyle(.plain)
 
-        Button(action: { selectedTab = .discover }) {
+        Button(action: {
+          print("Sidebar: Discover button tapped, setting selectedTab to .discover")
+          selectedTab = .discover
+        }) {
           SidebarRow(icon: "safari", title: "Discover", isSelected: selectedTab == .discover)
         }
         .buttonStyle(.plain)
@@ -494,11 +488,11 @@ extension AppTab {
   var displayName: String {
     switch self {
     case .feed: return "Feed"
+    case .discover: return "Discover"
     case .notification: return "Notifications"
     case .profile: return "Profile"
     case .settings: return "Settings"
     case .compose: return "Search"
-    case .discover: return "Discover"
     }
   }
 }
