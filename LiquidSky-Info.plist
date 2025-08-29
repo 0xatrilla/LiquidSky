@@ -35,5 +35,47 @@
 	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
+	<key>CFBundleIcons</key>
+	<dict>
+		<key>CFBundleAlternateIcons</key>
+		<dict>
+			<key>AppIcon2</key>
+			<dict>
+				<key>CFBundleIconFiles</key>
+				<array>
+					<string>AppIcon2</string>
+				</array>
+				<key>CFBundleIconName</key>
+				<string>AppIcon2</string>
+			</dict>
+			<key>AppIcon3</key>
+			<dict>
+				<key>CFBundleIconFiles</key>
+				<array>
+					<string>AppIcon3</string>
+				</array>
+				<key>CFBundleIconName</key>
+				<string>AppIcon3</string>
+			</dict>
+			<key>AppIcon4</key>
+			<dict>
+				<key>CFBundleIconFiles</key>
+				<array>
+					<string>AppIcon4</string>
+				</array>
+				<key>CFBundleIconName</key>
+				<string>AppIcon4</string>
+			</dict>
+			<key>AppIcon5</key>
+			<dict>
+				<key>CFBundleIconFiles</key>
+				<array>
+					<string>AppIcon5</string>
+				</array>
+				<key>CFBundleIconName</key>
+				<string>AppIcon5</string>
+			</dict>
+		</dict>
+	</dict>
 </dict>
 </plist>
