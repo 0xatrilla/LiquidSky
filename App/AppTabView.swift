@@ -6,10 +6,12 @@ import DesignSystem
 import Destinations
 import FeedUI
 import MediaUI
+import Models
 import NotificationsUI
 import ProfileUI
 import SettingsUI
 import SwiftUI
+import User
 
 struct AppTabView: View {
   @Environment(AppRouter.self) var router
@@ -84,9 +86,29 @@ struct AppTabView: View {
       }
     }
     .tint(.themePrimary)
+    .modifier(iPadAdaptiveLayout())
   }
+}
 
-
+// MARK: - iPad Adaptive Layout Modifier
+private struct iPadAdaptiveLayout: ViewModifier {
+  func body(content: Content) -> some View {
+    if UIDevice.current.userInterfaceIdiom == .pad {
+      content
+        .navigationSplitViewStyle(.balanced)
+        .toolbar {
+          ToolbarItemGroup(placement: .navigationBarTrailing) {
+            // iPad-specific toolbar items can be added here
+            Button("New Post") {
+              // Handle new post for iPad
+            }
+            .buttonStyle(.borderedProminent)
+          }
+        }
+    } else {
+      content
+    }
+  }
 }
 
 #Preview {
