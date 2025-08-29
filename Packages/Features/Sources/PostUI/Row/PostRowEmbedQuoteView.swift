@@ -7,6 +7,7 @@ struct PostRowEmbedQuoteView: View {
   @Environment(\.currentTab) var currentTab
   @Environment(AppRouter.self) var router
 
+
   let post: PostItem
 
   var body: some View {
@@ -28,7 +29,8 @@ struct PostRowEmbedQuoteView: View {
       .clipShape(RoundedRectangle(cornerRadius: 8))
       .shadow(color: .indigo.opacity(0.3), radius: 2)
       .onTapGesture {
-        router.navigateTo(.post(post))
+        // Note: This view is embedded in other posts, so navigation should be handled by the parent
+        // The parent PostRowView should handle navigation to the post
       }
   }
 }

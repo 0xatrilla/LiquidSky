@@ -259,8 +259,11 @@ public struct PostListView<T: PostsListViewDatasource>: View {
                 // Render reply chain with visual connectors
                 ReplyChainView(posts: postGroup.posts)
               } else {
-                // Render single post normally
-                PostRowView(post: postGroup.posts.first!)
+                // Render single post normally with NavigationLink for proper navigation
+                NavigationLink(value: RouterDestination.post(postGroup.posts.first!)) {
+                  PostRowView(post: postGroup.posts.first!)
+                }
+                .buttonStyle(.plain)
               }
             }
             if cursor != nil {
@@ -485,62 +488,62 @@ private struct ReplyChainView: View {
           }
           .frame(width: 40)  // Ensure consistent width for avatar column
 
-          // Post content
-          VStack(alignment: .leading, spacing: 8) {
-            // Author info
-            HStack(alignment: .firstTextBaseline) {
-              Text("\(post.author.displayName ?? "")  @\(post.author.handle)")
-                .font(.callout)
-                .foregroundStyle(.primary)
-                .fontWeight(.semibold)
-              Spacer()
-              Text(post.indexedAt.relativeFormatted)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
-            .lineLimit(1)
-            .onTapGesture {
-              router.navigateTo(.profile(post.author))
-            }
-
-            // Reply indicator
-            if post.isReplyTo, let toHandle = post.inReplyToHandle {
-              Text("Replying to @\(toHandle)")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
-
-            // Repost indicator
-            if post.isReposted, let repostedBy = post.repostedBy {
-              HStack(spacing: 4) {
-                Image(systemName: "arrow.2.squarepath")
-                  .font(.caption)
-                  .foregroundStyle(.secondary)
-                Text("Reposted by \(repostedBy.displayName ?? repostedBy.handle)")
+          // Post content wrapped in NavigationLink for proper navigation
+          NavigationLink(value: RouterDestination.post(post)) {
+            VStack(alignment: .leading, spacing: 8) {
+              // Author info
+              HStack(alignment: .firstTextBaseline) {
+                Text("\(post.author.displayName ?? "")  @\(post.author.handle)")
+                  .font(.callout)
+                  .foregroundStyle(.primary)
+                  .fontWeight(.semibold)
+                Spacer()
+                Text(post.indexedAt.relativeFormatted)
                   .font(.caption)
                   .foregroundStyle(.secondary)
               }
+              .lineLimit(1)
+              .onTapGesture {
+                router.navigateTo(.profile(post.author))
+              }
+
+              // Reply indicator
+              if post.isReplyTo, let toHandle = post.inReplyToHandle {
+                Text("Replying to @\(toHandle)")
+                  .font(.caption)
+                  .foregroundStyle(.secondary)
+              }
+
+              // Repost indicator
+              if post.isReposted, let repostedBy = post.repostedBy {
+                HStack(spacing: 4) {
+                  Image(systemName: "arrow.2.squarepath")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                  Text("Reposted by \(repostedBy.displayName ?? repostedBy.handle)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                }
+              }
+
+              // Post text
+              Text(post.content)
+                .font(.body)
+                .foregroundStyle(.primary)
+                .multilineTextAlignment(.leading)
+
+              // Embed content (proper media display)
+              // Temporarily disabled embed functionality
+              // if post.embed != nil {
+              //   PostRowEmbedView(post: post)
+              // }
+
+              // Actions (use same PostRowActionsView as normal posts for consistency)
+              PostRowActionsView(post: post)
+                .environment(postDataControllerProvider.get(for: post, client: client))
             }
-
-            // Post text
-            Text(post.content)
-              .font(.body)
-              .foregroundStyle(.primary)
-              .multilineTextAlignment(.leading)
-
-            // Embed content (proper media display)
-            // Temporarily disabled embed functionality
-            // if post.embed != nil {
-            //   PostRowEmbedView(post: post)
-            // }
-
-            // Actions (use same PostRowActionsView as normal posts for consistency)
-            PostRowActionsView(post: post)
-              .environment(postDataControllerProvider.get(for: post, client: client))
           }
-          .onTapGesture {
-            router.navigateTo(.post(post))
-          }
+          .buttonStyle(.plain)
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)

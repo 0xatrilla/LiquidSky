@@ -25,6 +25,7 @@ public struct PostRowView: View {
   @Environment(BSkyClient.self) var client
   @Environment(CurrentUser.self) var currentUser
 
+
   let post: PostItem
   @Namespace private var namespace
   @State private var parentPost: PostItem?
@@ -88,9 +89,6 @@ public struct PostRowView: View {
       }
     }
     .contentShape(Rectangle())
-    .onTapGesture {
-      router.navigateTo(.post(post))
-    }
   }
 
   private var avatarView: some View {
@@ -140,9 +138,9 @@ public struct PostRowView: View {
       }
     }
     .lineLimit(1)
-    .onTapGesture {
-      router.navigateTo(.profile(post.author))
-    }
+            .onTapGesture {
+          router.navigateTo(.profile(post.author))
+        }
   }
 
   @ViewBuilder
