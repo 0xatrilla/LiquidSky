@@ -26,4 +26,5 @@ public enum SheetDestination: SheetType, Hashable, Identifiable {
   case profile(Profile)
   case feed(FeedItem)
   case post(PostItem)
+  case translate(post: PostItem)
 }

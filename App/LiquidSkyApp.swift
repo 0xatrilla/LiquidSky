@@ -11,6 +11,7 @@ import MediaUI
 import Models
 import Nuke
 import NukeUI
+import PostUI
 import ProfileUI
 import SwiftUI
 import User
@@ -386,6 +387,14 @@ struct LiquidSkyApp: App {
           .environment(appState.client)
           .environment(appState.currentUser)
           .environment(router)
+        case .translate(let post):
+          TranslateView(post: post)
+            .presentationDetents([.medium, .large])
+            .environment(appState.client)
+            .environment(appState.currentUser)
+            .environment(router)
+            .environment(postDataControllerProvider)
+            .environment(settingsService)
         }
       }
       .onAppear {

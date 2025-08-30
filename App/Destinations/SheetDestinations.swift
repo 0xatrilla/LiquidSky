@@ -7,6 +7,7 @@ import Destinations
 import FeedUI
 import MediaUI
 import Models
+import PostUI
 import ProfileUI
 import SwiftUI
 import User
@@ -23,12 +24,12 @@ public struct SheetDestinations: ViewModifier {
     content
       .sheet(item: $router.presentedSheet) { presentedSheet in
         #if DEBUG
-        let _ = print("SheetDestinations: Creating sheet for \(presentedSheet)")
+          let _ = print("SheetDestinations: Creating sheet for \(presentedSheet)")
         #endif
         switch presentedSheet {
         case .auth:
           #if DEBUG
-          let _ = print("SheetDestinations: Creating AuthView")
+            let _ = print("SheetDestinations: Creating AuthView")
           #endif
           Group {
             AuthView()
@@ -36,23 +37,23 @@ public struct SheetDestinations: ViewModifier {
               .environment(router)
               .onAppear {
                 #if DEBUG
-                print("SheetDestinations: AuthView appeared successfully")
+                  print("SheetDestinations: AuthView appeared successfully")
                 #endif
               }
               .onDisappear {
                 #if DEBUG
-                print("SheetDestinations: AuthView disappeared")
+                  print("SheetDestinations: AuthView disappeared")
                 #endif
               }
           }
           .onAppear {
             #if DEBUG
-            print("SheetDestinations: Auth sheet container appeared")
+              print("SheetDestinations: Auth sheet container appeared")
             #endif
           }
           .onDisappear {
             #if DEBUG
-            print("SheetDestinations: Auth sheet container disappeared")
+              print("SheetDestinations: Auth sheet container disappeared")
             #endif
           }
         case .feedsList:
@@ -122,20 +123,20 @@ public struct SheetDestinations: ViewModifier {
                     .foregroundStyle(.blue)
                 }
               }
-              
+
               VStack(alignment: .leading, spacing: 4) {
                 Text(feed.displayName)
                   .font(.title2)
                   .fontWeight(.semibold)
-                
+
                 Text("by @\(feed.creatorHandle)")
                   .font(.subheadline)
                   .foregroundStyle(.secondary)
               }
-              
+
               Spacer()
             }
-            
+
             // Feed description
             if let description = feed.description, !description.isEmpty {
               Text(description)
@@ -143,23 +144,23 @@ public struct SheetDestinations: ViewModifier {
                 .lineLimit(nil)
                 .multilineTextAlignment(.leading)
             }
-            
+
             // Feed stats
             HStack(spacing: 24) {
               HStack(spacing: 4) {
                 Image(systemName: "heart")
                 Text("\(feed.likesCount)")
               }
-              
+
               HStack(spacing: 4) {
                 Image(systemName: "list.bullet")
                 Text("Feed")
               }
             }
             .foregroundStyle(.secondary)
-            
+
             Spacer()
-            
+
             Button("Done") {
               router.presentedSheet = nil
             }
@@ -191,46 +192,46 @@ public struct SheetDestinations: ViewModifier {
                     .frame(width: 48, height: 48)
                 }
               }
-              
+
               VStack(alignment: .leading, spacing: 4) {
                 Text(post.author.displayName ?? post.author.handle)
                   .font(.headline)
                   .fontWeight(.semibold)
-                
+
                 Text("@\(post.author.handle)")
                   .font(.subheadline)
                   .foregroundStyle(.secondary)
               }
-              
+
               Spacer()
             }
-            
+
             // Post content
             Text(post.content)
               .font(.body)
               .lineLimit(nil)
-            
+
             // Post stats
             HStack(spacing: 24) {
               HStack(spacing: 4) {
                 Image(systemName: "heart")
                 Text("\(post.likeCount)")
               }
-              
+
               HStack(spacing: 4) {
                 Image(systemName: "arrow.2.squarepath")
                 Text("\(post.repostCount)")
               }
-              
+
               HStack(spacing: 4) {
                 Image(systemName: "bubble.left")
                 Text("\(post.replyCount)")
               }
             }
             .foregroundStyle(.secondary)
-            
+
             Spacer()
-            
+
             Button("Done") {
               router.presentedSheet = nil
             }
@@ -242,11 +243,19 @@ public struct SheetDestinations: ViewModifier {
           .environment(router)
           .environment(postDataControllerProvider)
           .environment(settingsService)
+        case .translate(let post):
+          TranslateView(post: post)
+            .presentationDetents([.medium, .large])
+            .environment(client)
+            .environment(currentUser)
+            .environment(router)
+            .environment(postDataControllerProvider)
+            .environment(settingsService)
         }
       }
       .onChange(of: router.presentedSheet) {
         #if DEBUG
-        print("SheetDestinations: Sheet changed")
+          print("SheetDestinations: Sheet changed")
         #endif
       }
   }
