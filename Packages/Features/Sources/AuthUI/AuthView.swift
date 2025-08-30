@@ -127,10 +127,14 @@ public struct AuthView: View {
 
       // Title and subtitle
       VStack(spacing: isKeyboardVisible ? 4 : 8) {
-        Text("Welcome to Horizon")
-          .font(isKeyboardVisible ? .title2 : .largeTitle)
-          .fontWeight(.bold)
-          .multilineTextAlignment(.center)
+        HStack(spacing: 0) {
+          Text("Welcome to ")
+            .font(.custom("AlbraBookTRIAL-Light", size: isKeyboardVisible ? 22 : 34))
+          Text("Horizon")
+            .font(.custom("AlbraBookTRIAL-Light", size: isKeyboardVisible ? 22 : 34))
+            .italic()
+        }
+        .multilineTextAlignment(.center)
 
         if !isKeyboardVisible {
           Text("Sign in to your Bluesky account to get started")
