@@ -49,6 +49,39 @@
                ReferencedContainer = "container:LiquidSky.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "DB3E01CE2E629B2A000A1DFA"
+               BuildableName = "fastlane screenshot.xctest"
+               BlueprintName = "fastlane screenshot"
+               ReferencedContainer = "container:Horizon.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "DB3E01DF2E629BEF000A1DFA"
+               BuildableName = "fastlane screenshots.xctest"
+               BlueprintName = "fastlane screenshots"
+               ReferencedContainer = "container:Horizon.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "DB3E01F02E629D21000A1DFA"
+               BuildableName = "fastlanescreenshots.xctest"
+               BlueprintName = "fastlanescreenshots"
+               ReferencedContainer = "container:Horizon.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
