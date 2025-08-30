@@ -31,6 +31,10 @@ public final class PostContext: Sendable {
   public var isLiked: Bool { likeURI != nil }
   public var isReposted: Bool { repostURI != nil }
 
+  public func getClient() -> BSkyClient {
+    return client
+  }
+
   public var likeCount: Int { post.likeCount + (isLiked ? 1 : 0) }
   public var repostCount: Int { post.repostCount + (isReposted ? 1 : 0) }
 

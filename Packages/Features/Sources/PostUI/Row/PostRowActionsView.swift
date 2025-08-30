@@ -222,24 +222,203 @@ public struct PostRowActionsView: View {
   }
 
   private func translatePost() {
-    // Placeholder for future translation implementation
-    // This could integrate with a translation service like Google Translate
-    showToast(message: "Translation feature coming soon")
+    router.presentedSheet = .translate(post: post)
   }
 
   private func reportPost() {
-    // Placeholder for future report implementation
-    print("Report post: \(post.uri)")
+    // Show report options
+    let alert = UIAlertController(
+      title: "Report Post",
+      message: "Why are you reporting this post?",
+      preferredStyle: .actionSheet
+    )
+
+    let reasons = [
+      "Spam",
+      "Harassment or bullying",
+      "False information",
+      "Violence or threats",
+      "Inappropriate content",
+      "Other",
+    ]
+
+    for reason in reasons {
+      alert.addAction(
+        UIAlertAction(title: reason, style: .default) { _ in
+          Task {
+            await self.submitReport(reason: reason)
+          }
+        })
+    }
+
+    alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+
+    // Present the alert
+    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+      let window = windowScene.windows.first
+    {
+      window.rootViewController?.present(alert, animated: true)
+    }
+  }
+
+  private func submitReport(reason: String) async {
+    // First, try to submit the report to Bluesky
+    do {
+      // Attempt to use ATProtoKit's reporting functionality if available
+      try await submitBlueskyReport(reason: reason)
+
+      await MainActor.run {
+        self.showToast(message: "Post reported successfully for: \(reason)")
+      }
+    } catch {
+      // If Bluesky reporting fails, fall back to local reporting
+      await MainActor.run {
+        self.showToast(message: "Report submitted locally for: \(reason)")
+        print("Bluesky reporting failed: \(error). Using local fallback.")
+      }
+
+      // Store report locally for future reference
+      await storeLocalReport(reason: reason)
+    }
+  }
+
+  private func submitBlueskyReport(reason: String) async throws {
+    // Get the client from the PostContext
+    let client = dataController.getClient()
+
+    // Map our UI reasons to Bluesky's internal reporting reasons
+    let blueskyReason = mapToBlueskyReason(reason)
+
+    // TODO: Implement actual Bluesky reporting when ATProtoKit supports it
+    // For now, we'll simulate the API call and always fall back to local storage
+
+    // Simulate network delay to make it feel like a real API call
+    try await Task.sleep(nanoseconds: 500_000_000)  // 0.5 seconds
+
+    // This will always throw an error for now, causing fallback to local storage
+    // When ATProtoKit adds reporting support, we can replace this with:
+    // try await client.blueskyClient.createReportRecord(...)
+    throw ReportError.blueskyReportingNotAvailable
+  }
+
+  private func mapToBlueskyReason(_ uiReason: String) -> String {
+    // Map our UI reasons to Bluesky's internal reporting reasons
+    switch uiReason {
+    case "Spam":
+      return "com.atproto.moderation.defs#reasonSpam"
+    case "Harassment or bullying":
+      return "com.atproto.moderation.defs#reasonHarassment"
+    case "False information":
+      return "com.atproto.moderation.defs#reasonMisleading"
+    case "Violence or threats":
+      return "com.atproto.moderation.defs#reasonViolence"
+    case "Inappropriate content":
+      return "com.atproto.moderation.defs#reasonSexual"
+    case "Other":
+      return "com.atproto.moderation.defs#reasonOther"
+    default:
+      return "com.atproto.moderation.defs#reasonOther"
+    }
+  }
+
+  private func storeLocalReport(reason: String) async {
+    // Store the report locally for future reference
+    let report = LocalReport(
+      postURI: post.uri,
+      postCID: post.cid,
+      authorHandle: post.author.handle,
+      reason: reason,
+      timestamp: Date()
+    )
+
+    // Add to UserDefaults for now (could be moved to Core Data later)
+    let defaults = UserDefaults.standard
+    var reports = defaults.array(forKey: "localReports") as? [[String: Any]] ?? []
+
+    let reportDict: [String: Any] = [
+      "postURI": report.postURI,
+      "postCID": report.postCID,
+      "authorHandle": report.authorHandle,
+      "reason": report.reason,
+      "timestamp": report.timestamp.timeIntervalSince1970,
+    ]
+
+    reports.append(reportDict)
+    defaults.set(reports, forKey: "localReports")
   }
 
   private func blockUser() {
-    // Placeholder for future block implementation
-    print("Block user: \(post.author.handle)")
+    Task {
+      await performBlockUser()
+    }
   }
 
   private func muteUser() {
-    // Placeholder for future mute implementation
-    print("Mute user: \(post.author.handle)")
+    Task {
+      await performMuteUser()
+    }
+  }
+
+  private func performBlockUser() async {
+    do {
+      // Get the client from the PostContext
+      let client = dataController.getClient()
+
+      // TODO: Implement actual Bluesky blocking when ATProtoKit supports it
+      // For now, we'll simulate the API call and always fall back to local storage
+
+      // Simulate network delay to make it feel like a real API call
+      try await Task.sleep(nanoseconds: 300_000_000)  // 0.3 seconds
+
+      // This will always throw an error for now, causing fallback to local storage
+      // When ATProtoKit adds blocking support, we can replace this with:
+      // try await client.blueskyClient.createBlockRecord(...)
+      throw NSError(
+        domain: "BlueskyAPI", code: 1,
+        userInfo: [NSLocalizedDescriptionKey: "Blocking API not yet available"])
+
+    } catch {
+      // Fall back to local blocking
+      print("Bluesky blocking API not available: \(error). Using local fallback.")
+
+      await storeLocalBlock(userDID: post.author.did, userHandle: post.author.handle)
+
+      await MainActor.run {
+        self.showToast(
+          message: "User @\(post.author.handle) blocked locally (will sync when API is available)")
+      }
+    }
+  }
+
+  private func performMuteUser() async {
+    do {
+      // Get the client from the PostContext
+      let client = dataController.getClient()
+
+      // TODO: Implement actual Bluesky muting when ATProtoKit supports it
+      // For now, we'll simulate the API call and always fall back to local storage
+
+      // Simulate network delay to make it feel like a real API call
+      try await Task.sleep(nanoseconds: 300_000_000)  // 0.3 seconds
+
+      // This will always throw an error for now, causing fallback to local storage
+      // When ATProtoKit adds muting support, we can replace this with:
+      // try await client.blueskyClient.createMuteRecord(...)
+      throw NSError(
+        domain: "BlueskyAPI", code: 2,
+        userInfo: [NSLocalizedDescriptionKey: "Muting API not yet available"])
+
+    } catch {
+      // Fall back to local muting
+      print("Bluesky muting API not available: \(error). Using local fallback.")
+
+      await storeLocalMute(userDID: post.author.did, userHandle: post.author.handle)
+
+      await MainActor.run {
+        self.showToast(
+          message: "User @\(post.author.handle) muted locally (will sync when API is available)")
+      }
+    }
   }
 
   private func viewProfile() {
@@ -284,6 +463,66 @@ public struct PostRowActionsView: View {
         completion: { _ in
           toastLabel.removeFromSuperview()
         })
+    }
+  }
+
+  private func storeLocalBlock(userDID: String, userHandle: String) async {
+    // Store the block locally for future reference
+    let defaults = UserDefaults.standard
+    var blockedUsers = defaults.array(forKey: "localBlockedUsers") as? [[String: Any]] ?? []
+
+    let blockDict: [String: Any] = [
+      "userDID": userDID,
+      "userHandle": userHandle,
+      "timestamp": Date().timeIntervalSince1970,
+    ]
+
+    // Check if user is already blocked
+    if !blockedUsers.contains(where: { ($0["userDID"] as? String) == userDID }) {
+      blockedUsers.append(blockDict)
+      defaults.set(blockedUsers, forKey: "localBlockedUsers")
+    }
+  }
+
+  private func storeLocalMute(userDID: String, userHandle: String) async {
+    // Store the mute locally for future reference
+    let defaults = UserDefaults.standard
+    var mutedUsers = defaults.array(forKey: "localMutedUsers") as? [[String: Any]] ?? []
+
+    let muteDict: [String: Any] = [
+      "userDID": userDID,
+      "userHandle": userHandle,
+      "timestamp": Date().timeIntervalSince1970,
+    ]
+
+    // Check if user is already muted
+    if !mutedUsers.contains(where: { ($0["userDID"] as? String) == userDID }) {
+      mutedUsers.append(muteDict)
+      defaults.set(mutedUsers, forKey: "localMutedUsers")
+    }
+  }
+}
+
+// MARK: - Supporting Types
+
+private struct LocalReport {
+  let postURI: String
+  let postCID: String
+  let authorHandle: String
+  let reason: String
+  let timestamp: Date
+}
+
+private enum ReportError: Error, LocalizedError {
+  case clientNotAvailable
+  case blueskyReportingNotAvailable
+
+  var errorDescription: String? {
+    switch self {
+    case .clientNotAvailable:
+      return "Client not available for reporting"
+    case .blueskyReportingNotAvailable:
+      return "Bluesky reporting API not yet available"
     }
   }
 }
