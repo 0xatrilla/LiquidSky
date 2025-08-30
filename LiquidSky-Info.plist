@@ -35,6 +35,10 @@
 	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>AlbraBookTRIAL-Light.otf</string>
+	</array>
 	<key>UISupportedInterfaceOrientations_iPad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

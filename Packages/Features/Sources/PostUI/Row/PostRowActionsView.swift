@@ -381,7 +381,7 @@ public struct PostRowActionsView: View {
       // Fall back to local blocking
       print("Bluesky blocking API not available: \(error). Using local fallback.")
 
-      await storeLocalBlock(userDID: post.author.did, userHandle: post.author.handle)
+      BlockedUsersService.shared.blockUser(did: post.author.did, handle: post.author.handle)
 
       await MainActor.run {
         self.showToast(
@@ -412,7 +412,7 @@ public struct PostRowActionsView: View {
       // Fall back to local muting
       print("Bluesky muting API not available: \(error). Using local fallback.")
 
-      await storeLocalMute(userDID: post.author.did, userHandle: post.author.handle)
+      BlockedUsersService.shared.muteUser(did: post.author.did, handle: post.author.handle)
 
       await MainActor.run {
         self.showToast(
@@ -466,41 +466,6 @@ public struct PostRowActionsView: View {
     }
   }
 
-  private func storeLocalBlock(userDID: String, userHandle: String) async {
-    // Store the block locally for future reference
-    let defaults = UserDefaults.standard
-    var blockedUsers = defaults.array(forKey: "localBlockedUsers") as? [[String: Any]] ?? []
-
-    let blockDict: [String: Any] = [
-      "userDID": userDID,
-      "userHandle": userHandle,
-      "timestamp": Date().timeIntervalSince1970,
-    ]
-
-    // Check if user is already blocked
-    if !blockedUsers.contains(where: { ($0["userDID"] as? String) == userDID }) {
-      blockedUsers.append(blockDict)
-      defaults.set(blockedUsers, forKey: "localBlockedUsers")
-    }
-  }
-
-  private func storeLocalMute(userDID: String, userHandle: String) async {
-    // Store the mute locally for future reference
-    let defaults = UserDefaults.standard
-    var mutedUsers = defaults.array(forKey: "localMutedUsers") as? [[String: Any]] ?? []
-
-    let muteDict: [String: Any] = [
-      "userDID": userDID,
-      "userHandle": userHandle,
-      "timestamp": Date().timeIntervalSince1970,
-    ]
-
-    // Check if user is already muted
-    if !mutedUsers.contains(where: { ($0["userDID"] as? String) == userDID }) {
-      mutedUsers.append(muteDict)
-      defaults.set(mutedUsers, forKey: "localMutedUsers")
-    }
-  }
 }
 
 // MARK: - Supporting Types

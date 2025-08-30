@@ -20,6 +20,7 @@ public struct SettingsView: View {
   @State private var showingAcknowledgementsSheet = false
   @State private var showingAccountSwitcher = false
   @State private var showingTippingView = false
+  @State private var showingBlockedUsers = false
 
   public init() {}
 
@@ -51,6 +52,9 @@ public struct SettingsView: View {
 
         // Content Section
         contentSection
+
+        // Privacy Section
+        privacySection
 
         // Intelligence Section
         intelligenceSection
@@ -101,7 +105,26 @@ public struct SettingsView: View {
     .sheet(isPresented: $showingTippingView) {
       SimpleTippingView()
     }
+    .sheet(isPresented: $showingBlockedUsers) {
+      BlockedUsersView()
+    }
 
+  }
+
+  // MARK: - Privacy Section
+  private var privacySection: some View {
+    VStack(spacing: 16) {
+      SettingsSectionHeader(title: "Privacy", icon: "lock.shield.fill", color: .red)
+
+      SettingsNavigationRow(
+        title: "Blocked & Muted Users",
+        subtitle: "Manage users you've blocked or muted",
+        icon: "person.slash",
+        iconColor: .red
+      ) {
+        showingBlockedUsers = true
+      }
+    }
   }
 
   // MARK: - Intelligence Section
