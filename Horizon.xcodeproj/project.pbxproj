@@ -26,9 +26,32 @@
 		9FD63DE02CEF1F5B00243D9A /* PostUI in Frameworks */ = {isa = PBXBuildFile; productRef = 9FD63DDF2CEF1F5B00243D9A /* PostUI */; };
 		9FD63DE22CEF20F500243D9A /* AuthUI in Frameworks */ = {isa = PBXBuildFile; productRef = 9FD63DE12CEF20F500243D9A /* AuthUI */; };
 		DB3EFFD82E6276C6000A1DFA /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB722B8F2E608A4300644142 /* StoreKit.framework */; };
-		DB3EFFD92E6276C6000A1DFA /* StoreKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DB722B8F2E608A4300644142 /* StoreKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DB722B922E608AB900644142 /* Configuration.storekit in Resources */ = {isa = PBXBuildFile; fileRef = DB722B912E608AB900644142 /* Configuration.storekit */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		DB3E01D52E629B2A000A1DFA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9F21421B2CE9DAA1004167D7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9F2142222CE9DAA1004167D7;
+			remoteInfo = LiquidSky;
+		};
+		DB3E01E62E629BEF000A1DFA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9F21421B2CE9DAA1004167D7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9F2142222CE9DAA1004167D7;
+			remoteInfo = LiquidSky;
+		};
+		DB3E01F72E629D21000A1DFA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9F21421B2CE9DAA1004167D7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9F2142222CE9DAA1004167D7;
+			remoteInfo = LiquidSky;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		DB21B1072E53F69F00B27D22 /* Embed Foundation Extensions */ = {
@@ -47,7 +70,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				DB3EFFD92E6276C6000A1DFA /* StoreKit.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -61,6 +83,9 @@
 		9FAEE3A82CF0994C00F86CDC /* Model */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Model; path = Packages/Model; sourceTree = "<group>"; };
 		DB21B0F42E53F69B00B27D22 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		DB21B0F62E53F69B00B27D22 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		DB3E01CF2E629B2A000A1DFA /* fastlane screenshot.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "fastlane screenshot.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB3E01E02E629BEF000A1DFA /* fastlane screenshots.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "fastlane screenshots.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB3E01F12E629D21000A1DFA /* fastlanescreenshots.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = fastlanescreenshots.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB722B8F2E608A4300644142 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		DB722B912E608AB900644142 /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Configuration.storekit; sourceTree = "<group>"; };
 		E9FE37002DF0661A00EB0418 /* FeaturesTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = FeaturesTests.xctestplan; sourceTree = "<group>"; };
@@ -75,6 +100,11 @@
 		DB21B0F82E53F69B00B27D22 /* LiquidSkyWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = LiquidSkyWidgets;
+			sourceTree = "<group>";
+		};
+		DB3E01F22E629D21000A1DFA /* fastlanescreenshots */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = fastlanescreenshots;
 			sourceTree = "<group>";
 		};
 		DB722DB42E60FADA00644142 /* LiquidSkyWidgets */ = {
@@ -111,6 +141,27 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DB3E01CC2E629B2A000A1DFA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DB3E01DD2E629BEF000A1DFA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DB3E01EE2E629D21000A1DFA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -125,6 +176,7 @@
 				9FAEE3A72CF0994400F86CDC /* Features */,
 				DB21B0F82E53F69B00B27D22 /* LiquidSkyWidgets */,
 				DB722DB42E60FADA00644142 /* LiquidSkyWidgets */,
+				DB3E01F22E629D21000A1DFA /* fastlanescreenshots */,
 				9FAEE3B82CF09BB400F86CDC /* Frameworks */,
 				9F2142242CE9DAA1004167D7 /* Products */,
 			);
@@ -134,6 +186,9 @@
 			isa = PBXGroup;
 			children = (
 				9F2142232CE9DAA1004167D7 /* LiquidSky.app */,
+				DB3E01CF2E629B2A000A1DFA /* fastlane screenshot.xctest */,
+				DB3E01E02E629BEF000A1DFA /* fastlane screenshots.xctest */,
+				DB3E01F12E629D21000A1DFA /* fastlanescreenshots.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -193,6 +248,69 @@
 			productReference = 9F2142232CE9DAA1004167D7 /* LiquidSky.app */;
 			productType = "com.apple.product-type.application";
 		};
+		DB3E01CE2E629B2A000A1DFA /* fastlane screenshot */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DB3E01D92E629B2A000A1DFA /* Build configuration list for PBXNativeTarget "fastlane screenshot" */;
+			buildPhases = (
+				DB3E01CB2E629B2A000A1DFA /* Sources */,
+				DB3E01CC2E629B2A000A1DFA /* Frameworks */,
+				DB3E01CD2E629B2A000A1DFA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DB3E01D62E629B2A000A1DFA /* PBXTargetDependency */,
+			);
+			name = "fastlane screenshot";
+			packageProductDependencies = (
+			);
+			productName = "fastlane screenshot";
+			productReference = DB3E01CF2E629B2A000A1DFA /* fastlane screenshot.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		DB3E01DF2E629BEF000A1DFA /* fastlane screenshots */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DB3E01E82E629BEF000A1DFA /* Build configuration list for PBXNativeTarget "fastlane screenshots" */;
+			buildPhases = (
+				DB3E01DC2E629BEF000A1DFA /* Sources */,
+				DB3E01DD2E629BEF000A1DFA /* Frameworks */,
+				DB3E01DE2E629BEF000A1DFA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DB3E01E72E629BEF000A1DFA /* PBXTargetDependency */,
+			);
+			name = "fastlane screenshots";
+			packageProductDependencies = (
+			);
+			productName = "fastlane screenshots";
+			productReference = DB3E01E02E629BEF000A1DFA /* fastlane screenshots.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		DB3E01F02E629D21000A1DFA /* fastlanescreenshots */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DB3E01F92E629D21000A1DFA /* Build configuration list for PBXNativeTarget "fastlanescreenshots" */;
+			buildPhases = (
+				DB3E01ED2E629D21000A1DFA /* Sources */,
+				DB3E01EE2E629D21000A1DFA /* Frameworks */,
+				DB3E01EF2E629D21000A1DFA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DB3E01F82E629D21000A1DFA /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				DB3E01F22E629D21000A1DFA /* fastlanescreenshots */,
+			);
+			name = fastlanescreenshots;
+			packageProductDependencies = (
+			);
+			productName = fastlanescreenshots;
+			productReference = DB3E01F12E629D21000A1DFA /* fastlanescreenshots.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -205,6 +323,18 @@
 				TargetAttributes = {
 					9F2142222CE9DAA1004167D7 = {
 						CreatedOnToolsVersion = 16.1;
+					};
+					DB3E01CE2E629B2A000A1DFA = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = 9F2142222CE9DAA1004167D7;
+					};
+					DB3E01DF2E629BEF000A1DFA = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = 9F2142222CE9DAA1004167D7;
+					};
+					DB3E01F02E629D21000A1DFA = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = 9F2142222CE9DAA1004167D7;
 					};
 				};
 			};
@@ -227,6 +357,9 @@
 			projectRoot = "";
 			targets = (
 				9F2142222CE9DAA1004167D7 /* LiquidSky */,
+				DB3E01CE2E629B2A000A1DFA /* fastlane screenshot */,
+				DB3E01DF2E629BEF000A1DFA /* fastlane screenshots */,
+				DB3E01F02E629D21000A1DFA /* fastlanescreenshots */,
 			);
 		};
 /* End PBXProject section */
@@ -240,6 +373,27 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DB3E01CD2E629B2A000A1DFA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DB3E01DE2E629BEF000A1DFA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DB3E01EF2E629D21000A1DFA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -250,7 +404,46 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DB3E01CB2E629B2A000A1DFA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DB3E01DC2E629BEF000A1DFA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DB3E01ED2E629D21000A1DFA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DB3E01D62E629B2A000A1DFA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9F2142222CE9DAA1004167D7 /* LiquidSky */;
+			targetProxy = DB3E01D52E629B2A000A1DFA /* PBXContainerItemProxy */;
+		};
+		DB3E01E72E629BEF000A1DFA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9F2142222CE9DAA1004167D7 /* LiquidSky */;
+			targetProxy = DB3E01E62E629BEF000A1DFA /* PBXContainerItemProxy */;
+		};
+		DB3E01F82E629D21000A1DFA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9F2142222CE9DAA1004167D7 /* LiquidSky */;
+			targetProxy = DB3E01F72E629D21000A1DFA /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		9F2142462CE9DAA3004167D7 /* Debug */ = {
@@ -386,7 +579,7 @@
 				CODE_SIGN_ENTITLEMENTS = App/LiquidSky.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"App/Preview Content\"";
 				DEVELOPMENT_TEAM = LAXTJRK98P;
@@ -441,7 +634,7 @@
 				CODE_SIGN_ENTITLEMENTS = App/LiquidSky.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"App/Preview Content\"";
 				DEVELOPMENT_TEAM = LAXTJRK98P;
@@ -487,6 +680,141 @@
 			};
 			name = Release;
 		};
+		DB3E01D72E629B2A000A1DFA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = LAXTJRK98P;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "acxtrilla.fastlane-screenshot";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LiquidSky;
+			};
+			name = Debug;
+		};
+		DB3E01D82E629B2A000A1DFA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = LAXTJRK98P;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "acxtrilla.fastlane-screenshot";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LiquidSky;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		DB3E01E92E629BEF000A1DFA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = LAXTJRK98P;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "acxtrilla.fastlane-screenshots";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LiquidSky;
+			};
+			name = Debug;
+		};
+		DB3E01EA2E629BEF000A1DFA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = LAXTJRK98P;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "acxtrilla.fastlane-screenshots";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LiquidSky;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		DB3E01FA2E629D21000A1DFA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = LAXTJRK98P;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = acxtrilla.fastlanescreenshots;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LiquidSky;
+			};
+			name = Debug;
+		};
+		DB3E01FB2E629D21000A1DFA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = LAXTJRK98P;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = acxtrilla.fastlanescreenshots;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LiquidSky;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -504,6 +832,33 @@
 			buildConfigurations = (
 				9F2142492CE9DAA3004167D7 /* Debug */,
 				9F21424A2CE9DAA3004167D7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DB3E01D92E629B2A000A1DFA /* Build configuration list for PBXNativeTarget "fastlane screenshot" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DB3E01D72E629B2A000A1DFA /* Debug */,
+				DB3E01D82E629B2A000A1DFA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DB3E01E82E629BEF000A1DFA /* Build configuration list for PBXNativeTarget "fastlane screenshots" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DB3E01E92E629BEF000A1DFA /* Debug */,
+				DB3E01EA2E629BEF000A1DFA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DB3E01F92E629D21000A1DFA /* Build configuration list for PBXNativeTarget "fastlanescreenshots" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DB3E01FA2E629D21000A1DFA /* Debug */,
+				DB3E01FB2E629D21000A1DFA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

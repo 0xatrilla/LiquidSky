@@ -21,30 +21,12 @@ struct AppTabView: View {
 
   public var body: some View {
     TabView(selection: $selectedTab) {
-      // Feed
+      // Feed (showing FeedsListView with Discover title)
       Tab(value: AppTab.feed) {
         NavigationStack(
           path: Binding(
             get: { router[.feed] },
             set: { router[.feed] = $0 }
-          )
-        ) {
-          PostsTimelineView()
-            .navigationTitle("Home")
-            .navigationBarTitleDisplayMode(.large)
-            .withAppDestinations()
-        }
-
-      } label: {
-        Label("Feed", systemImage: "house")
-      }
-
-      // Discover
-      Tab(value: AppTab.discover) {
-        NavigationStack(
-          path: Binding(
-            get: { router[.discover] },
-            set: { router[.discover] = $0 }
           )
         ) {
           FeedsListView()
@@ -54,7 +36,7 @@ struct AppTabView: View {
         }
 
       } label: {
-        Label("Discover", systemImage: "safari")
+        Label("Feed", systemImage: "square.stack")
       }
 
       // Notifications
@@ -122,16 +104,15 @@ struct AppTabView: View {
           SimpleSearchView(client: client)
             .withAppDestinations()
         }
-
+        .onAppear { selectedTab = .compose }
       } label: {
         Label("Search", systemImage: "magnifyingglass")
       }
     }
     .tint(.themePrimary)
+
   }
 }
-
-
 
 #Preview {
   AppTabView()
@@ -143,7 +124,6 @@ extension AppTab {
   var displayName: String {
     switch self {
     case .feed: return "Feed"
-    case .discover: return "Discover"
     case .notification: return "Notifications"
     case .profile: return "Profile"
     case .settings: return "Settings"
