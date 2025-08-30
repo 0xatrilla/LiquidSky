@@ -262,7 +262,7 @@ public struct FeedDetailView: View {
       likeCount: 0,
       likeURI: nil,
       repostURI: nil,
-      // embed: nil,
+
       replyRef: nil
     )
 

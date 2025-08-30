@@ -15,16 +15,16 @@ public final class AccountManager {
 
   public func addAccount(_ account: Account) {
     #if DEBUG
-    print("AccountManager: Adding account with handle: \(account.handle)")
-    print("AccountManager: Current accounts count: \(accounts.count)")
+      print("AccountManager: Adding account with handle: \(account.handle)")
+      print("AccountManager: Current accounts count: \(accounts.count)")
     #endif
 
     // Check if account with same handle already exists
     if let existingAccount = accounts.first(where: { $0.handle == account.handle }) {
       #if DEBUG
-      print(
-        "AccountManager: Found existing account with handle: \(existingAccount.handle), updating instead of creating duplicate"
-      )
+        print(
+          "AccountManager: Found existing account with handle: \(existingAccount.handle), updating instead of creating duplicate"
+        )
       #endif
 
       // Update existing account instead of creating duplicate
@@ -50,7 +50,7 @@ public final class AccountManager {
       activeAccountId = updatedAccount.id
     } else {
       #if DEBUG
-      print("AccountManager: No existing account found, creating new one")
+        print("AccountManager: No existing account found, creating new one")
       #endif
 
       // Deactivate all other accounts
@@ -68,8 +68,8 @@ public final class AccountManager {
     }
 
     #if DEBUG
-    print("AccountManager: Final accounts count: \(accounts.count)")
-    print("AccountManager: Account handles: \(accounts.map { $0.handle })")
+      print("AccountManager: Final accounts count: \(accounts.count)")
+      print("AccountManager: Account handles: \(accounts.map { $0.handle })")
     #endif
 
     saveAccounts()
@@ -113,7 +113,10 @@ public final class AccountManager {
 
   public func loadAccounts() {
     #if DEBUG
-    print("AccountManager: Loading accounts from UserDefaults")
+      print("AccountManager: Loading accounts from UserDefaults")
+      print(
+        "AccountManager: Call stack: \(Thread.callStackSymbols.prefix(3).map { $0.components(separatedBy: " ").last ?? "unknown" })"
+      )
     #endif
 
     if let data = userDefaults.data(forKey: accountsKey),
@@ -121,12 +124,12 @@ public final class AccountManager {
     {
       accounts = decodedAccounts
       #if DEBUG
-      print("AccountManager: Loaded \(accounts.count) accounts from UserDefaults")
-      print("AccountManager: Account handles: \(accounts.map { $0.handle })")
+        print("AccountManager: Loaded \(accounts.count) accounts from UserDefaults")
+        print("AccountManager: Account handles: \(accounts.map { $0.handle })")
       #endif
     } else {
       #if DEBUG
-      print("AccountManager: No accounts found in UserDefaults")
+        print("AccountManager: No accounts found in UserDefaults")
       #endif
     }
 
@@ -135,11 +138,11 @@ public final class AccountManager {
     {
       activeAccountId = activeId
       #if DEBUG
-      print("AccountManager: Active account ID: \(activeId)")
+        print("AccountManager: Active account ID: \(activeId)")
       #endif
     } else {
       #if DEBUG
-      print("AccountManager: No active account ID found")
+        print("AccountManager: No active account ID found")
       #endif
     }
   }
@@ -163,14 +166,25 @@ public final class AccountManager {
   // Debug method to clear all accounts
   public func clearAllAccounts() {
     #if DEBUG
-    print("AccountManager: Clearing all accounts")
+      print("AccountManager: Clearing all accounts")
+      print("AccountManager: Before clearing - accounts count: \(accounts.count)")
+      print("AccountManager: Before clearing - account handles: \(accounts.map { $0.handle })")
+      print(
+        "AccountManager: Before clearing - active account ID: \(activeAccountId?.uuidString ?? "nil")"
+      )
     #endif
+
     accounts.removeAll()
     activeAccountId = nil
     userDefaults.removeObject(forKey: accountsKey)
     userDefaults.removeObject(forKey: activeAccountIdKey)
+
     #if DEBUG
-    print("AccountManager: All accounts cleared from memory and UserDefaults")
+      print("AccountManager: After clearing - accounts count: \(accounts.count)")
+      print(
+        "AccountManager: After clearing - active account ID: \(activeAccountId?.uuidString ?? "nil")"
+      )
+      print("AccountManager: All accounts cleared from memory and UserDefaults")
     #endif
   }
 }

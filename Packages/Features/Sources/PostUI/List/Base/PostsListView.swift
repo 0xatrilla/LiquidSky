@@ -481,10 +481,7 @@ private struct ReplyChainView: View {
                 .multilineTextAlignment(.leading)
 
               // Embed content (proper media display)
-              // Temporarily disabled embed functionality
-              // if post.embed != nil {
-              //   PostRowEmbedView(post: post)
-              // }
+              PostRowEmbedView(post: post)
 
               // Actions (use same PostRowActionsView as normal posts for consistency)
               PostRowActionsView(post: post)

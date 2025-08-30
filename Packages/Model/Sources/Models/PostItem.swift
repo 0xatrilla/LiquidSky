@@ -32,6 +32,9 @@ public struct PostItem: Hashable, Identifiable, Sendable {
   public let repostedBy: Profile?
   public let isReposted: Bool
 
+  // Embed data for media, links, and quoted posts
+  public let embed: EmbedData?
+
   public var hasReply: Bool = false
   public var isReplyTo: Bool = false
 
@@ -46,10 +49,10 @@ public struct PostItem: Hashable, Identifiable, Sendable {
     likeCount: Int,
     likeURI: String?,
     repostURI: String?,
-    // embed: Any?,
     replyRef: AppBskyLexicon.Feed.PostRecord.ReplyReference?,
     inReplyToHandle: String? = nil,
-    repostedBy: Profile? = nil
+    repostedBy: Profile? = nil,
+    embed: EmbedData? = nil
   ) {
     self.uri = uri
     self.cid = cid
@@ -61,11 +64,11 @@ public struct PostItem: Hashable, Identifiable, Sendable {
     self.likeCount = likeCount
     self.likeURI = likeURI
     self.repostURI = repostURI
-    // self.embed = embed
     self.indexAtFormatted = indexedAt.relativeFormatted
     self.replyRef = replyRef
     self.inReplyToHandle = inReplyToHandle
     self.repostedBy = repostedBy
+    self.embed = embed
     self.isReposted = repostedBy != nil
     self.hasReply = replyCount > 0
     self.isReplyTo = replyRef != nil
@@ -121,6 +124,12 @@ extension AppBskyLexicon.Feed.FeedViewPostDefinition {
       }
     }
 
+    let embedData = EmbedDataExtractor.extractEmbed(from: post)
+    #if DEBUG
+    print("PostItem: Creating PostItem for \(post.postItem.uri)")
+    print("PostItem: Embed data extracted: \(String(describing: embedData))")
+    #endif
+    
     let postItem = PostItem(
       uri: post.postItem.uri,
       cid: post.postItem.cid,
@@ -132,11 +141,11 @@ extension AppBskyLexicon.Feed.FeedViewPostDefinition {
       likeCount: post.likeCount ?? 0,
       likeURI: post.viewer?.likeURI,
       repostURI: post.viewer?.repostURI,
-      // embed: post.embed,
       replyRef: post.record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self)?.reply,
       inReplyToHandle: extractReplyTargetHandle(
         from: post.record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self)?.reply),
-      repostedBy: repostedByProfile
+      repostedBy: repostedByProfile,
+      embed: embedData
     )
 
     // Debug reply detection
@@ -174,7 +183,13 @@ private func extractReplyTargetHandle(from reply: AppBskyLexicon.Feed.PostRecord
 
 extension AppBskyLexicon.Feed.PostViewDefinition {
   public var postItem: PostItem {
-    PostItem(
+    let embedData = EmbedDataExtractor.extractEmbed(from: self)
+    #if DEBUG
+    print("PostViewDefinition: Creating PostItem for \(uri)")
+    print("PostViewDefinition: Embed data extracted: \(String(describing: embedData))")
+    #endif
+    
+    return PostItem(
       uri: uri,
       cid: cid,
       indexedAt: indexedAt,
@@ -185,8 +200,8 @@ extension AppBskyLexicon.Feed.PostViewDefinition {
       likeCount: likeCount ?? 0,
       likeURI: viewer?.likeURI,
       repostURI: viewer?.repostURI,
-      // embed: embed,
-      replyRef: record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self)?.reply
+      replyRef: record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self)?.reply,
+      embed: embedData
     )
   }
 }
@@ -197,7 +212,13 @@ extension AppBskyLexicon.Feed.ThreadViewPostDefinition {
 
 extension AppBskyLexicon.Embed.RecordDefinition.ViewRecord {
   public var postItem: PostItem {
-    PostItem(
+    let embedData = EmbedDataExtractor.extractEmbed(from: self)
+    #if DEBUG
+    print("ViewRecord: Creating PostItem for \(uri)")
+    print("ViewRecord: Embed data extracted: \(String(describing: embedData))")
+    #endif
+    
+    return PostItem(
       uri: uri,
       cid: cid,
       indexedAt: indexedAt,
@@ -208,8 +229,8 @@ extension AppBskyLexicon.Embed.RecordDefinition.ViewRecord {
       likeCount: likeCount ?? 0,
       likeURI: nil,
       repostURI: nil,
-      // embed: embeds?.first,
-      replyRef: value.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self)?.reply
+      replyRef: value.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self)?.reply,
+      embed: embedData
     )
   }
 }
@@ -218,24 +239,24 @@ extension PostItem {
   public static let placeholders: [PostItem] = Array(
     repeating: (), count: 10
   ).map { _ in
-    PostItem(
-      uri: UUID().uuidString,
-      cid: UUID().uuidString,
-      indexedAt: Date(),
-      author: Profile(
-        did: "placeholder",
-        handle: "placeholder@bsky",
-        displayName: "Placeholder Name",
-        avatarImageURL: nil),
-      content:
-        "Some content some content some content\nSome content some content some content\nsomecontent",
-      replyCount: 0,
-      repostCount: 0,
-      likeCount: 0,
-      likeURI: nil,
-      repostURI: nil,
-      // embed: nil,
-      replyRef: nil)
+          PostItem(
+        uri: UUID().uuidString,
+        cid: UUID().uuidString,
+        indexedAt: Date(),
+        author: Profile(
+          did: "placeholder",
+          handle: "placeholder@bsky",
+          displayName: "Placeholder Name",
+          avatarImageURL: nil),
+        content:
+          "Some content some content some content\nSome content some content some content\nsomecontent",
+        replyCount: 0,
+        repostCount: 0,
+        likeCount: 0,
+        likeURI: nil,
+        repostURI: nil,
+        replyRef: nil,
+        embed: nil)
   }
 
 }

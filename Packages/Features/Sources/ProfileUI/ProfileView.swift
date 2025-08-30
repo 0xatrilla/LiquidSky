@@ -256,29 +256,22 @@ public struct ProfileView: View {
       .pickerStyle(.segmented)
       .padding(.horizontal)
 
-      // Tab Content
-      TabView(selection: $selectedTab) {
-        // Posts Tab
-        PostsProfileView(profile: profile, filter: .postsWithNoReplies)
-          .environment(PostFilterService.shared)
-          .tag(ProfileTab.posts)
-
-        // Replies Tab
-        PostsProfileView(profile: profile, filter: .userReplies)
-          .environment(PostFilterService.shared)
-          .tag(ProfileTab.replies)
-
-        // Media Tab
-        PostsProfileView(profile: profile, filter: .postsWithMedia)
-          .environment(PostFilterService.shared)
-          .tag(ProfileTab.media)
-
-        // Likes Tab
-        PostsLikesView(profile: profile)
-          .tag(ProfileTab.likes)
+      // Tab Content - using direct content instead of TabView to allow proper scrolling
+      Group {
+        switch selectedTab {
+        case .posts:
+          PostsProfileView(profile: profile, filter: .postsWithNoReplies)
+            .environment(PostFilterService.shared)
+        case .replies:
+          PostsProfileView(profile: profile, filter: .userReplies)
+            .environment(PostFilterService.shared)
+        case .media:
+          PostsProfileView(profile: profile, filter: .postsWithMedia)
+            .environment(PostFilterService.shared)
+        case .likes:
+          PostsLikesView(profile: profile)
+        }
       }
-      .tabViewStyle(.page(indexDisplayMode: .never))
-      .frame(height: 600)  // Adjust height as needed
     }
   }
 

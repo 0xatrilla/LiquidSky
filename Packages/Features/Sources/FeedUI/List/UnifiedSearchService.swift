@@ -110,7 +110,7 @@ public class UnifiedSearchService: ObservableObject {
           likeCount: post.likeCount ?? 0,
           likeURI: post.viewer?.likeURI,
           repostURI: post.viewer?.repostURI,
-          // embed: post.embed,
+
           replyRef: post.record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self)?.reply
         )
       }

@@ -13,34 +13,55 @@ public struct PostRowEmbedView: View {
   }
 
   public var body: some View {
-    // Temporarily disabled embed functionality
-    // if let embed = post.embed {
-    //   switch embed {
-    //   case .embedImagesView(let images):
-    //     PostRowImagesView(images: images)
-    //   case .embedVideoView(let videos):
-    //     PostRowVideosView(videos: videos)
-    //   case .embedExternalView(let externalView):
-    //     if isQuote {
-    //       EmptyView()
-    //     } else {
-    //       PostRowEmbedExternalView(externalView: externalView)
-    //     }
-    //   case .embedRecordView(let record):
-    //     switch record.record {
-    //     case .viewRecord(let post):
-    //       if isQuote {
-    //         EmptyView()
-    //       } else {
-    //         PostRowEmbedQuoteView(post: post.postItem)
-    //       }
-    //   default:
-    //       EmptyView()
-    //     }
-    //   default:
-    //     EmptyView()
-    //   }
-    // }
-    EmptyView()
+    #if DEBUG
+    let _ = debugLog()
+    #endif
+    
+    if !isQuote {
+      if let embed = post.embed {
+        switch embed {
+        case .images(let imagesEmbed):
+          PostRowImagesView(images: imagesEmbed)
+        case .videos(let videoEmbed):
+          PostRowVideosView(videos: videoEmbed)
+        case .external(let externalEmbed):
+          PostRowEmbedExternalView(externalView: externalEmbed)
+        case .quotedPost(let recordEmbed):
+          // For now, just show a simple quoted post indicator
+          // TODO: Implement proper quoted post display
+          VStack(alignment: .leading, spacing: 8) {
+            HStack {
+              Image(systemName: "quote.bubble")
+                .foregroundColor(.secondary)
+              Text("Quoted post")
+                .font(.caption)
+                .foregroundColor(.secondary)
+              Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(8)
+          }
+        case .none:
+          EmptyView()
+        }
+      } else {
+        EmptyView()
+      }
+    } else {
+      EmptyView()
+    }
   }
+  
+  #if DEBUG
+  private func debugLog() {
+    if let embed = post.embed {
+      print("PostRowEmbedView: Found embed data for post \(post.uri)")
+      print("PostRowEmbedView: Embed type: \(embed)")
+    } else {
+      print("PostRowEmbedView: No embed data for post \(post.uri)")
+    }
+  }
+  #endif
 }

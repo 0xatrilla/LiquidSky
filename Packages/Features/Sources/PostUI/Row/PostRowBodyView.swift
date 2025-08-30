@@ -37,7 +37,12 @@ struct ClickablePostText: View {
       )
       .lineLimit(compactMode ? 3 : nil)
       .onTapGesture { location in
-        handleMentionTap(at: location)
+        // Try to handle mention tap first, then hashtag tap, then URL tap
+        if !handleMentionTap(at: location) {
+          if !handleHashtagTap(at: location) {
+            handleURLTap(at: location)
+          }
+        }
       }
   }
 
@@ -46,9 +51,9 @@ struct ClickablePostText: View {
 
     // Find and style mentions (handles starting with @)
     let mentionPattern = try! NSRegularExpression(pattern: "@([a-zA-Z0-9._-]+)")
-    let range = NSRange(location: 0, length: text.utf16.count)
+    let mentionRange = NSRange(location: 0, length: text.utf16.count)
 
-    mentionPattern.enumerateMatches(in: text, range: range) { match, _, _ in
+    mentionPattern.enumerateMatches(in: text, range: mentionRange) { match, _, _ in
       guard let match = match else { return }
 
       // Capture group for the handle without @ (optional, not used yet)
@@ -59,8 +64,41 @@ struct ClickablePostText: View {
 
       // Style the entire mention (@handle) using a safe conversion
       if let fullRange = Range(match.range, in: text),
-         let attributedRange = Range(NSRange(fullRange, in: text), in: attributedString) {
+        let attributedRange = Range(NSRange(fullRange, in: text), in: attributedString)
+      {
         attributedString[attributedRange].foregroundColor = .themePrimary
+        attributedString[attributedRange].underlineStyle = .single
+      }
+    }
+
+    // Find and style hashtags
+    let hashtagPattern = try! NSRegularExpression(pattern: "#([a-zA-Z0-9_]+)")
+    let hashtagRange = NSRange(location: 0, length: text.utf16.count)
+
+    hashtagPattern.enumerateMatches(in: text, range: hashtagRange) { match, _, _ in
+      guard let match = match else { return }
+
+      // Style the hashtag using a safe conversion
+      if let fullRange = Range(match.range, in: text),
+        let attributedRange = Range(NSRange(fullRange, in: text), in: attributedString)
+      {
+        attributedString[attributedRange].foregroundColor = .themePrimary
+        attributedString[attributedRange].underlineStyle = .single
+      }
+    }
+
+    // Find and style URLs
+    let urlPattern = try! NSRegularExpression(pattern: "https?://[^\\s]+")
+    let urlRange = NSRange(location: 0, length: text.utf16.count)
+
+    urlPattern.enumerateMatches(in: text, range: urlRange) { match, _, _ in
+      guard let match = match else { return }
+
+      // Style the URL using a safe conversion
+      if let fullRange = Range(match.range, in: text),
+        let attributedRange = Range(NSRange(fullRange, in: text), in: attributedString)
+      {
+        attributedString[attributedRange].foregroundColor = .blue
         attributedString[attributedRange].underlineStyle = .single
       }
     }
@@ -68,10 +106,11 @@ struct ClickablePostText: View {
     return attributedString
   }
 
-  private func handleMentionTap(at location: CGPoint) {
+  private func handleMentionTap(at location: CGPoint) -> Bool {
     // Find which mention was tapped
     let mentionPattern = try! NSRegularExpression(pattern: "@([a-zA-Z0-9._-]+)")
     let range = NSRange(location: 0, length: text.utf16.count)
+    var foundMention = false
 
     mentionPattern.enumerateMatches(in: text, range: range) { match, _, _ in
       guard let match = match else { return }
@@ -81,6 +120,7 @@ struct ClickablePostText: View {
         let handle = String(text[handleRange])
         // For now, just print the handle - navigation will be implemented later
         print("Tapped on mention: @\(handle)")
+        foundMention = true
       }
 
       // TODO: Implement navigation to profile when AppRouter is available
@@ -90,6 +130,59 @@ struct ClickablePostText: View {
       // 3. Calling router.navigateTo(.profile(profile))
 
       // Only handle the first mention for now
+      return
+    }
+
+    return foundMention
+  }
+
+  private func handleHashtagTap(at location: CGPoint) -> Bool {
+    // Find which hashtag was tapped
+    let hashtagPattern = try! NSRegularExpression(pattern: "#([a-zA-Z0-9_]+)")
+    let range = NSRange(location: 0, length: text.utf16.count)
+    var foundHashtag = false
+
+    hashtagPattern.enumerateMatches(in: text, range: range) { match, _, _ in
+      guard let match = match else { return }
+
+      let nsRange = match.range(at: 1)  // Capture group for the hashtag without #
+      if let hashtagRange = Range(nsRange, in: text) {
+        let hashtag = String(text[hashtagRange])
+        // For now, just print the hashtag - navigation will be implemented later
+        print("Tapped on hashtag: #\(hashtag)")
+        foundHashtag = true
+      }
+
+      // TODO: Implement navigation to hashtag search when AppRouter is available
+      // This will require:
+      // 1. Adding AppRouter to the environment
+      // 2. Calling router.navigateTo(.search(query: "#\(hashtag)"))
+
+      // Only handle the first hashtag for now
+      return
+    }
+
+    return foundHashtag
+  }
+
+  private func handleURLTap(at location: CGPoint) {
+    // Find which URL was tapped
+    let urlPattern = try! NSRegularExpression(pattern: "https?://[^\\s]+")
+    let range = NSRange(location: 0, length: text.utf16.count)
+
+    urlPattern.enumerateMatches(in: text, range: range) { match, _, _ in
+      guard let match = match else { return }
+
+      if let urlRange = Range(match.range, in: text) {
+        let urlString = String(text[urlRange])
+        if let url = URL(string: urlString) {
+          // Open URL in Safari
+          UIApplication.shared.open(url)
+        }
+      }
+
+      // Only handle the first URL for now
+      return
     }
   }
 }
