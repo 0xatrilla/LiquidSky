@@ -67,6 +67,10 @@ public struct AuthView: View {
             endPoint: .bottomTrailing
           )
           .ignoresSafeArea()
+
+          // Floating Bluesky logos background
+          FloatingBlueskyLogosView()
+            .allowsHitTesting(false)
         }
       )
       .navigationBarTitleDisplayMode(.inline)
@@ -416,6 +420,186 @@ struct SafariView: UIViewControllerRepresentable {
 
   func updateUIViewController(_ uiViewController: SFSafariViewController, context: Context) {
     // No updates needed
+  }
+}
+
+// MARK: - Floating Bluesky Logos View
+
+struct FloatingBlueskyLogosView: View {
+  @State private var logo1 = LogoState()
+  @State private var logo2 = LogoState()
+  @State private var logo3 = LogoState()
+  @State private var logo4 = LogoState()
+  @State private var logo5 = LogoState()
+  @State private var logo6 = LogoState()
+  @State private var logo7 = LogoState()
+  @State private var logo8 = LogoState()
+
+  var body: some View {
+    ZStack {
+      // Logo 1
+      Image("BlueskyLogo")
+        .resizable()
+        .scaledToFit()
+        .frame(width: 60, height: 60)
+        .opacity(0.08)
+        .rotationEffect(.degrees(logo1.rotation))
+        .offset(x: logo1.x, y: logo1.y)
+        .animation(
+          .easeInOut(duration: logo1.duration)
+            .repeatForever(autoreverses: true),
+          value: logo1.x
+        )
+        .onAppear {
+          logo1.startAnimation()
+        }
+
+      // Logo 2
+      Image("BlueskyLogo")
+        .resizable()
+        .scaledToFit()
+        .frame(width: 50, height: 50)
+        .opacity(0.06)
+        .rotationEffect(.degrees(logo2.rotation))
+        .offset(x: logo2.x, y: logo2.y)
+        .animation(
+          .easeInOut(duration: logo2.duration)
+            .repeatForever(autoreverses: true),
+          value: logo2.x
+        )
+        .onAppear {
+          logo2.startAnimation()
+        }
+
+      // Logo 3
+      Image("BlueskyLogo")
+        .resizable()
+        .scaledToFit()
+        .frame(width: 45, height: 45)
+        .opacity(0.05)
+        .rotationEffect(.degrees(logo3.rotation))
+        .offset(x: logo3.x, y: logo3.y)
+        .animation(
+          .easeInOut(duration: logo3.duration)
+            .repeatForever(autoreverses: true),
+          value: logo3.x
+        )
+        .onAppear {
+          logo3.startAnimation()
+        }
+
+      // Logo 4
+      Image("BlueskyLogo")
+        .resizable()
+        .scaledToFit()
+        .frame(width: 55, height: 55)
+        .opacity(0.07)
+        .rotationEffect(.degrees(logo4.rotation))
+        .offset(x: logo4.x, y: logo4.y)
+        .animation(
+          .easeInOut(duration: logo4.duration)
+            .repeatForever(autoreverses: true),
+          value: logo4.x
+        )
+        .onAppear {
+          logo4.startAnimation()
+        }
+
+      // Logo 5
+      Image("BlueskyLogo")
+        .resizable()
+        .scaledToFit()
+        .frame(width: 40, height: 40)
+        .opacity(0.04)
+        .rotationEffect(.degrees(logo5.rotation))
+        .offset(x: logo5.x, y: logo5.y)
+        .animation(
+          .easeInOut(duration: logo5.duration)
+            .repeatForever(autoreverses: true),
+          value: logo5.x
+        )
+        .onAppear {
+          logo5.startAnimation()
+        }
+
+      // Logo 6
+      Image("BlueskyLogo")
+        .resizable()
+        .scaledToFit()
+        .frame(width: 48, height: 48)
+        .opacity(0.06)
+        .rotationEffect(.degrees(logo6.rotation))
+        .offset(x: logo6.x, y: logo6.y)
+        .animation(
+          .easeInOut(duration: logo6.duration)
+            .repeatForever(autoreverses: true),
+          value: logo6.x
+        )
+        .onAppear {
+          logo6.startAnimation()
+        }
+
+      // Logo 7
+      Image("BlueskyLogo")
+        .resizable()
+        .scaledToFit()
+        .frame(width: 42, height: 42)
+        .opacity(0.05)
+        .rotationEffect(.degrees(logo7.rotation))
+        .offset(x: logo7.x, y: logo7.y)
+        .animation(
+          .easeInOut(duration: logo7.duration)
+            .repeatForever(autoreverses: true),
+          value: logo7.x
+        )
+        .onAppear {
+          logo7.startAnimation()
+        }
+
+      // Logo 8
+      Image("BlueskyLogo")
+        .resizable()
+        .scaledToFit()
+        .frame(width: 52, height: 52)
+        .opacity(0.07)
+        .rotationEffect(.degrees(logo8.rotation))
+        .offset(x: logo8.x, y: logo8.y)
+        .animation(
+          .easeInOut(duration: logo8.duration)
+            .repeatForever(autoreverses: true),
+          value: logo8.x
+        )
+        .onAppear {
+          logo8.startAnimation()
+        }
+    }
+  }
+}
+
+// MARK: - Logo State
+
+struct LogoState {
+  var x: CGFloat = 0
+  var y: CGFloat = 0
+  var rotation: Double = 0
+  var duration: Double = 0
+
+  mutating func startAnimation() {
+    // Random starting positions - cover the entire screen
+    x = CGFloat.random(in: -200...200)
+    y = CGFloat.random(in: -400...400)
+
+    // Random animation parameters - move across the entire screen
+    let targetX = CGFloat.random(in: -200...200)
+    let targetY = CGFloat.random(in: -400...400)
+    duration = Double.random(in: 12...20)
+
+    // Animate to target position with gentle rotation
+    withAnimation(.easeInOut(duration: duration).repeatForever(autoreverses: true)) {
+      x = targetX
+      y = targetY
+      rotation = Double.random(in: -45...45)
+    }
   }
 }
 
