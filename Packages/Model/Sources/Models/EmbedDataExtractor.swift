@@ -52,84 +52,38 @@ public struct EmbedDataExtractor {
   /// Convert ATProtoKit embed types to our EmbedData union type
   private static func convertToEmbedData(_ embed: Any?) -> EmbedData? {
     guard let embed = embed else { return nil }
-
+    
     #if DEBUG
-      print("EmbedDataExtractor: Converting embed type: \(type(of: embed))")
+    print("EmbedDataExtractor: Converting embed type: \(type(of: embed))")
     #endif
-
-    // Handle EmbedUnion types from PostViewDefinition
-    if let embedUnion = embed as? AppBskyLexicon.Feed.PostViewDefinition.EmbedUnion {
-      #if DEBUG
-        print("EmbedDataExtractor: Processing EmbedUnion")
-      #endif
-
-      // Extract the actual embed data from the union
-      switch embedUnion {
-      case .embedImagesView(let imagesView):
-        #if DEBUG
-          print("EmbedDataExtractor: Found embedImagesView")
-        #endif
-        return .images(imagesView)
-
-      case .embedVideoView(let videoView):
-        #if DEBUG
-          print("EmbedDataExtractor: Found embedVideoView")
-        #endif
-        return .videos(videoView)
-
-      case .embedExternalView(let externalView):
-        #if DEBUG
-          print("EmbedDataExtractor: Found embedExternalView")
-        #endif
-        return .external(externalView)
-
-      case .embedRecordView(let recordView):
-        #if DEBUG
-          print("EmbedDataExtractor: Found embedRecordView")
-        #endif
-        return .quotedPost(recordView)
-
-      case .embedRecordWithMediaView(let recordWithMediaView):
-        #if DEBUG
-          print("EmbedDataExtractor: Found embedRecordWithMediaView")
-        #endif
-        // For record with media, we'll return the record part
-        return .quotedPost(recordWithMediaView.record)
-
-      case .unknown(_, _):
-        #if DEBUG
-          print("EmbedDataExtractor: Found unknown embed type")
-        #endif
-        return nil
-      }
-    }
-
-    // Handle direct embed types (fallback for other structures)
+    
+    // Try to convert directly to our EmbedData types
     if let imagesEmbed = embed as? AppBskyLexicon.Embed.ImagesDefinition.View {
       #if DEBUG
-        print("EmbedDataExtractor: Successfully converted to ImagesDefinition.View")
+      print("EmbedDataExtractor: Successfully converted to ImagesDefinition.View")
       #endif
       return .images(imagesEmbed)
     } else if let videoEmbed = embed as? AppBskyLexicon.Embed.VideoDefinition.View {
       #if DEBUG
-        print("EmbedDataExtractor: Successfully converted to VideoDefinition.View")
+      print("EmbedDataExtractor: Successfully converted to VideoDefinition.View")
       #endif
       return .videos(videoEmbed)
     } else if let externalEmbed = embed as? AppBskyLexicon.Embed.ExternalDefinition.View {
       #if DEBUG
-        print("EmbedDataExtractor: Successfully converted to ExternalDefinition.View")
+      print("EmbedDataExtractor: Successfully converted to ExternalDefinition.View")
       #endif
       return .external(externalEmbed)
     } else if let recordEmbed = embed as? AppBskyLexicon.Embed.RecordDefinition.View {
       #if DEBUG
-        print("EmbedDataExtractor: Successfully converted to RecordDefinition.View")
+      print("EmbedDataExtractor: Successfully converted to RecordDefinition.View")
       #endif
       return .quotedPost(recordEmbed)
     }
-
+    
     #if DEBUG
-      print("EmbedDataExtractor: Failed to convert embed type: \(type(of: embed))")
+    print("EmbedDataExtractor: Failed to convert embed type: \(type(of: embed))")
     #endif
+    
     return nil
   }
 

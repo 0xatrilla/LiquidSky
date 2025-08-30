@@ -25,6 +25,8 @@ public struct AppDestinations: ViewModifier {
             .environment(PostFilterService.shared)
         case .profileLikes(let profile):
           PostsLikesView(profile: profile)
+        case .hashtag(let hashtag):
+          HashtagFeedView(hashtag: hashtag)
         }
       }
   }
