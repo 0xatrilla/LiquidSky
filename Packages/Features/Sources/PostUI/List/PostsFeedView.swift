@@ -95,6 +95,7 @@ extension PostsFeedView: @MainActor PostsListViewDatasource {
       print("PostsFeedView: Starting to load posts for feed: \(feedItem.displayName)")
       print("PostsFeedView: Feed URI: \(feedItem.uri)")
       print("PostsFeedView: Current state: \(state)")
+      print("PostsFeedView: About to call getFeed API")
     #endif
 
     switch state {
@@ -105,6 +106,10 @@ extension PostsFeedView: @MainActor PostsListViewDatasource {
       let feed = try await client.protoClient.getFeed(by: feedItem.uri, cursor: nil)
       #if DEBUG
         print("PostsFeedView: Successfully fetched feed with \(feed.feed.count) posts")
+        print("PostsFeedView: Feed response: \(feed)")
+        if feed.feed.isEmpty {
+          print("PostsFeedView: WARNING - Feed is empty!")
+        }
       #endif
       let processedPosts = await processFeed(feed.feed, client: client.protoClient)
       #if DEBUG

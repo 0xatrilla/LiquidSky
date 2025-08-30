@@ -25,7 +25,8 @@
 		9FB136012DEEB30A003D7ABE /* ComposerUI in Frameworks */ = {isa = PBXBuildFile; productRef = 9FB136002DEEB30A003D7ABE /* ComposerUI */; };
 		9FD63DE02CEF1F5B00243D9A /* PostUI in Frameworks */ = {isa = PBXBuildFile; productRef = 9FD63DDF2CEF1F5B00243D9A /* PostUI */; };
 		9FD63DE22CEF20F500243D9A /* AuthUI in Frameworks */ = {isa = PBXBuildFile; productRef = 9FD63DE12CEF20F500243D9A /* AuthUI */; };
-		DB722B902E608A4300644142 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB722B8F2E608A4300644142 /* StoreKit.framework */; };
+		DB3EFFD82E6276C6000A1DFA /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB722B8F2E608A4300644142 /* StoreKit.framework */; };
+		DB3EFFD92E6276C6000A1DFA /* StoreKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DB722B8F2E608A4300644142 /* StoreKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DB722B922E608AB900644142 /* Configuration.storekit in Resources */ = {isa = PBXBuildFile; fileRef = DB722B912E608AB900644142 /* Configuration.storekit */; };
 /* End PBXBuildFile section */
 
@@ -38,6 +39,17 @@
 			files = (
 			);
 			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DB3EFFDA2E6276C6000A1DFA /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				DB3EFFD92E6276C6000A1DFA /* StoreKit.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -80,7 +92,7 @@
 				9FA556A32CF49E55008A62B4 /* FeedUI in Frameworks */,
 				9F1552F12CEF35C000DD9F6E /* FeedUI in Frameworks */,
 				9FAEE3BA2CF09BB400F86CDC /* SettingsUI in Frameworks */,
-				DB722B902E608A4300644142 /* StoreKit.framework in Frameworks */,
+				DB3EFFD82E6276C6000A1DFA /* StoreKit.framework in Frameworks */,
 				9FB136012DEEB30A003D7ABE /* ComposerUI in Frameworks */,
 				9F1552F32CEF35C000DD9F6E /* PostUI in Frameworks */,
 				9FA3256B2E05439D007BAC14 /* Client in Frameworks */,
@@ -147,6 +159,7 @@
 				9F2142202CE9DAA1004167D7 /* Frameworks */,
 				9F2142212CE9DAA1004167D7 /* Resources */,
 				DB21B1072E53F69F00B27D22 /* Embed Foundation Extensions */,
+				DB3EFFDA2E6276C6000A1DFA /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
