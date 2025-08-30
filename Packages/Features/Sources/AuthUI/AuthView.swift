@@ -434,6 +434,10 @@ struct FloatingBlueskyLogosView: View {
   @State private var logo6 = LogoState()
   @State private var logo7 = LogoState()
   @State private var logo8 = LogoState()
+  @State private var logo9 = LogoState()
+  @State private var logo10 = LogoState()
+  @State private var logo11 = LogoState()
+  @State private var logo12 = LogoState()
 
   var body: some View {
     ZStack {
@@ -572,6 +576,74 @@ struct FloatingBlueskyLogosView: View {
         .onAppear {
           logo8.startAnimation()
         }
+
+      // Logo 9
+      Image("BlueskyLogo")
+        .resizable()
+        .scaledToFit()
+        .frame(width: 44, height: 44)
+        .opacity(0.06)
+        .rotationEffect(.degrees(logo9.rotation))
+        .offset(x: logo9.x, y: logo9.y)
+        .animation(
+          .easeInOut(duration: logo9.duration)
+            .repeatForever(autoreverses: true),
+          value: logo9.x
+        )
+        .onAppear {
+          logo9.startAnimation()
+        }
+
+      // Logo 10
+      Image("BlueskyLogo")
+        .resizable()
+        .scaledToFit()
+        .frame(width: 38, height: 38)
+        .opacity(0.05)
+        .rotationEffect(.degrees(logo10.rotation))
+        .offset(x: logo10.x, y: logo10.y)
+        .animation(
+          .easeInOut(duration: logo10.duration)
+            .repeatForever(autoreverses: true),
+          value: logo10.x
+        )
+        .onAppear {
+          logo10.startAnimation()
+        }
+
+      // Logo 11
+      Image("BlueskyLogo")
+        .resizable()
+        .scaledToFit()
+        .frame(width: 56, height: 56)
+        .opacity(0.07)
+        .rotationEffect(.degrees(logo11.rotation))
+        .offset(x: logo11.x, y: logo11.y)
+        .animation(
+          .easeInOut(duration: logo11.duration)
+            .repeatForever(autoreverses: true),
+          value: logo11.x
+        )
+        .onAppear {
+          logo11.startAnimation()
+        }
+
+      // Logo 12
+      Image("BlueskyLogo")
+        .resizable()
+        .scaledToFit()
+        .frame(width: 46, height: 46)
+        .opacity(0.06)
+        .rotationEffect(.degrees(logo12.rotation))
+        .offset(x: logo12.x, y: logo12.y)
+        .animation(
+          .easeInOut(duration: logo12.duration)
+            .repeatForever(autoreverses: true),
+          value: logo12.x
+        )
+        .onAppear {
+          logo12.startAnimation()
+        }
     }
   }
 }
@@ -585,14 +657,14 @@ struct LogoState {
   var duration: Double = 0
 
   mutating func startAnimation() {
-    // Random starting positions - cover the entire screen
-    x = CGFloat.random(in: -200...200)
-    y = CGFloat.random(in: -400...400)
+    // Random starting positions - cover the entire screen and beyond
+    x = CGFloat.random(in: -300...300)
+    y = CGFloat.random(in: -600...600)
 
-    // Random animation parameters - move across the entire screen
-    let targetX = CGFloat.random(in: -200...200)
-    let targetY = CGFloat.random(in: -400...400)
-    duration = Double.random(in: 12...20)
+    // Random animation parameters - move across the entire screen and beyond
+    let targetX = CGFloat.random(in: -300...300)
+    let targetY = CGFloat.random(in: -600...600)
+    duration = Double.random(in: 15...25)
 
     // Animate to target position with gentle rotation
     withAnimation(.easeInOut(duration: duration).repeatForever(autoreverses: true)) {
