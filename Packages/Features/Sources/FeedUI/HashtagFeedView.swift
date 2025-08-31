@@ -136,119 +136,8 @@ public struct HashtagFeedView: View {
           ScrollView {
             LazyVStack(spacing: 0) {
               ForEach(posts, id: \.id) { post in
-                // Simple post display for now
-                VStack(alignment: .leading, spacing: 8) {
-                  HStack {
-                    if let avatar = post.author.avatarImageURL {
-                      AsyncImage(url: avatar) { image in
-                        image
-                          .resizable()
-                          .aspectRatio(contentMode: .fill)
-                      } placeholder: {
-                        Image(systemName: "person.circle.fill")
-                          .foregroundColor(.secondary)
-                      }
-                      .frame(width: 32, height: 32)
-                      .clipShape(Circle())
-                    } else {
-                      Image(systemName: "person.circle.fill")
-                        .foregroundColor(.secondary)
-                        .frame(width: 32, height: 32)
-                    }
-
-                    VStack(alignment: .leading, spacing: 2) {
-                      Text(post.author.displayName ?? post.author.handle)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                      Text("@\(post.author.handle)")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                    }
-
-                    Spacer()
-
-                    Text(post.indexedAt, style: .relative)
-                      .font(.caption2)
-                      .foregroundColor(.secondary)
-                  }
-                  .padding(.horizontal, 12)
-
-                  if !post.content.isEmpty {
-                    Text(post.content)
-                      .font(.body)
-                      .lineLimit(3)
-                      .padding(.horizontal, 12)
-                  }
-
-                  // Simple embed display
-                  if let embed = post.embed {
-                    switch embed {
-                    case .images(let imagesView):
-                      if let firstImage = imagesView.images.first {
-                        AsyncImage(url: firstImage.fullSizeImageURL) { image in
-                          image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                        } placeholder: {
-                          Rectangle()
-                            .fill(Color.gray.opacity(0.3))
-                        }
-                        .frame(height: 200)
-                        .clipped()
-                        .cornerRadius(8)
-                        .padding(.horizontal, 16)
-                      }
-                    case .videos(_):
-                      Rectangle()
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(height: 200)
-                        .overlay(
-                          Image(systemName: "play.circle.fill")
-                            .font(.largeTitle)
-                            .foregroundColor(.white)
-                        )
-                        .cornerRadius(8)
-                        .padding(.horizontal, 16)
-                    case .external(let externalView):
-                      VStack(alignment: .leading, spacing: 4) {
-                        Text(externalView.external.title)
-                          .font(.caption)
-                          .fontWeight(.medium)
-                        Text(externalView.external.description)
-                          .font(.caption2)
-                          .foregroundColor(.secondary)
-                          .lineLimit(2)
-                      }
-                      .padding(12)
-                      .background(Color.gray.opacity(0.1))
-                      .cornerRadius(8)
-                      .padding(.horizontal, 12)
-                    case .quotedPost(_):
-                      VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                          Image(systemName: "quote.bubble")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                          Text("Quoted post")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                          Spacer()
-                        }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(8)
-                        .padding(.horizontal, 12)
-                      }
-                    case .none:
-                      EmptyView()
-                    }
-                  }
-
-                  Divider()
-                    .padding(.top, 8)
-                }
-                .padding(.vertical, 8)
+                HashtagPostRowView(post: post)
+                  .padding(.vertical, 8)
               }
 
               // Load more button
@@ -343,6 +232,230 @@ public struct HashtagFeedView: View {
       }
 
       isLoading = false
+    }
+  }
+}
+
+// MARK: - Hashtag Post Row View
+private struct HashtagPostRowView: View {
+  let post: PostItem
+  @Environment(BSkyClient.self) private var client
+  @State private var isLiked = false
+  @State private var isReposted = false
+  @State private var likeCount: Int
+  @State private var repostCount: Int
+  @State private var replyCount: Int
+
+  init(post: PostItem) {
+    self.post = post
+    self._likeCount = State(initialValue: post.likeCount)
+    self._repostCount = State(initialValue: post.repostCount)
+    self._replyCount = State(initialValue: post.replyCount)
+    self._isLiked = State(initialValue: post.likeURI != nil)
+    self._isReposted = State(initialValue: post.repostURI != nil)
+  }
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 12) {
+      // Author info
+      HStack {
+        AsyncImage(url: post.author.avatarImageURL) { phase in
+          switch phase {
+          case .success(let image):
+            image
+              .resizable()
+              .aspectRatio(contentMode: .fill)
+          default:
+            Image(systemName: "person.circle.fill")
+              .foregroundColor(.secondary)
+          }
+        }
+        .frame(width: 40, height: 40)
+        .clipShape(Circle())
+
+        VStack(alignment: .leading, spacing: 2) {
+          Text(post.author.displayName ?? "")
+            .font(.callout)
+            .fontWeight(.semibold)
+
+          Text("@\(post.author.handle)")
+            .font(.footnote)
+            .foregroundColor(.secondary)
+        }
+
+        Spacer()
+
+        Text(post.indexedAt, style: .relative)
+          .font(.caption)
+          .foregroundColor(.secondary)
+      }
+
+      // Post content
+      if !post.content.isEmpty {
+        Text(post.content)
+          .font(.body)
+          .lineLimit(nil)
+          .multilineTextAlignment(.leading)
+      }
+
+      // Media embeds
+      if let embed = post.embed {
+        switch embed {
+        case .images(let imagesView):
+          if let firstImage = imagesView.images.first {
+            AsyncImage(url: firstImage.fullSizeImageURL) { image in
+              image
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+            } placeholder: {
+              Rectangle()
+                .fill(Color.gray.opacity(0.3))
+            }
+            .frame(maxHeight: 300)
+            .clipped()
+            .cornerRadius(8)
+          }
+        case .videos(_):
+          Rectangle()
+            .fill(Color.gray.opacity(0.3))
+            .frame(height: 200)
+            .overlay(
+              Image(systemName: "play.circle.fill")
+                .font(.largeTitle)
+                .foregroundColor(.white)
+            )
+            .cornerRadius(8)
+        case .external(let externalView):
+          VStack(alignment: .leading, spacing: 4) {
+            Text(externalView.external.title)
+              .font(.caption)
+              .fontWeight(.medium)
+            Text(externalView.external.description)
+              .font(.caption2)
+              .foregroundColor(.secondary)
+              .lineLimit(2)
+          }
+          .padding(12)
+          .background(Color.gray.opacity(0.1))
+          .cornerRadius(8)
+        case .quotedPost(_):
+          VStack(alignment: .leading, spacing: 4) {
+            HStack {
+              Image(systemName: "quote.bubble")
+                .font(.caption)
+                .foregroundColor(.secondary)
+              Text("Quoted post")
+                .font(.caption)
+                .foregroundColor(.secondary)
+              Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(8)
+          }
+        case .none:
+          EmptyView()
+        }
+      }
+
+      // Interactive actions
+      HStack(spacing: 20) {
+        Button(action: {
+          Task {
+            await toggleLike()
+          }
+        }) {
+          HStack(spacing: 4) {
+            Image(systemName: isLiked ? "heart.fill" : "heart")
+              .font(.caption)
+              .foregroundColor(isLiked ? .red : .secondary)
+            Text("\(likeCount)")
+              .font(.caption)
+              .foregroundColor(.secondary)
+          }
+        }
+        .buttonStyle(.plain)
+
+        Button(action: {
+          Task {
+            await toggleRepost()
+          }
+        }) {
+          HStack(spacing: 4) {
+            Image(systemName: isReposted ? "arrow.2.squarepath.fill" : "arrow.2.squarepath")
+              .font(.caption)
+              .foregroundColor(isReposted ? .green : .secondary)
+            Text("\(repostCount)")
+              .font(.caption)
+              .foregroundColor(.secondary)
+          }
+        }
+        .buttonStyle(.plain)
+
+        Button(action: {
+          // Reply action - navigate to post details for reply
+          // This would typically open the composer, but for now we'll just show an alert
+        }) {
+          HStack(spacing: 4) {
+            Image(systemName: "bubble.left")
+              .font(.caption)
+            Text("\(replyCount)")
+              .font(.caption)
+          }
+          .foregroundColor(.secondary)
+        }
+        .buttonStyle(.plain)
+
+        Spacer()
+      }
+      .padding(.top, 8)
+    }
+    .padding(.horizontal, 16)
+  }
+
+  // MARK: - Post Actions
+  private func toggleLike() async {
+    do {
+      if isLiked {
+        // Unlike
+        if let likeURI = post.likeURI {
+          try await client.blueskyClient.deleteRecord(.recordURI(atURI: likeURI))
+          likeCount = max(0, likeCount - 1)
+          isLiked = false
+        }
+      } else {
+        // Like
+        let likeRecord = try await client.blueskyClient.createLikeRecord(
+          .init(recordURI: post.uri, cidHash: post.cid)
+        )
+        likeCount += 1
+        isLiked = true
+      }
+    } catch {
+      print("Error toggling like: \(error)")
+    }
+  }
+
+  private func toggleRepost() async {
+    do {
+      if isReposted {
+        // Remove repost
+        if let repostURI = post.repostURI {
+          try await client.blueskyClient.deleteRecord(.recordURI(atURI: repostURI))
+          repostCount = max(0, repostCount - 1)
+          isReposted = false
+        }
+      } else {
+        // Repost
+        let repostRecord = try await client.blueskyClient.createRepostRecord(
+          .init(recordURI: post.uri, cidHash: post.cid)
+        )
+        repostCount += 1
+        isReposted = true
+      }
+    } catch {
+      print("Error toggling repost: \(error)")
     }
   }
 }

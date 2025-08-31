@@ -37,7 +37,9 @@ let package = Package(
   targets: [
     .target(
       name: "FeedUI",
-      dependencies: baseDeps,
+      dependencies: baseDeps + [
+        .product(name: "AppRouter", package: "AppRouter")
+      ],
       linkerSettings: [
         .unsafeFlags(["-weak_framework", "FoundationModels"], .when(platforms: [.iOS]))
       ]
