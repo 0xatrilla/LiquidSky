@@ -351,7 +351,11 @@ private struct HashtagPostImagesView: View {
   let images: AppBskyLexicon.Embed.ImagesDefinition.View
 
   var body: some View {
-    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: min(images.images.count, 3)), spacing: 4) {
+    LazyVGrid(
+      columns: Array(
+        repeating: GridItem(.flexible(), spacing: 4), count: min(images.images.count, 3)),
+      spacing: 4
+    ) {
       ForEach(Array(images.images.prefix(3).enumerated()), id: \.offset) { index, image in
         AsyncImage(url: image.fullSizeImageURL) { phase in
           switch phase {
@@ -390,7 +394,7 @@ private struct HashtagPostVideosView: View {
               .frame(height: 200)
               .clipped()
               .cornerRadius(8)
-            
+
             Image(systemName: "play.circle.fill")
               .font(.system(size: 48))
               .foregroundColor(.white)
@@ -430,20 +434,20 @@ private struct HashtagPostExternalView: View {
           }
         }
       }
-      
+
       VStack(alignment: .leading, spacing: 4) {
         Text(externalView.external.title)
           .font(.subheadline)
           .fontWeight(.semibold)
           .lineLimit(2)
-        
+
         if !externalView.external.description.isEmpty {
           Text(externalView.external.description)
             .font(.caption)
             .foregroundStyle(.secondary)
             .lineLimit(3)
         }
-        
+
         Text(externalView.external.uri)
           .font(.caption)
           .foregroundStyle(.blue)
