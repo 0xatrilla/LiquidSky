@@ -87,11 +87,13 @@ struct ClickablePostText: View {
     // This is a simplified approach that will work reliably
     let hashtagPattern = #/#[a-zA-Z0-9_]+/#
     let hashtagMatches = text.matches(of: hashtagPattern)
-    
+
     if let firstMatch = hashtagMatches.first {
       let hashtag = String(firstMatch.output)
       let hashtagWithoutHash = String(hashtag.dropFirst())
+      print("PostRowBodyView: Tapping hashtag: \(hashtag) -> \(hashtagWithoutHash)")
       router.navigateTo(.hashtag(hashtagWithoutHash))
+      print("PostRowBodyView: Navigation called for hashtag: \(hashtagWithoutHash)")
     }
   }
 }

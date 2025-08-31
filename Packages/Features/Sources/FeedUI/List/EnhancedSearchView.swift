@@ -32,6 +32,7 @@ public struct EnhancedSearchView: View {
   @State private var searchHistory: [String] = []
   @Environment(AppRouter.self) var router
   @Environment(BSkyClient.self) var client
+  @State private var navigationPath = NavigationPath()
 
   public init(client: BSkyClient) {
     self._searchService = State(initialValue: UnifiedSearchService(client: client))
@@ -39,37 +40,42 @@ public struct EnhancedSearchView: View {
   }
 
   public var body: some View {
-    VStack(spacing: 0) {
-      filterButtons
+    NavigationStack(path: $navigationPath) {
+      VStack(spacing: 0) {
+        filterButtons
 
-      if !searchText.isEmpty {
-        searchResultsView
-      } else {
-        trendingContentView
-      }
-    }
-    .background(Color(.systemBackground))
-    .navigationTitle("Search")
-    .navigationBarTitleDisplayMode(.large)
-    .searchable(text: $searchText, prompt: "Search users, feeds, and posts...")
-    .onChange(of: searchText) { _, newValue in
-      if !newValue.isEmpty {
-        Task {
-          await performSearch()
+        if !searchText.isEmpty {
+          searchResultsView
+        } else {
+          trendingContentView
         }
       }
-    }
-    .onAppear {
-      searchService.client = client
-      trendingContentService.client = client
-      Task {
-        await trendingContentService.fetchTrendingContent()
-      }
-
-      if !searchText.isEmpty {
-        Task {
-          await performSearch()
+      .background(Color(.systemBackground))
+      .navigationTitle("Search")
+      .navigationBarTitleDisplayMode(.large)
+      .searchable(text: $searchText, prompt: "Search users, feeds, and posts...")
+      .onChange(of: searchText) { _, newValue in
+        if !newValue.isEmpty {
+          Task {
+            await performSearch()
+          }
         }
+      }
+      .onAppear {
+        searchService.client = client
+        trendingContentService.client = client
+        Task {
+          await trendingContentService.fetchTrendingContent()
+        }
+
+        if !searchText.isEmpty {
+          Task {
+            await performSearch()
+          }
+        }
+      }
+      .navigationDestination(for: String.self) { hashtag in
+        HashtagFeedView(hashtag: hashtag)
       }
     }
   }
@@ -151,7 +157,7 @@ public struct EnhancedSearchView: View {
                 // Navigate to hashtag feed instead of setting search text
                 let hashtagWithoutHash =
                   hashtag.tag.hasPrefix("#") ? String(hashtag.tag.dropFirst()) : hashtag.tag
-                router.navigateTo(.hashtag(hashtagWithoutHash))
+                navigationPath.append(hashtagWithoutHash)
               }) {
                 VStack(spacing: 8) {
                   HStack {
