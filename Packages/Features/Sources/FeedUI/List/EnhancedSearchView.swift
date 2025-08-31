@@ -49,6 +49,8 @@ public struct EnhancedSearchView: View {
       }
     }
     .background(Color(.systemBackground))
+    .navigationTitle("Search")
+    .navigationBarTitleDisplayMode(.large)
     .searchable(text: $searchText, prompt: "Search users, feeds, and posts...")
     .onChange(of: searchText) { _, newValue in
       if !newValue.isEmpty {
@@ -144,10 +146,7 @@ public struct EnhancedSearchView: View {
           }
 
           LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
-            ForEach(
-              trendingContentService.trendingHashtags.isEmpty
-                ? fallbackHashtags : trendingContentService.trendingHashtags, id: \.tag
-            ) { hashtag in
+            ForEach(fallbackHashtags, id: \.tag) { hashtag in
               Button(action: {
                 // Navigate to hashtag feed instead of setting search text
                 let hashtagWithoutHash =
