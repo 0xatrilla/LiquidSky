@@ -99,7 +99,10 @@ public class UnifiedSearchService: ObservableObject {
     do {
       let results = try await client.protoClient.searchPosts(matching: query, limit: 20)
       return results.posts.map { post in
-        PostItem(
+        // Extract embed data using the EmbedDataExtractor
+        let embedData = EmbedDataExtractor.extractEmbed(from: post)
+        
+        return PostItem(
           uri: post.uri,
           cid: post.cid,
           indexedAt: post.indexedAt,
@@ -110,8 +113,8 @@ public class UnifiedSearchService: ObservableObject {
           likeCount: post.likeCount ?? 0,
           likeURI: post.viewer?.likeURI,
           repostURI: post.viewer?.repostURI,
-
-          replyRef: post.record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self)?.reply
+          replyRef: post.record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self)?.reply,
+          embed: embedData
         )
       }
     } catch {
