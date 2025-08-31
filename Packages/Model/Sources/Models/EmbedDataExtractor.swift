@@ -52,38 +52,41 @@ public struct EmbedDataExtractor {
   /// Convert ATProtoKit embed types to our EmbedData union type
   private static func convertToEmbedData(_ embed: Any?) -> EmbedData? {
     guard let embed = embed else { return nil }
-    
+
     #if DEBUG
-    print("EmbedDataExtractor: Converting embed type: \(type(of: embed))")
+      print("EmbedDataExtractor: Converting embed type: \(type(of: embed))")
     #endif
-    
+
+    // Handle the embed union type by checking for specific embed types
+    // The embed might be a union that contains different embed types
+
     // Try to convert directly to our EmbedData types
     if let imagesEmbed = embed as? AppBskyLexicon.Embed.ImagesDefinition.View {
       #if DEBUG
-      print("EmbedDataExtractor: Successfully converted to ImagesDefinition.View")
+        print("EmbedDataExtractor: Successfully converted to ImagesDefinition.View")
       #endif
       return .images(imagesEmbed)
     } else if let videoEmbed = embed as? AppBskyLexicon.Embed.VideoDefinition.View {
       #if DEBUG
-      print("EmbedDataExtractor: Successfully converted to VideoDefinition.View")
+        print("EmbedDataExtractor: Successfully converted to VideoDefinition.View")
       #endif
       return .videos(videoEmbed)
     } else if let externalEmbed = embed as? AppBskyLexicon.Embed.ExternalDefinition.View {
       #if DEBUG
-      print("EmbedDataExtractor: Successfully converted to ExternalDefinition.View")
+        print("EmbedDataExtractor: Successfully converted to ExternalDefinition.View")
       #endif
       return .external(externalEmbed)
     } else if let recordEmbed = embed as? AppBskyLexicon.Embed.RecordDefinition.View {
       #if DEBUG
-      print("EmbedDataExtractor: Successfully converted to RecordDefinition.View")
+        print("EmbedDataExtractor: Successfully converted to RecordDefinition.View")
       #endif
       return .quotedPost(recordEmbed)
     }
-    
+
     #if DEBUG
-    print("EmbedDataExtractor: Failed to convert embed type: \(type(of: embed))")
+      print("EmbedDataExtractor: Failed to convert embed type: \(type(of: embed))")
     #endif
-    
+
     return nil
   }
 

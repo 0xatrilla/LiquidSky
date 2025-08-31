@@ -1,4 +1,5 @@
 import AppRouter
+import Client
 import DesignSystem
 import Destinations
 import Models
@@ -146,9 +147,16 @@ public struct UnifiedSearchResultsView: View {
 
 struct FeedSearchResultRow: View {
   @Environment(AppRouter.self) var router
+  @Environment(BSkyClient.self) private var client
 
   let feed: FeedSearchResult
   @Namespace private var namespace
+  @State private var isLiked: Bool
+
+  public init(feed: FeedSearchResult) {
+    self.feed = feed
+    self._isLiked = State(initialValue: feed.isLiked)
+  }
 
   var body: some View {
     HStack(spacing: 12) {
@@ -211,21 +219,35 @@ struct FeedSearchResultRow: View {
       Spacer()
 
       // Subscribe Button
-      Button(feed.isLiked ? "Subscribed" : "Subscribe") {
-        // Subscribe to feed
+      Button(isLiked ? "Liked" : "Like") {
+        Task {
+          await toggleFeedSubscription()
+        }
       }
       .padding(.horizontal, 12)
       .padding(.vertical, 6)
-      .background(feed.isLiked ? Color.clear : Color.blue)
-      .foregroundColor(feed.isLiked ? .secondary : .white)
+      .background(isLiked ? Color.clear : Color.blue)
+      .foregroundColor(isLiked ? .secondary : .white)
       .cornerRadius(8)
       .overlay(
         RoundedRectangle(cornerRadius: 8)
-          .stroke(feed.isLiked ? Color.secondary : Color.clear, lineWidth: 1)
+          .stroke(isLiked ? Color.secondary : Color.clear, lineWidth: 1)
       )
       .controlSize(.small)
-      .disabled(feed.isLiked)
     }
     .padding(.vertical, 8)
+  }
+
+  private func toggleFeedSubscription() async {
+    // TODO: Implement actual feed subscription API call using ATProtoKit
+    // For now, we'll use optimistic UI updates
+    // The isLiked property represents whether the user has liked the feed
+    // In a real implementation, you'd call the Bluesky API to like/unlike the feed
+
+    // Optimistically update the UI
+    isLiked.toggle()
+
+    // Print debug info
+    print("Would \(isLiked ? "like" : "unlike") feed: \(feed.uri)")
   }
 }

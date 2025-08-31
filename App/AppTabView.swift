@@ -93,7 +93,7 @@ struct AppTabView: View {
         Label("Settings", systemImage: "gearshape")
       }
 
-      // Native search tab in tab bar
+      // Enhanced search tab with trending content
       Tab(value: AppTab.compose, role: .search) {
         NavigationStack(
           path: Binding(
@@ -101,12 +101,12 @@ struct AppTabView: View {
             set: { router[.compose] = $0 }
           )
         ) {
-          SimpleSearchView(client: client)
+          EnhancedSearchView(client: client)
             .withAppDestinations()
         }
         .onAppear { selectedTab = .compose }
       } label: {
-        Label("Search", systemImage: "magnifyingglass")
+        Label("", systemImage: "magnifyingglass")
       }
     }
     .tint(.themePrimary)

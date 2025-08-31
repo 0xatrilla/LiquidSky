@@ -811,6 +811,84 @@ private struct TrendingTopic {
 
 // MARK: - Search UI Components
 
+private struct SuggestedUserRow: View {
+  let user: Profile
+
+  var body: some View {
+    HStack(spacing: 12) {
+      // Avatar
+      AsyncImage(url: user.avatarImageURL) { phase in
+        switch phase {
+        case .success(let image):
+          image
+            .resizable()
+            .scaledToFit()
+        default:
+          Circle()
+            .fill(Color.gray.opacity(0.3))
+        }
+      }
+      .frame(width: 40, height: 40)
+      .clipShape(Circle())
+
+      // User info
+      VStack(alignment: .leading, spacing: 2) {
+        Text(user.displayName ?? user.handle)
+          .font(.body)
+          .fontWeight(.medium)
+          .foregroundStyle(.primary)
+
+        Text("@\(user.handle)")
+          .font(.caption)
+          .foregroundStyle(.secondary)
+
+        if let description = user.description, !description.isEmpty {
+          Text(description)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .lineLimit(2)
+        }
+      }
+
+      Spacer()
+
+      // Follow button with liquid glass effect
+      Button(action: {
+        // TODO: Implement follow functionality
+      }) {
+        Text(user.isFollowing ? "Following" : "Follow")
+          .font(.caption)
+          .fontWeight(.medium)
+          .padding(.horizontal, 12)
+          .padding(.vertical, 6)
+          .background(
+            RoundedRectangle(cornerRadius: 12)
+              .fill(user.isFollowing ? Color.green.opacity(0.1) : Color.blue.opacity(0.1))
+              .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                  .stroke(
+                    user.isFollowing ? Color.green.opacity(0.3) : Color.blue.opacity(0.3),
+                    lineWidth: 0.5)
+              )
+          )
+          .foregroundStyle(user.isFollowing ? .green : .blue)
+      }
+      .buttonStyle(.plain)
+    }
+    .padding(.vertical, 12)
+    .padding(.horizontal, 16)
+    .background(
+      RoundedRectangle(cornerRadius: 16)
+        .fill(Color.gray.opacity(0.05))
+        .overlay(
+          RoundedRectangle(cornerRadius: 16)
+            .stroke(Color.gray.opacity(0.2), lineWidth: 0.5)
+        )
+    )
+    .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+  }
+}
+
 private struct SearchSectionHeader: View {
   let title: String
   let count: Int
@@ -1026,6 +1104,8 @@ private struct PostSearchResultRow: View {
     .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
   }
 }
+
+
 
 // MARK: - Search Filter Types
 

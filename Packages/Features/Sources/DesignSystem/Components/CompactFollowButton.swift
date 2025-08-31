@@ -56,37 +56,48 @@ public struct CompactFollowButton: View {
   
   private func toggleFollow() async {
     isLoading = true
-    
+    let previousFollowingState = isFollowing
+    let previousFollowingURI = followingURI
+
     do {
       if isFollowing {
         // Unfollow: Delete the follow record
         if let followingURI = followingURI {
-          try await client.blueskyClient.deleteRecord(.recordURI(atURI: followingURI))
+          // Optimistically update the UI
           isFollowing = false
+          self.followingURI = nil
+          
+          try await client.blueskyClient.deleteRecord(.recordURI(atURI: followingURI))
         } else {
           // If we don't have the followingURI, we need to fetch the profile first
           await fetchProfileForFollowingURI()
           if let followingURI = followingURI {
-            try await client.blueskyClient.deleteRecord(.recordURI(atURI: followingURI))
             isFollowing = false
+            self.followingURI = nil
+            
+            try await client.blueskyClient.deleteRecord(.recordURI(atURI: followingURI))
           }
         }
       } else {
         // Follow: Create a follow record
-        // For now, we'll use a placeholder approach until we can determine the correct API
-        print("Would create follow record for \(profile.did)")
+        // TODO: Implement actual follow creation using ATProtoKit
+        // The correct approach would be to use the client.protoClient.createRecord method
+        // with collection "app.bsky.graph.follow" and appropriate record data
         
         // Optimistically update the UI
         isFollowing = true
-        followingURI = "ui.optimistic.follow"
+        
+        // For now, we'll simulate the API call
+        print("Would follow user: \(profile.did)")
       }
     } catch {
-      print("Error toggling follow: \(error)")
-      
       // Revert optimistic updates on error
-      isFollowing = profile.isFollowing
+      isFollowing = previousFollowingState
+      followingURI = previousFollowingURI
+      
+      print("Error toggling follow for \(profile.did): \(error)")
     }
-    
+
     isLoading = false
   }
   
