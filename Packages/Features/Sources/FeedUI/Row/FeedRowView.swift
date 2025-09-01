@@ -4,15 +4,21 @@ import Client
 import DesignSystem
 import Destinations
 import Models
+import NukeUI
 import SwiftUI
+import User
 
 struct FeedRowView: View {
   let feed: FeedItem
   @Namespace private var namespace
   @Environment(AppRouter.self) var router
+  @Environment(CurrentUser.self) var currentUser
+  @State private var showingPinAlert = false
 
   var body: some View {
-    NavigationLink(value: RouterDestination.feed(feed)) {
+    Button(action: {
+      router.navigateTo(.feed(feed))
+    }) {
       VStack(alignment: .leading, spacing: 12) {
         headerView
         if let description = feed.description {
@@ -25,23 +31,48 @@ struct FeedRowView: View {
           .foregroundStyle(.tertiary)
       }
       .padding(.vertical, 12)
+      .contentShape(Rectangle())  // Make entire area tappable
     }
+    .buttonStyle(PlainButtonStyle())  // Remove default button styling
     .listRowSeparator(.hidden)
+    .onLongPressGesture {
+      showingPinAlert = true
+    }
+    .alert("Pin Feed", isPresented: $showingPinAlert) {
+      Button("Pin to My Feeds") {
+        pinFeed()
+      }
+      Button("Cancel", role: .cancel) {}
+    } message: {
+      Text("Add '\(feed.displayName)' to your pinned feeds?")
+    }
+  }
+
+  private func pinFeed() {
+    let feedToPin = feed
+    Task {
+      do {
+        try await currentUser.pinFeed(uri: feedToPin.uri, displayName: feedToPin.displayName)
+      } catch {
+        #if DEBUG
+          print("Failed to pin feed: \(error)")
+        #endif
+      }
+    }
   }
 
   @ViewBuilder
   var headerView: some View {
     HStack {
-      AsyncImage(url: feed.avatarImageURL) { phase in
-        switch phase {
-        case .success(let image):
+      LazyImage(url: feed.avatarImageURL) { state in
+        if let image = state.image {
           image
             .resizable()
             .scaledToFit()
             .frame(width: 44, height: 44)
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .shadow(color: .shadowPrimary.opacity(0.7), radius: 2)
-        default:
+        } else {
           Image(systemName: "antenna.radiowaves.left.and.right")
             .imageScale(.medium)
             .foregroundStyle(.white)
@@ -51,10 +82,7 @@ struct FeedRowView: View {
             .shadow(color: .shadowPrimary.opacity(0.7), radius: 2)
         }
       }
-      .onTapGesture {
-        // Navigate to the feed itself since this is not a user profile
-        // The feed is already wrapped in a NavigationLink
-      }
+
       VStack(alignment: .leading) {
         Text(feed.displayName)
           .font(.title2)

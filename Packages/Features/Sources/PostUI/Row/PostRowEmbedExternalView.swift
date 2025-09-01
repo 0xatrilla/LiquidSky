@@ -1,6 +1,7 @@
 import ATProtoKit
 import DesignSystem
 import Models
+import NukeUI
 import SwiftUI
 
 struct PostRowEmbedExternalView: View {
@@ -11,16 +12,15 @@ struct PostRowEmbedExternalView: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 8) {
       GeometryReader { proxy in
-        AsyncImage(url: externalView.external.thumbnailImageURL) { phase in
-          switch phase {
-          case .success(let image):
+        LazyImage(url: externalView.external.thumbnailImageURL) { state in
+          if let image = state.image {
             image
               .resizable()
               .aspectRatio(contentMode: .fill)
               .frame(width: proxy.size.width)
               .frame(height: 200)
               .clipped()
-          default:
+          } else {
             Rectangle()
               .fill(Color.gray.opacity(0.2))
           }

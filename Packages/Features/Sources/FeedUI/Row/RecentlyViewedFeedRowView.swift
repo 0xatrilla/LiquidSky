@@ -4,6 +4,7 @@ import Client
 import DesignSystem
 import Destinations
 import Models
+import NukeUI
 import SwiftUI
 
 struct RecentlyViewedFeedRowView: View {
@@ -17,29 +18,28 @@ struct RecentlyViewedFeedRowView: View {
   }
 
   public var body: some View {
-    NavigationLink(
-      value: RouterDestination.feed(
-        FeedItem(
-          uri: item.uri,
-          displayName: item.name,
-          description: nil,
-          avatarImageURL: item.avatarImageURL,
-          creatorHandle: "",
-          likesCount: 0,
-          liked: false
-        ))
-    ) {
+    Button(action: {
+      let feedItem = FeedItem(
+        uri: item.uri,
+        displayName: item.name,
+        description: nil,
+        avatarImageURL: item.avatarImageURL,
+        creatorHandle: "",
+        likesCount: 0,
+        liked: false
+      )
+      router.navigateTo(.feed(feedItem))
+    }) {
       HStack {
-        AsyncImage(url: item.avatarImageURL) { phase in
-          switch phase {
-          case .success(let image):
+        LazyImage(url: item.avatarImageURL) { state in
+          if let image = state.image {
             image
               .resizable()
               .scaledToFit()
               .frame(width: 32, height: 32)
               .clipShape(RoundedRectangle(cornerRadius: 8))
               .shadow(color: .shadowPrimary.opacity(0.7), radius: 2)
-          default:
+          } else {
             Image(systemName: "antenna.radiowaves.left.and.right")
               .imageScale(.medium)
               .foregroundStyle(.white)
@@ -49,10 +49,7 @@ struct RecentlyViewedFeedRowView: View {
               .shadow(color: .shadowPrimary.opacity(0.7), radius: 2)
           }
         }
-        .onTapGesture {
-          // Navigate to the feed itself since this is not a user profile
-          // The feed is already wrapped in a NavigationLink
-        }
+
         Text(item.name)
           .font(.title3)
           .fontWeight(.bold)
@@ -63,6 +60,7 @@ struct RecentlyViewedFeedRowView: View {
                 radius: 2, x: -1, y: -1)))
       }
     }
+    .buttonStyle(PlainButtonStyle())
     .listRowSeparator(.hidden)
     .listRowInsets(.vertical, 0)
   }

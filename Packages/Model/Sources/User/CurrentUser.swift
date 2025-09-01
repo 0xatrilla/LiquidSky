@@ -74,4 +74,36 @@ public final class CurrentUser: @unchecked Sendable {
     #endif
     return []
   }
+  
+  public func pinFeed(uri: String, displayName: String) async throws {
+    #if DEBUG
+    print("CurrentUser: Pinning feed: \(displayName)")
+    #endif
+    
+    // Create a saved feed item
+    let savedFeed = AppBskyLexicon.Actor.SavedFeed(
+      feedID: uri,
+      feedType: .feed,
+      value: uri,
+      isPinned: true
+    )
+    
+    // Add to saved feeds if not already present
+    if !savedFeeds.contains(where: { $0.value == uri }) {
+      savedFeeds.append(savedFeed)
+      
+      // Update preferences on the server
+      try await client.protoClient.putPreferences(
+        preferences: [.savedFeedsVersion2(.init(items: savedFeeds))]
+      )
+      
+      #if DEBUG
+      print("CurrentUser: Successfully pinned feed: \(displayName)")
+      #endif
+    } else {
+      #if DEBUG
+      print("CurrentUser: Feed already pinned: \(displayName)")
+      #endif
+    }
+  }
 }

@@ -139,25 +139,35 @@ public struct ProfileView: View {
           .foregroundColor(.secondary)
       }
 
-      VStack(spacing: 4) {
-        Text("\((fullProfile ?? profile).followingCount)")
-          .font(.title2)
-          .fontWeight(.bold)
-          .foregroundColor(.primary)
-        Text("Following")
-          .font(.caption)
-          .foregroundColor(.secondary)
+      Button(action: {
+        router.presentedSheet = .followingList(profile: fullProfile ?? profile)
+      }) {
+        VStack(spacing: 4) {
+          Text("\((fullProfile ?? profile).followingCount)")
+            .font(.title2)
+            .fontWeight(.bold)
+            .foregroundColor(.primary)
+          Text("Following")
+            .font(.caption)
+            .foregroundColor(.secondary)
+        }
       }
+      .buttonStyle(.plain)
 
-      VStack(spacing: 4) {
-        Text("\((fullProfile ?? profile).followersCount)")
-          .font(.title2)
-          .fontWeight(.bold)
-          .foregroundColor(.primary)
-        Text("Followers")
-          .font(.caption)
-          .foregroundColor(.secondary)
+      Button(action: {
+        router.presentedSheet = .followersList(profile: fullProfile ?? profile)
+      }) {
+        VStack(spacing: 4) {
+          Text("\((fullProfile ?? profile).followersCount)")
+            .font(.title2)
+            .fontWeight(.bold)
+            .foregroundColor(.primary)
+          Text("Followers")
+            .font(.caption)
+            .foregroundColor(.secondary)
+        }
       }
+      .buttonStyle(.plain)
     }
     .frame(maxWidth: .infinity)
   }
@@ -170,9 +180,7 @@ public struct ProfileView: View {
         .fontWeight(.semibold)
         .foregroundColor(.primary)
 
-      Text((fullProfile ?? profile).description ?? "")
-        .font(.body)
-        .foregroundColor(.primary)
+      ClickableBioText(text: (fullProfile ?? profile).description ?? "")
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     .frame(maxWidth: .infinity, alignment: .leading)
@@ -326,6 +334,58 @@ public struct ProfileView: View {
   }
 
   // The toggleFollow method and its related state variables are removed as per the edit hint.
+}
+
+// MARK: - Clickable Bio Text
+private struct ClickableBioText: View {
+  let text: String
+  @Environment(AppRouter.self) private var router
+
+  var body: some View {
+    let attributedString = createAttributedString(from: text)
+
+    Text(attributedString)
+      .font(.body)
+      .foregroundColor(.primary)
+      .textSelection(.enabled)
+      .onTapGesture { location in
+        handleTap(at: location)
+      }
+  }
+
+  private func createAttributedString(from text: String) -> AttributedString {
+    var attributedString = AttributedString(text)
+
+    // Find URLs in the text and make them clickable
+    let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+    let matches = detector?.matches(in: text, range: NSRange(text.startIndex..., in: text)) ?? []
+
+    for match in matches {
+      if let range = Range(match.range, in: text) {
+        let attributedRange = AttributedString(text[range]).range(of: String(text[range]))
+        if let url = match.url, let attributedRange = attributedRange {
+          attributedString[attributedRange].foregroundColor = .blue
+          attributedString[attributedRange].underlineStyle = .single
+        }
+      }
+    }
+
+    return attributedString
+  }
+
+  private func handleTap(at location: CGPoint) {
+    // Extract the tapped text and check if it's a URL
+    let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+    let matches = detector?.matches(in: text, range: NSRange(text.startIndex..., in: text)) ?? []
+
+    for match in matches {
+      if let url = match.url {
+        // Open URL in Safari or in-app browser
+        UIApplication.shared.open(url)
+        break
+      }
+    }
+  }
 }
 
 // MARK: - Profile Tab Enum

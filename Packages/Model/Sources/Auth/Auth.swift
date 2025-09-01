@@ -49,6 +49,9 @@ public final class Auth: @unchecked Sendable {
     #endif
 
     configurationContinuation.yield(nil)
+    
+    // Store logout state in UserDefaults to persist across app restarts
+    UserDefaults.standard.set(true, forKey: "Auth.isInFreshLoginState")
   }
 
   private func resetInternalState() {
@@ -74,6 +77,21 @@ public final class Auth: @unchecked Sendable {
       continuation = cont
     }
     self.configurationContinuation = continuation
+
+    // Check if we're in fresh login state from a previous logout
+    let freshLoginState = UserDefaults.standard.bool(forKey: "Auth.isInFreshLoginState")
+    
+    if freshLoginState {
+      #if DEBUG
+        print("Auth: Initializing in fresh login state from previous logout")
+      #endif
+      // Clear any existing accounts and reset state
+      accountManager.clearAllAccounts()
+      self.ATProtoKeychain = AppleSecureKeychain(identifier: UUID())
+      self.configuration = ATProtocolConfiguration(keychainProtocol: self.ATProtoKeychain)
+      self.isInFreshLoginState = true
+      return
+    }
 
     // Initialize with active account or create new keychain
     if let activeAccountId = accountManager.activeAccountId,
@@ -266,6 +284,9 @@ public final class Auth: @unchecked Sendable {
 
     // Yield the configuration to trigger the authentication flow
     configurationContinuation.yield(configuration)
+    
+    // Clear the fresh login state flag since we successfully added an account
+    UserDefaults.standard.removeObject(forKey: "Auth.isInFreshLoginState")
 
     return account
   }

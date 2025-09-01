@@ -4,6 +4,7 @@ import Client
 import DesignSystem
 import Destinations
 import Models
+import NukeUI
 import SwiftUI
 
 public struct HashtagFeedView: View {
@@ -268,61 +269,85 @@ private struct HashtagPostRowView: View {
           Text(post.author.displayName ?? post.author.handle)
             .font(.subheadline)
             .fontWeight(.semibold)
+            .foregroundColor(.primary)
 
-          Text("@\(post.author.handle)")
+          Text(post.author.handle)
             .font(.caption)
-            .foregroundStyle(.secondary)
+            .foregroundColor(.secondary)
         }
 
         Spacer()
 
-        Text(post.indexAtFormatted)
+        Text(post.indexedAt, style: .relative)
           .font(.caption)
-          .foregroundStyle(.tertiary)
+          .foregroundColor(.secondary)
       }
 
       // Post content
-      Text(post.content)
-        .font(.body)
-        .lineLimit(6)
+      if !post.content.isEmpty {
+        Text(post.content)
+          .font(.body)
+          .foregroundColor(.primary)
+          .frame(maxWidth: .infinity, alignment: .leading)
+          .multilineTextAlignment(.leading)
+      }
 
-      // Media embeds
+      // Embed content
       if let embed = post.embed {
         HashtagPostEmbedView(embed: embed)
       }
 
-      // Post stats
-      HStack(spacing: 16) {
-        HStack(spacing: 4) {
-          Image(systemName: "heart")
-            .font(.caption)
-          Text("\(post.likeCount)")
-            .font(.caption)
+      // Action buttons
+      HStack(spacing: 20) {
+        Button(action: {
+          // Handle reply
+        }) {
+          HStack(spacing: 4) {
+            Image(systemName: "bubble.left")
+              .font(.caption)
+            Text("\(post.replyCount)")
+              .font(.caption)
+          }
+          .foregroundColor(.secondary)
         }
-        .foregroundStyle(.secondary)
 
-        HStack(spacing: 4) {
-          Image(systemName: "arrow.2.squarepath")
-            .font(.caption)
-          Text("\(post.repostCount)")
-            .font(.caption)
+        Button(action: {
+          // Handle repost
+        }) {
+          HStack(spacing: 4) {
+            Image(systemName: "arrow.2.squarepath")
+              .font(.caption)
+            Text("\(post.repostCount)")
+              .font(.caption)
+          }
+          .foregroundColor(.secondary)
         }
-        .foregroundStyle(.secondary)
 
-        HStack(spacing: 4) {
-          Image(systemName: "bubble.left")
-            .font(.caption)
-          Text("\(post.replyCount)")
-            .font(.caption)
+        Button(action: {
+          // Handle like
+        }) {
+          HStack(spacing: 4) {
+            Image(systemName: post.likeURI != nil ? "heart.fill" : "heart")
+              .font(.caption)
+            Text("\(post.likeCount)")
+              .font(.caption)
+          }
+          .foregroundColor(post.likeURI != nil ? .red : .secondary)
         }
-        .foregroundStyle(.secondary)
+
+        Spacer()
       }
+      .padding(.top, 8)
     }
-    .padding()
-    .background(RoundedRectangle(cornerRadius: 12).fill(.ultraThinMaterial))
+    .padding(.horizontal, 16)
+    .padding(.vertical, 12)
+    .background(Color(.systemBackground))
+    .cornerRadius(12)
+    .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
     .onTapGesture {
       router.navigateTo(.post(post))
     }
+    .listRowSeparator(.hidden)
   }
 }
 
@@ -351,18 +376,21 @@ private struct HashtagPostImagesView: View {
   let images: AppBskyLexicon.Embed.ImagesDefinition.View
 
   var body: some View {
-    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: min(images.images.count, 3)), spacing: 4) {
+    LazyVGrid(
+      columns: Array(
+        repeating: GridItem(.flexible(), spacing: 4), count: min(images.images.count, 3)),
+      spacing: 4
+    ) {
       ForEach(Array(images.images.prefix(3).enumerated()), id: \.offset) { index, image in
-        AsyncImage(url: image.fullSizeImageURL) { phase in
-          switch phase {
-          case .success(let image):
+        LazyImage(url: image.fullSizeImageURL) { state in
+          if let image = state.image {
             image
               .resizable()
               .aspectRatio(contentMode: .fill)
               .frame(height: 120)
               .clipped()
               .cornerRadius(8)
-          default:
+          } else {
             Rectangle()
               .fill(Color.gray.opacity(0.2))
               .frame(height: 120)
@@ -380,9 +408,8 @@ private struct HashtagPostVideosView: View {
 
   var body: some View {
     VStack(spacing: 8) {
-      AsyncImage(url: videos.thumbnailImageURL.flatMap { URL(string: $0) }) { phase in
-        switch phase {
-        case .success(let image):
+      LazyImage(url: videos.thumbnailImageURL.flatMap { URL(string: $0) }) { state in
+        if let image = state.image {
           ZStack {
             image
               .resizable()
@@ -390,12 +417,12 @@ private struct HashtagPostVideosView: View {
               .frame(height: 200)
               .clipped()
               .cornerRadius(8)
-            
+
             Image(systemName: "play.circle.fill")
               .font(.system(size: 48))
               .foregroundColor(.white)
           }
-        default:
+        } else {
           Rectangle()
             .fill(Color.gray.opacity(0.2))
             .frame(height: 200)
@@ -413,16 +440,15 @@ private struct HashtagPostExternalView: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 8) {
       if let imageURL = externalView.external.thumbnailImageURL {
-        AsyncImage(url: imageURL) { phase in
-          switch phase {
-          case .success(let image):
+        LazyImage(url: imageURL) { state in
+          if let image = state.image {
             image
               .resizable()
               .aspectRatio(contentMode: .fill)
               .frame(height: 120)
               .clipped()
               .cornerRadius(8)
-          default:
+          } else {
             Rectangle()
               .fill(Color.gray.opacity(0.2))
               .frame(height: 120)
@@ -430,20 +456,20 @@ private struct HashtagPostExternalView: View {
           }
         }
       }
-      
+
       VStack(alignment: .leading, spacing: 4) {
         Text(externalView.external.title)
           .font(.subheadline)
           .fontWeight(.semibold)
           .lineLimit(2)
-        
+
         if !externalView.external.description.isEmpty {
           Text(externalView.external.description)
             .font(.caption)
             .foregroundStyle(.secondary)
             .lineLimit(3)
         }
-        
+
         Text(externalView.external.uri)
           .font(.caption)
           .foregroundStyle(.blue)
@@ -474,7 +500,7 @@ private struct HashtagPostQuotedView: View {
       }
       .padding(.horizontal, 12)
       .padding(.vertical, 8)
-      .background(Color.gray.opacity(0.1))
+      .background(Color.gray.opacity(0.2))
       .cornerRadius(8)
     }
   }

@@ -13,6 +13,12 @@ public struct AppDestinations: ViewModifier {
       .navigationDestination(for: RouterDestination.self) { destination in
         switch destination {
         case .feed(let feedItem):
+          let _ = {
+            #if DEBUG
+              print("AppDestinations: Navigating to feed: \(feedItem.displayName)")
+              print("AppDestinations: Feed URI: \(feedItem.uri)")
+            #endif
+          }()
           PostsFeedView(feedItem: feedItem)
         case .post(let post):
           PostDetailView(post: post)

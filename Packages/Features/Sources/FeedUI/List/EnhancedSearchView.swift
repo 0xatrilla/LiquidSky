@@ -182,6 +182,83 @@ public struct EnhancedSearchView: View {
           }
         }
 
+        // Suggested users section
+        VStack(spacing: 16) {
+          HStack {
+            Text("Suggested Users")
+              .font(.headline)
+              .fontWeight(.semibold)
+
+            Spacer()
+
+            if trendingContentService.isLoading {
+              ProgressView()
+                .scaleEffect(0.8)
+            }
+          }
+
+          if trendingContentService.isLoading {
+            HStack {
+              ProgressView()
+              Text("Loading suggested users...")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+          } else if !trendingContentService.suggestedUsers.isEmpty {
+            ScrollView(.horizontal, showsIndicators: false) {
+              HStack(spacing: 12) {
+                ForEach(trendingContentService.suggestedUsers.prefix(8)) { user in
+                  Button(action: {
+                    router.navigateTo(.profile(user))
+                  }) {
+                    VStack(spacing: 8) {
+                      AsyncImage(url: user.avatarImageURL) { phase in
+                        switch phase {
+                        case .success(let image):
+                          image
+                            .resizable()
+                            .scaledToFit()
+                        default:
+                          Circle()
+                            .fill(Color.gray.opacity(0.3))
+                        }
+                      }
+                      .frame(width: 50, height: 50)
+                      .clipShape(Circle())
+                      
+                      VStack(spacing: 2) {
+                        Text(user.displayName ?? user.handle)
+                          .font(.caption)
+                          .fontWeight(.medium)
+                          .lineLimit(1)
+                        
+                        Text("@\(user.handle)")
+                          .font(.caption2)
+                          .foregroundStyle(.secondary)
+                          .lineLimit(1)
+                      }
+                    }
+                    .frame(width: 80)
+                    .padding(.vertical, 8)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(12)
+                  }
+                  .buttonStyle(.plain)
+                }
+              }
+              .padding(.horizontal, 20)
+            }
+          } else {
+            Text("No suggested users available")
+              .font(.caption)
+              .foregroundStyle(.secondary)
+              .frame(maxWidth: .infinity)
+              .padding()
+          }
+        }
+
         // Popular searches section
         VStack(spacing: 16) {
           HStack {

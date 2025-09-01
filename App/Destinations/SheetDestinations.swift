@@ -251,6 +251,20 @@ public struct SheetDestinations: ViewModifier {
             .environment(router)
             .environment(postDataControllerProvider)
             .environment(settingsService)
+        case .followingList(let profile):
+          FollowingListView(profile: profile)
+            .environment(client)
+            .environment(currentUser)
+            .environment(router)
+            .environment(postDataControllerProvider)
+            .environment(settingsService)
+        case .followersList(let profile):
+          FollowersListView(profile: profile)
+            .environment(client)
+            .environment(currentUser)
+            .environment(router)
+            .environment(postDataControllerProvider)
+            .environment(settingsService)
         }
       }
       .onChange(of: router.presentedSheet) {

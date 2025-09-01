@@ -4,6 +4,7 @@ import Client
 import DesignSystem
 import Destinations
 import Models
+import NukeUI
 import SwiftUI
 import User
 
@@ -584,13 +585,12 @@ private struct PostSearchResultRow: View {
     VStack(alignment: .leading, spacing: 8) {
       // Author info
       HStack(spacing: 8) {
-        AsyncImage(url: post.author.avatarImageURL) { phase in
-          switch phase {
-          case .success(let image):
+        LazyImage(url: post.author.avatarImageURL) { state in
+          if let image = state.image {
             image
               .resizable()
               .scaledToFit()
-          default:
+          } else {
             Circle()
               .fill(Color.gray.opacity(0.3))
           }

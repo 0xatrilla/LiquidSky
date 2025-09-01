@@ -395,6 +395,20 @@ struct LiquidSkyApp: App {
             .environment(router)
             .environment(postDataControllerProvider)
             .environment(settingsService)
+        case .followingList(let profile):
+          FollowingListView(profile: profile)
+            .environment(appState.client)
+            .environment(appState.currentUser)
+            .environment(router)
+            .environment(postDataControllerProvider)
+            .environment(settingsService)
+        case .followersList(let profile):
+          FollowersListView(profile: profile)
+            .environment(appState.client)
+            .environment(appState.currentUser)
+            .environment(router)
+            .environment(postDataControllerProvider)
+            .environment(settingsService)
         }
       }
       .onAppear {
