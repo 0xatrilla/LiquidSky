@@ -1,29 +1,26 @@
 import ATProtoKit
 import AppRouter
-import Client
 import DesignSystem
 import Destinations
 import Models
-import PostUI
 import SwiftUI
 
-/// Single notification row following IceCubesApp's proven implementation
-/// Provides seamless navigation and better user experience
-public struct SingleNotificationRow: View {
+public struct EnhancedSingleNotificationRow: View {
   let notification: AppBskyLexicon.Notification.Notification
   let postItem: PostItem?
-
-  @Namespace private var namespace
-  @Environment(AppRouter.self) var router
-  @Environment(BSkyClient.self) var client
   let actionText: String
+  let router: AppRouter
 
   public init(
-    notification: AppBskyLexicon.Notification.Notification, postItem: PostItem?, actionText: String
+    notification: AppBskyLexicon.Notification.Notification,
+    postItem: PostItem?,
+    actionText: String,
+    router: AppRouter
   ) {
     self.notification = notification
     self.postItem = postItem
     self.actionText = actionText
+    self.router = router
   }
 
   public var body: some View {
@@ -34,7 +31,7 @@ public struct SingleNotificationRow: View {
         AsyncImage(url: notification.author.avatarImageURL) { image in
           image
             .resizable()
-            .scaledToFit()
+            .aspectRatio(contentMode: .fill)
         } placeholder: {
           Circle()
             .fill(.secondary.opacity(0.2))
@@ -74,7 +71,7 @@ public struct SingleNotificationRow: View {
           .lineLimit(2)
           .padding(.top, 4)
           .onTapGesture {
-            handleNotificationTap()
+            navigateToPost()
           }
       }
     }
@@ -88,34 +85,17 @@ public struct SingleNotificationRow: View {
   }
 
   private func handleNotificationTap() {
-    #if DEBUG
-      print(
-        "🔍 Debug: SingleNotificationRow handleNotificationTap called for reason: \(notification.reason)"
-      )
-    #endif
-
-    // Add haptic feedback for better UX
-    HapticManager.shared.impact(.light)
-
     switch notification.reason {
     case .follow:
       navigateToProfile()
-
     case .like, .repost, .reply, .mention, .quote:
       navigateToPost()
-
-    case .starterpackjoined, .verified, .unverified:
-      navigateToProfile()
-
     default:
-      // Try post first, fallback to profile
-      if postItem != nil {
-        navigateToPost()
-      } else {
-        navigateToProfile()
-      }
+      navigateToPost()
     }
   }
+
+  // MARK: - Navigation Functions
 
   private func navigateToProfile() {
     let profile = Profile(
@@ -125,28 +105,12 @@ public struct SingleNotificationRow: View {
       avatarImageURL: notification.author.avatarImageURL
     )
 
-    // Force navigation within the current tab (notifications)
-    // This ensures the profile opens in the notifications tab, not the feed tab
-    #if DEBUG
-      print("🔍 Debug: Navigating directly to profile: \(profile.handle)")
-    #endif
     router[.notification].append(.profile(profile))
   }
 
   private func navigateToPost() {
-    if let postItem {
-      #if DEBUG
-        print("🔍 Debug: Navigating directly to post: \(postItem.uri)")
-      #endif
-
-      // Force navigation within the current tab (notifications)
-      // This ensures the post opens in the notifications tab, not the feed tab
+    if let postItem = postItem {
       router[.notification].append(.post(postItem))
-    } else {
-      #if DEBUG
-        print("🔍 Debug: No postItem found, falling back to profile")
-      #endif
-      navigateToProfile()
     }
   }
 }

@@ -1,10 +1,13 @@
+import AppRouter
 import Client
 import DesignSystem
+import Destinations
 import Models
 import SwiftUI
 
 public struct NotificationsListView: View {
   @Environment(BSkyClient.self) var client
+  @Environment(AppRouter.self) var router
   @State private var notificationsGroups: [NotificationsGroup] = []
   @State private var cursor: String?
   @State private var isLoading = false
@@ -21,82 +24,13 @@ public struct NotificationsListView: View {
   public var body: some View {
     VStack(spacing: 0) {
       if isLoading && notificationsGroups.isEmpty {
-        VStack(spacing: 16) {
-          ProgressView()
-            .scaleEffect(1.2)
-          Text("Loading notifications...")
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        loadingView
       } else if let error = error, (error as? CancellationError) == nil {
-        VStack(spacing: 16) {
-          Image(systemName: "exclamationmark.triangle.fill")
-            .font(.system(size: 48))
-            .foregroundStyle(.red)
-
-          Text("Error Loading Notifications")
-            .font(.title2)
-            .fontWeight(.semibold)
-
-          Text(error.localizedDescription)
-            .font(.body)
-            .foregroundStyle(.secondary)
-            .multilineTextAlignment(.center)
-
-          Button("Try Again") {
-            Task {
-              await fetchNotifications()
-            }
-          }
-          .buttonStyle(.borderedProminent)
-        }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        errorView(error: error)
       } else if notificationsGroups.isEmpty {
-        VStack(spacing: 16) {
-          Image(systemName: "bell.slash")
-            .font(.system(size: 48))
-            .foregroundStyle(.secondary)
-
-          Text("No Notifications")
-            .font(.title2)
-            .fontWeight(.semibold)
-
-          Text("You're all caught up!")
-            .font(.body)
-            .foregroundStyle(.secondary)
-            .multilineTextAlignment(.center)
-        }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        emptyStateView
       } else {
-        ScrollView {
-          LazyVStack(spacing: 16) {
-            // Show summary button if there are 10+ new notifications
-            if newNotificationsCount >= 10 {
-              SummaryButtonView(itemCount: newNotificationsCount) {
-                showingSummary = true
-              }
-              .padding(.horizontal, 16)
-            }
-
-            ForEach(notificationsGroups) { group in
-              NotificationRow(group: group)
-            }
-
-            if let cursor = cursor {
-              Button("Load More") {
-                Task {
-                  await fetchNotifications()
-                }
-              }
-              .buttonStyle(.bordered)
-              .padding()
-            }
-          }
-          .padding(.vertical, 16)
-        }
+        notificationsContentView
       }
     }
     .navigationTitle("Notifications")
@@ -128,6 +62,110 @@ public struct NotificationsListView: View {
           itemCount: newNotificationsCount,
           onDismiss: { showingSummary = false }
         )
+      }
+    }
+  }
+
+  // MARK: - Loading View
+  private var loadingView: some View {
+    VStack(spacing: 16) {
+      ProgressView()
+        .scaleEffect(1.2)
+
+      Text("Loading notifications...")
+        .font(.subheadline)
+        .foregroundStyle(.secondary)
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+  }
+
+  // MARK: - Error View
+  private func errorView(error: Error) -> some View {
+    VStack(spacing: 16) {
+      Image(systemName: "exclamationmark.triangle")
+        .font(.system(size: 40))
+        .foregroundStyle(.red)
+
+      Text("Something went wrong")
+        .font(.headline)
+        .foregroundStyle(.primary)
+
+      Text(error.localizedDescription)
+        .font(.subheadline)
+        .foregroundStyle(.secondary)
+        .multilineTextAlignment(.center)
+        .padding(.horizontal, 32)
+
+      Button(action: {
+        Task {
+          await fetchNotifications()
+        }
+      }) {
+        Text("Try Again")
+          .font(.subheadline)
+          .foregroundColor(.white)
+          .padding(.horizontal, 24)
+          .padding(.vertical, 12)
+          .background(
+            RoundedRectangle(cornerRadius: 8)
+              .fill(Color.blue)
+          )
+      }
+      .buttonStyle(.plain)
+    }
+    .padding()
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+  }
+
+  // MARK: - Empty State View
+  private var emptyStateView: some View {
+    VStack(spacing: 16) {
+      Image(systemName: "checkmark.circle")
+        .font(.system(size: 40))
+        .foregroundStyle(.green)
+
+      Text("All caught up!")
+        .font(.headline)
+        .foregroundStyle(.primary)
+
+      Text("You're up to date with all your notifications.")
+        .font(.subheadline)
+        .foregroundStyle(.secondary)
+        .multilineTextAlignment(.center)
+    }
+    .padding()
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+  }
+
+  // MARK: - Notifications Content View
+  private var notificationsContentView: some View {
+    ScrollView {
+      LazyVStack(spacing: 0) {
+        // Simple notifications list
+        ForEach(notificationsGroups) { group in
+          EnhancedNotificationRow(group: group, router: router)
+        }
+
+        // Simple load more button
+        if cursor != nil {
+          Button(action: {
+            Task {
+              await fetchNotifications()
+            }
+          }) {
+            HStack {
+              Text("Load More")
+                .font(.subheadline)
+                .foregroundStyle(.blue)
+              Image(systemName: "arrow.down")
+                .font(.caption)
+                .foregroundStyle(.blue)
+            }
+            .padding()
+            .frame(maxWidth: .infinity)
+          }
+          .buttonStyle(.plain)
+        }
       }
     }
   }
