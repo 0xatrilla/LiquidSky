@@ -230,15 +230,29 @@ public struct NotificationRow: View {
         )
       case .follow:
         GroupedNotificationRow(group: group) { count in
-          count == 1 ? " followed you" : " and \(count - 1) others followed you"
+          let firstUser =
+            group.notifications.first?.author.displayName ?? group.notifications.first?.author
+            .actorHandle ?? "Someone"
+          return count == 1
+            ? "\(firstUser) followed you" : "\(firstUser) and \(count - 1) others followed you"
         }
       case .like:
         GroupedNotificationRow(group: group) { count in
-          count == 1 ? " liked your post" : " and \(count - 1) others liked your post"
+          let firstUser =
+            group.notifications.first?.author.displayName ?? group.notifications.first?.author
+            .actorHandle ?? "Someone"
+          return count == 1
+            ? "\(firstUser) liked your post"
+            : "\(firstUser) and \(count - 1) others liked your post"
         }
       case .repost:
         GroupedNotificationRow(group: group) { count in
-          count == 1 ? " reposted your post" : " and \(count - 1) others reposted your post"
+          let firstUser =
+            group.notifications.first?.author.displayName ?? group.notifications.first?.author
+            .actorHandle ?? "Someone"
+          return count == 1
+            ? "\(firstUser) reposted your post"
+            : "\(firstUser) and \(count - 1) others reposted your post"
         }
       case .mention:
         SingleNotificationRow(
@@ -254,14 +268,21 @@ public struct NotificationRow: View {
         )
       case .likeViaRepost:
         GroupedNotificationRow(group: group) { count in
-          count == 1
-            ? " liked your post via repost" : " and \(count - 1) others liked your post via repost"
+          let firstUser =
+            group.notifications.first?.author.displayName ?? group.notifications.first?.author
+            .actorHandle ?? "Someone"
+          return count == 1
+            ? "\(firstUser) liked your post via repost"
+            : "\(firstUser) and \(count - 1) others liked your post via repost"
         }
       case .repostViaRepost:
         GroupedNotificationRow(group: group) { count in
-          count == 1
-            ? " reposted your post via repost"
-            : " and \(count - 1) others reposted your post via repost"
+          let firstUser =
+            group.notifications.first?.author.displayName ?? group.notifications.first?.author
+            .actorHandle ?? "Someone"
+          return count == 1
+            ? "\(firstUser) reposted a repost of your post"
+            : "\(firstUser) and \(count - 1) others reposted a repost of your post"
         }
       case .starterpackjoined:
         SingleNotificationRow(

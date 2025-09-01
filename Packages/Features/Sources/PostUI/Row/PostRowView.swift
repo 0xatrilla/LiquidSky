@@ -160,14 +160,15 @@ public struct PostRowView: View {
   @ViewBuilder
   private var threadLineView: some View {
     // Only show thread lines when we're actually viewing a thread, not in a feed view
-    // In a feed view, posts are individual and not connected, so no thread lines should appear
-    if isInThreadContext && post.isReplyTo {
+    // In a thread view, show thread lines for posts that have replies below them
+    // The line should connect downward from a parent post to its reply
+    if isInThreadContext && post.hasReply {
       Rectangle()
         .fill(LinearGradient.themeGradient)
         .frame(width: 2)
         .frame(maxHeight: .infinity)
-        .padding(.top, -20)  // Start well above the avatar to connect with parent post above
-        .padding(.bottom, 8)  // Extend to connect with next post
+        .padding(.top, 8)  // Start below the avatar
+        .padding(.bottom, -20)  // Extend well below to connect with reply post above
     }
   }
 

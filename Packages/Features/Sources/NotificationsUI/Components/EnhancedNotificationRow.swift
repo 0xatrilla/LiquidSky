@@ -1,9 +1,9 @@
-import SwiftUI
 import ATProtoKit
 import AppRouter
 import DesignSystem
-import Models
 import Destinations
+import Models
+import SwiftUI
 
 public struct EnhancedNotificationRow: View {
   let group: NotificationsGroup
@@ -28,7 +28,11 @@ public struct EnhancedNotificationRow: View {
         EnhancedGroupedNotificationRow(
           group: group,
           actionTextBuilder: { count in
-            count == 1 ? " followed you" : " and \(count - 1) others followed you"
+            let firstUser =
+              group.notifications.first?.author.displayName ?? group.notifications.first?.author
+              .actorHandle ?? "Someone"
+            return count == 1
+              ? "\(firstUser) followed you" : "\(firstUser) and \(count - 1) others followed you"
           },
           router: router
         )
@@ -36,7 +40,12 @@ public struct EnhancedNotificationRow: View {
         EnhancedGroupedNotificationRow(
           group: group,
           actionTextBuilder: { count in
-            count == 1 ? " liked your post" : " and \(count - 1) others liked your post"
+            let firstUser =
+              group.notifications.first?.author.displayName ?? group.notifications.first?.author
+              .actorHandle ?? "Someone"
+            return count == 1
+              ? "\(firstUser) liked your post"
+              : "\(firstUser) and \(count - 1) others liked your post"
           },
           router: router
         )
@@ -44,7 +53,12 @@ public struct EnhancedNotificationRow: View {
         EnhancedGroupedNotificationRow(
           group: group,
           actionTextBuilder: { count in
-            count == 1 ? " reposted your post" : " and \(count - 1) others reposted your post"
+            let firstUser =
+              group.notifications.first?.author.displayName ?? group.notifications.first?.author
+              .actorHandle ?? "Someone"
+            return count == 1
+              ? "\(firstUser) reposted your post"
+              : "\(firstUser) and \(count - 1) others reposted your post"
           },
           router: router
         )
@@ -66,7 +80,12 @@ public struct EnhancedNotificationRow: View {
         EnhancedGroupedNotificationRow(
           group: group,
           actionTextBuilder: { count in
-            count == 1 ? " liked a repost of your post" : " and \(count - 1) others liked a repost of your post"
+            let firstUser =
+              group.notifications.first?.author.displayName ?? group.notifications.first?.author
+              .actorHandle ?? "Someone"
+            return count == 1
+              ? "\(firstUser) liked a repost of your post"
+              : "\(firstUser) and \(count - 1) others liked a repost of your post"
           },
           router: router
         )
@@ -74,7 +93,12 @@ public struct EnhancedNotificationRow: View {
         EnhancedGroupedNotificationRow(
           group: group,
           actionTextBuilder: { count in
-            count == 1 ? " reposted a repost of your post" : " and \(count - 1) others reposted a repost of your post"
+            let firstUser =
+              group.notifications.first?.author.displayName ?? group.notifications.first?.author
+              .actorHandle ?? "Someone"
+            return count == 1
+              ? "\(firstUser) reposted a repost of your post"
+              : "\(firstUser) and \(count - 1) others reposted a repost of your post"
           },
           router: router
         )
