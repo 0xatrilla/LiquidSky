@@ -69,10 +69,10 @@ struct QuotedPostContentView: View {
         Spacer()
       }
 
-      // Simple quoted post content area
+      // Quoted post content area - simplified for now
       VStack(alignment: .leading, spacing: 8) {
-        // Placeholder content - will be improved later
-        Text("Quoted post content")
+        // Placeholder content - will be enhanced later
+        Text("Quoted post content will be displayed here")
           .font(.body)
           .foregroundColor(.primary)
           .lineLimit(2)
