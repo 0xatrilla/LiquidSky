@@ -67,3 +67,7 @@ fastlane/test_output
 **/._.DS_Store
 buildServer.json
 NOTIFICATION_IMPROVEMENTS.md
+DerivedData/
+.build/
+*.xcworkspace/xcshareddata/swiftpm/
+Package.resolved
