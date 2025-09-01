@@ -56,7 +56,8 @@ public struct SimpleSearchView: View {
                   likesCount: feed.likesCount,
                   liked: feed.isLiked
                 )
-                router.navigateTo(.feed(feedItem))
+                // Force navigation within the current tab (search/compose)
+                router[.compose].append(.feed(feedItem))
               } label: {
                 FeedRow(feed: feed)
               }
@@ -70,7 +71,8 @@ public struct SimpleSearchView: View {
           Section("Posts") {
             ForEach(searchService.searchResults.posts) { post in
               Button {
-                router.navigateTo(.post(post))
+                // Force navigation within the current tab (search/compose)
+                router[.compose].append(.post(post))
               } label: {
                 PostRow(post: post)
               }

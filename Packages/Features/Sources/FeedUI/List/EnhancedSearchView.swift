@@ -150,7 +150,8 @@ public struct EnhancedSearchView: View {
               Button(action: {
                 let hashtagWithoutHash =
                   hashtag.tag.hasPrefix("#") ? String(hashtag.tag.dropFirst()) : hashtag.tag
-                router.navigateTo(.hashtag(hashtagWithoutHash))
+                // Force navigation within the current tab (search/compose)
+                router[.compose].append(.hashtag(hashtagWithoutHash))
               }) {
                 VStack(spacing: 8) {
                   HStack {
@@ -211,7 +212,8 @@ public struct EnhancedSearchView: View {
               HStack(spacing: 12) {
                 ForEach(trendingContentService.suggestedUsers.prefix(8)) { user in
                   Button(action: {
-                    router.navigateTo(.profile(user))
+                    // Force navigation within the current tab (search/compose)
+                    router[.compose].append(.profile(user))
                   }) {
                     VStack(spacing: 8) {
                       AsyncImage(url: user.avatarImageURL) { phase in
