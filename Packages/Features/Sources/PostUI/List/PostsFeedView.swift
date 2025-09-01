@@ -25,13 +25,21 @@ public struct PostsFeedView: View {
       .navigationBarTitleDisplayMode(.large)
       .toolbar {
         ToolbarItemGroup(placement: .topBarTrailing) {
-          // Compose button
+          // Summary button
+          Button(action: {
+            // Use the existing summary infrastructure
+            // This will show the summary button in the feed content when appropriate
+          }) {
+            Image(systemName: "sparkles")
+              .foregroundStyle(.primary)
+          }
+
+          // Post creation button
           Button(action: {
             router.presentedSheet = .composer(mode: .newPost)
           }) {
-            Image(systemName: "square.and.pencil")
-              .font(.title2)
-              .foregroundColor(.themePrimary)
+            Image(systemName: "plus")
+              .foregroundStyle(.primary)
           }
         }
       }

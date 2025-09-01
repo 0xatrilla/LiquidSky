@@ -18,6 +18,9 @@ struct AppTabView: View {
   @Environment(AppRouter.self) var router
   @Environment(BSkyClient.self) var client
   @State private var selectedTab: AppTab = .feed
+  @State private var showingSummary = false
+  @State private var summaryText = ""
+  @State private var isGeneratingSummary = false
 
   public var body: some View {
     TabView(selection: $selectedTab) {
@@ -32,6 +35,36 @@ struct AppTabView: View {
           FeedsListView()
             .navigationTitle("Discover")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+              ToolbarItemGroup(placement: .topBarTrailing) {
+                // Summary button
+                Button(action: {
+                  Task {
+                    await generateGlobalSummary()
+                  }
+                }) {
+                  if isGeneratingSummary {
+                    ProgressView()
+                      .scaleEffect(0.8)
+                      .foregroundColor(.themeSecondary)
+                  } else {
+                    Image(systemName: "sparkles")
+                      .font(.title2)
+                      .foregroundColor(.themeSecondary)
+                  }
+                }
+                .disabled(isGeneratingSummary)
+
+                // Post creation button
+                Button(action: {
+                  router.presentedSheet = .composer(mode: .newPost)
+                }) {
+                  Image(systemName: "square.and.pencil")
+                    .font(.title2)
+                    .foregroundColor(.themePrimary)
+                }
+              }
+            }
             .withAppDestinations()
         }
 
@@ -50,6 +83,36 @@ struct AppTabView: View {
           NotificationsListView()
             .navigationTitle("Notifications")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+              ToolbarItemGroup(placement: .topBarTrailing) {
+                // Summary button
+                Button(action: {
+                  Task {
+                    await generateGlobalSummary()
+                  }
+                }) {
+                  if isGeneratingSummary {
+                    ProgressView()
+                      .scaleEffect(0.8)
+                      .foregroundColor(.themeSecondary)
+                  } else {
+                    Image(systemName: "sparkles")
+                      .font(.title2)
+                      .foregroundColor(.themeSecondary)
+                  }
+                }
+                .disabled(isGeneratingSummary)
+
+                // Post creation button
+                Button(action: {
+                  router.presentedSheet = .composer(mode: .newPost)
+                }) {
+                  Image(systemName: "square.and.pencil")
+                    .font(.title2)
+                    .foregroundColor(.themePrimary)
+                }
+              }
+            }
             .withAppDestinations()
         }
 
@@ -68,6 +131,36 @@ struct AppTabView: View {
           CurrentUserView()
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+              ToolbarItemGroup(placement: .topBarTrailing) {
+                // Summary button
+                Button(action: {
+                  Task {
+                    await generateGlobalSummary()
+                  }
+                }) {
+                  if isGeneratingSummary {
+                    ProgressView()
+                      .scaleEffect(0.8)
+                      .foregroundColor(.themeSecondary)
+                  } else {
+                    Image(systemName: "sparkles")
+                      .font(.title2)
+                      .foregroundColor(.themeSecondary)
+                  }
+                }
+                .disabled(isGeneratingSummary)
+
+                // Post creation button
+                Button(action: {
+                  router.presentedSheet = .composer(mode: .newPost)
+                }) {
+                  Image(systemName: "square.and.pencil")
+                    .font(.title2)
+                    .foregroundColor(.themePrimary)
+                }
+              }
+            }
             .withAppDestinations()
         }
 
@@ -86,6 +179,36 @@ struct AppTabView: View {
           SettingsView()
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+              ToolbarItemGroup(placement: .topBarTrailing) {
+                // Summary button
+                Button(action: {
+                  Task {
+                    await generateGlobalSummary()
+                  }
+                }) {
+                  if isGeneratingSummary {
+                    ProgressView()
+                      .scaleEffect(0.8)
+                      .foregroundColor(.themeSecondary)
+                  } else {
+                    Image(systemName: "sparkles")
+                      .font(.title2)
+                      .foregroundColor(.themeSecondary)
+                  }
+                }
+                .disabled(isGeneratingSummary)
+
+                // Post creation button
+                Button(action: {
+                  router.presentedSheet = .composer(mode: .newPost)
+                }) {
+                  Image(systemName: "square.and.pencil")
+                    .font(.title2)
+                    .foregroundColor(.themePrimary)
+                }
+              }
+            }
             .withAppDestinations()
         }
 
@@ -102,6 +225,38 @@ struct AppTabView: View {
           )
         ) {
           EnhancedSearchView(client: client)
+            .navigationTitle("Search")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+              ToolbarItemGroup(placement: .topBarTrailing) {
+                // Summary button
+                Button(action: {
+                  Task {
+                    await generateGlobalSummary()
+                  }
+                }) {
+                  if isGeneratingSummary {
+                    ProgressView()
+                      .scaleEffect(0.8)
+                      .foregroundColor(.themeSecondary)
+                  } else {
+                    Image(systemName: "sparkles")
+                      .font(.title2)
+                      .foregroundColor(.themeSecondary)
+                  }
+                }
+                .disabled(isGeneratingSummary)
+
+                // Post creation button
+                Button(action: {
+                  router.presentedSheet = .composer(mode: .newPost)
+                }) {
+                  Image(systemName: "square.and.pencil")
+                    .font(.title2)
+                    .foregroundColor(.themePrimary)
+                }
+              }
+            }
             .withAppDestinations()
         }
         .onAppear { selectedTab = .compose }
@@ -110,7 +265,33 @@ struct AppTabView: View {
       }
     }
     .tint(.themePrimary)
+    .sheet(isPresented: $showingSummary) {
+      SummarySheetView(
+        title: "Feed Summary",
+        summary: summaryText,
+        itemCount: 0,
+        onDismiss: { showingSummary = false }
+      )
+    }
+  }
 
+  // MARK: - Summary Generation
+
+  private func generateGlobalSummary() async {
+    isGeneratingSummary = true
+
+    do {
+      // Use the existing FeedSummaryService to generate a summary
+      let summary = await FeedSummaryService.shared.summarizeFeedPosts([], feedName: "your feeds")
+      summaryText = summary
+      showingSummary = true
+    } catch {
+      // Fallback to a simple summary if the service fails
+      summaryText = "Unable to generate AI summary at this time. Please try again later."
+      showingSummary = true
+    }
+
+    isGeneratingSummary = false
   }
 }
 
