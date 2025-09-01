@@ -99,7 +99,19 @@ public struct EmbedDataExtractor {
         print("EmbedDataExtractor: Successfully converted to RecordDefinition.View")
         print("EmbedDataExtractor: Record type: \(type(of: recordEmbed.record))")
       #endif
-      return .quotedPost(recordEmbed)
+      if let quotedPostData = extractQuotedPostData(from: recordEmbed) {
+        return .quotedPost(quotedPostData)
+      } else {
+        return .quotedPost(
+          QuotedPostData(
+            uri: "unknown",
+            cid: "unknown",
+            author: Profile(
+              did: "unknown", handle: "unknown", displayName: nil, avatarImageURL: nil),
+            content: "Unable to load quoted post",
+            indexedAt: Date()
+          ))
+      }
     }
 
     // If direct casting fails, try to extract from union types
@@ -137,7 +149,19 @@ public struct EmbedDataExtractor {
             #if DEBUG
               print("EmbedDataExtractor: Found record embed in union field: \(label)")
             #endif
-            return .quotedPost(recordEmbed)
+            if let quotedPostData = extractQuotedPostData(from: recordEmbed) {
+              return .quotedPost(quotedPostData)
+            } else {
+              return .quotedPost(
+                QuotedPostData(
+                  uri: "unknown",
+                  cid: "unknown",
+                  author: Profile(
+                    did: "unknown", handle: "unknown", displayName: nil, avatarImageURL: nil),
+                  content: "Unable to load quoted post",
+                  indexedAt: Date()
+                ))
+            }
           }
         }
       }
@@ -183,7 +207,19 @@ public struct EmbedDataExtractor {
             #if DEBUG
               print("EmbedDataExtractor: Successfully extracted record from EmbedUnion child")
             #endif
-            return .quotedPost(recordEmbed)
+            if let quotedPostData = extractQuotedPostData(from: recordEmbed) {
+              return .quotedPost(quotedPostData)
+            } else {
+              return .quotedPost(
+                QuotedPostData(
+                  uri: "unknown",
+                  cid: "unknown",
+                  author: Profile(
+                    did: "unknown", handle: "unknown", displayName: nil, avatarImageURL: nil),
+                  content: "Unable to load quoted post",
+                  indexedAt: Date()
+                ))
+            }
           } else {
             // If direct casting fails, check if this is a type indicator and look for the data field
             let childMirror = Mirror(reflecting: child.value)
@@ -245,7 +281,19 @@ public struct EmbedDataExtractor {
                   #if DEBUG
                     print("EmbedDataExtractor: Successfully extracted record by type matching")
                   #endif
-                  return .quotedPost(recordEmbed)
+                  if let quotedPostData = extractQuotedPostData(from: recordEmbed) {
+                    return .quotedPost(quotedPostData)
+                  } else {
+                    return .quotedPost(
+                      QuotedPostData(
+                        uri: "unknown",
+                        cid: "unknown",
+                        author: Profile(
+                          did: "unknown", handle: "unknown", displayName: nil, avatarImageURL: nil),
+                        content: "Unable to load quoted post",
+                        indexedAt: Date()
+                      ))
+                  }
                 }
               }
             }
@@ -281,7 +329,19 @@ public struct EmbedDataExtractor {
                   print(
                     "EmbedDataExtractor: Successfully extracted record from EmbedUnion sub-child")
                 #endif
-                return .quotedPost(recordEmbed)
+                if let quotedPostData = extractQuotedPostData(from: recordEmbed) {
+                  return .quotedPost(quotedPostData)
+                } else {
+                  return .quotedPost(
+                    QuotedPostData(
+                      uri: "unknown",
+                      cid: "unknown",
+                      author: Profile(
+                        did: "unknown", handle: "unknown", displayName: nil, avatarImageURL: nil),
+                      content: "Unable to load quoted post",
+                      indexedAt: Date()
+                    ))
+                }
               }
             }
           }
@@ -292,6 +352,252 @@ public struct EmbedDataExtractor {
     #if DEBUG
       print("EmbedDataExtractor: Failed to convert embed type: \(type(of: embed))")
     #endif
+
+    return nil
+  }
+
+  /// Extract quoted post data from a RecordDefinition.View
+  private static func extractQuotedPostData(
+    from recordEmbed: AppBskyLexicon.Embed.RecordDefinition.View
+  ) -> QuotedPostData? {
+    #if DEBUG
+      print("EmbedDataExtractor: Starting extraction of quoted post data")
+    #endif
+
+    // Use reflection to extract the quoted post data
+    let mirror = Mirror(reflecting: recordEmbed)
+
+    var uri: String?
+    var cid: String?
+    var author: Profile?
+    var content: String?
+    var indexedAt: Date?
+
+    #if DEBUG
+      print(
+        "EmbedDataExtractor: Found mirror children: \(mirror.children.map { $0.label ?? "nil" })")
+    #endif
+
+    // Look for the record property which should contain the actual post data
+    for child in mirror.children {
+      if let label = child.label {
+        #if DEBUG
+          print("EmbedDataExtractor: Processing child with label: \(label)")
+        #endif
+
+        switch label {
+        case "record":
+          // The record should contain the actual post data
+          let recordMirror = Mirror(reflecting: child.value)
+          #if DEBUG
+            print(
+              "EmbedDataExtractor: Record mirror children: \(recordMirror.children.map { $0.label ?? "nil" })"
+            )
+          #endif
+
+          for recordChild in recordMirror.children {
+            if let recordLabel = recordChild.label {
+              #if DEBUG
+                print("EmbedDataExtractor: Processing record child: \(recordLabel)")
+              #endif
+
+              switch recordLabel {
+              case "uri":
+                if let uriString = recordChild.value as? String {
+                  uri = uriString
+                  #if DEBUG
+                    print("EmbedDataExtractor: Found URI: \(uriString)")
+                  #endif
+                }
+              case "cid":
+                if let cidString = recordChild.value as? String {
+                  cid = cidString
+                  #if DEBUG
+                    print("EmbedDataExtractor: Found CID: \(cidString)")
+                  #endif
+                }
+              case "indexedAt":
+                if let dateString = recordChild.value as? String {
+                  indexedAt = ISO8601DateFormatter().date(from: dateString)
+                  #if DEBUG
+                    print("EmbedDataExtractor: Found indexedAt: \(dateString)")
+                  #endif
+                }
+              case "value":
+                // The value should contain the actual post record
+                if let postRecord = recordChild.value as? AppBskyLexicon.Feed.PostRecord {
+                  content = postRecord.text
+                  #if DEBUG
+                    print("EmbedDataExtractor: Found content from PostRecord: \(postRecord.text)")
+                  #endif
+                } else {
+                  // Try to extract text using reflection
+                  let valueMirror = Mirror(reflecting: recordChild.value)
+                  for valueChild in valueMirror.children {
+                    if valueChild.label == "text", let text = valueChild.value as? String {
+                      content = text
+                      #if DEBUG
+                        print("EmbedDataExtractor: Found content from reflection: \(text)")
+                      #endif
+                      break
+                    }
+                  }
+                }
+              default:
+                break
+              }
+            }
+          }
+        case "author":
+          // Extract author information
+          if let authorData = extractAuthorFromValue(child.value) {
+            author = authorData
+            #if DEBUG
+              print("EmbedDataExtractor: Found author: \(authorData.handle)")
+            #endif
+          }
+        default:
+          break
+        }
+      }
+    }
+
+    #if DEBUG
+      print(
+        "EmbedDataExtractor: Extraction results - URI: \(uri ?? "nil"), CID: \(cid ?? "nil"), Author: \(author?.handle ?? "nil"), Content: \(content ?? "nil"), IndexedAt: \(indexedAt?.description ?? "nil")"
+      )
+    #endif
+
+    // Be more lenient - only require some basic info
+    if let content = content, !content.isEmpty {
+      // Create QuotedPostData with available information, using defaults for missing fields
+      return QuotedPostData(
+        uri: uri ?? "unknown",
+        cid: cid ?? "unknown",
+        author: author
+          ?? Profile(did: "unknown", handle: "unknown", displayName: nil, avatarImageURL: nil),
+        content: content,
+        indexedAt: indexedAt ?? Date()
+      )
+    } else {
+      #if DEBUG
+        print("EmbedDataExtractor: No content found, trying alternative extraction methods")
+      #endif
+
+      // Try alternative extraction methods if the primary method failed
+      if let alternativeContent = extractContentAlternative(from: recordEmbed) {
+        return QuotedPostData(
+          uri: uri ?? "unknown",
+          cid: cid ?? "unknown",
+          author: author
+            ?? Profile(did: "unknown", handle: "unknown", displayName: nil, avatarImageURL: nil),
+          content: alternativeContent,
+          indexedAt: indexedAt ?? Date()
+        )
+      }
+    }
+
+    return nil
+  }
+
+  /// Alternative method to extract content from RecordDefinition.View
+  private static func extractContentAlternative(
+    from recordEmbed: AppBskyLexicon.Embed.RecordDefinition.View
+  ) -> String? {
+    #if DEBUG
+      print("EmbedDataExtractor: Trying alternative content extraction")
+    #endif
+
+    let mirror = Mirror(reflecting: recordEmbed)
+
+    // Try to find any text content in the structure
+    for child in mirror.children {
+      if let label = child.label {
+        #if DEBUG
+          print("EmbedDataExtractor: Alternative - checking child: \(label)")
+        #endif
+
+        // Look for text content in various possible locations
+        if let text = extractTextFromValue(child.value) {
+          #if DEBUG
+            print("EmbedDataExtractor: Alternative - found text: \(text)")
+          #endif
+          return text
+        }
+      }
+    }
+
+    return nil
+  }
+
+  /// Extract text content from any value using reflection
+  private static func extractTextFromValue(_ value: Any) -> String? {
+    let mirror = Mirror(reflecting: value)
+
+    for child in mirror.children {
+      if let label = child.label {
+        switch label {
+        case "text", "content", "value":
+          if let text = child.value as? String, !text.isEmpty {
+            return text
+          }
+        default:
+          break
+        }
+      }
+
+      // Recursively check child values
+      if let childText = extractTextFromValue(child.value) {
+        return childText
+      }
+    }
+
+    return nil
+  }
+
+  /// Extract author information from a value
+  private static func extractAuthorFromValue(_ value: Any) -> Profile? {
+    let mirror = Mirror(reflecting: value)
+
+    var did: String?
+    var handle: String?
+    var displayName: String?
+    var avatarURL: URL?
+
+    for child in mirror.children {
+      if let label = child.label {
+        switch label {
+        case "did", "actorDID":
+          if let didString = child.value as? String {
+            did = didString
+          }
+        case "handle", "actorHandle":
+          if let handleString = child.value as? String {
+            handle = handleString
+          }
+        case "displayName":
+          if let displayNameString = child.value as? String {
+            displayName = displayNameString
+          }
+        case "avatarImageURL":
+          if let urlString = child.value as? String, let url = URL(string: urlString) {
+            avatarURL = url
+          }
+        default:
+          break
+        }
+      }
+    }
+
+    // If we found the essential author information, create a Profile
+    if let did = did, let handle = handle {
+      return Profile(
+        did: did,
+        handle: handle,
+        displayName: displayName,
+        avatarImageURL: avatarURL
+      )
+    }
 
     return nil
   }
@@ -356,12 +662,35 @@ public struct EmbedDataExtractor {
   }
 }
 
+/// Struct containing extracted quoted post data for easy display
+public struct QuotedPostData: Sendable {
+  public let uri: String
+  public let cid: String
+  public let author: Profile
+  public let content: String
+  public let indexedAt: Date
+
+  public init(
+    uri: String,
+    cid: String,
+    author: Profile,
+    content: String,
+    indexedAt: Date
+  ) {
+    self.uri = uri
+    self.cid = cid
+    self.author = author
+    self.content = content
+    self.indexedAt = indexedAt
+  }
+}
+
 /// Union type for embed data that conforms to Sendable
 public enum EmbedData: Sendable {
   case images(AppBskyLexicon.Embed.ImagesDefinition.View)
   case videos(AppBskyLexicon.Embed.VideoDefinition.View)
   case external(AppBskyLexicon.Embed.ExternalDefinition.View)
-  case quotedPost(AppBskyLexicon.Embed.RecordDefinition.View)
+  case quotedPost(QuotedPostData)
   case none
 }
 
