@@ -11,11 +11,11 @@ public struct SimpleSearchView: View {
   @State private var searchText = ""
   @Environment(AppRouter.self) var router
   @Environment(BSkyClient.self) var client
-  
+
   public init(client: BSkyClient) {
     self._searchService = StateObject(wrappedValue: UnifiedSearchService(client: client))
   }
-  
+
   public var body: some View {
     List {
       if searchService.isSearching {
@@ -32,7 +32,7 @@ public struct SimpleSearchView: View {
           Section("Users") {
             ForEach(searchService.searchResults.users) { user in
               Button {
-                router.presentedSheet = .profile(user)
+                router.navigateTo(.profile(user))
               } label: {
                 UserRow(user: user)
               }
@@ -40,7 +40,7 @@ public struct SimpleSearchView: View {
             }
           }
         }
-        
+
         // Feeds section
         if !searchService.searchResults.feeds.isEmpty {
           Section("Feeds") {
@@ -63,7 +63,7 @@ public struct SimpleSearchView: View {
             }
           }
         }
-        
+
         // Posts section
         if !searchService.searchResults.posts.isEmpty {
           Section("Posts") {
@@ -77,12 +77,13 @@ public struct SimpleSearchView: View {
             }
           }
         }
-        
+
         // No results
-        if searchService.searchResults.users.isEmpty 
-          && searchService.searchResults.feeds.isEmpty 
-          && searchService.searchResults.posts.isEmpty 
-          && !searchService.isSearching {
+        if searchService.searchResults.users.isEmpty
+          && searchService.searchResults.feeds.isEmpty
+          && searchService.searchResults.posts.isEmpty
+          && !searchService.isSearching
+        {
           Text("No results found")
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, alignment: .center)
@@ -103,7 +104,7 @@ public struct SimpleSearchView: View {
       } else {
         // Auto-search after typing stops
         Task {
-          try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 second delay
+          try? await Task.sleep(nanoseconds: 500_000_000)  // 0.5 second delay
           if searchText == newValue {
             await searchService.search(query: searchText)
           }
@@ -122,7 +123,7 @@ public struct SimpleSearchView: View {
 
 private struct UserRow: View {
   let user: Profile
-  
+
   var body: some View {
     HStack {
       AsyncImage(url: user.avatarImageURL) { image in
@@ -135,18 +136,18 @@ private struct UserRow: View {
       }
       .frame(width: 40, height: 40)
       .clipShape(Circle())
-      
+
       VStack(alignment: .leading, spacing: 2) {
         Text(user.displayName ?? user.handle)
           .font(.body)
           .lineLimit(1)
-        
+
         Text("@\(user.handle)")
           .font(.caption)
           .foregroundStyle(.secondary)
           .lineLimit(1)
       }
-      
+
       Spacer()
     }
     .contentShape(Rectangle())
@@ -155,7 +156,7 @@ private struct UserRow: View {
 
 private struct FeedRow: View {
   let feed: FeedSearchResult
-  
+
   var body: some View {
     HStack {
       AsyncImage(url: feed.avatarURL) { image in
@@ -168,12 +169,12 @@ private struct FeedRow: View {
       }
       .frame(width: 40, height: 40)
       .clipShape(RoundedRectangle(cornerRadius: 8))
-      
+
       VStack(alignment: .leading, spacing: 2) {
         Text(feed.displayName)
           .font(.body)
           .lineLimit(1)
-        
+
         if let description = feed.description {
           Text(description)
             .font(.caption)
@@ -181,9 +182,9 @@ private struct FeedRow: View {
             .lineLimit(2)
         }
       }
-      
+
       Spacer()
-      
+
       VStack(alignment: .trailing, spacing: 2) {
         Label("\(feed.likesCount)", systemImage: "heart")
           .font(.caption)
@@ -196,7 +197,7 @@ private struct FeedRow: View {
 
 private struct PostRow: View {
   let post: PostItem
-  
+
   var body: some View {
     VStack(alignment: .leading, spacing: 8) {
       // Author
@@ -211,24 +212,24 @@ private struct PostRow: View {
         }
         .frame(width: 24, height: 24)
         .clipShape(Circle())
-        
+
         Text(post.author.displayName ?? post.author.handle)
           .font(.caption)
           .fontWeight(.medium)
-        
+
         Text("@\(post.author.handle)")
           .font(.caption)
           .foregroundStyle(.secondary)
           .lineLimit(1)
-        
+
         Spacer()
       }
-      
+
       // Content
       Text(post.content)
         .font(.body)
         .lineLimit(3)
-      
+
       // Engagement
       HStack(spacing: 16) {
         Label("\(post.replyCount)", systemImage: "bubble.left")

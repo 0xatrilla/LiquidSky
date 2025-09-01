@@ -17,6 +17,7 @@ struct FeedRowView: View {
 
   var body: some View {
     Button(action: {
+      HapticManager.shared.impact(.light)
       router.navigateTo(.feed(feed))
     }) {
       VStack(alignment: .leading, spacing: 12) {

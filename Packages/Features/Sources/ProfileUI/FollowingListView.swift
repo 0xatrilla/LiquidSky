@@ -117,13 +117,33 @@ public struct FollowingListView: View {
 
     do {
       let followingData = try await client.protoClient.getFollows(from: profile.did)
-      let profiles = followingData.follows.map { follow in
-        Profile(
-          did: follow.actorDID,
-          handle: follow.actorHandle,
-          displayName: follow.displayName,
-          avatarImageURL: follow.avatarImageURL
-        )
+
+      // Check if current user is following each profile
+      let profiles = await withTaskGroup(of: Profile.self) { group in
+        for follow in followingData.follows {
+          group.addTask {
+            // Check if current user is following this profile
+            let isFollowing = await self.checkIfCurrentUserIsFollowing(follow.actorDID)
+
+            return Profile(
+              did: follow.actorDID,
+              handle: follow.actorHandle,
+              displayName: follow.displayName,
+              avatarImageURL: follow.avatarImageURL,
+              description: nil,
+              followersCount: 0,
+              followingCount: 0,
+              postsCount: 0,
+              isFollowing: isFollowing
+            )
+          }
+        }
+
+        var results: [Profile] = []
+        for await profile in group {
+          results.append(profile)
+        }
+        return results.sorted { $0.handle < $1.handle }
       }
 
       await MainActor.run {
@@ -138,6 +158,18 @@ public struct FollowingListView: View {
       #if DEBUG
         print("Error loading following for \(profile.did): \(error)")
       #endif
+    }
+  }
+
+  private func checkIfCurrentUserIsFollowing(_ targetDID: String) async -> Bool {
+    do {
+      let currentUserProfile = try await client.protoClient.getProfile(for: targetDID)
+      return currentUserProfile.viewer?.followingURI != nil
+    } catch {
+      #if DEBUG
+        print("Error checking follow status for \(targetDID): \(error)")
+      #endif
+      return false
     }
   }
 }

@@ -45,7 +45,9 @@ public final class AppSettings {
 
   // Device experimental gate for Apple Intelligence usage on physical devices
   public var aiDeviceExperimentalEnabled: Bool {
-    didSet { UserDefaults.standard.set(aiDeviceExperimentalEnabled, forKey: "aiDeviceExperimentalEnabled") }
+    didSet {
+      UserDefaults.standard.set(aiDeviceExperimentalEnabled, forKey: "aiDeviceExperimentalEnabled")
+    }
   }
 
   // MARK: - Media Settings
@@ -55,6 +57,11 @@ public final class AppSettings {
 
   public var preloadImages: Bool {
     didSet { UserDefaults.standard.set(preloadImages, forKey: "preloadImages") }
+  }
+
+  // MARK: - Haptic Feedback Settings
+  public var hapticFeedbackEnabled: Bool {
+    didSet { UserDefaults.standard.set(hapticFeedbackEnabled, forKey: "hapticFeedbackEnabled") }
   }
 
   // MARK: - Initialization
@@ -83,6 +90,8 @@ public final class AppSettings {
       ImageQuality(rawValue: UserDefaults.standard.string(forKey: "imageQuality") ?? "high")
       ?? .high
     self.preloadImages = UserDefaults.standard.object(forKey: "preloadImages") as? Bool ?? true
+    self.hapticFeedbackEnabled =
+      UserDefaults.standard.object(forKey: "hapticFeedbackEnabled") as? Bool ?? true
   }
 
   // MARK: - Helper Methods
@@ -104,6 +113,7 @@ public final class AppSettings {
     aiDeviceExperimentalEnabled = false
     imageQuality = .high
     preloadImages = true
+    hapticFeedbackEnabled = true
   }
 }
 

@@ -288,14 +288,14 @@ public struct SearchView: View {
               LazyVStack(spacing: 8) {
                 ForEach(results.users) { user in
                   Button(action: {
-                    // Navigate to user profile by presenting as sheet
+                    // Navigate to user profile within the search tab
                     // The search results already contain Profile objects, so use them directly
                     guard !user.did.isEmpty, !user.handle.isEmpty else {
                       return
                     }
 
-                    // Present the profile sheet
-                    router.presentedSheet = .profile(user)
+                    // Navigate to profile within the search tab
+                    router.navigateTo(.profile(user))
                   }) {
                     UserSearchResultRow(user: user)
                   }
@@ -1104,8 +1104,6 @@ private struct PostSearchResultRow: View {
     .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
   }
 }
-
-
 
 // MARK: - Search Filter Types
 

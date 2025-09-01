@@ -72,6 +72,14 @@ public final class SettingsService {
     set { settings.preloadImages = newValue }
   }
 
+  public var hapticFeedbackEnabled: Bool {
+    get { settings.hapticFeedbackEnabled }
+    set {
+      settings.hapticFeedbackEnabled = newValue
+      // Note: HapticManager will be updated when the setting is accessed
+    }
+  }
+
   public var aiSummariesEnabled: Bool {
     get { settings.aiSummariesEnabled }
     set { settings.aiSummariesEnabled = newValue }

@@ -1,31 +1,74 @@
 import SwiftUI
+import UIKit
 
 @MainActor
 public final class HapticManager: Sendable {
   public static let shared = HapticManager()
 
-  private init() {}
+  @Published public var isEnabled: Bool = true
+
+  private init() {
+    // Load haptic feedback preference
+    isEnabled = UserDefaults.standard.object(forKey: "hapticFeedbackEnabled") as? Bool ?? true
+  }
 
   public func impact(_ style: ImpactStyle) {
-    // Mock implementation - can be replaced with proper haptic feedback later
+    guard isEnabled else { return }
+
     #if os(iOS)
-      // For now, just log the impact style
-      print("Haptic impact: \(style)")
+      let impactFeedbackGenerator: UIImpactFeedbackGenerator
+
+      switch style {
+      case .light:
+        impactFeedbackGenerator = UIImpactFeedbackGenerator(style: .light)
+      case .medium:
+        impactFeedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
+      case .heavy:
+        impactFeedbackGenerator = UIImpactFeedbackGenerator(style: .heavy)
+      case .soft:
+        impactFeedbackGenerator = UIImpactFeedbackGenerator(style: .soft)
+      case .rigid:
+        impactFeedbackGenerator = UIImpactFeedbackGenerator(style: .rigid)
+      }
+
+      impactFeedbackGenerator.prepare()
+      impactFeedbackGenerator.impactOccurred()
     #endif
   }
 
   public func notification(_ type: NotificationType) {
-    // Mock implementation - can be replaced with proper haptic feedback later
+    guard isEnabled else { return }
+
     #if os(iOS)
-      print("Haptic notification: \(type)")
+      let notificationFeedbackGenerator: UINotificationFeedbackGenerator
+
+      switch type {
+      case .success:
+        notificationFeedbackGenerator = UINotificationFeedbackGenerator()
+        notificationFeedbackGenerator.notificationOccurred(.success)
+      case .warning:
+        notificationFeedbackGenerator = UINotificationFeedbackGenerator()
+        notificationFeedbackGenerator.notificationOccurred(.warning)
+      case .error:
+        notificationFeedbackGenerator = UINotificationFeedbackGenerator()
+        notificationFeedbackGenerator.notificationOccurred(.error)
+      }
     #endif
   }
 
   public func selection() {
-    // Mock implementation - can be replaced with proper haptic feedback later
+    guard isEnabled else { return }
+
     #if os(iOS)
-      print("Haptic selection")
+      let selectionFeedbackGenerator = UISelectionFeedbackGenerator()
+      selectionFeedbackGenerator.prepare()
+      selectionFeedbackGenerator.selectionChanged()
     #endif
+  }
+
+  public func toggleHapticFeedback() {
+    isEnabled.toggle()
+    UserDefaults.standard.set(isEnabled, forKey: "hapticFeedbackEnabled")
   }
 }
 

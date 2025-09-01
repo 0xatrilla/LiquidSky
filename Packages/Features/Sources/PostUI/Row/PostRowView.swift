@@ -81,7 +81,14 @@ public struct PostRowView: View {
           .font(.caption)
           .foregroundStyle(.secondary)
       }
-      PostRowBodyView(post: post)
+      PostRowBodyView(
+        post: post,
+        onUsernameTap: { username in
+          // Search for the user and navigate to their profile
+          Task {
+            await searchAndNavigateToUser(username: username)
+          }
+        })
       PostRowEmbedView(post: post)
       if !isQuote {
         PostRowActionsView(post: post)
@@ -186,6 +193,43 @@ public struct PostRowView: View {
       }
     } catch {
       // Silently ignore; parent will just not render
+    }
+  }
+
+  // Search for a user by username and navigate to their profile
+  @MainActor
+  private func searchAndNavigateToUser(username: String) async {
+    do {
+      // Search for the user by their handle
+      let searchResults = try await client.protoClient.searchActors(matching: username, limit: 1)
+
+      if let firstActor = searchResults.actors.first {
+        // Create a proper Profile object with the real DID
+        let profile = Profile(
+          did: firstActor.actorDID,
+          handle: firstActor.actorHandle,
+          displayName: firstActor.displayName,
+          avatarImageURL: firstActor.avatarImageURL,
+          description: firstActor.description,
+          followersCount: 0,
+          followingCount: 0,
+          postsCount: 0,
+          isFollowing: firstActor.viewer?.followingURI != nil,
+          isFollowedBy: firstActor.viewer?.followedByURI != nil,
+          isBlocked: firstActor.viewer?.isBlocked == true,
+          isBlocking: firstActor.viewer?.blockingURI != nil,
+          isMuted: firstActor.viewer?.isMuted == true
+        )
+
+        print("PostRowView: Found profile for \(username), navigating to profile")
+        router.navigateTo(.profile(profile))
+      } else {
+        print("PostRowView: No profile found for username: \(username)")
+        // Could show an error message or fallback behavior here
+      }
+    } catch {
+      print("PostRowView: Error searching for user \(username): \(error)")
+      // Could show an error message or fallback behavior here
     }
   }
 

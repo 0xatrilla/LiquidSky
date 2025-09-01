@@ -262,6 +262,14 @@ public struct SettingsView: View {
         iconColor: .green,
         isOn: $settingsService.compactMode
       )
+
+      SettingsToggleRow(
+        title: "Haptic Feedback",
+        subtitle: "Provide tactile feedback for interactions",
+        icon: "hand.tap.fill",
+        iconColor: .blue,
+        isOn: $settingsService.hapticFeedbackEnabled
+      )
     }
   }
 

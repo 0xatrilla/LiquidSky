@@ -1,4 +1,3 @@
-import AppRouter
 import Destinations
 import Models
 import SwiftUI
@@ -8,13 +7,17 @@ public struct PostRowBodyView: View {
   @Environment(SettingsService.self) private var settingsService
 
   let post: PostItem
+  let onUsernameTap: ((String) -> Void)?
 
-  public init(post: PostItem) {
+  public init(post: PostItem, onUsernameTap: ((String) -> Void)? = nil) {
     self.post = post
+    self.onUsernameTap = onUsernameTap
   }
 
   public var body: some View {
-    ClickablePostText(text: post.content, compactMode: compactMode, isFocused: isFocused)
+    ClickablePostText(
+      text: post.content, compactMode: compactMode, isFocused: isFocused,
+      onUsernameTap: onUsernameTap)
   }
 
   private var compactMode: Bool {
@@ -27,7 +30,7 @@ struct ClickablePostText: View {
   let text: String
   let compactMode: Bool
   let isFocused: Bool
-  @Environment(AppRouter.self) private var router
+  let onUsernameTap: ((String) -> Void)?
 
   var body: some View {
     let attributedString = createAttributedString(from: text)
@@ -65,6 +68,8 @@ struct ClickablePostText: View {
       if let attributedRange = attributedString.range(of: String(match.output)) {
         attributedString[attributedRange].foregroundColor = .blue
         attributedString[attributedRange].underlineStyle = .single
+        // Add custom attribute to identify mentions
+        attributedString[attributedRange][MentionAttribute.self] = String(match.output)
       }
     }
 
@@ -76,6 +81,8 @@ struct ClickablePostText: View {
       if let attributedRange = attributedString.range(of: String(match.output)) {
         attributedString[attributedRange].foregroundColor = .blue
         attributedString[attributedRange].underlineStyle = .single
+        // Add custom attribute to identify URLs
+        attributedString[attributedRange][URLAttribute.self] = String(match.output)
       }
     }
 
@@ -83,34 +90,68 @@ struct ClickablePostText: View {
   }
 
   private func handleTap(at location: CGPoint, in attributedString: AttributedString) {
-    // Check if the tap is on a hashtag by examining the text layout
-    // For now, we'll use a simpler approach that checks if there are hashtags
-    // and only navigates if the tap is likely on one
+    // Check if the tap is on a hashtag, mention, or URL
     let hashtagPattern = #/#[a-zA-Z0-9_]+/#
+    let mentionPattern = #/@[a-zA-Z0-9_.]+/#
+    let urlPattern = #/https?://[^\s]+/#
+
     let hashtagMatches = text.matches(of: hashtagPattern)
-    
-    // If no hashtags, do nothing (let parent handle the tap)
-    guard !hashtagMatches.isEmpty else { return }
-    
-    // For now, we'll use a simple heuristic: if there are hashtags and the tap is
-    // in the text area, we'll assume it's on a hashtag. This is a limitation of
+    let mentionMatches = text.matches(of: mentionPattern)
+    let urlMatches = text.matches(of: urlPattern)
+
+    // If no interactive elements, do nothing (let parent handle the tap)
+    guard !hashtagMatches.isEmpty || !mentionMatches.isEmpty || !urlMatches.isEmpty else { return }
+
+    // For now, we'll use a simple heuristic: if there are interactive elements and the tap is
+    // in the text area, we'll assume it's on one. This is a limitation of
     // SwiftUI's current tap handling, but it's better than the current broken behavior.
     // In a future update, we could implement more precise tap detection using UITextView.
-    
-    // Extract the hashtag that was tapped (for now, just use the first one)
-    // This is a temporary solution until we can implement proper tap coordinate detection
-    if let firstMatch = hashtagMatches.first {
-      let hashtag = String(firstMatch.output)
+
+    // Priority: mentions > hashtags > URLs
+    if let firstMention = mentionMatches.first {
+      let mention = String(firstMention.output)
+      let username = String(mention.dropFirst())  // Remove @ symbol
+      print("PostRowBodyView: Tapping mention: \(mention) -> \(username)")
+
+      // Use the callback to handle username navigation
+      onUsernameTap?(username)
+      return
+    }
+
+    if let firstHashtag = hashtagMatches.first {
+      let hashtag = String(firstHashtag.output)
       let hashtagWithoutHash = String(hashtag.dropFirst())
       print("PostRowBodyView: Tapping hashtag: \(hashtag) -> \(hashtagWithoutHash)")
-      router.navigateTo(.hashtag(hashtagWithoutHash))
-      print("PostRowBodyView: Navigation called for hashtag: \(hashtagWithoutHash)")
+      // TODO: Handle hashtag navigation through callback
+      print("PostRowBodyView: Hashtag navigation not yet implemented")
+      return
+    }
+
+    if let firstURL = urlMatches.first {
+      let url = String(firstURL.output)
+      print("PostRowBodyView: Tapping URL: \(url)")
+      // Open URL in Safari or handle appropriately
+      if let url = URL(string: url) {
+        UIApplication.shared.open(url)
+      }
+      return
     }
   }
+
 }
 
-// MARK: - Custom Attribute for Hashtags
+// MARK: - Custom Attributes
 struct HashtagAttribute: CodableAttributedStringKey {
   typealias Value = String
   static let name = "hashtag"
+}
+
+struct MentionAttribute: CodableAttributedStringKey {
+  typealias Value = String
+  static let name = "mention"
+}
+
+struct URLAttribute: CodableAttributedStringKey {
+  typealias Value = String
+  static let name = "url"
 }

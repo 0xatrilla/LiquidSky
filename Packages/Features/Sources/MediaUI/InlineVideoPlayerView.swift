@@ -1,4 +1,5 @@
 import AVKit
+import DesignSystem
 import Models
 import SwiftUI
 
@@ -65,7 +66,10 @@ public struct InlineVideoPlayerView: View {
 
         // Play button overlay (when not playing)
         if !isPlaying && player != nil && !showControls {
-          Button(action: togglePlayPause) {
+          Button(action: {
+            HapticManager.shared.impact(.light)
+            togglePlayPause()
+          }) {
             Image(systemName: "play.circle.fill")
               .font(.system(size: 48))
               .foregroundColor(.white)
@@ -74,6 +78,65 @@ public struct InlineVideoPlayerView: View {
                   .fill(.ultraThinMaterial)
                   .scaleEffect(1.2)
               )
+          }
+        }
+
+        // Fullscreen button (always visible when not in quote mode)
+        if !isQuote && player != nil {
+          VStack {
+            Spacer()
+            HStack {
+              Spacer()
+              Button(action: {
+                HapticManager.shared.impact(.light)
+                // Use native full screen with AVPlayerViewController
+                if let player = player {
+                  // Create a temporary AVPlayerViewController for native full screen
+                  let playerViewController = AVPlayerViewController()
+                  playerViewController.player = player
+                  playerViewController.showsPlaybackControls = true
+                  playerViewController.allowsPictureInPicturePlayback = true
+
+                  // Enable fullscreen controls
+                  playerViewController.entersFullScreenWhenPlaybackBegins = false
+                  playerViewController.exitsFullScreenWhenPlaybackEnds = false
+
+                  // Present the player view controller
+                  if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                    let window = windowScene.windows.first,
+                    let rootViewController = window.rootViewController
+                  {
+                    // Pause the inline player temporarily
+                    let wasPlaying = player.timeControlStatus == .playing
+                    if wasPlaying {
+                      player.pause()
+                    }
+
+                    rootViewController.present(playerViewController, animated: true) {
+                      // Resume playing when presented in full screen
+                      if wasPlaying {
+                        player.play()
+                      }
+                    }
+                  } else {
+                    // Fallback to custom full screen
+                    onFullScreenRequest?()
+                  }
+                } else {
+                  // Fallback to custom full screen
+                  onFullScreenRequest?()
+                }
+              }) {
+                Image(systemName: "arrow.up.left.and.arrow.down.right")
+                  .font(.title2)
+                  .foregroundColor(.white)
+                  .padding(8)
+                  .background(.ultraThinMaterial)
+                  .clipShape(Circle())
+              }
+              .padding(.trailing, 12)
+              .padding(.bottom, 12)
+            }
           }
         }
       }
@@ -142,7 +205,7 @@ public struct InlineVideoPlayerView: View {
       // Top controls
       HStack {
         Button(action: {
-          // Try native full screen first, fallback to custom full screen
+          // Use native full screen with AVPlayerViewController
           if let player = player {
             // Create a temporary AVPlayerViewController for native full screen
             let playerViewController = AVPlayerViewController()
@@ -150,14 +213,26 @@ public struct InlineVideoPlayerView: View {
             playerViewController.showsPlaybackControls = true
             playerViewController.allowsPictureInPicturePlayback = true
 
+            // Enable fullscreen controls
+            playerViewController.entersFullScreenWhenPlaybackBegins = false
+            playerViewController.exitsFullScreenWhenPlaybackEnds = false
+
             // Present the player view controller
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let window = windowScene.windows.first,
               let rootViewController = window.rootViewController
             {
+              // Pause the inline player temporarily
+              let wasPlaying = player.timeControlStatus == .playing
+              if wasPlaying {
+                player.pause()
+              }
+
               rootViewController.present(playerViewController, animated: true) {
-                // Start playing when presented
-                player.play()
+                // Resume playing when presented in full screen
+                if wasPlaying {
+                  player.play()
+                }
               }
             } else {
               // Fallback to custom full screen
@@ -178,7 +253,10 @@ public struct InlineVideoPlayerView: View {
 
         Spacer()
 
-        Button(action: toggleMute) {
+        Button(action: {
+          HapticManager.shared.impact(.light)
+          toggleMute()
+        }) {
           Image(systemName: isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
             .font(.title2)
             .foregroundColor(.white)
@@ -193,7 +271,10 @@ public struct InlineVideoPlayerView: View {
       Spacer()
 
       // Center play/pause button
-      Button(action: togglePlayPause) {
+      Button(action: {
+        HapticManager.shared.impact(.medium)
+        togglePlayPause()
+      }) {
         Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
           .font(.system(size: 48))
           .foregroundColor(.white)
@@ -213,6 +294,7 @@ public struct InlineVideoPlayerView: View {
           value: Binding(
             get: { progress },
             set: { newValue in
+              HapticManager.shared.impact(.light)
               seekTo(newValue)
             }
           ), in: 0...1

@@ -79,6 +79,9 @@ public struct FollowButton: View {
           self.followingURI = nil
 
           try await client.blueskyClient.deleteRecord(.recordURI(atURI: followingURI))
+
+          // Add haptic feedback for unfollow
+          HapticManager.shared.impact(.medium)
         } else {
           // If we don't have the followingURI, we need to fetch the profile first
           await fetchProfileForFollowingURI()
@@ -88,6 +91,9 @@ public struct FollowButton: View {
             self.followingURI = nil
 
             try await client.blueskyClient.deleteRecord(.recordURI(atURI: followingURI))
+
+            // Add haptic feedback for unfollow
+            HapticManager.shared.impact(.medium)
           }
         }
       } else {
@@ -100,6 +106,9 @@ public struct FollowButton: View {
         isFollowing = true
         followersCount += 1
 
+        // Add haptic feedback for follow
+        HapticManager.shared.impact(.light)
+
         // For now, we'll simulate the API call
         print("Would follow user: \(profile.did)")
       }
@@ -108,6 +117,9 @@ public struct FollowButton: View {
       isFollowing = previousFollowingState
       followingURI = previousFollowingURI
       followersCount = previousFollowersCount
+
+      // Add haptic feedback for error
+      HapticManager.shared.notification(.error)
 
       print("Error toggling follow for \(profile.did): \(error)")
     }
