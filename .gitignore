@@ -71,3 +71,15 @@ DerivedData/
 .build/
 *.xcworkspace/xcshareddata/swiftpm/
 Package.resolved
+# Xcode
+DerivedData/
+build/
+*.xcworkspace/xcshareddata/swiftpm/
+.swiftpm/
+*.xcuserstate
+*.xcuserdatad/
+
+# Swift Package Manager
+.build/
+SourcePackages/
+Package.resolved
