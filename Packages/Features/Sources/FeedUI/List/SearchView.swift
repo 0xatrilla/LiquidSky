@@ -294,8 +294,9 @@ public struct SearchView: View {
                       return
                     }
 
-                    // Navigate to profile within the search tab
-                    router.navigateTo(.profile(user))
+                    // Force navigation within the current tab (search/compose)
+                    // This ensures the profile opens in the search tab, not the feed tab
+                    router[.compose].append(.profile(user))
                   }) {
                     UserSearchResultRow(user: user)
                   }
@@ -322,7 +323,8 @@ public struct SearchView: View {
                       likesCount: feed.likesCount,
                       liked: feed.isLiked
                     )
-                    router.navigateTo(.feed(feedItem))
+                    // Force navigation within the current tab (search/compose)
+                    router[.compose].append(.feed(feedItem))
                   }) {
                     FeedSearchResultRow(feed: feed)
                   }
@@ -341,7 +343,8 @@ public struct SearchView: View {
                   Button(action: {
                     // Navigate to post using proper navigation
                     // The post is already a PostItem, so we can use it directly
-                    router.navigateTo(.post(post))
+                    // Force navigation within the current tab (search/compose)
+                    router[.compose].append(.post(post))
                   }) {
                     PostSearchResultRow(post: post)
                   }

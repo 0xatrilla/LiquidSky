@@ -110,7 +110,7 @@ public struct SingleNotificationRow: View {
     .contentShape(Rectangle())
     .onTapGesture {
       #if DEBUG
-      print("🔍 Debug: SingleNotificationRow tapped!")
+        print("🔍 Debug: SingleNotificationRow tapped!")
       #endif
       handleNotificationTap()
     }
@@ -118,9 +118,9 @@ public struct SingleNotificationRow: View {
 
   private func handleNotificationTap() {
     #if DEBUG
-    print(
-      "🔍 Debug: SingleNotificationRow handleNotificationTap called for reason: \(notification.reason)"
-    )
+      print(
+        "🔍 Debug: SingleNotificationRow handleNotificationTap called for reason: \(notification.reason)"
+      )
     #endif
 
     // Add haptic feedback for better UX
@@ -154,24 +154,26 @@ public struct SingleNotificationRow: View {
       avatarImageURL: notification.author.avatarImageURL
     )
 
-    // Direct navigation should now work with unified navigation stack
+    // Force navigation within the current tab (notifications)
+    // This ensures the profile opens in the notifications tab, not the feed tab
     #if DEBUG
-    print("🔍 Debug: Navigating directly to profile: \(profile.handle)")
+      print("🔍 Debug: Navigating directly to profile: \(profile.handle)")
     #endif
-    router.navigateTo(.profile(profile))
+    router[.notification].append(.profile(profile))
   }
 
   private func navigateToPost() {
     if let postItem {
       #if DEBUG
-      print("🔍 Debug: Navigating directly to post: \(postItem.uri)")
+        print("🔍 Debug: Navigating directly to post: \(postItem.uri)")
       #endif
 
-      // Direct navigation should now work with unified navigation stack
-      router.navigateTo(.post(postItem))
+      // Force navigation within the current tab (notifications)
+      // This ensures the post opens in the notifications tab, not the feed tab
+      router[.notification].append(.post(postItem))
     } else {
       #if DEBUG
-      print("🔍 Debug: No postItem found, falling back to profile")
+        print("🔍 Debug: No postItem found, falling back to profile")
       #endif
       navigateToProfile()
     }

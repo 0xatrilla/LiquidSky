@@ -32,7 +32,8 @@ public struct SimpleSearchView: View {
           Section("Users") {
             ForEach(searchService.searchResults.users) { user in
               Button {
-                router.navigateTo(.profile(user))
+                // Force navigation within the current tab (search/compose)
+                router[.compose].append(.profile(user))
               } label: {
                 UserRow(user: user)
               }
