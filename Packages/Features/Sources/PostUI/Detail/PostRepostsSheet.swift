@@ -108,48 +108,68 @@ public struct PostRepostsSheet: View {
     error = nil
 
     do {
-      // Since ATProtoKit doesn't have getPostReposts yet, we'll create a realistic user list
-      // that matches the actual engagement count using available search methods
-      let realisticUsers = await createRealisticRepostedUsers()
+      // Fetch notifications and filter for reposts on this specific post
+      let response = try await client.protoClient.listNotifications(isPriority: false)
 
-      await MainActor.run {
-        self.repostedUsers = realisticUsers
-        self.isLoading = false
+      // Filter notifications for reposts on this specific post
+      let repostNotifications = response.notifications.filter { notification in
+        switch notification.reason {
+        case .repost:
+          return notification.reasonSubjectURI == post.uri
+        default:
+          return false
+        }
       }
+
+      // Extract user profiles from the notifications
+      let profiles = repostNotifications.map { notification in
+        Profile(
+          did: notification.author.actorDID,
+          handle: notification.author.actorHandle,
+          displayName: notification.author.displayName,
+          avatarImageURL: notification.author.avatarImageURL
+        )
+      }
+
+      // Sort by most recent first
+      repostedUsers = profiles.sorted {
+        $0.id > $1.id  // Simple sorting for now, could be improved with actual timestamps
+      }
+
     } catch {
-      await MainActor.run {
-        self.error = error
-        self.isLoading = false
-      }
+      self.error = error
       #if DEBUG
-        print("Error loading reposted users for post \(post.uri): \(error)")
+        print("Failed to load reposted users: \(error)")
       #endif
     }
+
+    isLoading = false
   }
 
   private func createRealisticRepostedUsers() async -> [Profile] {
     var users: [Profile] = []
-    
+
     // Start with the post author (they might have reposted their own post)
     users.append(post.author)
-    
+
     // If we have more reposts, try to find realistic users
     if post.repostCount > 1 {
       let remainingReposts = post.repostCount - 1
-      
+
       // Try to find users who might be interested in this type of content
       // by searching for users with similar interests or by the post content
       let searchQueries = generateSearchQueries(from: post)
-      
+
       for query in searchQueries {
         if users.count >= post.repostCount { break }
-        
+
         do {
-          let searchResults = try await client.protoClient.searchActors(matching: query, limit: min(remainingReposts, 10))
-          
+          let searchResults = try await client.protoClient.searchActors(
+            matching: query, limit: min(remainingReposts, 10))
+
           for actor in searchResults.actors {
             if users.count >= post.repostCount { break }
-            
+
             // Don't add the same user twice
             if !users.contains(where: { $0.did == actor.actorDID }) {
               let profile = Profile(
@@ -175,26 +195,26 @@ public struct PostRepostsSheet: View {
           continue
         }
       }
-      
+
       // If we still don't have enough users, create some realistic placeholders
       while users.count < post.repostCount {
         let placeholderUser = createPlaceholderUser(index: users.count)
         users.append(placeholderUser)
       }
     }
-    
+
     return users
   }
-  
+
   private func generateSearchQueries(from post: PostItem) -> [String] {
     var queries: [String] = []
-    
+
     // Add the author's handle as a search query
     queries.append(post.author.handle)
-    
+
     // If the post has content, try to extract meaningful search terms
     let content = post.content.lowercased()
-    
+
     // Look for hashtags or mentions
     let words = content.components(separatedBy: .whitespacesAndNewlines)
     for word in words {
@@ -204,7 +224,7 @@ public struct PostRepostsSheet: View {
         queries.append(String(word.dropFirst()))
       }
     }
-    
+
     // Add some generic but relevant search terms
     if content.contains("tech") || content.contains("developer") {
       queries.append("developer")
@@ -215,22 +235,27 @@ public struct PostRepostsSheet: View {
     if content.contains("music") || content.contains("song") {
       queries.append("musician")
     }
-    
+
     // Add the author's display name if available
     if let displayName = post.author.displayName {
       queries.append(displayName)
     }
-    
+
     return queries
   }
-  
+
   private func createPlaceholderUser(index: Int) -> Profile {
-    let names = ["Riley", "Quinn", "Avery", "Morgan", "Blake", "Jordan", "Taylor", "Casey", "Sam", "Alex"]
-    let handles = ["riley.tech", "quinn.art", "avery.music", "morgan.code", "blake.design", "jordan.photo", "taylor.writer", "casey.dev", "sam.creator", "alex.media"]
-    
+    let names = [
+      "Riley", "Quinn", "Avery", "Morgan", "Blake", "Jordan", "Taylor", "Casey", "Sam", "Alex",
+    ]
+    let handles = [
+      "riley.tech", "quinn.art", "avery.music", "morgan.code", "blake.design", "jordan.photo",
+      "taylor.writer", "casey.dev", "sam.creator", "alex.media",
+    ]
+
     let nameIndex = index % names.count
     let handleIndex = index % handles.count
-    
+
     return Profile(
       did: "did:placeholder:repost:\(index)",
       handle: handles[handleIndex],

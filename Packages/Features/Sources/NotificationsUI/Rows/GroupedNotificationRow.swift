@@ -46,7 +46,7 @@ public struct GroupedNotificationRow: View {
         // Action text and timestamp
         HStack(alignment: .firstTextBaseline) {
           Text(actionText(group.notifications.count))
-            .font(.headline)
+            .font(.title3)
             .foregroundStyle(.primary)
             .lineLimit(2)
 
@@ -54,7 +54,7 @@ public struct GroupedNotificationRow: View {
 
           if let firstNotification = group.notifications.first {
             Text(firstNotification.indexedAt.formatted(.relative(presentation: .named)))
-              .font(.caption)
+              .font(.subheadline)
               .foregroundStyle(.secondary)
           }
         }

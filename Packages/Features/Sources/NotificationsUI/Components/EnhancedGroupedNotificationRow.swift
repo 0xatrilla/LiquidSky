@@ -71,14 +71,14 @@ public struct EnhancedGroupedNotificationRow: View {
       // Clean action text
       HStack {
         Text(actionTextBuilder(group.notifications.count))
-          .font(.subheadline)
+          .font(.body)
           .foregroundStyle(.primary)
 
         Spacer()
 
         if let firstNotification = group.notifications.first {
           Text(firstNotification.indexedAt.formatted(.relative(presentation: .named)))
-            .font(.caption)
+            .font(.subheadline)
             .foregroundStyle(.secondary)
         }
       }
@@ -86,7 +86,7 @@ public struct EnhancedGroupedNotificationRow: View {
       // Post content if available
       if let postItem = group.postItem, !postItem.content.isEmpty {
         Text(postItem.content)
-          .font(.subheadline)
+          .font(.body)
           .foregroundStyle(.secondary)
           .lineLimit(2)
           .padding(.top, 4)

@@ -53,20 +53,20 @@ public struct EnhancedSingleNotificationRow: View {
       // Clean action text
       HStack {
         Text("\(notification.author.displayName ?? notification.author.actorHandle) \(actionText)")
-          .font(.subheadline)
+          .font(.body)
           .foregroundStyle(.primary)
 
         Spacer()
 
         Text(notification.indexedAt.formatted(.relative(presentation: .named)))
-          .font(.caption)
+          .font(.subheadline)
           .foregroundStyle(.secondary)
       }
 
       // Post content if available
       if let postItem = postItem, !postItem.content.isEmpty {
         Text(postItem.content)
-          .font(.subheadline)
+          .font(.body)
           .foregroundStyle(.secondary)
           .lineLimit(2)
           .padding(.top, 4)
