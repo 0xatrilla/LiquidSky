@@ -92,7 +92,7 @@ public struct PostRowView: View {
       PostRowEmbedView(post: post)
       if !isQuote {
         PostRowActionsView(post: post)
-        
+
         // Engagement details - show likes and reposts with clickable previews
         if post.likeCount > 0 || post.repostCount > 0 {
           PostEngagementDetailsView(post: post)
