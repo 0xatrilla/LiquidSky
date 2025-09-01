@@ -425,14 +425,15 @@ private struct ReplyChainView: View {
             }
 
             // Thread line connector (theme-aware line connecting posts in the chain)
-            // Only show thread lines for replies, not for the first post in a thread
-            if index < posts.count - 1 && post.isReplyTo {
+            // Show thread lines for posts that have replies below them
+            // The line should connect downward from a parent post to its reply
+            if index < posts.count - 1 && post.hasReply {
               Rectangle()
                 .fill(LinearGradient.themeGradient)
                 .frame(width: 2)
                 .frame(maxHeight: .infinity)
-                .padding(.top, -20)  // Start well above the avatar to connect with parent post above
-                .padding(.bottom, 8)  // Extend to connect with next post
+                .padding(.top, 8)  // Start below the avatar
+                .padding(.bottom, -20)  // Extend well below to connect with reply post above
             }
           }
           .frame(width: 40)  // Ensure consistent width for avatar column
