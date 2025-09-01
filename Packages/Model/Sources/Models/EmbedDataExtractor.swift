@@ -63,7 +63,7 @@ public struct EmbedDataExtractor {
 
     // Handle the embed union type by checking for specific embed types
     // The embed might be a union that contains different embed types
-    
+
     // Use reflection to examine the embed structure
     let mirror = Mirror(reflecting: embed)
     #if DEBUG
@@ -109,7 +109,7 @@ public struct EmbedDataExtractor {
         #if DEBUG
           print("EmbedDataExtractor: Examining child: \(label) = \(child.value)")
         #endif
-        
+
         // Check for common union field names
         if label == "images" || label == "imagesEmbed" {
           if let imagesEmbed = child.value as? AppBskyLexicon.Embed.ImagesDefinition.View {
@@ -138,6 +138,152 @@ public struct EmbedDataExtractor {
               print("EmbedDataExtractor: Found record embed in union field: \(label)")
             #endif
             return .quotedPost(recordEmbed)
+          }
+        }
+      }
+    }
+
+    // Special handling for EmbedUnion type - this is the key fix!
+    if String(describing: type(of: embed)).contains("EmbedUnion") {
+      #if DEBUG
+        print("EmbedDataExtractor: Detected EmbedUnion type, using advanced extraction")
+        print("EmbedDataExtractor: EmbedUnion children count: \(mirror.children.count)")
+        for (index, child) in mirror.children.enumerated() {
+          print("EmbedDataExtractor: Child \(index): \(child.label ?? "nil") = \(child.value)")
+        }
+      #endif
+
+      // For EmbedUnion, we need to check all possible union cases
+      // Try to extract the actual embed data from the union
+      for child in mirror.children {
+        if let label = child.label {
+          #if DEBUG
+            print("EmbedDataExtractor: Examining EmbedUnion child: \(label) = \(child.value)")
+          #endif
+
+          // The child.value might be another union or container
+          // Let's try to extract from it directly
+          if let imagesEmbed = child.value as? AppBskyLexicon.Embed.ImagesDefinition.View {
+            #if DEBUG
+              print("EmbedDataExtractor: Successfully extracted images from EmbedUnion child")
+            #endif
+            return .images(imagesEmbed)
+          } else if let videoEmbed = child.value as? AppBskyLexicon.Embed.VideoDefinition.View {
+            #if DEBUG
+              print("EmbedDataExtractor: Successfully extracted video from EmbedUnion child")
+            #endif
+            return .videos(videoEmbed)
+          } else if let externalEmbed = child.value as? AppBskyLexicon.Embed.ExternalDefinition.View
+          {
+            #if DEBUG
+              print("EmbedDataExtractor: Successfully extracted external from EmbedUnion child")
+            #endif
+            return .external(externalEmbed)
+          } else if let recordEmbed = child.value as? AppBskyLexicon.Embed.RecordDefinition.View {
+            #if DEBUG
+              print("EmbedDataExtractor: Successfully extracted record from EmbedUnion child")
+            #endif
+            return .quotedPost(recordEmbed)
+          } else {
+            // If direct casting fails, check if this is a type indicator and look for the data field
+            let childMirror = Mirror(reflecting: child.value)
+            #if DEBUG
+              print(
+                "EmbedDataExtractor: Child \(label) has \(childMirror.children.count) sub-children")
+              for (subIndex, subChild) in childMirror.children.enumerated() {
+                print(
+                  "EmbedDataExtractor: Sub-child \(subIndex): \(subChild.label ?? "nil") = \(subChild.value)"
+                )
+              }
+            #endif
+
+            // If this child has a "type" field indicating the embed type, look for the corresponding data field
+            var embedType: String? = nil
+            var embedData: Any? = nil
+
+            for subChild in childMirror.children {
+              if subChild.label == "type", let typeString = subChild.value as? String {
+                embedType = typeString
+                #if DEBUG
+                  print("EmbedDataExtractor: Found embed type: \(typeString)")
+                #endif
+              } else if subChild.label == "images" || subChild.label == "video"
+                || subChild.label == "external" || subChild.label == "record"
+              {
+                embedData = subChild.value
+                #if DEBUG
+                  print("EmbedDataExtractor: Found embed data field: \(subChild.label ?? "nil")")
+                #endif
+              }
+            }
+
+            // Now try to match the type with the data
+            if let embedType = embedType, let embedData = embedData {
+              if embedType.contains("images") {
+                if let imagesEmbed = embedData as? AppBskyLexicon.Embed.ImagesDefinition.View {
+                  #if DEBUG
+                    print("EmbedDataExtractor: Successfully extracted images by type matching")
+                  #endif
+                  return .images(imagesEmbed)
+                }
+              } else if embedType.contains("video") {
+                if let videoEmbed = embedData as? AppBskyLexicon.Embed.VideoDefinition.View {
+                  #if DEBUG
+                    print("EmbedDataExtractor: Successfully extracted video by type matching")
+                  #endif
+                  return .videos(videoEmbed)
+                }
+              } else if embedType.contains("external") {
+                if let externalEmbed = embedData as? AppBskyLexicon.Embed.ExternalDefinition.View {
+                  #if DEBUG
+                    print("EmbedDataExtractor: Successfully extracted external by type matching")
+                  #endif
+                  return .external(externalEmbed)
+                }
+              } else if embedType.contains("record") {
+                if let recordEmbed = embedData as? AppBskyLexicon.Embed.RecordDefinition.View {
+                  #if DEBUG
+                    print("EmbedDataExtractor: Successfully extracted record by type matching")
+                  #endif
+                  return .quotedPost(recordEmbed)
+                }
+              }
+            }
+
+            // Fallback: try to extract from all sub-children directly
+            for subChild in childMirror.children {
+              if let imagesEmbed = subChild.value as? AppBskyLexicon.Embed.ImagesDefinition.View {
+                #if DEBUG
+                  print(
+                    "EmbedDataExtractor: Successfully extracted images from EmbedUnion sub-child")
+                #endif
+                return .images(imagesEmbed)
+              } else if let videoEmbed = subChild.value
+                as? AppBskyLexicon.Embed.VideoDefinition.View
+              {
+                #if DEBUG
+                  print(
+                    "EmbedDataExtractor: Successfully extracted video from EmbedUnion sub-child")
+                #endif
+                return .videos(videoEmbed)
+              } else if let externalEmbed = subChild.value
+                as? AppBskyLexicon.Embed.ExternalDefinition.View
+              {
+                #if DEBUG
+                  print(
+                    "EmbedDataExtractor: Successfully extracted external from EmbedUnion sub-child")
+                #endif
+                return .external(externalEmbed)
+              } else if let recordEmbed = subChild.value
+                as? AppBskyLexicon.Embed.RecordDefinition.View
+              {
+                #if DEBUG
+                  print(
+                    "EmbedDataExtractor: Successfully extracted record from EmbedUnion sub-child")
+                #endif
+                return .quotedPost(recordEmbed)
+              }
+            }
           }
         }
       }
