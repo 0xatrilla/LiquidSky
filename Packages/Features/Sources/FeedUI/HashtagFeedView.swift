@@ -486,69 +486,92 @@ private struct HashtagPostExternalView: View {
 // MARK: - Hashtag Post Quoted View
 private struct HashtagPostQuotedView: View {
   let quotedPostData: QuotedPostData
+  @Environment(AppRouter.self) private var router
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 8) {
-      // Quoted post header
-      HStack(spacing: 8) {
-        Image(systemName: "quote.bubble")
-          .font(.caption)
-          .foregroundColor(.secondary)
-        Text("Quoted post")
-          .font(.caption)
-          .foregroundColor(.secondary)
-        Spacer()
-      }
-
-      // Quoted post content area - now using the extracted data directly
+    Button(action: {
+      // Navigate to the quoted post detail view
+      let postItem = PostItem(
+        uri: quotedPostData.uri,
+        cid: quotedPostData.cid,
+        indexedAt: quotedPostData.indexedAt,
+        author: quotedPostData.author,
+        content: quotedPostData.content,
+        replyCount: 0,
+        repostCount: 0,
+        likeCount: 0,
+        likeURI: nil,
+        repostURI: nil,
+        replyRef: nil,
+        inReplyToHandle: nil,
+        repostedBy: nil,
+        embed: nil
+      )
+      router.navigateTo(.post(postItem))
+    }) {
       VStack(alignment: .leading, spacing: 8) {
-        // Display author information
+        // Quoted post header
         HStack(spacing: 8) {
-          if let avatarURL = quotedPostData.author.avatarImageURL {
-            AsyncImage(url: avatarURL) { image in
-              image
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-            } placeholder: {
-              Image(systemName: "person.circle.fill")
-                .foregroundColor(.secondary)
-            }
-            .frame(width: 24, height: 24)
-            .clipShape(Circle())
-          } else {
-            Image(systemName: "person.circle.fill")
-              .foregroundColor(.secondary)
-              .frame(width: 24, height: 24)
-          }
-
-          VStack(alignment: .leading, spacing: 2) {
-            Text(quotedPostData.author.displayName ?? quotedPostData.author.handle)
-              .font(.caption)
-              .fontWeight(.medium)
-              .foregroundStyle(.primary)
-
-            Text("@\(quotedPostData.author.handle)")
-              .font(.caption2)
-              .foregroundStyle(.secondary)
-          }
-
+          Image(systemName: "quote.bubble")
+            .font(.caption)
+            .foregroundColor(.secondary)
+          Text("Quoted post")
+            .font(.caption)
+            .foregroundColor(.secondary)
           Spacer()
         }
 
-        // Display actual quoted post content
-        Text(quotedPostData.content)
-          .font(.caption)
-          .foregroundStyle(.primary)
-          .lineLimit(3)
-          .multilineTextAlignment(.leading)
+        // Quoted post content area - now using the extracted data directly
+        VStack(alignment: .leading, spacing: 8) {
+          // Display author information
+          HStack(spacing: 8) {
+            if let avatarURL = quotedPostData.author.avatarImageURL {
+              AsyncImage(url: avatarURL) { image in
+                image
+                  .resizable()
+                  .aspectRatio(contentMode: .fill)
+              } placeholder: {
+                Image(systemName: "person.circle.fill")
+                  .foregroundColor(.secondary)
+              }
+              .frame(width: 24, height: 24)
+              .clipShape(Circle())
+            } else {
+              Image(systemName: "person.circle.fill")
+                .foregroundColor(.secondary)
+                .font(.title2)
+            }
+
+            Text(quotedPostData.author.displayName ?? quotedPostData.author.handle)
+              .font(.subheadline)
+              .fontWeight(.semibold)
+              .lineLimit(1)
+
+            Text("@\(quotedPostData.author.handle)")
+              .font(.footnote)
+              .foregroundColor(.secondary)
+              .lineLimit(1)
+
+            Spacer()
+          }
+
+          // Display quoted post content
+          Text(quotedPostData.content)
+            .font(.subheadline)
+            .lineLimit(3)
+            .multilineTextAlignment(.leading)
+        }
       }
       .padding(.horizontal, 12)
       .padding(.vertical, 8)
+      .background(Color.gray.opacity(0.05))
+      .cornerRadius(12)
+      .overlay(
+        RoundedRectangle(cornerRadius: 12)
+          .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+      )
+      .padding(.horizontal, 12)
     }
-    .padding(.horizontal, 12)
-    .padding(.vertical, 8)
-    .background(Color.gray.opacity(0.2))
-    .cornerRadius(8)
+    .buttonStyle(PlainButtonStyle())
   }
-
 }
