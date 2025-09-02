@@ -22,16 +22,16 @@ public struct PostDetailView: View {
     ScrollViewReader { proxy in
       List {
         ForEach(parents) { parent in
-          PostRowView(post: parent)
+          PostRowView(post: parent, showEngagementDetails: true)
             .environment(\.isFocused, false)  // Parent posts are not focused
         }
 
-        PostRowView(post: post)
+        PostRowView(post: post, showEngagementDetails: true)
           .environment(\.isFocused, true)  // This is the focused post
           .id("focusedPost")
 
         ForEach(replies) { reply in
-          PostRowView(post: reply)
+          PostRowView(post: reply, showEngagementDetails: true)
             .environment(\.isFocused, false)  // Reply posts are not focused
         }
 
