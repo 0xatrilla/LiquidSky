@@ -85,9 +85,6 @@ public struct GroupedNotificationRow: View {
     .background(Color(.systemBackground))
     .contentShape(Rectangle())
     .onTapGesture {
-      #if DEBUG
-        print("🔍 Debug: GroupedNotificationRow tapped!")
-      #endif
       handleNotificationTap()
     }
     .sheet(isPresented: $showingFollowersList) {
@@ -102,10 +99,6 @@ public struct GroupedNotificationRow: View {
   }
 
   private func handleNotificationTap() {
-    #if DEBUG
-      print("🔍 Debug: GroupedNotificationRow handleNotificationTap called for type: \(group.type)")
-    #endif
-
     // Special handling for multiple followers (show sheet)
     if group.type == .follow && group.notifications.count > 1 {
       showingFollowersList = true
@@ -124,9 +117,6 @@ public struct GroupedNotificationRow: View {
           displayName: notification.author.displayName,
           avatarImageURL: notification.author.avatarImageURL
         )
-        #if DEBUG
-          print("🔍 Debug: Navigating directly to profile: \(profile.handle)")
-        #endif
         // Force navigation within the current tab (notifications)
         router[.notification].append(.profile(profile))
       }
@@ -134,9 +124,6 @@ public struct GroupedNotificationRow: View {
     case .like, .repost:
       // Handle post-related notifications with direct navigation
       if let postItem = group.postItem {
-        #if DEBUG
-          print("🔍 Debug: Navigating directly to post: \(postItem.uri)")
-        #endif
         // Force navigation within the current tab (notifications)
         router[.notification].append(.post(postItem))
       } else {
@@ -156,7 +143,6 @@ public struct GroupedNotificationRow: View {
       // Handle other notification types
       if let postItem = group.postItem {
         // Navigate directly to post (no sheet)
-        print("🔍 Debug: Navigating directly to post: \(postItem.uri)")
         // Force navigation within the current tab (notifications)
         router[.notification].append(.post(postItem))
       } else {
@@ -207,10 +193,7 @@ public struct GroupedNotificationRow: View {
             displayName: notification.author.displayName,
             avatarImageURL: notification.author.avatarImageURL
           )
-          #if DEBUG
-            print("🔍 Debug: Navigating directly to profile: \(profile.handle)")
-          #endif
-          // Force navigation within the current tab (notifications)
+                  // Force navigation within the current tab (notifications)
           router[.notification].append(.profile(profile))
         }
       }

@@ -88,12 +88,6 @@ public struct SingleNotificationRow: View {
   }
 
   private func handleNotificationTap() {
-    #if DEBUG
-      print(
-        "🔍 Debug: SingleNotificationRow handleNotificationTap called for reason: \(notification.reason)"
-      )
-    #endif
-
     // Add haptic feedback for better UX
     HapticManager.shared.impact(.light)
 
@@ -127,25 +121,15 @@ public struct SingleNotificationRow: View {
 
     // Force navigation within the current tab (notifications)
     // This ensures the profile opens in the notifications tab, not the feed tab
-    #if DEBUG
-      print("🔍 Debug: Navigating directly to profile: \(profile.handle)")
-    #endif
     router[.notification].append(.profile(profile))
   }
 
   private func navigateToPost() {
     if let postItem {
-      #if DEBUG
-        print("🔍 Debug: Navigating directly to post: \(postItem.uri)")
-      #endif
-
       // Force navigation within the current tab (notifications)
       // This ensures the post opens in the notifications tab, not the feed tab
       router[.notification].append(.post(postItem))
     } else {
-      #if DEBUG
-        print("🔍 Debug: No postItem found, falling back to profile")
-      #endif
       navigateToProfile()
     }
   }

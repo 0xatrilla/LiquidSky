@@ -15,10 +15,6 @@ public struct PostRowEmbedView: View {
   }
 
   public var body: some View {
-    #if DEBUG
-      let _ = debugLog()
-    #endif
-
     if !isQuote {
       if let embed = post.embed {
         switch embed {
@@ -31,10 +27,6 @@ public struct PostRowEmbedView: View {
         case .quotedPost(let quotedPostData):
           QuotedPostContentView(quotedPostData: quotedPostData) {
             // This closure will be handled by the parent view
-            // For now, we'll just print a debug message
-            #if DEBUG
-              print("PostRowEmbedView: Quoted post tapped - URI: \(quotedPostData.uri)")
-            #endif
           }
         case .none:
           EmptyView()
@@ -47,16 +39,6 @@ public struct PostRowEmbedView: View {
     }
   }
 
-  #if DEBUG
-    private func debugLog() {
-      if let embed = post.embed {
-        print("PostRowEmbedView: Found embed data for post \(post.uri)")
-        print("PostRowEmbedView: Embed type: \(embed)")
-      } else {
-        print("PostRowEmbedView: No embed data for post \(post.uri)")
-      }
-    }
-  #endif
 }
 
 // MARK: - Quoted Post Content View

@@ -82,38 +82,15 @@ extension AppBskyLexicon.Feed.FeedViewPostDefinition {
 
     if let reason = reason {
       // Check if this is a repost
-      #if DEBUG
-        print("PostsListView: Repost detected, investigating structure...")
-        print("PostsListView: Reason type: \(type(of: reason))")
-        print("PostsListView: Reason description: \(reason)")
-      #endif
-
       // Try to extract repost information from ATProtoKit
       // Since we don't know the exact type, let's use reflection to find the structure
       let mirror = Mirror(reflecting: reason)
-      #if DEBUG
-        print("PostsListView: Reason mirror children:")
-        for child in mirror.children {
-          print("PostsListView: - \(child.label ?? "nil"): \(child.value)")
-        }
-      #endif
 
       // Try to extract the repost author from the reason field
       // Based on ATProtoKit structure, the reason should contain author information
       if let repostAuthor = extractRepostAuthor(from: reason) {
         repostedByProfile = repostAuthor
-        #if DEBUG
-          print(
-            "PostsListView: Successfully extracted repost author: \(repostedByProfile?.displayName ?? repostedByProfile?.handle ?? "unknown")"
-          )
-          print(
-            "PostsListView: Repost author details - DID: \(repostedByProfile?.did ?? "nil"), Handle: \(repostedByProfile?.handle ?? "nil")"
-          )
-        #endif
       } else {
-        #if DEBUG
-          print("PostsListView: Failed to extract repost author, using placeholder")
-        #endif
         // Fallback to placeholder if we can't extract the real author
         repostedByProfile = Profile(
           did: "did:placeholder:repost",
@@ -125,10 +102,6 @@ extension AppBskyLexicon.Feed.FeedViewPostDefinition {
     }
 
     let embedData = EmbedDataExtractor.extractEmbed(from: post)
-    #if DEBUG
-    print("PostItem: Creating PostItem for \(post.postItem.uri)")
-    print("PostItem: Embed data extracted: \(String(describing: embedData))")
-    #endif
     
     let postItem = PostItem(
       uri: post.postItem.uri,
@@ -150,10 +123,7 @@ extension AppBskyLexicon.Feed.FeedViewPostDefinition {
 
     // Debug reply detection
     if postItem.hasReply {
-      #if DEBUG
-        print(
-          "PostsListView: Reply detected for post \(postItem.uri) - hasReply: \(postItem.hasReply)")
-      #endif
+      // Reply detected
     }
 
     return postItem
