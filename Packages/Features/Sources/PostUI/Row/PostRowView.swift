@@ -18,6 +18,7 @@ public struct PostRowView: View {
   @Environment(\.isFocused) var isFocused
   @Environment(\.isThreadContext) var isThreadContext
   @Environment(\.sizeCategory) var sizeCategory
+  @Environment(\.currentTab) var currentTab
   @Environment(SettingsService.self) var settingsService
 
   @Environment(PostContextProvider.self) var postDataControllerProvider
@@ -26,11 +27,14 @@ public struct PostRowView: View {
   @Environment(CurrentUser.self) var currentUser
 
   let post: PostItem
+  let showEngagementDetails: Bool
+  
   @Namespace private var namespace
   @State private var parentPost: PostItem?
 
-  public init(post: PostItem) {
+  public init(post: PostItem, showEngagementDetails: Bool = false) {
     self.post = post
+    self.showEngagementDetails = showEngagementDetails
   }
 
   public var body: some View {
@@ -94,7 +98,8 @@ public struct PostRowView: View {
         PostRowActionsView(post: post)
 
         // Engagement details - show likes and reposts with clickable previews
-        if post.likeCount > 0 || post.repostCount > 0 {
+        // Only show in notification tab or when explicitly requested
+        if (showEngagementDetails || currentTab == .notification) && (post.likeCount > 0 || post.repostCount > 0) {
           PostEngagementDetailsView(post: post)
         }
       }

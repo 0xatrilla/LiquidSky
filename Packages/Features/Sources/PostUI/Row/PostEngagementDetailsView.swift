@@ -12,16 +12,21 @@ public struct PostEngagementDetailsView: View {
   }
 
   public var body: some View {
-    VStack(spacing: 8) {
+    VStack(spacing: 6) {
       // Likes section
       if post.likeCount > 0 {
         Button(action: {
           showingLikesSheet = true
         }) {
           HStack(spacing: 8) {
+            Image(systemName: "heart.fill")
+              .font(.caption)
+              .foregroundStyle(.red)
+            
             Text("\(post.likeCount) \(post.likeCount == 1 ? "like" : "likes")")
               .font(.caption)
-              .foregroundStyle(.blue)
+              .fontWeight(.medium)
+              .foregroundStyle(.primary)
 
             Spacer()
 
@@ -29,6 +34,10 @@ public struct PostEngagementDetailsView: View {
               .font(.caption2)
               .foregroundStyle(.secondary)
           }
+          .padding(.horizontal, 12)
+          .padding(.vertical, 8)
+          .background(Color(.systemGray6))
+          .cornerRadius(8)
         }
         .buttonStyle(.plain)
       }
@@ -39,9 +48,14 @@ public struct PostEngagementDetailsView: View {
           showingRepostsSheet = true
         }) {
           HStack(spacing: 8) {
-            Text("\(post.repostCount) \(post.repostCount == 1 ? "repost" : "reposts")")
+            Image(systemName: "arrow.2.squarepath")
               .font(.caption)
               .foregroundStyle(.blue)
+            
+            Text("\(post.repostCount) \(post.repostCount == 1 ? "repost" : "reposts")")
+              .font(.caption)
+              .fontWeight(.medium)
+              .foregroundStyle(.primary)
 
             Spacer()
 
@@ -49,6 +63,10 @@ public struct PostEngagementDetailsView: View {
               .font(.caption2)
               .foregroundStyle(.secondary)
           }
+          .padding(.horizontal, 12)
+          .padding(.vertical, 8)
+          .background(Color(.systemGray6))
+          .cornerRadius(8)
         }
         .buttonStyle(.plain)
       }
