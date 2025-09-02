@@ -378,7 +378,15 @@ public struct EmbedDataExtractor {
         "EmbedDataExtractor: Found mirror children: \(mirror.children.map { $0.label ?? "nil" })")
     #endif
 
-    // Look for the record property which should contain the actual post data
+    // First, try to find content using the alternative method since we know it works
+    if let alternativeContent = extractContentAlternative(from: recordEmbed) {
+      content = alternativeContent
+      #if DEBUG
+        print("EmbedDataExtractor: Found content via alternative method: \(alternativeContent)")
+      #endif
+    }
+
+    // Now look for other properties
     for child in mirror.children {
       if let label = child.label {
         #if DEBUG
@@ -402,6 +410,57 @@ public struct EmbedDataExtractor {
               #endif
 
               switch recordLabel {
+              case "viewRecord":
+                // This is where the actual post data is stored
+                let viewRecordMirror = Mirror(reflecting: recordChild.value)
+                #if DEBUG
+                  print(
+                    "EmbedDataExtractor: ViewRecord mirror children: \(viewRecordMirror.children.map { $0.label ?? "nil" })"
+                  )
+                #endif
+
+                for viewRecordChild in viewRecordMirror.children {
+                  if let viewRecordLabel = viewRecordChild.label {
+                    #if DEBUG
+                      print("EmbedDataExtractor: Processing viewRecord child: \(viewRecordLabel)")
+                    #endif
+
+                    switch viewRecordLabel {
+                    case "uri":
+                      if let uriString = viewRecordChild.value as? String {
+                        uri = uriString
+                        #if DEBUG
+                          print("EmbedDataExtractor: Found URI: \(uriString)")
+                        #endif
+                      }
+                    case "cid":
+                      if let cidString = viewRecordChild.value as? String {
+                        cid = cidString
+                        #if DEBUG
+                          print("EmbedDataExtractor: Found CID: \(cidString)")
+                        #endif
+                      }
+                    case "indexedAt":
+                      if let dateString = viewRecordChild.value as? String {
+                        indexedAt = ISO8601DateFormatter().date(from: dateString)
+                        #if DEBUG
+                          print("EmbedDataExtractor: Found indexedAt: \(dateString)")
+                        #endif
+                      }
+                    case "author":
+                      // Extract author information from the viewRecord
+                      if let authorData = extractAuthorFromValue(viewRecordChild.value) {
+                        author = authorData
+                        #if DEBUG
+                          print(
+                            "EmbedDataExtractor: Found author in viewRecord: \(authorData.handle)")
+                        #endif
+                      }
+                    default:
+                      break
+                    }
+                  }
+                }
               case "uri":
                 if let uriString = recordChild.value as? String {
                   uri = uriString
@@ -423,26 +482,6 @@ public struct EmbedDataExtractor {
                     print("EmbedDataExtractor: Found indexedAt: \(dateString)")
                   #endif
                 }
-              case "value":
-                // The value should contain the actual post record
-                if let postRecord = recordChild.value as? AppBskyLexicon.Feed.PostRecord {
-                  content = postRecord.text
-                  #if DEBUG
-                    print("EmbedDataExtractor: Found content from PostRecord: \(postRecord.text)")
-                  #endif
-                } else {
-                  // Try to extract text using reflection
-                  let valueMirror = Mirror(reflecting: recordChild.value)
-                  for valueChild in valueMirror.children {
-                    if valueChild.label == "text", let text = valueChild.value as? String {
-                      content = text
-                      #if DEBUG
-                        print("EmbedDataExtractor: Found content from reflection: \(text)")
-                      #endif
-                      break
-                    }
-                  }
-                }
               default:
                 break
               }
@@ -454,6 +493,16 @@ public struct EmbedDataExtractor {
             author = authorData
             #if DEBUG
               print("EmbedDataExtractor: Found author: \(authorData.handle)")
+            #endif
+          }
+        case "actor", "creator", "postedBy":
+          // Try alternative author property names
+          if let authorData = extractAuthorFromValue(child.value) {
+            author = authorData
+            #if DEBUG
+              print(
+                "EmbedDataExtractor: Found author via alternative property \(label): \(authorData.handle)"
+              )
             #endif
           }
         default:
@@ -468,7 +517,7 @@ public struct EmbedDataExtractor {
       )
     #endif
 
-    // Be more lenient - only require some basic info
+    // If we have content, create QuotedPostData
     if let content = content, !content.isEmpty {
       // Create QuotedPostData with available information, using defaults for missing fields
       return QuotedPostData(
@@ -479,22 +528,6 @@ public struct EmbedDataExtractor {
         content: content,
         indexedAt: indexedAt ?? Date()
       )
-    } else {
-      #if DEBUG
-        print("EmbedDataExtractor: No content found, trying alternative extraction methods")
-      #endif
-
-      // Try alternative extraction methods if the primary method failed
-      if let alternativeContent = extractContentAlternative(from: recordEmbed) {
-        return QuotedPostData(
-          uri: uri ?? "unknown",
-          cid: cid ?? "unknown",
-          author: author
-            ?? Profile(did: "unknown", handle: "unknown", displayName: nil, avatarImageURL: nil),
-          content: alternativeContent,
-          indexedAt: indexedAt ?? Date()
-        )
-      }
     }
 
     return nil
@@ -524,6 +557,33 @@ public struct EmbedDataExtractor {
           #endif
           return text
         }
+
+        // Special handling for the record property which should contain the actual post data
+        if label == "record" {
+          #if DEBUG
+            print(
+              "EmbedDataExtractor: Alternative - found record property, examining it more closely")
+          #endif
+
+          let recordMirror = Mirror(reflecting: child.value)
+          for recordChild in recordMirror.children {
+            if let recordLabel = recordChild.label {
+              #if DEBUG
+                print("EmbedDataExtractor: Alternative - checking record child: \(recordLabel)")
+              #endif
+
+              // Look specifically in viewRecord for the actual post content
+              if recordLabel == "viewRecord" {
+                if let text = extractTextFromValue(recordChild.value) {
+                  #if DEBUG
+                    print("EmbedDataExtractor: Alternative - found text in viewRecord: \(text)")
+                  #endif
+                  return text
+                }
+              }
+            }
+          }
+        }
       }
     }
 
@@ -534,12 +594,30 @@ public struct EmbedDataExtractor {
   private static func extractTextFromValue(_ value: Any) -> String? {
     let mirror = Mirror(reflecting: value)
 
+    #if DEBUG
+      print(
+        "EmbedDataExtractor: extractTextFromValue - checking children: \(mirror.children.map { $0.label ?? "nil" })"
+      )
+    #endif
+
     for child in mirror.children {
       if let label = child.label {
+        #if DEBUG
+          print("EmbedDataExtractor: extractTextFromValue - checking property: \(label)")
+        #endif
+
         switch label {
         case "text", "content", "value":
           if let text = child.value as? String, !text.isEmpty {
+            #if DEBUG
+              print("EmbedDataExtractor: extractTextFromValue - found text in \(label): \(text)")
+            #endif
             return text
+          }
+        case "record", "post", "feed":
+          // These might contain the actual post data
+          if let childText = extractTextFromValue(child.value) {
+            return childText
           }
         default:
           break
@@ -564,26 +642,57 @@ public struct EmbedDataExtractor {
     var displayName: String?
     var avatarURL: URL?
 
+    #if DEBUG
+      print(
+        "EmbedDataExtractor: Extracting author from value with children: \(mirror.children.map { $0.label ?? "nil" })"
+      )
+    #endif
+
     for child in mirror.children {
       if let label = child.label {
+        #if DEBUG
+          print("EmbedDataExtractor: Checking author property: \(label)")
+        #endif
+
         switch label {
-        case "did", "actorDID":
+        case "did", "actorDID", "actorDid":
           if let didString = child.value as? String {
             did = didString
+            #if DEBUG
+              print("EmbedDataExtractor: Found DID: \(didString)")
+            #endif
           }
-        case "handle", "actorHandle":
+        case "handle", "actorHandle", "actorHandle":
           if let handleString = child.value as? String {
             handle = handleString
+            #if DEBUG
+              print("EmbedDataExtractor: Found handle: \(handleString)")
+            #endif
           }
-        case "displayName":
+        case "displayName", "displayName", "actorDisplayName":
           if let displayNameString = child.value as? String {
             displayName = displayNameString
+            #if DEBUG
+              print("EmbedDataExtractor: Found displayName: \(displayNameString)")
+            #endif
           }
-        case "avatarImageURL":
-          if let urlString = child.value as? String, let url = URL(string: urlString) {
+        case "avatarImageURL", "avatar", "actorAvatar":
+          if let url = child.value as? URL {
             avatarURL = url
+            #if DEBUG
+              print("EmbedDataExtractor: Found avatar URL: \(url)")
+            #endif
+          } else if let urlString = child.value as? String, let url = URL(string: urlString) {
+            avatarURL = url
+            #if DEBUG
+              print("EmbedDataExtractor: Found avatar URL string: \(urlString)")
+            #endif
           }
         default:
+          // Try to recursively search for author information in nested structures
+          if let nestedAuthor = extractAuthorFromValue(child.value) {
+            return nestedAuthor
+          }
           break
         }
       }
@@ -591,6 +700,9 @@ public struct EmbedDataExtractor {
 
     // If we found the essential author information, create a Profile
     if let did = did, let handle = handle {
+      #if DEBUG
+        print("EmbedDataExtractor: Successfully created Profile for author: \(handle)")
+      #endif
       return Profile(
         did: did,
         handle: handle,
@@ -599,6 +711,9 @@ public struct EmbedDataExtractor {
       )
     }
 
+    #if DEBUG
+      print("EmbedDataExtractor: Failed to extract author information - missing DID or handle")
+    #endif
     return nil
   }
 
