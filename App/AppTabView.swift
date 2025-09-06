@@ -1,5 +1,6 @@
 import AppRouter
 import AuthUI
+import ChatUI
 import Client
 import ComposerUI
 import DesignSystem
@@ -25,253 +26,204 @@ struct AppTabView: View {
 
   public var body: some View {
     TabView(selection: $selectedTab) {
-      // Feed (showing FeedsListView with Discover title)
-      if settingsService.tabBarTabsRaw.contains(AppTab.feed.rawValue) {
-        Tab(value: AppTab.feed) {
-          NavigationStack(
-            path: Binding(
-              get: { router[.feed] },
-              set: { router[.feed] = $0 }
-            )
-          ) {
-            FeedsListView()
-              .navigationTitle("Discover")
-              .navigationBarTitleDisplayMode(.large)
-              .toolbar {
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                  // Summary button
-                  Button(action: {
-                    Task {
-                      await generateGlobalSummary()
+      ForEach(currentTabs, id: \.rawValue) { tab in
+        switch tab {
+        case .feed:
+          Tab(value: AppTab.feed) {
+            NavigationStack(
+              path: Binding(
+                get: { router[.feed] },
+                set: { router[.feed] = $0 }
+              )
+            ) {
+              FeedsListView()
+                .navigationTitle("Discover")
+                .navigationBarTitleDisplayMode(.large)
+                .toolbar {
+                  ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button(action: {
+                      Task { await generateGlobalSummary() }
+                    }) {
+                      if isGeneratingSummary {
+                        ProgressView().scaleEffect(0.8).foregroundColor(.themeSecondary)
+                      } else {
+                        Image(systemName: "sparkles").font(.title2).foregroundColor(.themeSecondary)
+                      }
                     }
-                  }) {
-                    if isGeneratingSummary {
-                      ProgressView()
-                        .scaleEffect(0.8)
-                        .foregroundColor(.themeSecondary)
-                    } else {
-                      Image(systemName: "sparkles")
-                        .font(.title2)
-                        .foregroundColor(.themeSecondary)
-                    }
-                  }
-                  .disabled(isGeneratingSummary)
+                    .disabled(isGeneratingSummary)
 
-                  // Post creation button
-                  Button(action: {
-                    router.presentedSheet = .composer(mode: .newPost)
-                  }) {
-                    Image(systemName: "square.and.pencil")
-                      .font(.title2)
-                      .foregroundColor(.themePrimary)
+                    Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
+                      Image(systemName: "square.and.pencil").font(.title2).foregroundColor(
+                        .themePrimary)
+                    }
                   }
                 }
-              }
-              .withAppDestinations()
+                .withAppDestinations()
+            }
+          } label: {
+            Label("Feed", systemImage: "square.stack")
           }
 
-        } label: {
-          Label("Feed", systemImage: "square.stack")
-        }
-      }
+        case .messages:
+          Tab(value: AppTab.messages) {
+            NavigationStack(
+              path: Binding(
+                get: { router[.messages] },
+                set: { router[.messages] = $0 }
+              )
+            ) {
+              ConversationsView()
+                .navigationTitle("Messages")
+                .navigationBarTitleDisplayMode(.large)
+            }
+          } label: {
+            Label("Messages", systemImage: "bubble.left.and.bubble.right")
+          }
 
-      // Notifications
-      if settingsService.tabBarTabsRaw.contains(AppTab.notification.rawValue) {
-        Tab(value: AppTab.notification) {
-          NavigationStack(
-            path: Binding(
-              get: { router[.notification] },
-              set: { router[.notification] = $0 }
-            )
-          ) {
-            NotificationsListView()
-              .navigationTitle("Notifications")
-              .navigationBarTitleDisplayMode(.large)
-              .toolbar {
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                  // Summary button
-                  Button(action: {
-                    Task {
-                      await generateGlobalSummary()
+        case .notification:
+          Tab(value: AppTab.notification) {
+            NavigationStack(
+              path: Binding(
+                get: { router[.notification] },
+                set: { router[.notification] = $0 }
+              )
+            ) {
+              NotificationsListView()
+                .navigationTitle("Notifications")
+                .navigationBarTitleDisplayMode(.large)
+                .toolbar {
+                  ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button(action: {
+                      Task { await generateGlobalSummary() }
+                    }) {
+                      if isGeneratingSummary {
+                        ProgressView().scaleEffect(0.8).foregroundColor(.themeSecondary)
+                      } else {
+                        Image(systemName: "sparkles").font(.title2).foregroundColor(.themeSecondary)
+                      }
                     }
-                  }) {
-                    if isGeneratingSummary {
-                      ProgressView()
-                        .scaleEffect(0.8)
-                        .foregroundColor(.themeSecondary)
-                    } else {
-                      Image(systemName: "sparkles")
-                        .font(.title2)
-                        .foregroundColor(.themeSecondary)
-                    }
-                  }
-                  .disabled(isGeneratingSummary)
+                    .disabled(isGeneratingSummary)
 
-                  // Post creation button
-                  Button(action: {
-                    router.presentedSheet = .composer(mode: .newPost)
-                  }) {
-                    Image(systemName: "square.and.pencil")
-                      .font(.title2)
-                      .foregroundColor(.themePrimary)
+                    Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
+                      Image(systemName: "square.and.pencil").font(.title2).foregroundColor(
+                        .themePrimary)
+                    }
                   }
                 }
-              }
-              .withAppDestinations()
+                .withAppDestinations()
+            }
+          } label: {
+            Label("Notifications", systemImage: "bell")
           }
 
-        } label: {
-          Label("Notifications", systemImage: "bell")
-        }
-      }
-
-      // Profile
-      if settingsService.tabBarTabsRaw.contains(AppTab.profile.rawValue) {
-        Tab(value: AppTab.profile) {
-          NavigationStack(
-            path: Binding(
-              get: { router[.profile] },
-              set: { router[.profile] = $0 }
-            )
-          ) {
-            CurrentUserView()
-              .navigationTitle("Profile")
-              .navigationBarTitleDisplayMode(.large)
-              .toolbar {
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                  // Summary button
-                  Button(action: {
-                    Task {
-                      await generateGlobalSummary()
+        case .profile:
+          Tab(value: AppTab.profile) {
+            NavigationStack(
+              path: Binding(
+                get: { router[.profile] },
+                set: { router[.profile] = $0 }
+              )
+            ) {
+              CurrentUserView()
+                .navigationTitle("Profile")
+                .navigationBarTitleDisplayMode(.large)
+                .toolbar {
+                  ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button(action: {
+                      Task { await generateGlobalSummary() }
+                    }) {
+                      if isGeneratingSummary {
+                        ProgressView().scaleEffect(0.8).foregroundColor(.themeSecondary)
+                      } else {
+                        Image(systemName: "sparkles").font(.title2).foregroundColor(.themeSecondary)
+                      }
                     }
-                  }) {
-                    if isGeneratingSummary {
-                      ProgressView()
-                        .scaleEffect(0.8)
-                        .foregroundColor(.themeSecondary)
-                    } else {
-                      Image(systemName: "sparkles")
-                        .font(.title2)
-                        .foregroundColor(.themeSecondary)
-                    }
-                  }
-                  .disabled(isGeneratingSummary)
+                    .disabled(isGeneratingSummary)
 
-                  // Post creation button
-                  Button(action: {
-                    router.presentedSheet = .composer(mode: .newPost)
-                  }) {
-                    Image(systemName: "square.and.pencil")
-                      .font(.title2)
-                      .foregroundColor(.themePrimary)
+                    Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
+                      Image(systemName: "square.and.pencil").font(.title2).foregroundColor(
+                        .themePrimary)
+                    }
                   }
                 }
-              }
-              .withAppDestinations()
+                .withAppDestinations()
+            }
+          } label: {
+            Label("Profile", systemImage: "person")
           }
 
-        } label: {
-          Label("Profile", systemImage: "person")
-        }
-      }
-
-      // Settings
-      if settingsService.tabBarTabsRaw.contains(AppTab.settings.rawValue) {
-        Tab(value: AppTab.settings) {
-          NavigationStack(
-            path: Binding(
-              get: { router[.settings] },
-              set: { router[.settings] = $0 }
-            )
-          ) {
-            SettingsView()
-              .navigationTitle("Settings")
-              .navigationBarTitleDisplayMode(.large)
-              .toolbar {
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                  // Summary button
-                  Button(action: {
-                    Task {
-                      await generateGlobalSummary()
+        case .settings:
+          Tab(value: AppTab.settings) {
+            NavigationStack(
+              path: Binding(
+                get: { router[.settings] },
+                set: { router[.settings] = $0 }
+              )
+            ) {
+              SettingsView()
+                .navigationTitle("Settings")
+                .navigationBarTitleDisplayMode(.large)
+                .toolbar {
+                  ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button(action: {
+                      Task { await generateGlobalSummary() }
+                    }) {
+                      if isGeneratingSummary {
+                        ProgressView().scaleEffect(0.8).foregroundColor(.themeSecondary)
+                      } else {
+                        Image(systemName: "sparkles").font(.title2).foregroundColor(.themeSecondary)
+                      }
                     }
-                  }) {
-                    if isGeneratingSummary {
-                      ProgressView()
-                        .scaleEffect(0.8)
-                        .foregroundColor(.themeSecondary)
-                    } else {
-                      Image(systemName: "sparkles")
-                        .font(.title2)
-                        .foregroundColor(.themeSecondary)
-                    }
-                  }
-                  .disabled(isGeneratingSummary)
+                    .disabled(isGeneratingSummary)
 
-                  // Post creation button
-                  Button(action: {
-                    router.presentedSheet = .composer(mode: .newPost)
-                  }) {
-                    Image(systemName: "square.and.pencil")
-                      .font(.title2)
-                      .foregroundColor(.themePrimary)
+                    Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
+                      Image(systemName: "square.and.pencil").font(.title2).foregroundColor(
+                        .themePrimary)
+                    }
                   }
                 }
-              }
-              .withAppDestinations()
+                .withAppDestinations()
+            }
+          } label: {
+            Label("Settings", systemImage: "gearshape")
           }
 
-        } label: {
-          Label("Settings", systemImage: "gearshape")
-        }
-      }
-
-      // Enhanced search tab with trending content
-      if settingsService.tabBarTabsRaw.contains(AppTab.compose.rawValue) {
-        Tab(value: AppTab.compose, role: .search) {
-          NavigationStack(
-            path: Binding(
-              get: { router[.compose] },
-              set: { router[.compose] = $0 }
-            )
-          ) {
-            EnhancedSearchView(client: client)
-              .navigationTitle("Search")
-              .navigationBarTitleDisplayMode(.large)
-              .toolbar {
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                  // Summary button
-                  Button(action: {
-                    Task {
-                      await generateGlobalSummary()
+        case .compose:
+          Tab(value: AppTab.compose, role: .search) {
+            NavigationStack(
+              path: Binding(
+                get: { router[.compose] },
+                set: { router[.compose] = $0 }
+              )
+            ) {
+              EnhancedSearchView(client: client)
+                .navigationTitle("Search")
+                .navigationBarTitleDisplayMode(.large)
+                .toolbar {
+                  ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button(action: {
+                      Task { await generateGlobalSummary() }
+                    }) {
+                      if isGeneratingSummary {
+                        ProgressView().scaleEffect(0.8).foregroundColor(.themeSecondary)
+                      } else {
+                        Image(systemName: "sparkles").font(.title2).foregroundColor(.themeSecondary)
+                      }
                     }
-                  }) {
-                    if isGeneratingSummary {
-                      ProgressView()
-                        .scaleEffect(0.8)
-                        .foregroundColor(.themeSecondary)
-                    } else {
-                      Image(systemName: "sparkles")
-                        .font(.title2)
-                        .foregroundColor(.themeSecondary)
-                    }
-                  }
-                  .disabled(isGeneratingSummary)
+                    .disabled(isGeneratingSummary)
 
-                  // Post creation button
-                  Button(action: {
-                    router.presentedSheet = .composer(mode: .newPost)
-                  }) {
-                    Image(systemName: "square.and.pencil")
-                      .font(.title2)
-                      .foregroundColor(.themePrimary)
+                    Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
+                      Image(systemName: "square.and.pencil").font(.title2).foregroundColor(
+                        .themePrimary)
+                    }
                   }
                 }
-              }
-              .withAppDestinations()
+                .withAppDestinations()
+            }
+            .onAppear { selectedTab = .compose }
+          } label: {
+            Label("Search", systemImage: "magnifyingglass")
           }
-          .onAppear { selectedTab = .compose }
-        } label: {
-          Label("", systemImage: "magnifyingglass")
         }
       }
     }
@@ -303,6 +255,12 @@ struct AppTabView: View {
     }
 
     isGeneratingSummary = false
+  }
+}
+
+extension AppTabView {
+  fileprivate var currentTabs: [AppTab] {
+    settingsService.tabBarTabsRaw.compactMap { AppTab(rawValue: $0) }
   }
 }
 

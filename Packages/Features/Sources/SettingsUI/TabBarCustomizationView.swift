@@ -37,10 +37,14 @@ public struct TabBarCustomizationView: View {
                 get: { selectedRaw.contains(tab.rawValue) },
                 set: { isOn in
                   if isOn {
-                    selectedRaw.append(tab.rawValue)
+                    if !selectedRaw.contains(tab.rawValue) {
+                      selectedRaw.append(tab.rawValue)
+                    }
                   } else {
                     selectedRaw.removeAll { $0 == tab.rawValue }
                   }
+                  // De-duplicate defensively then persist
+                  selectedRaw = Array(NSOrderedSet(array: selectedRaw)) as? [String] ?? selectedRaw
                   settingsService.tabBarTabsRaw = selectedRaw
                 }
               )

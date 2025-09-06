@@ -17,7 +17,7 @@ public enum AppTab: String, TabType, CaseIterable {
     case .notification: return "Notifications"
     case .profile: return "Profile"
     case .settings: return "Settings"
-    case .compose: return "New Post"
+    case .compose: return "Search"
     }
   }
 
@@ -28,7 +28,7 @@ public enum AppTab: String, TabType, CaseIterable {
     case .notification: return "bell"
     case .profile: return "person"
     case .settings: return "gearshape"
-    case .compose: return "square.and.pencil"
+    case .compose: return "magnifyingglass"
     }
   }
 }
