@@ -26,6 +26,7 @@ public struct SettingsView: View {
   @State private var showingLists = false
   @State private var showingListNotifications = false
   @State private var showingMessages = false
+  @State private var showingTabCustomization = false
 
   public init() {}
 
@@ -124,6 +125,9 @@ public struct SettingsView: View {
     }
     .sheet(isPresented: $showingMessages) {
       ConversationsView()
+    }
+    .sheet(isPresented: $showingTabCustomization) {
+      TabBarCustomizationView()
     }
 
   }
@@ -237,12 +241,12 @@ public struct SettingsView: View {
       }
 
       SettingsNavigationRow(
-        title: "Messages",
-        subtitle: "Direct messages (beta)",
-        icon: "bubble.left.and.bubble.right",
+        title: "Customize Tab Bar",
+        subtitle: "Choose which tabs appear and order",
+        icon: "rectangle.3.offgrid",
         iconColor: .blue
       ) {
-        showingMessages = true
+        showingTabCustomization = true
       }
     }
   }

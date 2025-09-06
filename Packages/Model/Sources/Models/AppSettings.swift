@@ -64,6 +64,12 @@ public final class AppSettings {
     didSet { UserDefaults.standard.set(hapticFeedbackEnabled, forKey: "hapticFeedbackEnabled") }
   }
 
+  // MARK: - Tab Bar Settings
+  // Array of AppTab raw values representing the visible tabs in order
+  public var tabBarTabsRaw: [String] {
+    didSet { UserDefaults.standard.set(tabBarTabsRaw, forKey: "tabBarTabs") }
+  }
+
   // MARK: - Initialization
   public init() {
     // Load saved settings or use defaults
@@ -92,6 +98,11 @@ public final class AppSettings {
     self.preloadImages = UserDefaults.standard.object(forKey: "preloadImages") as? Bool ?? true
     self.hapticFeedbackEnabled =
       UserDefaults.standard.object(forKey: "hapticFeedbackEnabled") as? Bool ?? true
+
+    // Default tab order without Messages
+    let defaultTabs = ["feed", "notification", "profile", "settings", "compose"]
+    self.tabBarTabsRaw =
+      UserDefaults.standard.array(forKey: "tabBarTabs") as? [String] ?? defaultTabs
   }
 
   // MARK: - Helper Methods
@@ -114,6 +125,7 @@ public final class AppSettings {
     imageQuality = .high
     preloadImages = true
     hapticFeedbackEnabled = true
+    tabBarTabsRaw = ["feed", "notification", "profile", "settings", "compose"]
   }
 }
 

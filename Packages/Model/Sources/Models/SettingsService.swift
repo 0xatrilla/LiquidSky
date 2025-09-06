@@ -80,6 +80,12 @@ public final class SettingsService {
     }
   }
 
+  // MARK: - Tab Bar Settings
+  public var tabBarTabsRaw: [String] {
+    get { settings.tabBarTabsRaw }
+    set { settings.tabBarTabsRaw = newValue }
+  }
+
   public var aiSummariesEnabled: Bool {
     get { settings.aiSummariesEnabled }
     set { settings.aiSummariesEnabled = newValue }
