@@ -68,6 +68,12 @@ public struct ProfileView: View {
     .task {
       await fetchFullProfile()
     }
+    .onChange(of: isCurrentUser) { _, newValue in
+      // If we're viewing another user's profile and the likes tab is selected, switch to posts
+      if !newValue && selectedTab == .likes {
+        selectedTab = .posts
+      }
+    }
   }
 
   // MARK: - Profile Header
@@ -259,7 +265,9 @@ public struct ProfileView: View {
         Text("Posts").tag(ProfileTab.posts)
         Text("Replies").tag(ProfileTab.replies)
         Text("Media").tag(ProfileTab.media)
-        Text("Likes").tag(ProfileTab.likes)
+        if isCurrentUser {
+          Text("Likes").tag(ProfileTab.likes)
+        }
       }
       .pickerStyle(.segmented)
       .padding(.horizontal)
