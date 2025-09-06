@@ -3,6 +3,7 @@ import AppRouter
 import Client
 import DesignSystem
 import Destinations
+import FeedUI
 import Models
 import SwiftUI
 import User
@@ -10,6 +11,9 @@ import User
 public struct PostsTimelineView: View {
   @Environment(BSkyClient.self) var client
   @Environment(AppRouter.self) var router
+  @State private var showingSummary = false
+  @State private var summaryText = ""
+  @State private var isGeneratingSummary = false
 
   public init() {}
 
@@ -21,22 +25,63 @@ public struct PostsTimelineView: View {
         ToolbarItemGroup(placement: .topBarTrailing) {
           // Summary button
           Button(action: {
-            // Use the existing summary infrastructure
-            // This will show the summary button in the feed content when appropriate
+            Task {
+              await generateTimelineSummary()
+            }
           }) {
-            Image(systemName: "sparkles")
-              .foregroundStyle(.primary)
+            if isGeneratingSummary {
+              ProgressView()
+                .scaleEffect(0.8)
+                .foregroundColor(.themeSecondary)
+            } else {
+              Image(systemName: "sparkles")
+                .font(.title2)
+                .foregroundColor(.themeSecondary)
+            }
           }
+          .disabled(isGeneratingSummary)
 
           // Post creation button
           Button(action: {
             router.presentedSheet = .composer(mode: .newPost)
           }) {
-            Image(systemName: "plus")
-              .foregroundStyle(.primary)
+            Image(systemName: "square.and.pencil")
+              .font(.title2)
+              .foregroundColor(.themePrimary)
           }
         }
       }
+      .sheet(isPresented: $showingSummary) {
+        SummarySheetView(
+          title: "Following Summary",
+          summary: summaryText,
+          itemCount: 0,
+          onDismiss: { showingSummary = false }
+        )
+      }
+  }
+
+  private func generateTimelineSummary() async {
+    isGeneratingSummary = true
+
+    do {
+      // Fetch recent posts from timeline
+      let feed = try await client.protoClient.getTimeline()
+      let processedPosts = await processFeed(feed.feed, client: client.protoClient)
+
+      // Use FeedSummaryService to generate AI summary
+      let summary = await FeedSummaryService.shared.summarizeFeedPosts(
+        processedPosts, feedName: "Following")
+      summaryText = summary
+      showingSummary = true
+    } catch {
+      // Fallback to a simple summary if the service fails
+      summaryText =
+        "Unable to generate AI summary for your Following timeline at this time. Please try again later."
+      showingSummary = true
+    }
+
+    isGeneratingSummary = false
   }
 }
 

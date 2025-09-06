@@ -3,6 +3,7 @@ import AppRouter
 import Client
 import DesignSystem
 import Destinations
+import FeedUI
 import Models
 import SwiftData
 import SwiftUI
@@ -14,6 +15,9 @@ public struct PostsFeedView: View {
   @Environment(AppRouter.self) var router
 
   private let feedItem: FeedItem
+  @State private var showingSummary = false
+  @State private var summaryText = ""
+  @State private var isGeneratingSummary = false
 
   public init(feedItem: FeedItem) {
     self.feedItem = feedItem
@@ -27,24 +31,42 @@ public struct PostsFeedView: View {
         ToolbarItemGroup(placement: .topBarTrailing) {
           // Summary button
           Button(action: {
-            // Use the existing summary infrastructure
-            // This will show the summary button in the feed content when appropriate
+            Task {
+              await generateFeedSummary()
+            }
           }) {
-            Image(systemName: "sparkles")
-              .foregroundStyle(.primary)
+            if isGeneratingSummary {
+              ProgressView()
+                .scaleEffect(0.8)
+                .foregroundColor(.themeSecondary)
+            } else {
+              Image(systemName: "sparkles")
+                .font(.title2)
+                .foregroundColor(.themeSecondary)
+            }
           }
+          .disabled(isGeneratingSummary)
 
           // Post creation button
           Button(action: {
             router.presentedSheet = .composer(mode: .newPost)
           }) {
-            Image(systemName: "plus")
-              .foregroundStyle(.primary)
+            Image(systemName: "square.and.pencil")
+              .font(.title2)
+              .foregroundColor(.themePrimary)
           }
         }
       }
       .onAppear {
         updateRecentlyViewed()
+      }
+      .sheet(isPresented: $showingSummary) {
+        SummarySheetView(
+          title: "\(feedItem.displayName) Summary",
+          summary: summaryText,
+          itemCount: 0,
+          onDismiss: { showingSummary = false }
+        )
       }
   }
 
@@ -88,6 +110,29 @@ public struct PostsFeedView: View {
         // Don't crash the app if this fails - it's not critical functionality
       }
     }
+  }
+
+  private func generateFeedSummary() async {
+    isGeneratingSummary = true
+
+    do {
+      // Fetch recent posts for this specific feed
+      let feed = try await client.protoClient.getFeed(by: feedItem.uri, cursor: nil)
+      let processedPosts = await processFeed(feed.feed, client: client.protoClient)
+
+      // Use FeedSummaryService to generate AI summary
+      let summary = await FeedSummaryService.shared.summarizeFeedPosts(
+        processedPosts, feedName: feedItem.displayName)
+      summaryText = summary
+      showingSummary = true
+    } catch {
+      // Fallback to a simple summary if the service fails
+      summaryText =
+        "Unable to generate AI summary for \(feedItem.displayName) at this time. Please try again later."
+      showingSummary = true
+    }
+
+    isGeneratingSummary = false
   }
 
 }

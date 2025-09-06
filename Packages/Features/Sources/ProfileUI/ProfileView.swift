@@ -64,7 +64,7 @@ public struct ProfileView: View {
       }
     }
     .background(.background)
-    .navigationBarBackButtonHidden()
+    .navigationBarBackButtonHidden(!showBack)
     .task {
       await fetchFullProfile()
     }
