@@ -21,6 +21,8 @@ public struct SettingsView: View {
   @State private var showingAccountSwitcher = false
   @State private var showingTippingView = false
   @State private var showingBlockedUsers = false
+  @State private var showingCustomDomain = false
+  @State private var showingLists = false
 
   public init() {}
 
@@ -108,6 +110,12 @@ public struct SettingsView: View {
     .sheet(isPresented: $showingBlockedUsers) {
       BlockedUsersView()
     }
+    .sheet(isPresented: $showingCustomDomain) {
+      CustomDomainView()
+    }
+    .sheet(isPresented: $showingLists) {
+      ListsManagementView()
+    }
 
   }
 
@@ -190,6 +198,24 @@ public struct SettingsView: View {
         iconColor: .red
       ) {
         showingChangePassword = true
+      }
+
+      SettingsNavigationRow(
+        title: "Custom Domain",
+        subtitle: "Use your domain as your handle",
+        icon: "globe",
+        iconColor: .blue
+      ) {
+        showingCustomDomain = true
+      }
+
+      SettingsNavigationRow(
+        title: "Lists",
+        subtitle: "Manage curation and moderation lists",
+        icon: "list.bullet",
+        iconColor: .green
+      ) {
+        showingLists = true
       }
     }
   }
