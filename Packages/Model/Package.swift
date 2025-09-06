@@ -15,7 +15,7 @@ let package = Package(
 
   ],
   dependencies: [
-    .package(url: "https://github.com/MasterJ93/ATProtoKit", from: "0.28.0"),
+    .package(url: "https://github.com/MasterJ93/ATProtoKit", from: "0.31.2"),
     .package(url: "https://github.com/evgenyneu/keychain-swift", from: "24.0.0"),
     .package(url: "https://github.com/Dimillian/AppRouter.git", from: "1.0.2"),
     .package(url: "https://github.com/kean/Nuke", from: "12.8.0"),

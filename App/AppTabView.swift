@@ -1,5 +1,6 @@
 import AppRouter
 import AuthUI
+import ChatUI
 import Client
 import ComposerUI
 import DesignSystem
@@ -24,6 +25,22 @@ struct AppTabView: View {
 
   public var body: some View {
     TabView(selection: $selectedTab) {
+      // Messages
+      Tab(value: AppTab.messages) {
+        NavigationStack(
+          path: Binding(
+            get: { router[.messages] },
+            set: { router[.messages] = $0 }
+          )
+        ) {
+          ConversationsView()
+            .navigationTitle("Messages")
+            .navigationBarTitleDisplayMode(.large)
+        }
+      } label: {
+        Label("Messages", systemImage: "bubble.left.and.bubble.right")
+      }
+
       // Feed (showing FeedsListView with Discover title)
       Tab(value: AppTab.feed) {
         NavigationStack(
@@ -305,6 +322,7 @@ extension AppTab {
   var displayName: String {
     switch self {
     case .feed: return "Feed"
+    case .messages: return "Messages"
     case .notification: return "Notifications"
     case .profile: return "Profile"
     case .settings: return "Settings"

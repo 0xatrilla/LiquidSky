@@ -26,6 +26,7 @@ let package = Package(
     .library(name: "DesignSystem", targets: ["DesignSystem"]),
     .library(name: "MediaUI", targets: ["MediaUI"]),
     .library(name: "ComposerUI", targets: ["ComposerUI"]),
+    .library(name: "ChatUI", targets: ["ChatUI"]),
   ],
   dependencies: [
     .package(name: "Model", path: "../Model"),
@@ -43,6 +44,10 @@ let package = Package(
       linkerSettings: [
         .unsafeFlags(["-weak_framework", "FoundationModels"], .when(platforms: [.iOS]))
       ]
+    ),
+    .target(
+      name: "ChatUI",
+      dependencies: baseDeps
     ),
     .testTarget(
       name: "FeedUITests",
@@ -70,7 +75,8 @@ let package = Package(
     .target(
       name: "SettingsUI",
       dependencies: baseDeps + [
-        .product(name: "AcknowList", package: "AcknowList")
+        .product(name: "AcknowList", package: "AcknowList"),
+        "ChatUI",
       ]
     ),
     .target(

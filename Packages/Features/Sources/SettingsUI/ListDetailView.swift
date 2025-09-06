@@ -89,6 +89,12 @@ public struct ListDetailView: View {
       .navigationTitle(list.name)
       .navigationBarTitleDisplayMode(.large)
       .toolbar {
+        ToolbarItem(placement: .navigationBarLeading) {
+          Button("Search") {
+            // TODO: Navigate to search view
+          }
+        }
+
         ToolbarItem(placement: .navigationBarTrailing) {
           Button("Done") {
             dismiss()
@@ -163,24 +169,10 @@ public struct ListDetailView: View {
     do {
       switch action {
       case .follow:
-        try await service.followUser(did: member.did)
-      case .unfollow:
-        try await service.unfollowUser(followUri: "placeholder://follow/\(member.did)")
-      case .mute:
-        try await service.muteUser(did: member.did)
-      case .unmute:
-        try await service.unmuteUser(muteUri: "placeholder://mute/\(member.did)")
-      case .block:
-        try await service.blockUser(did: member.did)
-      case .unblock:
-        try await service.unblockUser(blockUri: "placeholder://block/\(member.did)")
-      }
-
-      // Update the member's state in the UI
-      if let index = members.firstIndex(where: { $0.id == member.id }) {
-        var updatedMember = members[index]
-        switch action {
-        case .follow:
+        let followUri = try await service.followUser(did: member.did)
+        // Store the follow URI for future unfollow operations
+        if let index = members.firstIndex(where: { $0.id == member.id }) {
+          var updatedMember = members[index]
           updatedMember = ListMember(
             id: updatedMember.id,
             did: updatedMember.did,
@@ -190,8 +182,73 @@ public struct ListDetailView: View {
             avatarURL: updatedMember.avatarURL,
             isFollowing: true,
             isMuted: updatedMember.isMuted,
-            isBlocked: updatedMember.isBlocked
+            isBlocked: updatedMember.isBlocked,
+            followUri: followUri,
+            muteUri: updatedMember.muteUri,
+            blockUri: updatedMember.blockUri
           )
+          members[index] = updatedMember
+        }
+        return
+      case .unfollow:
+        guard let followUri = member.followUri else { return }
+        try await service.unfollowUser(followUri: followUri)
+      case .mute:
+        let muteUri = try await service.muteUser(did: member.did)
+        // Store the mute URI for future unmute operations
+        if let index = members.firstIndex(where: { $0.id == member.id }) {
+          var updatedMember = members[index]
+          updatedMember = ListMember(
+            id: updatedMember.id,
+            did: updatedMember.did,
+            handle: updatedMember.handle,
+            displayName: updatedMember.displayName,
+            description: updatedMember.description,
+            avatarURL: updatedMember.avatarURL,
+            isFollowing: updatedMember.isFollowing,
+            isMuted: true,
+            isBlocked: updatedMember.isBlocked,
+            followUri: updatedMember.followUri,
+            muteUri: muteUri,
+            blockUri: updatedMember.blockUri
+          )
+          members[index] = updatedMember
+        }
+        return
+      case .unmute:
+        guard let muteUri = member.muteUri else { return }
+        try await service.unmuteUser(muteUri: muteUri)
+      case .block:
+        let blockUri = try await service.blockUser(did: member.did)
+        // Store the block URI for future unblock operations
+        if let index = members.firstIndex(where: { $0.id == member.id }) {
+          var updatedMember = members[index]
+          updatedMember = ListMember(
+            id: updatedMember.id,
+            did: updatedMember.did,
+            handle: updatedMember.handle,
+            displayName: updatedMember.displayName,
+            description: updatedMember.description,
+            avatarURL: updatedMember.avatarURL,
+            isFollowing: updatedMember.isFollowing,
+            isMuted: updatedMember.isMuted,
+            isBlocked: true,
+            followUri: updatedMember.followUri,
+            muteUri: updatedMember.muteUri,
+            blockUri: blockUri
+          )
+          members[index] = updatedMember
+        }
+        return
+      case .unblock:
+        guard let blockUri = member.blockUri else { return }
+        try await service.unblockUser(blockUri: blockUri)
+      }
+
+      // Update the member's state in the UI for unfollow/unmute/unblock actions
+      if let index = members.firstIndex(where: { $0.id == member.id }) {
+        var updatedMember = members[index]
+        switch action {
         case .unfollow:
           updatedMember = ListMember(
             id: updatedMember.id,
@@ -202,19 +259,10 @@ public struct ListDetailView: View {
             avatarURL: updatedMember.avatarURL,
             isFollowing: false,
             isMuted: updatedMember.isMuted,
-            isBlocked: updatedMember.isBlocked
-          )
-        case .mute:
-          updatedMember = ListMember(
-            id: updatedMember.id,
-            did: updatedMember.did,
-            handle: updatedMember.handle,
-            displayName: updatedMember.displayName,
-            description: updatedMember.description,
-            avatarURL: updatedMember.avatarURL,
-            isFollowing: updatedMember.isFollowing,
-            isMuted: true,
-            isBlocked: updatedMember.isBlocked
+            isBlocked: updatedMember.isBlocked,
+            followUri: nil,
+            muteUri: updatedMember.muteUri,
+            blockUri: updatedMember.blockUri
           )
         case .unmute:
           updatedMember = ListMember(
@@ -226,19 +274,10 @@ public struct ListDetailView: View {
             avatarURL: updatedMember.avatarURL,
             isFollowing: updatedMember.isFollowing,
             isMuted: false,
-            isBlocked: updatedMember.isBlocked
-          )
-        case .block:
-          updatedMember = ListMember(
-            id: updatedMember.id,
-            did: updatedMember.did,
-            handle: updatedMember.handle,
-            displayName: updatedMember.displayName,
-            description: updatedMember.description,
-            avatarURL: updatedMember.avatarURL,
-            isFollowing: updatedMember.isFollowing,
-            isMuted: updatedMember.isMuted,
-            isBlocked: true
+            isBlocked: updatedMember.isBlocked,
+            followUri: updatedMember.followUri,
+            muteUri: nil,
+            blockUri: updatedMember.blockUri
           )
         case .unblock:
           updatedMember = ListMember(
@@ -250,8 +289,13 @@ public struct ListDetailView: View {
             avatarURL: updatedMember.avatarURL,
             isFollowing: updatedMember.isFollowing,
             isMuted: updatedMember.isMuted,
-            isBlocked: false
+            isBlocked: false,
+            followUri: updatedMember.followUri,
+            muteUri: updatedMember.muteUri,
+            blockUri: nil
           )
+        default:
+          break  // Follow/mute/block actions are handled above
         }
         members[index] = updatedMember
       }
@@ -355,6 +399,9 @@ public struct ListMember: Identifiable {
   public let isFollowing: Bool
   public let isMuted: Bool
   public let isBlocked: Bool
+  public let followUri: String?
+  public let muteUri: String?
+  public let blockUri: String?
 }
 
 public enum ListMemberAction {
@@ -396,7 +443,10 @@ private struct ListMemberItem: Decodable {
       avatarURL: subject.avatar.flatMap(URL.init),
       isFollowing: false,  // TODO: Get from viewer data
       isMuted: false,  // TODO: Get from viewer data
-      isBlocked: false  // TODO: Get from viewer data
+      isBlocked: false,  // TODO: Get from viewer data
+      followUri: nil,  // TODO: Get from viewer data
+      muteUri: nil,  // TODO: Get from viewer data
+      blockUri: nil  // TODO: Get from viewer data
     )
   }
 }

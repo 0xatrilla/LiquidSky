@@ -9,13 +9,14 @@ public class ListMemberActionsService: ObservableObject {
     self.client = client
   }
 
-  public func followUser(did: String) async throws {
+  public func followUser(did: String) async throws -> String {
     // TODO: Implement actual follow using ATProtoKit
-    // The ATProtoKit API signatures need to be verified
+    // The follow API needs to be implemented in ATProtoKit
     print("Would follow user: \(did)")
 
     // Simulate success for now
     try await Task.sleep(nanoseconds: 500_000_000)  // 0.5 second delay
+    return "placeholder://follow/\(did)"
   }
 
   public func unfollowUser(followUri: String) async throws {
@@ -26,12 +27,14 @@ public class ListMemberActionsService: ObservableObject {
     try await Task.sleep(nanoseconds: 500_000_000)  // 0.5 second delay
   }
 
-  public func muteUser(did: String) async throws {
+  public func muteUser(did: String) async throws -> String {
     // TODO: Implement actual mute using ATProtoKit
+    // The mute API needs to be implemented in ATProtoKit
     print("Would mute user: \(did)")
 
     // Simulate success for now
     try await Task.sleep(nanoseconds: 500_000_000)  // 0.5 second delay
+    return "placeholder://mute/\(did)"
   }
 
   public func unmuteUser(muteUri: String) async throws {
@@ -42,12 +45,14 @@ public class ListMemberActionsService: ObservableObject {
     try await Task.sleep(nanoseconds: 500_000_000)  // 0.5 second delay
   }
 
-  public func blockUser(did: String) async throws {
+  public func blockUser(did: String) async throws -> String {
     // TODO: Implement actual block using ATProtoKit
+    // The block API needs to be implemented in ATProtoKit
     print("Would block user: \(did)")
 
     // Simulate success for now
     try await Task.sleep(nanoseconds: 500_000_000)  // 0.5 second delay
+    return "placeholder://block/\(did)"
   }
 
   public func unblockUser(blockUri: String) async throws {

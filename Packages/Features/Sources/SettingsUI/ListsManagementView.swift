@@ -11,6 +11,8 @@ public struct ListsManagementView: View {
   @State private var error: Error?
   @State private var lists: [UserList] = []
   @State private var selectedList: UserList?
+  @State private var showingCreateList = false
+  @State private var showingEditList: UserList?
 
   public init() {}
 
@@ -75,15 +77,41 @@ public struct ListsManagementView: View {
               }
             }
             .buttonStyle(.plain)
+            .contextMenu {
+              Button("Edit List") {
+                showingEditList = list
+              }
+
+              Button("Delete List", role: .destructive) {
+                Task {
+                  await deleteList(list)
+                }
+              }
+            }
           }
           .listStyle(.insetGrouped)
           .refreshable { await loadLists() }
         }
       }
       .navigationTitle("Lists")
+      .toolbar {
+        ToolbarItem(placement: .navigationBarTrailing) {
+          Button(action: {
+            showingCreateList = true
+          }) {
+            Image(systemName: "plus")
+          }
+        }
+      }
       .task { await loadLists() }
       .sheet(item: $selectedList) { list in
         ListDetailView(list: list)
+      }
+      .sheet(isPresented: $showingCreateList) {
+        CreateEditListView()
+      }
+      .sheet(item: $showingEditList) { list in
+        CreateEditListView(list: list)
       }
     }
   }
@@ -155,6 +183,14 @@ public struct ListsManagementView: View {
 
     let decoded = try JSONDecoder().decode(ListMembersResponse.self, from: data)
     return decoded.items.count
+  }
+
+  private func deleteList(_ list: UserList) async {
+    // TODO: Implement actual list deletion using ATProtoKit
+    print("Would delete list: \(list.id)")
+
+    // For now, just remove from local array
+    lists.removeAll { $0.id == list.id }
   }
 
   private struct GetListsResponse: Decodable {

@@ -1,4 +1,5 @@
 import Auth
+import ChatUI
 import DesignSystem
 import Models
 import StoreKit
@@ -23,6 +24,8 @@ public struct SettingsView: View {
   @State private var showingBlockedUsers = false
   @State private var showingCustomDomain = false
   @State private var showingLists = false
+  @State private var showingListNotifications = false
+  @State private var showingMessages = false
 
   public init() {}
 
@@ -115,6 +118,12 @@ public struct SettingsView: View {
     }
     .sheet(isPresented: $showingLists) {
       ListsManagementView()
+    }
+    .sheet(isPresented: $showingListNotifications) {
+      ListNotificationSettingsView()
+    }
+    .sheet(isPresented: $showingMessages) {
+      ConversationsView()
     }
 
   }
@@ -216,6 +225,24 @@ public struct SettingsView: View {
         iconColor: .green
       ) {
         showingLists = true
+      }
+
+      SettingsNavigationRow(
+        title: "List Notifications",
+        subtitle: "Get notified about list changes",
+        icon: "bell.badge",
+        iconColor: .orange
+      ) {
+        showingListNotifications = true
+      }
+
+      SettingsNavigationRow(
+        title: "Messages",
+        subtitle: "Direct messages (beta)",
+        icon: "bubble.left.and.bubble.right",
+        iconColor: .blue
+      ) {
+        showingMessages = true
       }
     }
   }
