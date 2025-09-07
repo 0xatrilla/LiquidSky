@@ -118,6 +118,8 @@ extension PostsTimelineView: @MainActor PostsListViewDatasource {
 
       // Try to process the feed with enhanced error handling
       let posts = await processFeed(feed.feed, client: client.protoClient)
+      // Trigger per-account post notifications for new posts
+      PostNotificationManager.shared.process(posts: posts)
       #if DEBUG
         print("Successfully processed \(posts.count) posts from timeline")
       #endif
@@ -126,6 +128,7 @@ extension PostsTimelineView: @MainActor PostsListViewDatasource {
     case .loaded(let posts, let cursor):
       let feed = try await client.protoClient.getTimeline(cursor: cursor)
       let newPosts = await processFeed(feed.feed, client: client.protoClient)
+      PostNotificationManager.shared.process(posts: newPosts)
       return .loaded(posts: posts + newPosts, cursor: feed.cursor)
     }
   }
