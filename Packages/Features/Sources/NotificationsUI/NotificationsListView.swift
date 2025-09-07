@@ -191,6 +191,20 @@ public struct NotificationsListView: View {
           client: client, response.notifications)
         self.cursor = response.cursor
       }
+
+      // Local alert when Bluesky notifications arrive (optional per preferences)
+      if NotificationPreferences.shared.notifyOnBlueskyNotifications,
+        !notificationsGroups.isEmpty
+      {
+        let content = UNMutableNotificationContent()
+        content.title = "New Notifications"
+        content.body = "You have new activity on Horizon."
+        content.sound = .default
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let req = UNNotificationRequest(
+          identifier: UUID().uuidString, content: content, trigger: trigger)
+        try await UNUserNotificationCenter.current().add(req)
+      }
     } catch {
       // Handle cancellation gracefully
       if (error as? CancellationError) != nil {

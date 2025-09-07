@@ -77,6 +77,7 @@ let package = Package(
       dependencies: baseDeps + [
         .product(name: "AcknowList", package: "AcknowList"),
         "ChatUI",
+        "NotificationsUI",
       ]
     ),
     .target(

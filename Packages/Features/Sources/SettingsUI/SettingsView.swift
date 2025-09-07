@@ -2,6 +2,7 @@ import Auth
 import ChatUI
 import DesignSystem
 import Models
+import NotificationsUI
 import StoreKit
 import SwiftUI
 import UIKit
@@ -25,6 +26,7 @@ public struct SettingsView: View {
   @State private var showingCustomDomain = false
   @State private var showingLists = false
   @State private var showingListNotifications = false
+  @State private var showingNotificationsCenter = false
   @State private var showingMessages = false
   @State private var showingTabCustomization = false
 
@@ -128,6 +130,9 @@ public struct SettingsView: View {
     .sheet(isPresented: $showingTabCustomization) {
       TabBarCustomizationView()
     }
+    .sheet(isPresented: $showingNotificationsCenter) {
+      NotificationsCenterView()
+    }
 
   }
 
@@ -213,7 +218,7 @@ public struct SettingsView: View {
         icon: "bell",
         iconColor: .blue
       ) {
-        showingListNotifications = true
+        showingNotificationsCenter = true
       }
 
       SettingsNavigationRow(
