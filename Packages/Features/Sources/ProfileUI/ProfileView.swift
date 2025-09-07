@@ -214,6 +214,16 @@ public struct ProfileView: View {
 
       Menu {
         if !isCurrentUser {
+          // Per-account post notifications
+          Button(action: {
+            NotificationPreferences.shared.toggleSubscription(for: profile.did)
+          }) {
+            let enabled = NotificationPreferences.shared.isSubscribed(to: profile.did)
+            Label(
+              enabled ? "Disable Notifications" : "Enable Notifications",
+              systemImage: enabled ? "bell.slash" : "bell")
+          }
+
           Button(action: {
             Task { await toggleMute() }
           }) {

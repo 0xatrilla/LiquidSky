@@ -107,7 +107,7 @@ struct CheckFeedIntent: AppIntent {
 
 // MARK: - App Shortcuts Provider
 @preconcurrency
-struct LiquidSkyAppShortcuts: AppShortcutsProvider {
+struct HorizonAppShortcuts: AppShortcutsProvider {
   // Must be a literal per AppIntents validation
   nonisolated static var shortcutTileColor: ShortcutTileColor { .blue }
 

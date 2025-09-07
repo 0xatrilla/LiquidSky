@@ -64,7 +64,7 @@ struct NotificationSettingsView: View {
                 .foregroundColor(.red)
             }
 
-            Text("Enable in Settings > Notifications > LiquidSky")
+            Text("Enable in Settings > Notifications > Horizon")
               .font(.caption)
               .foregroundColor(.secondary)
           }

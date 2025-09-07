@@ -8,6 +8,7 @@ public struct SummarySheetView: View {
 
   @Environment(\.colorScheme) private var colorScheme
   @State private var isVisible = false
+  @State private var attributedSummary: AttributedString?
 
   public init(title: String, summary: String, itemCount: Int, onDismiss: @escaping () -> Void) {
     self.title = title
@@ -25,7 +26,7 @@ public struct SummarySheetView: View {
           dismiss()
         }
 
-      // Main content
+      // Main content - now properly constrained to safe area
       VStack(spacing: 0) {
         // Handle bar
         RoundedRectangle(cornerRadius: 2.5)
@@ -34,94 +35,150 @@ public struct SummarySheetView: View {
           .padding(.top, 8)
           .padding(.bottom, 16)
 
-        // Content
-        VStack(spacing: 24) {
-          // Header
-          VStack(spacing: 8) {
-            HStack {
-              Image(systemName: "sparkles")
-                .font(.title2)
-                .symbolRenderingMode(.multicolor)
+        // Scrollable content area
+        ScrollView {
+          VStack(spacing: 24) {
+            // Header
+            VStack(spacing: 8) {
+              HStack {
+                Image(systemName: "sparkles")
+                  .font(.title2)
+                  .symbolRenderingMode(.multicolor)
 
-              Text(title)
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundStyle(.primary)
+                Text(title)
+                  .font(.title2)
+                  .fontWeight(.bold)
+                  .foregroundStyle(.primary)
 
-              Spacer()
+                Spacer()
+              }
+
+              Text("\(itemCount) new items")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+              // Apple Intelligence branding
+              HStack {
+                Image(systemName: "brain.head.profile")
+                  .font(.caption)
+                  .foregroundStyle(.white)
+                  .padding(6)
+                  .background(
+                    LinearGradient(
+                      colors: [.blue, .purple], startPoint: .leading, endPoint: .trailing)
+                  )
+                  .clipShape(Circle())
+
+                Text("Powered by Apple Intelligence")
+                  .font(.caption)
+                  .fontWeight(.semibold)
+                  .overlay(
+                    LinearGradient(
+                      colors: [.blue, .purple], startPoint: .leading, endPoint: .trailing
+                    )
+                    .mask(
+                      Text("Powered by Apple Intelligence")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                    )
+                  )
+                  .foregroundStyle(.clear)
+                  .padding(.vertical, 6)
+                  .padding(.horizontal, 10)
+                  .background(
+                    LinearGradient(
+                      colors: [.blue.opacity(0.15), .purple.opacity(0.15)], startPoint: .leading,
+                      endPoint: .trailing
+                    )
+                    .clipShape(Capsule())
+                  )
+
+                Spacer()
+              }
+              .padding(.top, 4)
             }
 
-            Text("\(itemCount) new items")
-              .font(.subheadline)
-              .foregroundStyle(.secondary)
-              .frame(maxWidth: .infinity, alignment: .leading)
-          }
-
-          // Summary content
-          VStack(alignment: .leading, spacing: 16) {
-            HStack {
-              Image(systemName: "brain.head.profile")
-                .font(.title3)
-                .foregroundColor(.blueskyPrimary)
-
-              Text("AI Summary")
-                .font(.headline)
-                .fontWeight(.semibold)
-                .foregroundStyle(.primary)
-
-              Spacer()
-            }
-
-            Text(summary)
+            // Summary content
+            VStack(alignment: .leading, spacing: 16) {
+              Group {
+                if let attributedSummary {
+                  Text(attributedSummary)
+                } else {
+                  Text(summary)
+                }
+              }
               .font(.body)
               .foregroundStyle(.primary)
               .multilineTextAlignment(.leading)
+              .lineSpacing(5)
               .lineLimit(nil)
               .fixedSize(horizontal: false, vertical: true)
-          }
-          .padding(20)
-          .background(
-            RoundedRectangle(cornerRadius: 16)
-              .fill(.ultraThinMaterial)
-              .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                  .stroke(.quaternary, lineWidth: 0.5)
-              )
-          )
-
-          // Action buttons
-          HStack(spacing: 16) {
-            Button("Dismiss") {
-              dismiss()
+              .textSelection(.enabled)
             }
-            .buttonStyle(.bordered)
-            .frame(maxWidth: .infinity)
+            .padding(20)
+            .background(
+              RoundedRectangle(cornerRadius: 16)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                  RoundedRectangle(cornerRadius: 16)
+                    .stroke(.quaternary, lineWidth: 0.5)
+                )
+            )
 
-            Button("View All") {
-              dismiss()
-              // TODO: Scroll to top of feed/notifications
+            // Action buttons
+            HStack(spacing: 16) {
+              Button("Dismiss") {
+                dismiss()
+              }
+              .buttonStyle(.bordered)
+              .frame(maxWidth: .infinity)
+
+              Button("View All") {
+                dismiss()
+                // TODO: Scroll to top of feed/notifications
+              }
+              .buttonStyle(.borderedProminent)
+              .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
-            .frame(maxWidth: .infinity)
+            .padding(.bottom, 20)  // Extra padding for scroll area
           }
+          .padding(.horizontal, 24)
         }
-        .padding(.horizontal, 24)
-        .padding(.bottom, 32)
+        .frame(maxHeight: 500)  // Reasonable max height for content
       }
       .background(
         RoundedRectangle(cornerRadius: 24)
           .fill(.ultraThinMaterial)
           .overlay(
-            RoundedRectangle(cornerRadius: 24)
-              .stroke(.quaternary, lineWidth: 0.5)
+            ZStack {
+              // Outer stroke
+              RoundedRectangle(cornerRadius: 24)
+                .stroke(.white.opacity(colorScheme == .dark ? 0.08 : 0.2), lineWidth: 1)
+              // Top highlight for a glass sheen
+              RoundedRectangle(cornerRadius: 24)
+                .fill(
+                  LinearGradient(
+                    colors: [Color.white.opacity(colorScheme == .dark ? 0.10 : 0.35), .clear],
+                    startPoint: .topLeading,
+                    endPoint: .center
+                  )
+                )
+                .allowsHitTesting(false)
+            }
           )
+          .shadow(color: .black.opacity(0.25), radius: 20, x: 0, y: 10)
       )
       .padding(.horizontal, 16)
+      .frame(maxHeight: 600)  // Overall sheet height limit
       .offset(y: isVisible ? 0 : 600)
       .animation(.spring(response: 0.6, dampingFraction: 0.8), value: isVisible)
     }
     .onAppear {
       isVisible = true
+      if let attr = try? AttributedString(markdown: summary) {
+        attributedSummary = attr
+      }
     }
   }
 
@@ -140,7 +197,7 @@ public struct SummarySheetView: View {
   SummarySheetView(
     title: "Feed Summary",
     summary:
-      "You have 15 new posts in your feed, including updates from developers, tech discussions about iOS development, and project updates from the indie dev community.",
+      "The developer community has been buzzing with excitement over the latest iOS updates and SwiftUI innovations. Several prominent developers shared their experiences with the new declarative UI patterns, highlighting significant performance improvements and cleaner code architecture. The discussions revealed a growing trend toward more modular app design, with many developers experimenting with SwiftUI's advanced features like custom view modifiers and state management techniques.\n\nCommunity sentiment remains overwhelmingly positive, with developers actively sharing resources, code snippets, and best practices. Notable conversations included deep-dives into accessibility improvements, with several developers showcasing how they've made their apps more inclusive. The feed also featured some interesting project showcases, including a new productivity app that leverages Apple's latest frameworks and a creative coding experiment that demonstrates the power of SwiftUI's animation system.",
     itemCount: 15,
     onDismiss: {}
   )

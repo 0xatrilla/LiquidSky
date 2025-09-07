@@ -1,5 +1,6 @@
 import Client
 import SwiftUI
+import UserNotifications
 
 public struct ListNotificationSettingsView: View {
   @Environment(BSkyClient.self) private var client
@@ -34,8 +35,18 @@ public struct ListNotificationSettingsView: View {
 
           Section {
             Button("Test Notification") {
-              // TODO: Send test notification
-              print("Would send test notification")
+              let center = UNUserNotificationCenter.current()
+              center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+                guard granted else { return }
+                let content = UNMutableNotificationContent()
+                content.title = "List Notifications"
+                content.body = "This is a test notification for your list settings."
+                content.sound = .default
+                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+                let request = UNNotificationRequest(
+                  identifier: UUID().uuidString, content: content, trigger: trigger)
+                center.add(request)
+              }
             }
             .foregroundColor(.blue)
           } header: {

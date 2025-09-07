@@ -5,7 +5,7 @@ import SwiftUI
 struct TextPatternAttribute: CodableAttributedStringKey {
   typealias Value = ComposerTextPattern
 
-  static let name = "LiquidSky.TextPatternAttribute"
+  static let name = "Horizon.TextPatternAttribute"
   static let inheritedByAddedText: Bool = false
   static let invalidationConditions: Set<AttributedString.AttributeInvalidationCondition>? = [
     .textChanged
@@ -33,25 +33,25 @@ enum ComposerTextPattern: String, CaseIterable, Codable {
   case mention = "mention"
   case url = "url"
   case hashtag = "hashtag"
-  
+
   /// Get the color for a specific theme
   func color(for theme: String) -> Color {
     switch self {
     case .mention:
-      return .blue // Fallback color for now
+      return .blue  // Fallback color for now
     case .url:
-      return .blue // Fallback color for now
+      return .blue  // Fallback color for now
     case .hashtag:
-      return .blue // Fallback color for now
+      return .blue  // Fallback color for now
     }
   }
-  
+
   /// Get the color for the current theme (for backward compatibility)
   var color: Color {
     let currentTheme = UserDefaults.standard.string(forKey: "selectedColorTheme") ?? "bluesky"
     return color(for: currentTheme)
   }
-  
+
   /// Get the regex pattern for matching
   var pattern: String {
     switch self {
@@ -63,7 +63,7 @@ enum ComposerTextPattern: String, CaseIterable, Codable {
       return "(?i)https?://(?:www\\.)?\\S+(?:/|\\b)"
     }
   }
-  
+
   /// Check if text matches this pattern
   func matches(_ text: String) -> Bool {
     switch self {

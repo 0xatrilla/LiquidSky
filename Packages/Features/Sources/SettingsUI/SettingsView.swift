@@ -408,7 +408,7 @@ public struct SettingsView: View {
       SettingsSectionHeader(title: "About", icon: "info.circle.fill", color: .gray)
 
       SettingsNavigationRow(
-        title: "About LiquidSky",
+        title: "About Horizon",
         subtitle: "Version 1.0.0 • Build 1",
         icon: "info.circle.fill",
         iconColor: .gray
@@ -483,7 +483,7 @@ private struct AboutView: View {
             .padding(.top, 40)
 
           // App Name
-          Text("LiquidSky")
+          Text("Horizon")
             .font(.largeTitle)
             .fontWeight(.bold)
 
@@ -528,7 +528,7 @@ private struct AboutView: View {
             HStack(spacing: 40) {
               // GitHub Logo
               Button {
-                if let url = URL(string: "https://github.com/0xatrilla/LiquidSky") {
+                if let url = URL(string: "https://github.com/0xatrilla/Horizon") {
                   UIApplication.shared.open(url)
                 }
               } label: {
