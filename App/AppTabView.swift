@@ -75,6 +75,14 @@ struct AppTabView: View {
               ConversationsView()
                 .navigationTitle("Messages")
                 .navigationBarTitleDisplayMode(.large)
+                .toolbar {
+                  ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
+                      Image(systemName: "square.and.pencil").font(.title2).foregroundColor(
+                        .themePrimary)
+                    }
+                  }
+                }
             }
           } label: {
             Label("Messages", systemImage: "bubble.left.and.bubble.right")
@@ -93,17 +101,6 @@ struct AppTabView: View {
                 .navigationBarTitleDisplayMode(.large)
                 .toolbar {
                   ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button(action: {
-                      Task { await generateGlobalSummary() }
-                    }) {
-                      if isGeneratingSummary {
-                        ProgressView().scaleEffect(0.8).foregroundColor(.themeSecondary)
-                      } else {
-                        Image(systemName: "sparkles").font(.title2).foregroundColor(.themeSecondary)
-                      }
-                    }
-                    .disabled(isGeneratingSummary)
-
                     Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
                       Image(systemName: "square.and.pencil").font(.title2).foregroundColor(
                         .themePrimary)
@@ -129,17 +126,6 @@ struct AppTabView: View {
                 .navigationBarTitleDisplayMode(.large)
                 .toolbar {
                   ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button(action: {
-                      Task { await generateGlobalSummary() }
-                    }) {
-                      if isGeneratingSummary {
-                        ProgressView().scaleEffect(0.8).foregroundColor(.themeSecondary)
-                      } else {
-                        Image(systemName: "sparkles").font(.title2).foregroundColor(.themeSecondary)
-                      }
-                    }
-                    .disabled(isGeneratingSummary)
-
                     Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
                       Image(systemName: "square.and.pencil").font(.title2).foregroundColor(
                         .themePrimary)
@@ -165,17 +151,6 @@ struct AppTabView: View {
                 .navigationBarTitleDisplayMode(.large)
                 .toolbar {
                   ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button(action: {
-                      Task { await generateGlobalSummary() }
-                    }) {
-                      if isGeneratingSummary {
-                        ProgressView().scaleEffect(0.8).foregroundColor(.themeSecondary)
-                      } else {
-                        Image(systemName: "sparkles").font(.title2).foregroundColor(.themeSecondary)
-                      }
-                    }
-                    .disabled(isGeneratingSummary)
-
                     Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
                       Image(systemName: "square.and.pencil").font(.title2).foregroundColor(
                         .themePrimary)
@@ -201,17 +176,6 @@ struct AppTabView: View {
                 .navigationBarTitleDisplayMode(.large)
                 .toolbar {
                   ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button(action: {
-                      Task { await generateGlobalSummary() }
-                    }) {
-                      if isGeneratingSummary {
-                        ProgressView().scaleEffect(0.8).foregroundColor(.themeSecondary)
-                      } else {
-                        Image(systemName: "sparkles").font(.title2).foregroundColor(.themeSecondary)
-                      }
-                    }
-                    .disabled(isGeneratingSummary)
-
                     Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
                       Image(systemName: "square.and.pencil").font(.title2).foregroundColor(
                         .themePrimary)

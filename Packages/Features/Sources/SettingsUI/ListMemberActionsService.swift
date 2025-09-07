@@ -1,5 +1,6 @@
 import Client
 import Foundation
+import Models
 
 @MainActor
 public class ListMemberActionsService: ObservableObject {
@@ -28,39 +29,23 @@ public class ListMemberActionsService: ObservableObject {
   }
 
   public func muteUser(did: String) async throws -> String {
-    // TODO: Implement actual mute using ATProtoKit
-    // The mute API needs to be implemented in ATProtoKit
-    print("Would mute user: \(did)")
-
-    // Simulate success for now
-    try await Task.sleep(nanoseconds: 500_000_000)  // 0.5 second delay
-    return "placeholder://mute/\(did)"
+    try await client.protoClient.muteActor(did)
+    return "mute://\(did)"
   }
 
   public func unmuteUser(muteUri: String) async throws {
-    // TODO: Implement actual unmute using ATProtoKit
-    print("Would unmute user, record URI: \(muteUri)")
-
-    // Simulate success for now
-    try await Task.sleep(nanoseconds: 500_000_000)  // 0.5 second delay
+    let did = muteUri.replacingOccurrences(of: "mute://", with: "")
+    try await client.protoClient.unmuteActor(did)
   }
 
   public func blockUser(did: String) async throws -> String {
-    // TODO: Implement actual block using ATProtoKit
-    // The block API needs to be implemented in ATProtoKit
-    print("Would block user: \(did)")
-
-    // Simulate success for now
-    try await Task.sleep(nanoseconds: 500_000_000)  // 0.5 second delay
-    return "placeholder://block/\(did)"
+    let result = try await client.blueskyClient.createBlockRecord(
+      ofType: .actorBlock(actorDID: did))
+    return result.recordURI
   }
 
   public func unblockUser(blockUri: String) async throws {
-    // TODO: Implement actual unblock using ATProtoKit
-    print("Would unblock user, record URI: \(blockUri)")
-
-    // Simulate success for now
-    try await Task.sleep(nanoseconds: 500_000_000)  // 0.5 second delay
+    try await client.blueskyClient.deleteRecord(.recordURI(atURI: blockUri))
   }
 }
 

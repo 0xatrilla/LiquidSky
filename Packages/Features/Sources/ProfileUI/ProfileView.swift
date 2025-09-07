@@ -212,9 +212,48 @@ public struct ProfileView: View {
           )
       }
 
-      Button(action: {
-        // TODO: Implement more options
-      }) {
+      Menu {
+        if !isCurrentUser {
+          Button(action: {
+            Task { await toggleMute() }
+          }) {
+            Label(
+              profile.isMuted ? "Unmute" : "Mute",
+              systemImage: profile.isMuted ? "speaker" : "speaker.slash")
+          }
+
+          Button(action: {
+            Task { await toggleBlock() }
+          }) {
+            Label(
+              profile.isBlocked ? "Unblock" : "Block",
+              systemImage: profile.isBlocked
+                ? "person.crop.circle.badge.checkmark" : "person.crop.circle.badge.minus")
+          }
+          .foregroundColor(.red)
+
+          Divider()
+
+          Button(action: {
+            // TODO: Implement add to list
+          }) {
+            Label("Add to List", systemImage: "list.bullet")
+          }
+
+          Button(action: {
+            // TODO: Implement report user
+          }) {
+            Label("Report", systemImage: "exclamationmark.triangle")
+          }
+          .foregroundColor(.orange)
+        } else {
+          Button(action: {
+            // TODO: Implement edit profile
+          }) {
+            Label("Edit Profile", systemImage: "pencil")
+          }
+        }
+      } label: {
         Image(systemName: "ellipsis")
           .font(.subheadline)
           .foregroundColor(.primary)
@@ -339,6 +378,30 @@ public struct ProfileView: View {
     }
 
     isLoadingProfile = false
+  }
+
+  // MARK: - Profile Actions
+  private func toggleMute() async {
+    if profile.isMuted {
+      _ = try? await client.protoClient.unmuteActor(profile.did)
+    } else {
+      _ = try? await client.protoClient.muteActor(profile.did)
+    }
+  }
+
+  private func toggleBlock() async {
+    if profile.isBlocked {
+      if let blockingURI = try? await client.protoClient.getProfile(for: profile.did).viewer?
+        .blockingURI
+      {
+        try? await client.blueskyClient.deleteRecord(.recordURI(atURI: blockingURI))
+      }
+      BlockedUsersService.shared.unblockUser(did: profile.did)
+    } else {
+      _ = try? await client.blueskyClient.createBlockRecord(
+        ofType: .actorBlock(actorDID: profile.did))
+      BlockedUsersService.shared.blockUser(did: profile.did, handle: profile.handle)
+    }
   }
 
   // The toggleFollow method and its related state variables are removed as per the edit hint.
