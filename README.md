@@ -1,10 +1,14 @@
 <img width="102" height="102" alt="LiquidSky Logo" src="https://github.com/user-attachments/assets/0a74b4eb-7bec-4e10-ab57-9a1b8bb0ab4e" />
 
-# LiquidSky
+# Horizon for Bluesky
 
 A beautiful, modern Bluesky client for iOS built with SwiftUI and the AT Protocol.
 
-![LiquidSky Screenshot](https://example.com/liquidsky-screenshot.png)
+<img width="200" height="550" alt="Screenshot 2025-09-07 at 02 12 53" src="https://github.com/user-attachments/assets/51b8c7d1-1876-471e-a4bf-67d1c9e79380" />
+<img width="200" height="550" alt="Screenshot 2025-09-07 at 02 13 02" src="https://github.com/user-attachments/assets/d9d68059-4270-485e-92cd-502b74432c2d" />
+<img width="200" height="550" alt="Screenshot 2025-09-07 at 02 13 13" src="https://github.com/user-attachments/assets/c1254eaf-3958-4d52-84c3-5f13b7f729e1" />
+<img width="200" height="550" alt="Screenshot 2025-09-07 at 02 13 29" src="https://github.com/user-attachments/assets/50504651-6f3e-4268-bfa5-2a7547bb357a" />
+
 
 ## ✨ **Features**
 
