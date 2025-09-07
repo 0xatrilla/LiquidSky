@@ -213,9 +213,7 @@ public struct SettingsView: View {
         icon: "bell",
         iconColor: .blue
       ) {
-        // Open Notifications tab
-        NotificationCenter.default.post(
-          name: Notification.Name("openNotificationsFromShortcut"), object: nil)
+        showingListNotifications = true
       }
 
       SettingsNavigationRow(
