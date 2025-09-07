@@ -1,4 +1,5 @@
-<img width="102" height="102" alt="LiquidSky Logo" src="https://github.com/user-attachments/assets/0a74b4eb-7bec-4e10-ab57-9a1b8bb0ab4e" />
+
+<img width="150" height="150" alt="butterfly" src="https://github.com/user-attachments/assets/2fb98b8a-6b5f-4ec2-87e4-4fa8fdde023f" />
 
 # Horizon for Bluesky
 
