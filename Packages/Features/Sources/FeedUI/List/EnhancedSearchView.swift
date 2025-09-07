@@ -30,6 +30,7 @@ public struct EnhancedSearchView: View {
   @State private var searchText = ""
   @State private var selectedFilter: SearchFilter = .all
   @State private var searchHistory: [String] = []
+  @State private var debounceTask: Task<Void, Never>?
   @Environment(AppRouter.self) var router
   @Environment(BSkyClient.self) var client
 
@@ -53,10 +54,12 @@ public struct EnhancedSearchView: View {
     .navigationBarTitleDisplayMode(.large)
     .searchable(text: $searchText, prompt: "Search users, feeds, and posts...")
     .onChange(of: searchText) { _, newValue in
-      if !newValue.isEmpty {
-        Task {
-          await performSearch()
-        }
+      // Debounce to avoid firing a request on every keystroke
+      debounceTask?.cancel()
+      guard !newValue.isEmpty else { return }
+      debounceTask = Task { @MainActor in
+        try? await Task.sleep(nanoseconds: 300_000_000)
+        if !Task.isCancelled { await performSearch() }
       }
     }
     .onAppear {
@@ -229,13 +232,13 @@ public struct EnhancedSearchView: View {
                       }
                       .frame(width: 50, height: 50)
                       .clipShape(Circle())
-                      
+
                       VStack(spacing: 2) {
                         Text(user.displayName ?? user.handle)
                           .font(.caption)
                           .fontWeight(.medium)
                           .lineLimit(1)
-                        
+
                         Text("@\(user.handle)")
                           .font(.caption2)
                           .foregroundStyle(.secondary)

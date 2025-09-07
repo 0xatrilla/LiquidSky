@@ -33,8 +33,24 @@ public class UnifiedSearchService: ObservableObject {
       searchError = nil
 
       do {
+        let looksLikeHandle = query.hasPrefix("@") || query.contains(".")
+        var userResults: [Profile] = []
+        if looksLikeHandle {
+          userResults = await searchUsers(query: query)
+          if !userResults.isEmpty {
+            if !Task.isCancelled {
+              searchResults = SearchResults(posts: [], users: userResults, feeds: [])
+              isSearching = false
+            }
+            return
+          }
+        }
+
+        // Simpler sequential flow to avoid main-actor isolation overhead
+        if !looksLikeHandle {
+          userResults = await searchUsers(query: query)
+        }
         let postResults = await searchPosts(query: query)
-        let userResults = await searchUsers(query: query)
         let feedResults = await searchFeeds(query: query)
 
         if !Task.isCancelled {
@@ -101,7 +117,7 @@ public class UnifiedSearchService: ObservableObject {
       return results.posts.map { post in
         // Extract embed data using the EmbedDataExtractor
         let embedData = EmbedDataExtractor.extractEmbed(from: post)
-        
+
         return PostItem(
           uri: post.uri,
           cid: post.cid,
@@ -129,9 +145,6 @@ public class UnifiedSearchService: ObservableObject {
     guard let client = client else { return [] }
 
     do {
-      var allResults: [Profile] = []
-
-      // First, search by the exact query (this will find exact handle matches and some display name matches)
       let exactResults = try await client.protoClient.searchActors(matching: query, limit: 20)
       let exactProfiles = exactResults.actors.map { actor in
         Profile(
@@ -150,63 +163,11 @@ public class UnifiedSearchService: ObservableObject {
           isMuted: actor.viewer?.isMuted == true
         )
       }
-      allResults.append(contentsOf: exactProfiles)
-
-      // If the query doesn't look like a handle (doesn't start with @ and doesn't contain .),
-      // also search for it as a potential display name
-      if !query.hasPrefix("@") && !query.contains(".") && query.count > 2 {
-        // Search for display names that might contain the query
-        // Note: This is a workaround since Bluesky API doesn't directly support display name search
-        // We'll search for variations that might match display names
-        let displayNameVariations = [
-          query,
-          query.lowercased(),
-          query.capitalized,
-        ]
-
-        for variation in displayNameVariations {
-          do {
-            let displayResults = try await client.protoClient.searchActors(
-              matching: variation, limit: 10)
-            let displayProfiles = displayResults.actors.map { actor in
-              Profile(
-                did: actor.actorDID,
-                handle: actor.actorHandle,
-                displayName: actor.displayName,
-                avatarImageURL: actor.avatarImageURL,
-                description: actor.description,
-                followersCount: 0,
-                followingCount: 0,
-                postsCount: 0,
-                isFollowing: actor.viewer?.followingURI != nil,
-                isFollowedBy: actor.viewer?.followedByURI != nil,
-                isBlocked: actor.viewer?.isBlocked == true,
-                isBlocking: actor.viewer?.blockingURI != nil,
-                isMuted: actor.viewer?.isMuted == true
-              )
-            }
-
-            // Only add profiles that aren't already in our results and have matching display names
-            for profile in displayProfiles {
-              if !allResults.contains(where: { $0.did == profile.did })
-                && profile.displayName?.localizedCaseInsensitiveContains(query) == true
-              {
-                allResults.append(profile)
-              }
-            }
-          } catch {
-            // Continue with other variations if one fails
-            continue
-          }
-        }
+      if query.hasPrefix("@") || query.contains(".") { return exactProfiles }
+      let filtered = exactProfiles.filter {
+        $0.displayName?.localizedCaseInsensitiveContains(query) == true
       }
-
-      // Remove duplicates and limit results
-      let uniqueResults = Array(Set(allResults.map { $0.did })).prefix(20).compactMap { did in
-        allResults.first { $0.did == did }
-      }
-
-      return Array(uniqueResults)
+      return filtered.isEmpty ? exactProfiles : filtered
 
     } catch {
       #if DEBUG
