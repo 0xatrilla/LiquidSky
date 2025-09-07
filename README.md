@@ -1,17 +1,16 @@
+<img width="102" height="102" alt="LiquidSky Logo" src="https://github.com/user-attachments/assets/0a74b4eb-7bec-4e10-ab57-9a1b8bb0ab4e" />
 
-<img width="102" height="102" alt="generated-image" src="https://github.com/user-attachments/assets/0a74b4eb-7bec-4e10-ab57-9a1b8bb0ab4e" />
-
-# Horizon
+# LiquidSky
 
 A beautiful, modern Bluesky client for iOS built with SwiftUI and the AT Protocol.
 
-![Horizon Screenshot](https://example.com/horizon-screenshot.png)
+![LiquidSky Screenshot](https://example.com/liquidsky-screenshot.png)
 
 ## ✨ **Features**
 
 ### 🎨 **Core Features**
 - **Modern SwiftUI Interface**: Beautiful, native iOS design with Liquid Glass effects
-- **AT Protocol Integration**: Full Bluesky API support via ATProtoKit
+- **AT Protocol Integration**: Full Bluesky API support via ATProtoKit 0.31.2
 - **Real-time Updates**: Live feed updates and notifications
 - **Media Support**: Rich media handling with inline videos and images
 - **Push Notifications**: Real-time notifications for new activity
@@ -24,18 +23,38 @@ A beautiful, modern Bluesky client for iOS built with SwiftUI and the AT Protoco
 - **Post Creation**: Compose and publish posts with media attachments
 - **Interactions**: Like, repost, and reply to posts
 - **Profile Management**: View and edit your profile
-- **Feed Management**: Create and manage custom feeds
-- **User Search**: Find and follow other users
+- **User Search**: Fast, optimized search for users, posts, and feeds
 - **Content Filtering**: Customizable content preferences
+- **Feed Summarization**: AI-powered feed summaries using Apple Intelligence
+
+### 💬 **Direct Messages**
+- **Real-time Chat**: Send and receive direct messages
+- **Conversation Management**: View conversation history and unread counts
+- **Message Status**: Read receipts and delivery indicators
+- **Background Sync**: Messages sync across devices
+
+### 📋 **Lists Management**
+- **Create & Edit Lists**: Create custom user lists with descriptions
+- **List Members**: Add/remove users from lists with bulk actions
+- **Member Actions**: Follow, mute, block, and manage list members
+- **List Discovery**: Browse and subscribe to public lists
+- **Advanced Filtering**: Search and filter list members
+- **Push Notifications**: Get notified of list changes
+
+### 🌐 **Custom Domain Support**
+- **Domain Linking**: Link your personal domain to your Bluesky profile
+- **DNS Configuration**: Easy setup with TXT record verification
+- **Profile Customization**: Enhanced profile with custom domain
 
 ### ⚙️ **Settings & Customization**
+- **Tab Bar Customization**: Choose which tabs appear and their order
 - **Theme Management**: Light, dark, and system theme support
 - **Video Preferences**: Control autoplay, muting, and concurrent video limits
 - **Display Options**: Timestamps, compact mode, and content preferences
 - **Privacy Controls**: Mentions, replies, and quote permissions
 - **Notification Settings**: Push and email notification preferences
 - **Content Filters**: Sensitive content and media playback controls
-- **In-App Purchases**: Support development with optional tips
+- **User Actions**: Mute, block, and report users with real AT Protocol integration
 
 ### 💝 **Support & Tipping**
 - **Multiple Tip Amounts**: Choose from small, medium, large, or custom tip amounts
@@ -49,6 +68,7 @@ A beautiful, modern Bluesky client for iOS built with SwiftUI and the AT Protoco
 - **Background Processing**: Handle notifications even when app is closed
 - **Deep Linking**: Navigate directly to content from notifications
 - **Customizable**: Choose which notifications to receive
+- **List Notifications**: Get notified when users are added/removed from lists
 
 ### ☁️ **iCloud Integration**
 - **Cross-Device Sync**: Keep preferences in sync across all your devices
@@ -76,11 +96,24 @@ A beautiful, modern Bluesky client for iOS built with SwiftUI and the AT Protoco
 - **Modular Design**: Feature-based package organization
 
 ### **AT Protocol Integration**
-- **ATProtoKit**: Official Bluesky client library
+- **ATProtoKit 0.31.2**: Latest Bluesky client library with chat support
 - **Real-time Streaming**: Live updates via WebSocket connections
 - **Rich Media Support**: Images, videos, and custom content
 - **Feed Management**: Custom algorithm feeds and lists
 - **User Management**: Profile editing and account management
+- **Chat API**: Direct messaging with real-time synchronization
+
+### **Search Architecture**
+- **Optimized Search**: Debounced input with smart query prioritization
+- **Handle Detection**: Fast user search for @handles and domains
+- **Parallel Processing**: Efficient concurrent search across posts, users, and feeds
+- **Result Caching**: Smart caching for improved performance
+
+### **Lists Management Architecture**
+- **Real AT Protocol**: Full integration with Bluesky's list APIs
+- **Member Management**: Bulk actions and advanced filtering
+- **Push Notifications**: Real-time list change notifications
+- **Background Sync**: Automatic synchronization of list changes
 
 ### **Push Notification Architecture**
 - **UserNotifications Framework**: Native iOS notification system
@@ -115,7 +148,7 @@ A beautiful, modern Bluesky client for iOS built with SwiftUI and the AT Protoco
 
 - **SwiftUI** with iOS 26's Liquid Glass effects
 - **Swift Observation** framework for state management
-- **AT Protocol** via ATProtoKit for Bluesky integration
+- **AT Protocol** via ATProtoKit 0.31.2 for Bluesky integration
 - **Async/Await** for modern concurrency
 - **SwiftData** for local data persistence
 - **Nuke/NukeUI** for image loading and caching
@@ -124,6 +157,7 @@ A beautiful, modern Bluesky client for iOS built with SwiftUI and the AT Protoco
 - **CloudKit** for iCloud data synchronization
 - **WidgetKit** for home screen widgets
 - **StoreKit** for in-app purchases and tipping
+- **Apple Intelligence** for feed summarization
 
 ## 🚀 **Getting Started**
 
@@ -144,6 +178,18 @@ A beautiful, modern Bluesky client for iOS built with SwiftUI and the AT Protoco
 3. **App Groups**: Set up for widget data sharing
 4. **StoreKit**: Add configuration file for testing
 
+## 🎯 **Recent Updates**
+
+### **v2.0 - Major Feature Release**
+- ✅ **Direct Messages**: Full chat implementation with real-time sync
+- ✅ **Lists Management**: Create, edit, and manage user lists
+- ✅ **Custom Domain Support**: Link personal domains to profiles
+- ✅ **Tab Bar Customization**: Customize tab order and visibility
+- ✅ **Optimized Search**: Fast, debounced search with handle prioritization
+- ✅ **Real Mute/Block**: AT Protocol integration for user actions
+- ✅ **Feed Summarization**: AI-powered feed summaries
+- ✅ **Enhanced UI**: Improved profile actions and navigation
+
 ## 🤝 **Contributing**
 
 We welcome contributions! Please see our contributing guidelines for details.
@@ -160,4 +206,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**Horizon** - Where the sky meets the horizon of possibilities. 🌅
+**LiquidSky** - Where the sky meets the horizon of possibilities. 🌅
