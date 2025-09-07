@@ -241,6 +241,17 @@ public struct SettingsView: View {
       }
 
       SettingsNavigationRow(
+        title: "Notifications Center",
+        subtitle: "Manage account and list notifications",
+        icon: "bell",
+        iconColor: .blue
+      ) {
+        // Open Notifications tab
+        NotificationCenter.default.post(
+          name: Notification.Name("openNotificationsFromShortcut"), object: nil)
+      }
+
+      SettingsNavigationRow(
         title: "Customize Tab Bar",
         subtitle: "Choose which tabs appear and order",
         icon: "rectangle.3.offgrid",

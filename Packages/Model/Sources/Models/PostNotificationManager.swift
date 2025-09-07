@@ -1,6 +1,8 @@
 import Foundation
 import UserNotifications
 
+@MainActor
+
 public final class PostNotificationManager {
   public static let shared = PostNotificationManager()
 
@@ -56,5 +58,3 @@ public final class PostNotificationManager {
     return String(prefix) + "…"
   }
 }
-
-

@@ -1,5 +1,7 @@
 import Foundation
 
+@MainActor
+
 @Observable
 public final class NotificationPreferences {
   public static let shared = NotificationPreferences()
