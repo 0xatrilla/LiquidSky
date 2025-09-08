@@ -243,6 +243,7 @@ public struct HashtagFeedView: View {
 // MARK: - Hashtag Post Row View
 private struct HashtagPostRowView: View {
   let post: PostItem
+  @Environment(\.currentTab) var currentTab
   @Environment(AppRouter.self) private var router
 
   var body: some View {
@@ -345,7 +346,7 @@ private struct HashtagPostRowView: View {
     .cornerRadius(12)
     .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
     .onTapGesture {
-      router.navigateTo(.post(post))
+      router[currentTab].append(.post(post))
     }
     .listRowSeparator(.hidden)
   }
@@ -486,6 +487,7 @@ private struct HashtagPostExternalView: View {
 // MARK: - Hashtag Post Quoted View
 private struct HashtagPostQuotedView: View {
   let quotedPostData: QuotedPostData
+  @Environment(\.currentTab) var currentTab
   @Environment(AppRouter.self) private var router
 
   var body: some View {
@@ -507,7 +509,7 @@ private struct HashtagPostQuotedView: View {
         repostedBy: nil,
         embed: nil
       )
-      router.navigateTo(.post(postItem))
+      router[currentTab].append(.post(postItem))
     }) {
       VStack(alignment: .leading, spacing: 8) {
         // Quoted post header

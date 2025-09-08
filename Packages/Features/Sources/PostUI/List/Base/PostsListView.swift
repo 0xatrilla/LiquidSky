@@ -454,9 +454,6 @@ private struct ReplyChainView: View {
                   .foregroundStyle(.secondary)
               }
               .lineLimit(1)
-              .onTapGesture {
-                router.navigateTo(.profile(post.author))
-              }
 
               // Reply indicator
               if post.isReplyTo, let toHandle = post.inReplyToHandle {
