@@ -47,14 +47,13 @@ struct AppTabView: View {
                       if isGeneratingSummary {
                         ProgressView().scaleEffect(0.8).foregroundColor(.themeSecondary)
                       } else {
-                        Image(systemName: "sparkles").font(.title2).foregroundColor(.themeSecondary)
+                        Image(systemName: "sparkles").foregroundColor(.themeSecondary)
                       }
                     }
                     .disabled(isGeneratingSummary)
 
                     Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
-                      Image(systemName: "square.and.pencil").font(.title2).foregroundColor(
-                        .themePrimary)
+                      Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
                     }
                   }
                 }
@@ -79,8 +78,7 @@ struct AppTabView: View {
                 .toolbar {
                   ToolbarItemGroup(placement: .topBarTrailing) {
                     Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
-                      Image(systemName: "square.and.pencil").font(.title2).foregroundColor(
-                        .themePrimary)
+                      Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
                     }
                   }
                 }
@@ -103,8 +101,7 @@ struct AppTabView: View {
                 .toolbar {
                   ToolbarItemGroup(placement: .topBarTrailing) {
                     Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
-                      Image(systemName: "square.and.pencil").font(.title2).foregroundColor(
-                        .themePrimary)
+                      Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
                     }
                   }
                 }
@@ -129,8 +126,7 @@ struct AppTabView: View {
                 .toolbar {
                   ToolbarItemGroup(placement: .topBarTrailing) {
                     Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
-                      Image(systemName: "square.and.pencil").font(.title2).foregroundColor(
-                        .themePrimary)
+                      Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
                     }
                   }
                 }
@@ -155,8 +151,7 @@ struct AppTabView: View {
                 .toolbar {
                   ToolbarItemGroup(placement: .topBarTrailing) {
                     Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
-                      Image(systemName: "square.and.pencil").font(.title2).foregroundColor(
-                        .themePrimary)
+                      Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
                     }
                   }
                 }
@@ -181,8 +176,7 @@ struct AppTabView: View {
                 .toolbar {
                   ToolbarItemGroup(placement: .topBarTrailing) {
                     Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
-                      Image(systemName: "square.and.pencil").font(.title2).foregroundColor(
-                        .themePrimary)
+                      Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
                     }
                   }
                 }

@@ -35,7 +35,6 @@ public struct PostsTimelineView: View {
                 .foregroundColor(.themeSecondary)
             } else {
               Image(systemName: "sparkles")
-                .font(.title2)
                 .foregroundColor(.themeSecondary)
             }
           }
@@ -46,7 +45,6 @@ public struct PostsTimelineView: View {
             router.presentedSheet = .composer(mode: .newPost)
           }) {
             Image(systemName: "square.and.pencil")
-              .font(.title2)
               .foregroundColor(.themePrimary)
           }
         }

@@ -41,7 +41,6 @@ public struct PostsFeedView: View {
                 .foregroundColor(.themeSecondary)
             } else {
               Image(systemName: "sparkles")
-                .font(.title2)
                 .foregroundColor(.themeSecondary)
             }
           }
@@ -52,7 +51,6 @@ public struct PostsFeedView: View {
             router.presentedSheet = .composer(mode: .newPost)
           }) {
             Image(systemName: "square.and.pencil")
-              .font(.title2)
               .foregroundColor(.themePrimary)
           }
         }

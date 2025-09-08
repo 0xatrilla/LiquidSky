@@ -11,6 +11,7 @@ import SwiftUI
 public struct UnifiedSearchResultsView: View {
   @ObservedObject var searchService: UnifiedSearchService
   @Environment(\.dismiss) private var dismiss
+  @Environment(AppRouter.self) var router
 
   public init(searchService: UnifiedSearchService) {
     self.searchService = searchService
@@ -99,25 +100,30 @@ public struct UnifiedSearchResultsView: View {
       if !searchService.searchResults.users.isEmpty {
         Section(header: Text("Users")) {
           ForEach(searchService.searchResults.users, id: \.did) { user in
-            HStack(spacing: 12) {
-              AsyncImage(url: user.avatarImageURL) { phase in
-                switch phase {
-                case .success(let image):
-                  image.resizable().scaledToFill()
-                default:
-                  Circle().fill(Color.gray.opacity(0.3))
+            Button(action: {
+              router[.compose].append(.profile(user))
+            }) {
+              HStack(spacing: 12) {
+                AsyncImage(url: user.avatarImageURL) { phase in
+                  switch phase {
+                  case .success(let image):
+                    image.resizable().scaledToFill()
+                  default:
+                    Circle().fill(Color.gray.opacity(0.3))
+                  }
                 }
-              }
-              .frame(width: 40, height: 40)
-              .clipShape(Circle())
+                .frame(width: 40, height: 40)
+                .clipShape(Circle())
 
-              VStack(alignment: .leading, spacing: 2) {
-                Text(user.displayName ?? user.handle).font(.body).fontWeight(.medium)
-                Text("@\(user.handle)").font(.caption).foregroundStyle(.secondary)
-              }
+                VStack(alignment: .leading, spacing: 2) {
+                  Text(user.displayName ?? user.handle).font(.body).fontWeight(.medium)
+                  Text("@\(user.handle)").font(.caption).foregroundStyle(.secondary)
+                }
 
-              Spacer()
+                Spacer()
+              }
             }
+            .buttonStyle(.plain)
           }
         }
       }
@@ -126,12 +132,17 @@ public struct UnifiedSearchResultsView: View {
       if !searchService.searchResults.posts.isEmpty {
         Section(header: Text("Posts")) {
           ForEach(searchService.searchResults.posts, id: \.uri) { post in
-            VStack(alignment: .leading, spacing: 6) {
-              Text(post.author.displayName ?? post.author.handle)
-                .font(.subheadline).fontWeight(.semibold)
-              Text(post.content).font(.body).lineLimit(3)
+            Button(action: {
+              router[.compose].append(.post(post))
+            }) {
+              VStack(alignment: .leading, spacing: 6) {
+                Text(post.author.displayName ?? post.author.handle)
+                  .font(.subheadline).fontWeight(.semibold)
+                Text(post.content).font(.body).lineLimit(3)
+              }
+              .padding(.vertical, 6)
             }
-            .padding(.vertical, 6)
+            .buttonStyle(.plain)
           }
         }
       }
@@ -140,7 +151,14 @@ public struct UnifiedSearchResultsView: View {
       if !searchService.searchResults.feeds.isEmpty {
         Section(header: Text("Feeds")) {
           ForEach(searchService.searchResults.feeds) { feed in
-            FeedSearchResultRow(feed: feed)
+            Button(action: {
+              // Navigate to feed - we'll need to create a feed destination
+              // For now, we'll navigate to a hashtag as a placeholder
+              router[.compose].append(.hashtag(feed.displayName))
+            }) {
+              FeedSearchResultRow(feed: feed)
+            }
+            .buttonStyle(.plain)
           }
         }
       }
