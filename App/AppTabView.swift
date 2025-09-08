@@ -15,6 +15,7 @@ import SettingsUI
 import SwiftUI
 import User
 
+@MainActor
 struct AppTabView: View {
   @Environment(AppRouter.self) var router
   @Environment(BSkyClient.self) var client
@@ -31,9 +32,176 @@ struct AppTabView: View {
 
   public var body: some View {
     TabView(selection: $selectedTab) {
-      ForEach(currentTabs, id: \.rawValue) { tab in
-        switch tab {
-        case .feed:
+      ForEach(
+        settingsService.tabBarTabsRaw + settingsService.pinnedFeedURIs.map { "feed:\($0)" },
+        id: \.self
+      ) { key in
+        if let tab = AppTab(rawValue: key) {
+          switch tab {
+          case .feed:
+            Tab(value: AppTab.feed) {
+              NavigationStack(
+                path: Binding(
+                  get: { router[.feed] },
+                  set: { router[.feed] = $0 }
+                )
+              ) {
+                FeedsListView()
+                  .navigationTitle("Discover")
+                  .navigationBarTitleDisplayMode(.large)
+                  .toolbar {
+                    ToolbarItemGroup(placement: .topBarTrailing) {
+                      Button(action: {
+                        Task { await generateGlobalSummary() }
+                      }) {
+                        if isGeneratingSummary {
+                          ProgressView().scaleEffect(0.8).foregroundColor(.themeSecondary)
+                        } else {
+                          Image(systemName: "sparkles").foregroundColor(.themeSecondary)
+                        }
+                      }
+                      .disabled(isGeneratingSummary)
+
+                      Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
+                        Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
+                      }
+                    }
+                  }
+                  .withAppDestinations()
+                  .environment(\.currentTab, .feed)
+              }
+            } label: {
+              Label("Feed", systemImage: "square.stack")
+            }
+
+          case .messages:
+            Tab(value: AppTab.messages) {
+              NavigationStack(
+                path: Binding(
+                  get: { router[.messages] },
+                  set: { router[.messages] = $0 }
+                )
+              ) {
+                ConversationsView()
+                  .navigationTitle("Messages")
+                  .navigationBarTitleDisplayMode(.large)
+                  .toolbar {
+                    ToolbarItemGroup(placement: .topBarTrailing) {
+                      Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
+                        Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
+                      }
+                    }
+                  }
+              }
+            } label: {
+              Label("Messages", systemImage: "bubble.left.and.bubble.right")
+            }
+
+          case .notification:
+            Tab(value: AppTab.notification) {
+              NavigationStack(
+                path: Binding(
+                  get: { router[.notification] },
+                  set: { router[.notification] = $0 }
+                )
+              ) {
+                NotificationsListView()
+                  .navigationTitle("Notifications")
+                  .navigationBarTitleDisplayMode(.large)
+                  .toolbar {
+                    ToolbarItemGroup(placement: .topBarTrailing) {
+                      Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
+                        Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
+                      }
+                    }
+                  }
+                  .withAppDestinations()
+                  .environment(\.currentTab, .notification)
+              }
+            } label: {
+              Label("Notifications", systemImage: "bell")
+                .badge(badgeStore.unreadCount)
+            }
+
+          case .profile:
+            Tab(value: AppTab.profile) {
+              NavigationStack(
+                path: Binding(
+                  get: { router[.profile] },
+                  set: { router[.profile] = $0 }
+                )
+              ) {
+                CurrentUserView()
+                  .navigationTitle("Profile")
+                  .navigationBarTitleDisplayMode(.large)
+                  .toolbar {
+                    ToolbarItemGroup(placement: .topBarTrailing) {
+                      Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
+                        Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
+                      }
+                    }
+                  }
+                  .withAppDestinations()
+                  .environment(\.currentTab, .profile)
+              }
+            } label: {
+              Label("Profile", systemImage: "person")
+            }
+
+          case .settings:
+            Tab(value: AppTab.settings) {
+              NavigationStack(
+                path: Binding(
+                  get: { router[.settings] },
+                  set: { router[.settings] = $0 }
+                )
+              ) {
+                SettingsView()
+                  .navigationTitle("Settings")
+                  .navigationBarTitleDisplayMode(.large)
+                  .toolbar {
+                    ToolbarItemGroup(placement: .topBarTrailing) {
+                      Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
+                        Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
+                      }
+                    }
+                  }
+                  .withAppDestinations()
+                  .environment(\.currentTab, .settings)
+              }
+            } label: {
+              Label("Settings", systemImage: "gearshape")
+            }
+
+          case .compose:
+            Tab(value: AppTab.compose, role: .search) {
+              NavigationStack(
+                path: Binding(
+                  get: { router[.compose] },
+                  set: { router[.compose] = $0 }
+                )
+              ) {
+                EnhancedSearchView(client: client)
+                  .navigationTitle("Search")
+                  .navigationBarTitleDisplayMode(.large)
+                  .toolbar {
+                    ToolbarItemGroup(placement: .topBarTrailing) {
+                      Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
+                        Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
+                      }
+                    }
+                  }
+                  .withAppDestinations()
+                  .environment(\.currentTab, .compose)
+              }
+              .onAppear { selectedTab = .compose }
+            } label: {
+              Label("Search", systemImage: "magnifyingglass")
+            }
+          }
+          // Close switch(tab) scope before handling pinned feed keys
+        } else if key.hasPrefix("feed:") {
+          let feedURI = String(key.dropFirst(5))
           Tab(value: AppTab.feed) {
             NavigationStack(
               path: Binding(
@@ -41,157 +209,23 @@ struct AppTabView: View {
                 set: { router[.feed] = $0 }
               )
             ) {
-              FeedsListView()
-                .navigationTitle("Discover")
-                .navigationBarTitleDisplayMode(.large)
-                .toolbar {
-                  ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button(action: {
-                      Task { await generateGlobalSummary() }
-                    }) {
-                      if isGeneratingSummary {
-                        ProgressView().scaleEffect(0.8).foregroundColor(.themeSecondary)
-                      } else {
-                        Image(systemName: "sparkles").foregroundColor(.themeSecondary)
-                      }
-                    }
-                    .disabled(isGeneratingSummary)
-
-                    Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
-                      Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
-                    }
-                  }
-                }
+              let item = FeedItem(
+                uri: feedURI,
+                displayName: settingsService.pinnedFeedNames[feedURI] ?? "Feed",
+                description: nil,
+                avatarImageURL: nil,
+                creatorHandle: "",
+                likesCount: 0,
+                liked: false
+              )
+              PostsFeedView(feedItem: item)
                 .withAppDestinations()
                 .environment(\.currentTab, .feed)
             }
           } label: {
-            Label("Feed", systemImage: "square.stack")
-          }
-
-        case .messages:
-          Tab(value: AppTab.messages) {
-            NavigationStack(
-              path: Binding(
-                get: { router[.messages] },
-                set: { router[.messages] = $0 }
-              )
-            ) {
-              ConversationsView()
-                .navigationTitle("Messages")
-                .navigationBarTitleDisplayMode(.large)
-                .toolbar {
-                  ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
-                      Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
-                    }
-                  }
-                }
-            }
-          } label: {
-            Label("Messages", systemImage: "bubble.left.and.bubble.right")
-          }
-
-        case .notification:
-          Tab(value: AppTab.notification) {
-            NavigationStack(
-              path: Binding(
-                get: { router[.notification] },
-                set: { router[.notification] = $0 }
-              )
-            ) {
-              NotificationsListView()
-                .navigationTitle("Notifications")
-                .navigationBarTitleDisplayMode(.large)
-                .toolbar {
-                  ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
-                      Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
-                    }
-                  }
-                }
-                .withAppDestinations()
-                .environment(\.currentTab, .notification)
-            }
-          } label: {
-            Label("Notifications", systemImage: "bell")
-              .badge(badgeStore.unreadCount)
-          }
-
-        case .profile:
-          Tab(value: AppTab.profile) {
-            NavigationStack(
-              path: Binding(
-                get: { router[.profile] },
-                set: { router[.profile] = $0 }
-              )
-            ) {
-              CurrentUserView()
-                .navigationTitle("Profile")
-                .navigationBarTitleDisplayMode(.large)
-                .toolbar {
-                  ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
-                      Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
-                    }
-                  }
-                }
-                .withAppDestinations()
-                .environment(\.currentTab, .profile)
-            }
-          } label: {
-            Label("Profile", systemImage: "person")
-          }
-
-        case .settings:
-          Tab(value: AppTab.settings) {
-            NavigationStack(
-              path: Binding(
-                get: { router[.settings] },
-                set: { router[.settings] = $0 }
-              )
-            ) {
-              SettingsView()
-                .navigationTitle("Settings")
-                .navigationBarTitleDisplayMode(.large)
-                .toolbar {
-                  ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
-                      Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
-                    }
-                  }
-                }
-                .withAppDestinations()
-                .environment(\.currentTab, .settings)
-            }
-          } label: {
-            Label("Settings", systemImage: "gearshape")
-          }
-
-        case .compose:
-          Tab(value: AppTab.compose, role: .search) {
-            NavigationStack(
-              path: Binding(
-                get: { router[.compose] },
-                set: { router[.compose] = $0 }
-              )
-            ) {
-              EnhancedSearchView(client: client)
-                .navigationTitle("Search")
-                .navigationBarTitleDisplayMode(.large)
-                .toolbar {
-                  ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
-                      Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
-                    }
-                  }
-                }
-                .withAppDestinations()
-                .environment(\.currentTab, .compose)
-            }
-            .onAppear { selectedTab = .compose }
-          } label: {
-            Label("Search", systemImage: "magnifyingglass")
+            Label(
+              settingsService.pinnedFeedNames[feedURI] ?? "Feed",
+              systemImage: "dot.radiowaves.left.and.right")
           }
         }
       }

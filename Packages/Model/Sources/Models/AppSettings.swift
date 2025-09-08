@@ -70,6 +70,16 @@ public final class AppSettings {
     didSet { UserDefaults.standard.set(tabBarTabsRaw, forKey: "tabBarTabs") }
   }
 
+  // URIs of feeds pinned as individual tabs (in order)
+  public var pinnedFeedURIs: [String] {
+    didSet { UserDefaults.standard.set(pinnedFeedURIs, forKey: "pinnedFeedURIs") }
+  }
+
+  // Mapping from pinned feed URI -> display name for prettier tab labels
+  public var pinnedFeedNames: [String: String] {
+    didSet { UserDefaults.standard.set(pinnedFeedNames, forKey: "pinnedFeedNames") }
+  }
+
   // MARK: - Initialization
   public init() {
     // Load saved settings or use defaults
@@ -103,6 +113,12 @@ public final class AppSettings {
     let defaultTabs = ["feed", "notification", "profile", "settings", "compose"]
     self.tabBarTabsRaw =
       UserDefaults.standard.array(forKey: "tabBarTabs") as? [String] ?? defaultTabs
+
+    self.pinnedFeedURIs =
+      UserDefaults.standard.array(forKey: "pinnedFeedURIs") as? [String] ?? []
+
+    self.pinnedFeedNames =
+      UserDefaults.standard.dictionary(forKey: "pinnedFeedNames") as? [String: String] ?? [:]
   }
 
   // MARK: - Helper Methods
@@ -126,6 +142,8 @@ public final class AppSettings {
     preloadImages = true
     hapticFeedbackEnabled = true
     tabBarTabsRaw = ["feed", "notification", "profile", "settings", "compose"]
+    pinnedFeedURIs = []
+    pinnedFeedNames = [:]
   }
 }
 

@@ -6,6 +6,7 @@ public struct TabBarCustomizationView: View {
   @State private var settingsService = SettingsService.shared
   @State private var availableTabs: [AppTab] = AppTab.allCases
   @State private var selectedRaw: [String] = []
+  @State private var pinnedFeedURIs: [String] = []
 
   public init() {}
 
@@ -56,6 +57,28 @@ public struct TabBarCustomizationView: View {
             }
           }
         }
+
+        if !pinnedFeedURIs.isEmpty {
+          Section("Pinned Feeds (swipe to remove)") {
+            ForEach(pinnedFeedURIs, id: \.self) { uri in
+              HStack {
+                Image(systemName: "dot.radiowaves.left.and.right")
+                Text(SettingsService.shared.pinnedFeedNames[uri] ?? uri)
+                  .lineLimit(1)
+                  .truncationMode(.middle)
+              }
+            }
+            .onDelete { indices in
+              // Allow swipe-to-delete only for feeds
+              pinnedFeedURIs.remove(atOffsets: indices)
+              settingsService.pinnedFeedURIs = pinnedFeedURIs
+            }
+            .onMove { indices, newOffset in
+              pinnedFeedURIs.move(fromOffsets: indices, toOffset: newOffset)
+              settingsService.pinnedFeedURIs = pinnedFeedURIs
+            }
+          }
+        }
       }
       .environment(\.editMode, .constant(.active))
       .navigationTitle("Customize Tabs")
@@ -67,6 +90,7 @@ public struct TabBarCustomizationView: View {
       }
       .onAppear {
         selectedRaw = settingsService.tabBarTabsRaw
+        pinnedFeedURIs = settingsService.pinnedFeedURIs
       }
     }
   }
@@ -79,5 +103,7 @@ public struct TabBarCustomizationView: View {
     let defaults = [AppTab.feed, .notification, .profile, .settings, .compose]
     selectedRaw = defaults.map { $0.rawValue }
     settingsService.tabBarTabsRaw = selectedRaw
+    pinnedFeedURIs = []
+    settingsService.pinnedFeedURIs = []
   }
 }

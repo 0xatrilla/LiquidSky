@@ -46,6 +46,12 @@ struct FeedRowView: View {
         } label: {
           Label("Save to My Feeds", systemImage: "pin")
         }
+        Button {
+          HapticManager.shared.impact(.light)
+          pinFeedToTabBar()
+        } label: {
+          Label("Pin to Tab Bar", systemImage: "square.stack.3d.up")
+        }
       } else {
         Button(role: .destructive) {
           HapticManager.shared.impact(.light)
@@ -53,8 +59,26 @@ struct FeedRowView: View {
         } label: {
           Label("Remove from My Feeds", systemImage: "trash")
         }
+        Button {
+          HapticManager.shared.impact(.light)
+          pinFeedToTabBar()
+        } label: {
+          Label("Pin to Tab Bar", systemImage: "square.stack.3d.up")
+        }
       }
     }
+  }
+
+  private func pinFeedToTabBar() {
+    let uri = feed.uri
+    var uris = SettingsService.shared.pinnedFeedURIs
+    if !uris.contains(uri) {
+      uris.append(uri)
+      SettingsService.shared.pinnedFeedURIs = uris
+    }
+    var names = SettingsService.shared.pinnedFeedNames
+    names[uri] = feed.displayName
+    SettingsService.shared.pinnedFeedNames = names
   }
 
   private func pinFeed() {

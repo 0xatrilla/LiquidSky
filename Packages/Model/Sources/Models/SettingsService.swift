@@ -86,6 +86,17 @@ public final class SettingsService {
     set { settings.tabBarTabsRaw = newValue }
   }
 
+  // Feeds pinned as tabs
+  public var pinnedFeedURIs: [String] {
+    get { settings.pinnedFeedURIs }
+    set { settings.pinnedFeedURIs = newValue }
+  }
+
+  public var pinnedFeedNames: [String: String] {
+    get { settings.pinnedFeedNames }
+    set { settings.pinnedFeedNames = newValue }
+  }
+
   public var aiSummariesEnabled: Bool {
     get { settings.aiSummariesEnabled }
     set { settings.aiSummariesEnabled = newValue }
