@@ -59,6 +59,7 @@ struct AppTabView: View {
                   }
                 }
                 .withAppDestinations()
+                .environment(\.currentTab, .feed)
             }
           } label: {
             Label("Feed", systemImage: "square.stack")
@@ -108,6 +109,7 @@ struct AppTabView: View {
                   }
                 }
                 .withAppDestinations()
+                .environment(\.currentTab, .notification)
             }
           } label: {
             Label("Notifications", systemImage: "bell")
@@ -133,6 +135,7 @@ struct AppTabView: View {
                   }
                 }
                 .withAppDestinations()
+                .environment(\.currentTab, .profile)
             }
           } label: {
             Label("Profile", systemImage: "person")
@@ -158,6 +161,7 @@ struct AppTabView: View {
                   }
                 }
                 .withAppDestinations()
+                .environment(\.currentTab, .settings)
             }
           } label: {
             Label("Settings", systemImage: "gearshape")
@@ -183,6 +187,7 @@ struct AppTabView: View {
                   }
                 }
                 .withAppDestinations()
+                .environment(\.currentTab, .compose)
             }
             .onAppear { selectedTab = .compose }
           } label: {

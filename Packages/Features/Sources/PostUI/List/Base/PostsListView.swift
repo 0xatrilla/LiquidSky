@@ -233,12 +233,9 @@ public struct PostListView<T: PostsListViewDatasource>: View {
                 // Render reply chain with visual connectors
                 ReplyChainView(posts: postGroup.posts)
               } else {
-                // Render single post normally with NavigationLink for proper navigation
-                NavigationLink(value: RouterDestination.post(postGroup.posts.first!)) {
-                  PostRowView(post: postGroup.posts.first!)
-                    .environment(\.handleOwnNavigation, false)
-                }
-                .buttonStyle(.plain)
+                // Render single post normally with row-managed navigation
+                PostRowView(post: postGroup.posts.first!)
+                  .environment(\.handleOwnNavigation, true)
               }
             }
             if cursor != nil {
@@ -439,8 +436,10 @@ private struct ReplyChainView: View {
           }
           .frame(width: 40)  // Ensure consistent width for avatar column
 
-          // Post content wrapped in NavigationLink for proper navigation
-          NavigationLink(value: RouterDestination.post(post)) {
+          // Post content navigates via row-managed navigation to avoid gesture conflicts
+          Button(action: {
+            router[.feed].append(.post(post))
+          }) {
             VStack(alignment: .leading, spacing: 8) {
               // Author info
               HStack(alignment: .firstTextBaseline) {

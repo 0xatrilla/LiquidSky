@@ -90,11 +90,12 @@ public struct PostRowView: View {
       PostRowBodyView(
         post: post,
         onUsernameTap: { username in
-          // Search for the user and navigate to their profile
-          Task {
-            await searchAndNavigateToUser(username: username)
-          }
-        })
+          Task { await searchAndNavigateToUser(username: username) }
+        },
+        onHashtagTap: { tag in
+          router[currentTab].append(.hashtag(tag))
+        }
+      )
       PostRowEmbedView(post: post)
       if !isQuote {
         PostRowActionsView(post: post)
@@ -110,10 +111,8 @@ public struct PostRowView: View {
     }
     .contentShape(Rectangle())
     .onTapGesture {
-      if handleOwnNavigation {
-        // Navigate within the current tab's navigation stack
-        router[currentTab].append(.post(post))
-      }
+      // Always allow row tap to navigate; this is the primary gesture
+      router[currentTab].append(.post(post))
     }
   }
 

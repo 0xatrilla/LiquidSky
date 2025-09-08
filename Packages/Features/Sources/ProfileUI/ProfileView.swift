@@ -327,12 +327,15 @@ public struct ProfileView: View {
         case .posts:
           PostsProfileView(profile: profile, filter: .postsWithNoReplies)
             .environment(PostFilterService.shared)
+            .environment(\.currentTab, .profile)
         case .replies:
           PostsProfileView(profile: profile, filter: .userReplies)
             .environment(PostFilterService.shared)
+            .environment(\.currentTab, .profile)
         case .media:
           PostsProfileView(profile: profile, filter: .postsWithMedia)
             .environment(PostFilterService.shared)
+            .environment(\.currentTab, .profile)
         case .likes:
           PostsLikesView(profile: profile)
         }

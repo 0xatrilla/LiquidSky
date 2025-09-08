@@ -8,16 +8,33 @@ public struct PostRowBodyView: View {
 
   let post: PostItem
   let onUsernameTap: ((String) -> Void)?
+  let onHashtagTap: ((String) -> Void)?
 
-  public init(post: PostItem, onUsernameTap: ((String) -> Void)? = nil) {
+  public init(
+    post: PostItem,
+    onUsernameTap: ((String) -> Void)? = nil,
+    onHashtagTap: ((String) -> Void)? = nil
+  ) {
     self.post = post
     self.onUsernameTap = onUsernameTap
+    self.onHashtagTap = onHashtagTap
   }
 
   public var body: some View {
     ClickablePostText(
       text: post.content, compactMode: compactMode, isFocused: isFocused,
-      onUsernameTap: onUsernameTap)
+      onUsernameTap: onUsernameTap,
+      onHashtagTap: onHashtagTap
+    )
+    .onOpenURL { url in
+      guard url.scheme == "horizon" else { return }
+      let path = url.host() ?? ""
+      if path == "tag", let tag = url.path.split(separator: "/").dropFirst().first {
+        onHashtagTap?(String(tag))
+      } else if path == "user", let handle = url.path.split(separator: "/").dropFirst().first {
+        onUsernameTap?(String(handle))
+      }
+    }
   }
 
   private var compactMode: Bool {
@@ -31,6 +48,7 @@ struct ClickablePostText: View {
   let compactMode: Bool
   let isFocused: Bool
   let onUsernameTap: ((String) -> Void)?
+  let onHashtagTap: ((String) -> Void)?
 
   var body: some View {
     let attributedString = createAttributedString(from: text)
@@ -39,9 +57,12 @@ struct ClickablePostText: View {
       .font(compactMode ? .caption : .body)
       .lineLimit(compactMode ? 3 : nil)
       .textSelection(.enabled)
-      .onTapGesture { location in
-        handleTap(at: location, in: attributedString)
-      }
+      // Do not intercept general taps here; allow the row to handle navigation.
+      // We only react when the text clearly encodes interactive elements.
+      .highPriorityGesture(
+        TapGesture().onEnded { _ in
+          // Intentionally no-op to avoid swallowing parent tap
+        })
   }
 
   private func createAttributedString(from text: String) -> AttributedString {
@@ -57,6 +78,11 @@ struct ClickablePostText: View {
         attributedString[attributedRange].underlineStyle = .single
         // Add custom attribute to identify hashtags
         attributedString[attributedRange][HashtagAttribute.self] = String(match.output)
+        // Add tappable link using custom scheme to route via .onOpenURL
+        let tag = String(match.output.dropFirst())
+        if let link = URL(string: "horizon://tag/\(tag)") {
+          attributedString[attributedRange].link = link
+        }
       }
     }
 
@@ -70,6 +96,10 @@ struct ClickablePostText: View {
         attributedString[attributedRange].underlineStyle = .single
         // Add custom attribute to identify mentions
         attributedString[attributedRange][MentionAttribute.self] = String(match.output)
+        let handle = String(match.output.dropFirst())
+        if let link = URL(string: "horizon://user/\(handle)") {
+          attributedString[attributedRange].link = link
+        }
       }
     }
 
@@ -83,6 +113,9 @@ struct ClickablePostText: View {
         attributedString[attributedRange].underlineStyle = .single
         // Add custom attribute to identify URLs
         attributedString[attributedRange][URLAttribute.self] = String(match.output)
+        if let link = URL(string: String(match.output)) {
+          attributedString[attributedRange].link = link
+        }
       }
     }
 
@@ -121,9 +154,7 @@ struct ClickablePostText: View {
     if let firstHashtag = hashtagMatches.first {
       let hashtag = String(firstHashtag.output)
       let hashtagWithoutHash = String(hashtag.dropFirst())
-      print("PostRowBodyView: Tapping hashtag: \(hashtag) -> \(hashtagWithoutHash)")
-      // TODO: Handle hashtag navigation through callback
-      print("PostRowBodyView: Hashtag navigation not yet implemented")
+      onHashtagTap?(hashtagWithoutHash)
       return
     }
 
