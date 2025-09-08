@@ -7,6 +7,7 @@ public struct TabBarCustomizationView: View {
   @State private var availableTabs: [AppTab] = AppTab.allCases
   @State private var selectedRaw: [String] = []
   @State private var pinnedFeedURIs: [String] = []
+  @State private var isEditing: Bool = false
 
   public init() {}
 
@@ -22,6 +23,15 @@ public struct TabBarCustomizationView: View {
               Image(systemName: "line.3.horizontal")
                 .foregroundStyle(.secondary)
             }
+            .swipeActions(edge: .trailing) {
+              // Swipe to remove from visible → moves to Add Tabs list
+              Button(role: .destructive) {
+                selectedRaw.removeAll { $0 == tab.rawValue }
+                settingsService.tabBarTabsRaw = selectedRaw
+              } label: {
+                Label("Remove", systemImage: "trash")
+              }
+            }
           }
           .onMove { indices, newOffset in
             var tabs = selectedTabs
@@ -31,29 +41,31 @@ public struct TabBarCustomizationView: View {
           }
         }
 
-        Section("Add/Remove Tabs") {
-          ForEach(availableTabs, id: \.rawValue) { tab in
-            Toggle(
-              isOn: Binding(
-                get: { selectedRaw.contains(tab.rawValue) },
-                set: { isOn in
-                  if isOn {
-                    if !selectedRaw.contains(tab.rawValue) {
-                      selectedRaw.append(tab.rawValue)
-                    }
-                  } else {
-                    selectedRaw.removeAll { $0 == tab.rawValue }
-                  }
-                  // De-duplicate defensively then persist
-                  selectedRaw = Array(NSOrderedSet(array: selectedRaw)) as? [String] ?? selectedRaw
+        Section("Add Tabs") {
+          ForEach(availableTabs.filter { !selectedRaw.contains($0.rawValue) }, id: \.rawValue) {
+            tab in
+            HStack {
+              Image(systemName: tab.icon)
+              Text(tab.title)
+              Spacer()
+              Button("Add") {
+                if !selectedRaw.contains(tab.rawValue) {
+                  selectedRaw.append(tab.rawValue)
                   settingsService.tabBarTabsRaw = selectedRaw
                 }
-              )
-            ) {
-              HStack {
-                Image(systemName: tab.icon)
-                Text(tab.title)
               }
+              .buttonStyle(.bordered)
+            }
+            .swipeActions(edge: .trailing) {
+              Button {
+                if !selectedRaw.contains(tab.rawValue) {
+                  selectedRaw.append(tab.rawValue)
+                  settingsService.tabBarTabsRaw = selectedRaw
+                }
+              } label: {
+                Label("Add", systemImage: "plus")
+              }
+              .tint(.blue)
             }
           }
         }
@@ -67,11 +79,14 @@ public struct TabBarCustomizationView: View {
                   .lineLimit(1)
                   .truncationMode(.middle)
               }
-            }
-            .onDelete { indices in
-              // Allow swipe-to-delete only for feeds
-              pinnedFeedURIs.remove(atOffsets: indices)
-              settingsService.pinnedFeedURIs = pinnedFeedURIs
+              .swipeActions(edge: .trailing) {
+                Button(role: .destructive) {
+                  pinnedFeedURIs.removeAll { $0 == uri }
+                  settingsService.pinnedFeedURIs = pinnedFeedURIs
+                } label: {
+                  Label("Remove", systemImage: "trash")
+                }
+              }
             }
             .onMove { indices, newOffset in
               pinnedFeedURIs.move(fromOffsets: indices, toOffset: newOffset)
@@ -80,10 +95,14 @@ public struct TabBarCustomizationView: View {
           }
         }
       }
-      .environment(\.editMode, .constant(.active))
+      // Toggle edit mode only when needed so swipe-to-delete works when not editing
+      .environment(\.editMode, .constant(isEditing ? .active : .inactive))
       .navigationTitle("Customize Tabs")
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
+        ToolbarItem(placement: .navigationBarLeading) {
+          Button(isEditing ? "Done" : "Edit") { isEditing.toggle() }
+        }
         ToolbarItem(placement: .navigationBarTrailing) {
           Button("Reset") { resetToDefault() }
         }
