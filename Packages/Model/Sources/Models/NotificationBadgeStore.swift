@@ -3,7 +3,7 @@ import Foundation
 @MainActor
 @Observable
 public final class NotificationBadgeStore: Sendable {
-  public nonisolated(unsafe) static let shared = NotificationBadgeStore()
+  public static let shared = NotificationBadgeStore()
 
   private let lastSeenKey = "notifications.lastSeen"
   private let badgeCountKey = "notifications.badge.count"

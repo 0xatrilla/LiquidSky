@@ -39,6 +39,10 @@ public struct NotificationsListView: View {
     .task {
       await fetchNotifications()
     }
+    .onAppear {
+      // Clear badge when notifications tab is viewed
+      badgeStore.markSeenNow()
+    }
     .refreshable {
       // Prevent multiple simultaneous refreshes
       guard !isLoading else { return }

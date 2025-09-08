@@ -25,6 +25,10 @@ struct AppTabView: View {
   @State private var isGeneratingSummary = false
   @State private var badgeStore = NotificationBadgeStore.shared
 
+  private var badgeCount: Int? {
+    badgeStore.unreadCount > 0 ? badgeStore.unreadCount : nil
+  }
+
   public var body: some View {
     TabView(selection: $selectedTab) {
       ForEach(currentTabs, id: \.rawValue) { tab in
@@ -111,7 +115,7 @@ struct AppTabView: View {
             }
           } label: {
             Label("Notifications", systemImage: "bell")
-              .badge(badgeStore.unreadCount > 0 ? badgeStore.unreadCount : nil)
+              .badge(badgeStore.unreadCount)
           }
 
         case .profile:
