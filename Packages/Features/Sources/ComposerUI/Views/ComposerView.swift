@@ -93,9 +93,54 @@ extension ComposerView {
       switch mode {
       case .newPost:
         _ = try await client.blueskyClient.createPostRecord(text: String(text.characters))
-      case .reply:
-        // TODO: Create replyRef
-        _ = try await client.blueskyClient.createPostRecord(text: String(text.characters))
+      case .reply(let post):
+        // Create proper reply reference
+        // For replies, the parent is the post being replied to
+        // The root is either the original post in the thread or the same as parent for top-level replies
+        let parentRef = ComAtprotoLexicon.Repository.StrongReference(
+          recordURI: post.uri,
+          cidHash: post.cid
+        )
+
+        // If the post being replied to is itself a reply, use its root
+        // Otherwise, use the post itself as the root
+        let rootRef: ComAtprotoLexicon.Repository.StrongReference
+        if let existingReplyRef = post.replyRef {
+          // Use reflection to extract the root URI and CID
+          let mirror = Mirror(reflecting: existingReplyRef)
+          if let rootChild = mirror.children.first(where: { $0.label == "root" }) {
+            let rootMirror = Mirror(reflecting: rootChild.value)
+            var rootURI = post.uri
+            var rootCID = post.cid
+
+            for child in rootMirror.children {
+              if child.label == "recordURI", let uri = child.value as? String {
+                rootURI = uri
+              } else if child.label == "cidHash", let cid = child.value as? String {
+                rootCID = cid
+              }
+            }
+            rootRef = ComAtprotoLexicon.Repository.StrongReference(
+              recordURI: rootURI,
+              cidHash: rootCID
+            )
+          } else {
+            rootRef = parentRef
+          }
+        } else {
+          // This is a top-level post, so root = parent
+          rootRef = parentRef
+        }
+
+        let replyRef = AppBskyLexicon.Feed.PostRecord.ReplyReference(
+          root: rootRef,
+          parent: parentRef
+        )
+
+        _ = try await client.blueskyClient.createPostRecord(
+          text: String(text.characters),
+          replyTo: replyRef
+        )
       }
       dismiss()
     } catch {
