@@ -629,24 +629,33 @@ struct LiquidSkyApp: App {
   }
 
   private func handleNotificationTap(_ notification: Notification) {
-    guard let userInfo = notification.userInfo else { return }
+    guard let userInfo = notification.userInfo else {
+      router.selectedTab = .notification
+      return
+    }
 
-    // Handle different types of notifications
-    if let type = userInfo["type"] as? String {
-      switch type {
-      case "follow":
-        router.selectedTab = .notification
-      case "like", "repost", "reply":
-        // Navigate to the specific post if we have the URI
-        if let postUri = userInfo["postUri"] as? String {
-          // TODO: Navigate to specific post
-          router.selectedTab = .feed
+    if let destination = userInfo["destination"] as? String {
+      switch destination {
+      case "post":
+        if let uri = userInfo["uri"] as? String, let client = appState.client {
+          Task { @MainActor in
+            router.selectedTab = .notification
+            do {
+              let posts = try await client.protoClient.getPosts([uri]).posts
+              if let item = posts.first?.postItem {
+                router[.notification].append(.post(item))
+              }
+            } catch {
+              router.selectedTab = .notification
+            }
+          }
+        } else {
+          router.selectedTab = .notification
         }
       default:
         router.selectedTab = .notification
       }
     } else {
-      // Default to notifications tab
       router.selectedTab = .notification
     }
   }

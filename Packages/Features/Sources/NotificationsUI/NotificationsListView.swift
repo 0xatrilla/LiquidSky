@@ -16,6 +16,7 @@ public struct NotificationsListView: View {
   @State private var summaryText: String?
   @State private var newNotificationsCount = 0
   @State private var previousNotificationsCount = 0
+  @State private var badgeStore = NotificationBadgeStore.shared
 
   @StateObject private var simpleSummaryService = SimpleSummaryService()
 
@@ -192,14 +193,54 @@ public struct NotificationsListView: View {
         self.cursor = response.cursor
       }
 
+      // Update badge based on new notifications since last seen
+      let newSinceLastSeen = notificationsGroups.filter { $0.timestamp > badgeStore.lastSeenDate }
+      badgeStore.unreadCount = newSinceLastSeen.count
+
       // Local alert when Bluesky notifications arrive (optional per preferences)
       if NotificationPreferences.shared.notifyOnBlueskyNotifications,
-        !notificationsGroups.isEmpty
+        !newSinceLastSeen.isEmpty
       {
         let content = UNMutableNotificationContent()
         content.title = "New Notifications"
-        content.body = "You have new activity on Horizon."
+        if let first = newSinceLastSeen.first {
+          switch first.type {
+          case .like:
+            let name =
+              first.notifications.first?.author.displayName ?? first.notifications.first?.author
+              .actorHandle ?? "Someone"
+            content.body = "\(name) liked your post"
+          case .reply:
+            let name =
+              first.notifications.first?.author.displayName ?? first.notifications.first?.author
+              .actorHandle ?? "Someone"
+            content.body = "\(name) replied to your post"
+          case .repost:
+            let name =
+              first.notifications.first?.author.displayName ?? first.notifications.first?.author
+              .actorHandle ?? "Someone"
+            content.body = "\(name) reposted your post"
+          case .follow:
+            let name =
+              first.notifications.first?.author.displayName ?? first.notifications.first?.author
+              .actorHandle ?? "Someone"
+            content.body = "\(name) started following you"
+          case .mention:
+            let name =
+              first.notifications.first?.author.displayName ?? first.notifications.first?.author
+              .actorHandle ?? "Someone"
+            content.body = "\(name) mentioned you"
+          default:
+            content.body = "You have new activity on Horizon."
+          }
+        } else {
+          content.body = "You have new activity on Horizon."
+        }
         content.sound = .default
+        // Deep-link via userInfo to open post on tap
+        if let postURI = newSinceLastSeen.first?.postItem?.uri {
+          content.userInfo = ["destination": "post", "uri": postURI]
+        }
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         let req = UNNotificationRequest(
           identifier: UUID().uuidString, content: content, trigger: trigger)

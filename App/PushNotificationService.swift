@@ -126,6 +126,14 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
       userInfo: userInfo
     )
 
+    // Basic deep-link handling: open post if present
+    if let destination = userInfo["destination"] as? String, destination == "post",
+      let uri = userInfo["uri"] as? String
+    {
+      // Store for app to pick up at launch if needed
+      UserDefaults.standard.set(["destination": destination, "uri": uri], forKey: "launchLink")
+    }
+
     completionHandler()
   }
 }
