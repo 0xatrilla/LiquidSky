@@ -4,6 +4,7 @@ import DesignSystem
 import Destinations
 import Models
 import SwiftUI
+import User
 
 extension EnvironmentValues {
   @Entry public var hideMoreActions = false
@@ -14,11 +15,16 @@ public struct PostRowActionsView: View {
   @Environment(PostContext.self) var dataController
   @Environment(AppRouter.self) var router
   @Environment(PostFilterService.self) var postFilterService
+  @Environment(CurrentUser.self) var currentUser
 
   let post: PostItem
 
   public init(post: PostItem) {
     self.post = post
+  }
+
+  private var isOwnPost: Bool {
+    currentUser.profile?.actorDID == post.author.did
   }
 
   public var body: some View {
@@ -168,6 +174,19 @@ public struct PostRowActionsView: View {
             }) {
               Label("Remove Repost", systemImage: "arrow.2.squarepath.slash")
             }
+          }
+
+          // Delete post option for own posts
+          if isOwnPost {
+            Divider()
+            Button(action: {
+              Task {
+                await deletePost()
+              }
+            }) {
+              Label("Delete Post", systemImage: "trash")
+            }
+            .foregroundColor(.red)
           }
         } label: {
           Image(systemName: "ellipsis")
@@ -463,6 +482,28 @@ public struct PostRowActionsView: View {
         completion: { _ in
           toastLabel.removeFromSuperview()
         })
+    }
+  }
+
+  private func deletePost() async {
+    do {
+      // Get the client from the PostContext
+      let client = dataController.getClient()
+
+      // Delete the post using ATProtoKit
+      try await client.blueskyClient.deleteRecord(.recordURI(atURI: post.uri))
+
+      await MainActor.run {
+        self.showToast(message: "Post deleted successfully")
+      }
+
+      // TODO: Refresh the feed or remove the post from the UI
+      // This would require a callback or notification to the parent view
+
+    } catch {
+      await MainActor.run {
+        self.showToast(message: "Failed to delete post: \(error.localizedDescription)")
+      }
     }
   }
 

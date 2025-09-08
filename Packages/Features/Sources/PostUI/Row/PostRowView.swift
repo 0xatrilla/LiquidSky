@@ -11,12 +11,14 @@ extension EnvironmentValues {
   @Entry public var isQuote: Bool = false
   @Entry public var isFocused: Bool = false
   @Entry public var isThreadContext: Bool = false
+  @Entry public var handleOwnNavigation: Bool = true
 }
 
 public struct PostRowView: View {
   @Environment(\.isQuote) var isQuote
   @Environment(\.isFocused) var isFocused
   @Environment(\.isThreadContext) var isThreadContext
+  @Environment(\.handleOwnNavigation) var handleOwnNavigation
   @Environment(\.sizeCategory) var sizeCategory
   @Environment(\.currentTab) var currentTab
   @Environment(SettingsService.self) var settingsService
@@ -28,7 +30,7 @@ public struct PostRowView: View {
 
   let post: PostItem
   let showEngagementDetails: Bool
-  
+
   @Namespace private var namespace
   @State private var parentPost: PostItem?
 
@@ -79,8 +81,8 @@ public struct PostRowView: View {
         }
       }
 
-      // Show simple reply indicator in thread view only
-      if post.isReplyTo && isInThreadContext, let toHandle = post.inReplyToHandle {
+      // Show simple reply indicator in thread view and profile views
+      if post.isReplyTo, let toHandle = post.inReplyToHandle {
         Text("Replying to @\(toHandle)")
           .font(.caption)
           .foregroundStyle(.secondary)
@@ -99,14 +101,18 @@ public struct PostRowView: View {
 
         // Engagement details - show likes and reposts with clickable previews
         // Only show in notification tab or when explicitly requested
-        if (showEngagementDetails || currentTab == .notification) && (post.likeCount > 0 || post.repostCount > 0) {
+        if (showEngagementDetails || currentTab == .notification)
+          && (post.likeCount > 0 || post.repostCount > 0)
+        {
           PostEngagementDetailsView(post: post)
         }
       }
     }
     .contentShape(Rectangle())
     .onTapGesture {
-      router.navigateTo(.post(post))
+      if handleOwnNavigation {
+        router.navigateTo(.post(post))
+      }
     }
   }
 

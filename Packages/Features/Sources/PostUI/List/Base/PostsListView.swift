@@ -236,6 +236,7 @@ public struct PostListView<T: PostsListViewDatasource>: View {
                 // Render single post normally with NavigationLink for proper navigation
                 NavigationLink(value: RouterDestination.post(postGroup.posts.first!)) {
                   PostRowView(post: postGroup.posts.first!)
+                    .environment(\.handleOwnNavigation, false)
                 }
                 .buttonStyle(.plain)
               }
