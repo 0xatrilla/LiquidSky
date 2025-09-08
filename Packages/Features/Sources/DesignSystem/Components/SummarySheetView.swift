@@ -99,7 +99,7 @@ public struct SummarySheetView: View {
               .padding(.top, 4)
             }
 
-            // Summary content
+            // Summary content - now fills the entire sheet
             VStack(alignment: .leading, spacing: 16) {
               Group {
                 if let attributedSummary {
@@ -116,15 +116,8 @@ public struct SummarySheetView: View {
               .fixedSize(horizontal: false, vertical: true)
               .textSelection(.enabled)
             }
-            .padding(20)
-            .background(
-              RoundedRectangle(cornerRadius: 16)
-                .fill(.ultraThinMaterial)
-                .overlay(
-                  RoundedRectangle(cornerRadius: 16)
-                    .stroke(.quaternary, lineWidth: 0.5)
-                )
-            )
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
 
             // Action buttons
             HStack(spacing: 16) {
@@ -145,7 +138,7 @@ public struct SummarySheetView: View {
           }
           .padding(.horizontal, 24)
         }
-        .frame(maxHeight: 500)  // Reasonable max height for content
+        .frame(maxHeight: 700)  // Increased height for full summary content
       }
       .background(
         RoundedRectangle(cornerRadius: 24)
@@ -170,8 +163,8 @@ public struct SummarySheetView: View {
           .shadow(color: .black.opacity(0.25), radius: 20, x: 0, y: 10)
       )
       .padding(.horizontal, 16)
-      .frame(maxHeight: 600)  // Overall sheet height limit
-      .offset(y: isVisible ? 0 : 600)
+      .frame(maxHeight: 800)  // Increased overall sheet height limit
+      .offset(y: isVisible ? 0 : 800)
       .animation(.spring(response: 0.6, dampingFraction: 0.8), value: isVisible)
     }
     .onAppear {
