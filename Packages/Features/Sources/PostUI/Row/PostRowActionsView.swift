@@ -12,6 +12,7 @@ extension EnvironmentValues {
 
 public struct PostRowActionsView: View {
   @Environment(\.hideMoreActions) var hideMoreActions
+  @Environment(\.currentTab) var currentTab
   @Environment(PostContext.self) var dataController
   @Environment(AppRouter.self) var router
   @Environment(PostFilterService.self) var postFilterService
@@ -441,11 +442,11 @@ public struct PostRowActionsView: View {
   }
 
   private func viewProfile() {
-    router.navigateTo(.profile(post.author))
+    router[currentTab].append(.profile(post.author))
   }
 
   private func viewInThread() {
-    router.navigateTo(.post(post))
+    router[currentTab].append(.post(post))
   }
 
   private func showToast(message: String) {

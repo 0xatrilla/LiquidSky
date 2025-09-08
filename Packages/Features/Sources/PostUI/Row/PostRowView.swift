@@ -111,7 +111,8 @@ public struct PostRowView: View {
     .contentShape(Rectangle())
     .onTapGesture {
       if handleOwnNavigation {
-        router.navigateTo(.post(post))
+        // Navigate within the current tab's navigation stack
+        router[currentTab].append(.post(post))
       }
     }
   }
