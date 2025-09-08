@@ -26,7 +26,7 @@ public struct NotificationsListView: View {
     VStack(spacing: 0) {
       if isLoading && notificationsGroups.isEmpty {
         loadingView
-      } else if let error = error, (error as? CancellationError) == nil {
+      } else if let error = error, !(error is CancellationError) {
         errorView(error: error)
       } else if notificationsGroups.isEmpty {
         emptyStateView
@@ -50,7 +50,10 @@ public struct NotificationsListView: View {
       // Track previous notification count to detect new ones
       previousNotificationsCount = notificationsGroups.count
 
+      // Clear any existing errors before refresh
+      error = nil
       cursor = nil
+
       await fetchNotifications()
 
       // Check for new notifications and offer summary if 10+
@@ -252,7 +255,7 @@ public struct NotificationsListView: View {
       }
     } catch {
       // Handle cancellation gracefully
-      if (error as? CancellationError) != nil {
+      if error is CancellationError {
         // Task was cancelled, don't show error
         isLoading = false
         return

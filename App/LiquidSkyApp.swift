@@ -63,18 +63,46 @@ struct LiquidSkyApp: App {
       Group {
         switch appState {
         case .resuming:
-          AuthView()
-            .environment(accountManager)
-            .environment(auth)
-            .environment(router)
-            .environment(postDataControllerProvider)
-            .environment(postFilterService)
-            .environment(imageQualityService)
-            .environment(settingsService)
-            .environment(ColorThemeManager.shared)
-            .environment(pushNotificationService)
-            // .environment(cloudKitSyncService)
-            .environment(inAppPurchaseService)
+          // Show loading screen instead of AuthView to prevent flickering
+          VStack(spacing: 24) {
+            // App icon or logo placeholder
+            ZStack {
+              Circle()
+                .fill(.blue.opacity(0.1))
+                .frame(width: 80, height: 80)
+
+              Image(systemName: "cloud.fill")
+                .font(.system(size: 32))
+                .foregroundStyle(.blue)
+            }
+
+            VStack(spacing: 8) {
+              Text("Horizon")
+                .font(.title2)
+                .fontWeight(.semibold)
+                .foregroundStyle(.primary)
+
+              ProgressView()
+                .scaleEffect(0.8)
+
+              Text("Loading...")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            }
+          }
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
+          .background(Color(.systemGroupedBackground))
+          .environment(accountManager)
+          .environment(auth)
+          .environment(router)
+          .environment(postDataControllerProvider)
+          .environment(postFilterService)
+          .environment(imageQualityService)
+          .environment(settingsService)
+          .environment(ColorThemeManager.shared)
+          .environment(pushNotificationService)
+          // .environment(cloudKitSyncService)
+          .environment(inAppPurchaseService)
         case .authenticated(let client, let currentUser):
           AppTabView()
             .environment(client)
@@ -153,25 +181,23 @@ struct LiquidSkyApp: App {
               handleNotificationTap(notification)
             }
         case .unauthenticated:
-          VStack {
-            Text("Unauthenticated")
-              .font(.title)
-              .foregroundColor(.secondary)
-
-            Button("Show Auth Screen") {
+          AuthView()
+            .environment(accountManager)
+            .environment(auth)
+            .environment(router)
+            .environment(postDataControllerProvider)
+            .environment(postFilterService)
+            .environment(imageQualityService)
+            .environment(settingsService)
+            .environment(ColorThemeManager.shared)
+            .environment(pushNotificationService)
+            // .environment(cloudKitSyncService)
+            .environment(inAppPurchaseService)
+            .onAppear {
               #if DEBUG
-                print("Manual auth button tapped")
+                print("LiquidSkyApp: Showing unauthenticated state")
               #endif
-              router.presentedSheet = .auth
             }
-            .buttonStyle(.borderedProminent)
-            .padding()
-          }
-          .onAppear {
-            #if DEBUG
-              print("LiquidSkyApp: Showing unauthenticated state")
-            #endif
-          }
         case .error(let error):
           Text("Error: \(error.localizedDescription)")
             .onAppear {
@@ -450,11 +476,27 @@ struct LiquidSkyApp: App {
           print("LiquidSkyApp: Main task started")
         #endif
 
-        // Wait for initial session restoration attempt
+        // Wait for initial session restoration attempt with timeout
         #if DEBUG
           print("Waiting for initial session restoration...")
         #endif
-        await auth.restoreSession()
+
+        // Add timeout to prevent long loading times
+        await withTaskGroup(of: Void.self) { group in
+          group.addTask {
+            await auth.restoreSession()
+          }
+
+          group.addTask {
+            try? await Task.sleep(nanoseconds: 3_000_000_000)  // 3 second timeout
+            #if DEBUG
+              print("Session restoration timeout reached")
+            #endif
+          }
+
+          await group.next()
+          group.cancelAll()
+        }
 
         // Check if we have an initial configuration after restoration attempt
         if auth.configuration == nil {
@@ -463,7 +505,6 @@ struct LiquidSkyApp: App {
           #endif
           await MainActor.run {
             appState = .unauthenticated
-            router.presentedSheet = .auth
             #if DEBUG
               print("Auth screen requested after failed restoration")
             #endif
