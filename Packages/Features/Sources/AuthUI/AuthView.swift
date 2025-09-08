@@ -23,6 +23,27 @@ public struct AuthView: View {
 
   public init() {}
 
+  // Clear cached accounts when the login view appears
+  private func clearCachedAccounts() {
+    #if DEBUG
+      print("AuthView: Clearing cached accounts to prevent login conflicts")
+    #endif
+
+    // Set fresh login state to ignore any existing accounts
+    UserDefaults.standard.set(true, forKey: "Auth.isInFreshLoginState")
+
+    // Force logout to clear all cached data
+    Task {
+      do {
+        try await auth.logout()
+      } catch {
+        #if DEBUG
+          print("AuthView: Error during logout: \(error)")
+        #endif
+      }
+    }
+  }
+
   public var body: some View {
     NavigationView {
       ScrollView {
@@ -47,6 +68,10 @@ public struct AuthView: View {
         }
         .padding(.horizontal, 24)
         .animation(.easeInOut(duration: 0.3), value: isKeyboardVisible)
+      }
+      .onAppear {
+        // Clear cached accounts when login view appears
+        clearCachedAccounts()
       }
       .background(
         ZStack {

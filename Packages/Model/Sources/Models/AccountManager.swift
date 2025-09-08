@@ -27,13 +27,16 @@ public final class AccountManager {
         )
       #endif
 
-      // Update existing account instead of creating duplicate
-      var updatedAccount = existingAccount
-      updatedAccount.isActive = true
-      updatedAccount.did = account.did
-      updatedAccount.displayName = account.displayName
-      updatedAccount.avatarUrl = account.avatarUrl
-      updatedAccount.keychainIdentifier = account.keychainIdentifier
+      // Create a new account with the same ID but updated information
+      let updatedAccount = Account(
+        id: existingAccount.id,
+        handle: existingAccount.handle,
+        did: account.did,
+        displayName: account.displayName,
+        avatarUrl: account.avatarUrl,
+        keychainIdentifier: account.keychainIdentifier,
+        isActive: true
+      )
 
       // Deactivate all other accounts
       accounts = accounts.map { existingAccount in
@@ -42,7 +45,7 @@ public final class AccountManager {
         return updatedAccount
       }
 
-      // Update the existing account
+      // Replace the existing account
       if let index = accounts.firstIndex(where: { $0.id == existingAccount.id }) {
         accounts[index] = updatedAccount
       }

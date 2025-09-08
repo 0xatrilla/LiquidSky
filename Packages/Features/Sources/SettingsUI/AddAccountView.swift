@@ -15,6 +15,27 @@ public struct AddAccountView: View {
 
   public init() {}
 
+  // Clear cached accounts when the add account view appears
+  private func clearCachedAccounts() {
+    #if DEBUG
+      print("AddAccountView: Clearing cached accounts to prevent login conflicts")
+    #endif
+
+    // Set fresh login state to ignore any existing accounts
+    UserDefaults.standard.set(true, forKey: "Auth.isInFreshLoginState")
+
+    // Force logout to clear all cached data
+    Task {
+      do {
+        try await auth.logout()
+      } catch {
+        #if DEBUG
+          print("AddAccountView: Error during logout: \(error)")
+        #endif
+      }
+    }
+  }
+
   public var body: some View {
     NavigationView {
       VStack(spacing: 0) {
@@ -32,6 +53,10 @@ public struct AddAccountView: View {
       .padding(.horizontal, 24)
       .navigationTitle("Add Account")
       .navigationBarTitleDisplayMode(.inline)
+      .onAppear {
+        // Clear cached accounts when add account view appears
+        clearCachedAccounts()
+      }
       .toolbar {
         ToolbarItem(placement: .topBarLeading) {
           Button("Cancel") {
