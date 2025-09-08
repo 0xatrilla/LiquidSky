@@ -10,10 +10,12 @@ import User
 
 struct FeedRowView: View {
   let feed: FeedItem
+  let currentFilter: FeedsListFilter
   @Namespace private var namespace
   @Environment(AppRouter.self) var router
   @Environment(CurrentUser.self) var currentUser
   @State private var showingPinAlert = false
+  @State private var showingUnpinAlert = false
 
   var body: some View {
     Button(action: {
@@ -36,16 +38,22 @@ struct FeedRowView: View {
     }
     .buttonStyle(PlainButtonStyle())  // Remove default button styling
     .listRowSeparator(.hidden)
-    .onLongPressGesture {
-      showingPinAlert = true
-    }
-    .alert("Pin Feed", isPresented: $showingPinAlert) {
-      Button("Pin to My Feeds") {
-        pinFeed()
+    .contextMenu {
+      if currentFilter == .suggested {
+        Button {
+          HapticManager.shared.impact(.light)
+          pinFeed()
+        } label: {
+          Label("Save to My Feeds", systemImage: "pin")
+        }
+      } else {
+        Button(role: .destructive) {
+          HapticManager.shared.impact(.light)
+          unpinFeed()
+        } label: {
+          Label("Remove from My Feeds", systemImage: "trash")
+        }
       }
-      Button("Cancel", role: .cancel) {}
-    } message: {
-      Text("Add '\(feed.displayName)' to your pinned feeds?")
     }
   }
 
@@ -57,6 +65,19 @@ struct FeedRowView: View {
       } catch {
         #if DEBUG
           print("Failed to pin feed: \(error)")
+        #endif
+      }
+    }
+  }
+
+  private func unpinFeed() {
+    let feedToUnpin = feed
+    Task {
+      do {
+        try await currentUser.unpinFeed(uri: feedToUnpin.uri, displayName: feedToUnpin.displayName)
+      } catch {
+        #if DEBUG
+          print("Failed to unpin feed: \(error)")
         #endif
       }
     }
@@ -131,7 +152,8 @@ struct FeedRowView: View {
           creatorHandle: "dimillian.app",
           likesCount: 50,
           liked: false
-        )
+        ),
+        currentFilter: .suggested
       )
       FeedRowView(
         feed: FeedItem(
@@ -142,7 +164,8 @@ struct FeedRowView: View {
           creatorHandle: "dimillian.app",
           likesCount: 50,
           liked: true
-        )
+        ),
+        currentFilter: .myFeeds
       )
     }
     .listStyle(.plain)

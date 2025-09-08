@@ -39,7 +39,7 @@ public struct FeedsListView: View {
     .scrollIndicators(.hidden)
     .task(id: filter) {
       #if DEBUG
-      print("Filter changed to: \(filter)")
+        print("Filter changed to: \(filter)")
       #endif
       await loadFeedsForCurrentFilter()
     }
@@ -54,7 +54,7 @@ public struct FeedsListView: View {
     )
     .onChange(of: currentUser.savedFeeds.count) {
       #if DEBUG
-      print("Saved feeds count changed: \(currentUser.savedFeeds.count)")
+        print("Saved feeds count changed: \(currentUser.savedFeeds.count)")
       #endif
       switch filter {
       case .suggested:
@@ -106,7 +106,7 @@ public struct FeedsListView: View {
         .frame(maxWidth: .infinity)
       } else {
         ForEach(feeds, id: \.uri) { feed in
-          FeedRowView(feed: feed)
+          FeedRowView(feed: feed, currentFilter: filter)
         }
       }
     }
@@ -131,12 +131,12 @@ extension FeedsListView {
     error = nil
     do {
       #if DEBUG
-      print("Fetching suggested feeds...")
+        print("Fetching suggested feeds...")
       #endif
       let feeds = try await client.protoClient.getPopularFeedGenerators(matching: nil)
       #if DEBUG
-      print("Suggested feeds API response: \(feeds)")
-      print("Suggested feeds received: \(feeds.feeds.count)")
+        print("Suggested feeds API response: \(feeds)")
+        print("Suggested feeds received: \(feeds.feeds.count)")
       #endif
 
       let feedItems = feeds.feeds.map { $0.feedItem }.filter { feed in
@@ -144,8 +144,8 @@ extension FeedsListView {
       }
 
       #if DEBUG
-      print("Filtered suggested feeds: \(feedItems.count)")
-      print("Feed items: \(feedItems.map { $0.displayName })")
+        print("Filtered suggested feeds: \(feedItems.count)")
+        print("Feed items: \(feedItems.map { $0.displayName })")
       #endif
 
       withAnimation {
@@ -153,7 +153,7 @@ extension FeedsListView {
       }
     } catch {
       #if DEBUG
-      print("Error fetching suggested feeds: \(error)")
+        print("Error fetching suggested feeds: \(error)")
       #endif
       self.error = error
     }
@@ -162,14 +162,14 @@ extension FeedsListView {
   private func fetchMyFeeds() async {
     do {
       #if DEBUG
-      print("Fetching my feeds...")
-      print("Saved feeds count: \(currentUser.savedFeeds.count)")
-      print("Saved feeds URIs: \(currentUser.savedFeeds.map { $0.value })")
+        print("Fetching my feeds...")
+        print("Saved feeds count: \(currentUser.savedFeeds.count)")
+        print("Saved feeds URIs: \(currentUser.savedFeeds.map { $0.value })")
       #endif
 
       guard !currentUser.savedFeeds.isEmpty else {
         #if DEBUG
-        print("No saved feeds to fetch")
+          print("No saved feeds to fetch")
         #endif
         withAnimation {
           self.feeds = []
@@ -180,14 +180,14 @@ extension FeedsListView {
       let feeds = try await client.protoClient.getFeedGenerators(
         by: currentUser.savedFeeds.map { $0.value })
       #if DEBUG
-      print("My feeds API response: \(feeds)")
-      print("My feeds received: \(feeds.feeds.count)")
+        print("My feeds API response: \(feeds)")
+        print("My feeds received: \(feeds.feeds.count)")
       #endif
 
       let feedItems = feeds.feeds.map { $0.feedItem }
       #if DEBUG
-      print("Processed my feeds: \(feedItems.count)")
-      print("Feed items: \(feedItems.map { $0.displayName })")
+        print("Processed my feeds: \(feedItems.count)")
+        print("Feed items: \(feedItems.map { $0.displayName })")
       #endif
 
       withAnimation {
@@ -195,7 +195,7 @@ extension FeedsListView {
       }
     } catch {
       #if DEBUG
-      print("Error fetching my feeds: \(error)")
+        print("Error fetching my feeds: \(error)")
       #endif
       // Don't set error state for my feeds, just show empty state
       withAnimation {
