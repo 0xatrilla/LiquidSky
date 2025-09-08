@@ -23,24 +23,33 @@ public struct AuthView: View {
 
   public init() {}
 
-  // Clear cached accounts when the login view appears
-  private func clearCachedAccounts() {
-    #if DEBUG
-      print("AuthView: Clearing cached accounts to prevent login conflicts")
-    #endif
+  // Clear cached accounts only when there's a login conflict
+  private func clearCachedAccountsIfNeeded() {
+    // Only clear accounts if we're in a fresh login state (set by logout or explicit clearing)
+    let isInFreshLoginState = UserDefaults.standard.bool(forKey: "Auth.isInFreshLoginState")
 
-    // Set fresh login state to ignore any existing accounts
-    UserDefaults.standard.set(true, forKey: "Auth.isInFreshLoginState")
+    if isInFreshLoginState {
+      #if DEBUG
+        print("AuthView: In fresh login state, clearing cached accounts to prevent conflicts")
+      #endif
 
-    // Force logout to clear all cached data
-    Task {
-      do {
-        try await auth.logout()
-      } catch {
-        #if DEBUG
-          print("AuthView: Error during logout: \(error)")
-        #endif
+      // Clear the fresh login state flag
+      UserDefaults.standard.removeObject(forKey: "Auth.isInFreshLoginState")
+
+      // Force logout to clear all cached data
+      Task {
+        do {
+          try await auth.logout()
+        } catch {
+          #if DEBUG
+            print("AuthView: Error during logout: \(error)")
+          #endif
+        }
       }
+    } else {
+      #if DEBUG
+        print("AuthView: Normal app startup, not clearing cached accounts")
+      #endif
     }
   }
 
@@ -70,8 +79,8 @@ public struct AuthView: View {
         .animation(.easeInOut(duration: 0.3), value: isKeyboardVisible)
       }
       .onAppear {
-        // Clear cached accounts when login view appears
-        clearCachedAccounts()
+        // Clear cached accounts only if needed (fresh login state)
+        clearCachedAccountsIfNeeded()
       }
       .background(
         ZStack {
@@ -423,8 +432,23 @@ public struct AuthView: View {
       // Use addAccount to persist the account and its keychain identifier
       _ = try await auth.addAccount(handle: trimmedHandle, appPassword: trimmedPassword)
     } catch {
-      withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-        self.error = error.localizedDescription
+      // Check if this is a login conflict error
+      if error.localizedDescription.contains("already exists") {
+        #if DEBUG
+          print("AuthView: Login conflict detected, setting fresh login state")
+        #endif
+
+        // Set fresh login state to clear cached accounts on next attempt
+        UserDefaults.standard.set(true, forKey: "Auth.isInFreshLoginState")
+
+        // Show a more helpful error message
+        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+          self.error = "Login conflict detected. Please try again."
+        }
+      } else {
+        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+          self.error = error.localizedDescription
+        }
       }
     }
 

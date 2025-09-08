@@ -15,24 +15,33 @@ public struct AddAccountView: View {
 
   public init() {}
 
-  // Clear cached accounts when the add account view appears
-  private func clearCachedAccounts() {
-    #if DEBUG
-      print("AddAccountView: Clearing cached accounts to prevent login conflicts")
-    #endif
+  // Clear cached accounts only when there's a login conflict
+  private func clearCachedAccountsIfNeeded() {
+    // Only clear accounts if we're in a fresh login state (set by logout or explicit clearing)
+    let isInFreshLoginState = UserDefaults.standard.bool(forKey: "Auth.isInFreshLoginState")
 
-    // Set fresh login state to ignore any existing accounts
-    UserDefaults.standard.set(true, forKey: "Auth.isInFreshLoginState")
+    if isInFreshLoginState {
+      #if DEBUG
+        print("AddAccountView: In fresh login state, clearing cached accounts to prevent conflicts")
+      #endif
 
-    // Force logout to clear all cached data
-    Task {
-      do {
-        try await auth.logout()
-      } catch {
-        #if DEBUG
-          print("AddAccountView: Error during logout: \(error)")
-        #endif
+      // Clear the fresh login state flag
+      UserDefaults.standard.removeObject(forKey: "Auth.isInFreshLoginState")
+
+      // Force logout to clear all cached data
+      Task {
+        do {
+          try await auth.logout()
+        } catch {
+          #if DEBUG
+            print("AddAccountView: Error during logout: \(error)")
+          #endif
+        }
       }
+    } else {
+      #if DEBUG
+        print("AddAccountView: Normal add account flow, not clearing cached accounts")
+      #endif
     }
   }
 
@@ -54,8 +63,8 @@ public struct AddAccountView: View {
       .navigationTitle("Add Account")
       .navigationBarTitleDisplayMode(.inline)
       .onAppear {
-        // Clear cached accounts when add account view appears
-        clearCachedAccounts()
+        // Clear cached accounts only if needed (fresh login state)
+        clearCachedAccountsIfNeeded()
       }
       .toolbar {
         ToolbarItem(placement: .topBarLeading) {
@@ -206,7 +215,20 @@ public struct AddAccountView: View {
       dismiss()
     } catch {
       print("AddAccountView: Error adding account: \(error)")
-      if let authError = error as? AuthError {
+
+      // Check if this is a login conflict error
+      if error.localizedDescription.contains("already exists")
+        || (error as? AuthError) == .accountAlreadyExists
+      {
+        #if DEBUG
+          print("AddAccountView: Login conflict detected, setting fresh login state")
+        #endif
+
+        // Set fresh login state to clear cached accounts on next attempt
+        UserDefaults.standard.set(true, forKey: "Auth.isInFreshLoginState")
+
+        errorMessage = "Login conflict detected. Please try again."
+      } else if let authError = error as? AuthError {
         switch authError {
         case .accountAlreadyExists:
           errorMessage = "An account with this handle already exists"
