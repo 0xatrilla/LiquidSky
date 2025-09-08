@@ -6,6 +6,8 @@ import Models
 import NukeUI
 import SwiftUI
 
+// Note: Avoid importing PostUI to prevent cycles. Render simple rows here.
+
 public struct UnifiedSearchResultsView: View {
   @ObservedObject var searchService: UnifiedSearchService
   @Environment(\.dismiss) private var dismiss
@@ -15,36 +17,15 @@ public struct UnifiedSearchResultsView: View {
   }
 
   public var body: some View {
-    NavigationView {
-      VStack(spacing: 0) {
-        if searchService.isSearching {
-          loadingView
-        } else if let error = searchService.searchError {
-          errorView(error: error)
-        } else if !searchService.searchResults.hasResults {
-          emptyStateView
-        } else {
-          searchResultsList
-        }
-      }
-      .navigationTitle("Search Results")
-      #if os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
-      #endif
-      .toolbar {
-        #if os(iOS)
-          ToolbarItem(placement: .navigationBarTrailing) {
-            Button("Done") {
-              dismiss()
-            }
-          }
-        #else
-          ToolbarItem(placement: .primaryAction) {
-            Button("Done") {
-              dismiss()
-            }
-          }
-        #endif
+    VStack(spacing: 0) {
+      if searchService.isSearching {
+        loadingView
+      } else if let error = searchService.searchError {
+        errorView(error: error)
+      } else if !searchService.searchResults.hasResults {
+        emptyStateView
+      } else {
+        searchResultsList
       }
     }
   }
@@ -113,38 +94,62 @@ public struct UnifiedSearchResultsView: View {
   // MARK: - Search Results List
 
   private var searchResultsList: some View {
-    Group {
-      if searchService.searchResults.hasResults {
-        List {
-          ForEach(Array(searchService.searchResults.feeds.enumerated()), id: \.element.id) {
-            _, feed in
+    List {
+      // Users
+      if !searchService.searchResults.users.isEmpty {
+        Section(header: Text("Users")) {
+          ForEach(searchService.searchResults.users, id: \.did) { user in
+            HStack(spacing: 12) {
+              AsyncImage(url: user.avatarImageURL) { phase in
+                switch phase {
+                case .success(let image):
+                  image.resizable().scaledToFill()
+                default:
+                  Circle().fill(Color.gray.opacity(0.3))
+                }
+              }
+              .frame(width: 40, height: 40)
+              .clipShape(Circle())
+
+              VStack(alignment: .leading, spacing: 2) {
+                Text(user.displayName ?? user.handle).font(.body).fontWeight(.medium)
+                Text("@\(user.handle)").font(.caption).foregroundStyle(.secondary)
+              }
+
+              Spacer()
+            }
+          }
+        }
+      }
+
+      // Posts
+      if !searchService.searchResults.posts.isEmpty {
+        Section(header: Text("Posts")) {
+          ForEach(searchService.searchResults.posts, id: \.uri) { post in
+            VStack(alignment: .leading, spacing: 6) {
+              Text(post.author.displayName ?? post.author.handle)
+                .font(.subheadline).fontWeight(.semibold)
+              Text(post.content).font(.body).lineLimit(3)
+            }
+            .padding(.vertical, 6)
+          }
+        }
+      }
+
+      // Feeds
+      if !searchService.searchResults.feeds.isEmpty {
+        Section(header: Text("Feeds")) {
+          ForEach(searchService.searchResults.feeds) { feed in
             FeedSearchResultRow(feed: feed)
           }
         }
-        .listStyle(.plain)
-      } else {
-        VStack(spacing: 16) {
-          Image(systemName: "magnifyingglass")
-            .font(.system(size: 48))
-            .foregroundColor(.secondary)
-
-          Text("No feeds found")
-            .font(.title3)
-            .fontWeight(.medium)
-
-          Text("Try adjusting your search terms")
-            .font(.body)
-            .foregroundColor(.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding()
       }
     }
+    .listStyle(.insetGrouped)
   }
 }
 
 // MARK: - Feed Search Result Row
-
 struct FeedSearchResultRow: View {
   @Environment(AppRouter.self) var router
   @Environment(BSkyClient.self) private var client

@@ -57,12 +57,7 @@ struct ClickablePostText: View {
       .font(compactMode ? .caption : .body)
       .lineLimit(compactMode ? 3 : nil)
       .textSelection(.enabled)
-      // Do not intercept general taps here; allow the row to handle navigation.
-      // We only react when the text clearly encodes interactive elements.
-      .highPriorityGesture(
-        TapGesture().onEnded { _ in
-          // Intentionally no-op to avoid swallowing parent tap
-        })
+    // Don't add any explicit tap gestures here so the row tap remains active.
   }
 
   private func createAttributedString(from text: String) -> AttributedString {
