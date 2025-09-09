@@ -528,6 +528,17 @@ struct LiquidSkyApp: App {
           #endif
         }
 
+        // Safety net: if we are still in resuming state after the timeout, move on
+        let isStillResuming = await MainActor.run { () -> Bool in
+          if case .resuming = appState { return true } else { return false }
+        }
+        if isStillResuming {
+          #if DEBUG
+            print("Safety fallback engaged: transitioning to unauthenticated state")
+          #endif
+          await MainActor.run { appState = .unauthenticated }
+        }
+
         for await configuration in auth.configurationUpdates {
           #if DEBUG
             print(

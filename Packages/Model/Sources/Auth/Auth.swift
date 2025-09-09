@@ -49,7 +49,7 @@ public final class Auth: @unchecked Sendable {
     #endif
 
     configurationContinuation.yield(nil)
-    
+
     // Store logout state in UserDefaults to persist across app restarts
     UserDefaults.standard.set(true, forKey: "Auth.isInFreshLoginState")
   }
@@ -59,7 +59,8 @@ public final class Auth: @unchecked Sendable {
     self.ATProtoKeychain = AppleSecureKeychain(identifier: UUID())
 
     // Reset the configuration to ensure no old session data remains
-    self.configuration = ATProtocolConfiguration(keychainProtocol: self.ATProtoKeychain)
+    // Important: keep configuration nil until an authenticated session exists
+    self.configuration = nil
 
     #if DEBUG
       print("Auth: Internal state reset, new keychain and configuration created")
@@ -80,7 +81,7 @@ public final class Auth: @unchecked Sendable {
 
     // Check if we're in fresh login state from a previous logout
     let freshLoginState = UserDefaults.standard.bool(forKey: "Auth.isInFreshLoginState")
-    
+
     if freshLoginState {
       #if DEBUG
         print("Auth: Initializing in fresh login state from previous logout")
@@ -118,10 +119,9 @@ public final class Auth: @unchecked Sendable {
         print("Auth: No accounts found, creating new keychain")
       #endif
       self.ATProtoKeychain = AppleSecureKeychain(identifier: UUID())
+      // No authenticated session yet; leave configuration nil
+      self.configuration = nil
     }
-
-    // Initialize configuration with the keychain
-    self.configuration = ATProtocolConfiguration(keychainProtocol: self.ATProtoKeychain)
 
     // Note: Session restoration is orchestrated by the app on startup to avoid duplicate work.
   }
@@ -284,7 +284,7 @@ public final class Auth: @unchecked Sendable {
 
     // Yield the configuration to trigger the authentication flow
     configurationContinuation.yield(configuration)
-    
+
     // Clear the fresh login state flag since we successfully added an account
     UserDefaults.standard.removeObject(forKey: "Auth.isInFreshLoginState")
 
@@ -333,6 +333,9 @@ public final class Auth: @unchecked Sendable {
         #if DEBUG
           print("Auth: No accounts available, cannot restore session")
         #endif
+        // Ensure downstream logic knows there is no active session
+        self.configuration = nil
+        configurationContinuation.yield(nil)
         return
       }
 
@@ -342,6 +345,8 @@ public final class Auth: @unchecked Sendable {
         #if DEBUG
           print("Auth: Active account not found in account list")
         #endif
+        self.configuration = nil
+        configurationContinuation.yield(nil)
         return
       }
 
