@@ -17,8 +17,18 @@ struct FeedsListErrorView: View {
         Text("Retry")
           .padding()
       }
-      .buttonStyle(.glass)
+      .modifier(ButtonStyleModifier())
     }
     .listRowSeparator(.hidden)
+  }
+}
+
+struct ButtonStyleModifier: ViewModifier {
+  func body(content: Content) -> some View {
+    if #available(iOS 26.0, *) {
+      content.buttonStyle(.glass)
+    } else {
+      content.buttonStyle(.bordered)
+    }
   }
 }

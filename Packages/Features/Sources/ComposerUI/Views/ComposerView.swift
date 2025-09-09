@@ -4,6 +4,7 @@ import DesignSystem
 import Models
 import SwiftUI
 
+@available(iOS 26.0, *)
 public struct ComposerView: View {
   @Environment(BSkyClient.self) private var client
   @Environment(\.dismiss) private var dismiss
@@ -84,6 +85,7 @@ public struct ComposerView: View {
 }
 
 // MARK: - Network
+@available(iOS 26.0, *)
 extension ComposerView {
   private func sendPost() async {
     guard canSendPost else { return }

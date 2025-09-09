@@ -3,8 +3,9 @@ import DesignSystem
 import Models
 import PhotosUI
 import SwiftUI
+
 #if canImport(FoundationModels)
-import FoundationModels
+  import FoundationModels
 #endif
 
 struct ComposerToolbarView: ToolbarContent {
@@ -30,7 +31,7 @@ struct ComposerToolbarView: ToolbarContent {
       .onChange(of: selectedPhotos) { _, newValue in
         // TODO: Handle selected photos
         #if DEBUG
-        print("Selected photos: \(newValue.count)")
+          print("Selected photos: \(newValue.count)")
         #endif
       }
     }
@@ -43,7 +44,7 @@ struct ComposerToolbarView: ToolbarContent {
       .onChange(of: selectedVideos) { _, newValue in
         // TODO: Handle selected videos
         #if DEBUG
-        print("Selected videos: \(newValue.count)")
+          print("Selected videos: \(newValue.count)")
         #endif
       }
     }
@@ -59,13 +60,15 @@ struct ComposerToolbarView: ToolbarContent {
         CameraView { image in
           // TODO: Handle captured image
           #if DEBUG
-          print("Captured image")
+            print("Captured image")
           #endif
         }
       }
     }
 
-    ToolbarSpacer(placement: .keyboard)
+    if #available(iOS 26.0, *) {
+      ToolbarSpacer(placement: .keyboard)
+    }
 
     ToolbarItem(placement: .keyboard) {
       Button {
@@ -131,18 +134,18 @@ struct ComposerToolbarView: ToolbarContent {
   private func aiComposeAvailable() -> Bool {
     let aiEnabledByUser = SettingsService.shared.aiSummariesEnabled
     #if targetEnvironment(simulator)
-    let aiGatedOK = aiEnabledByUser
+      let aiGatedOK = aiEnabledByUser
     #else
-    let aiGatedOK = aiEnabledByUser && SettingsService.shared.aiDeviceExperimentalEnabled
+      let aiGatedOK = aiEnabledByUser && SettingsService.shared.aiDeviceExperimentalEnabled
     #endif
     #if canImport(FoundationModels)
-    if #available(iOS 26.0, *) {
-      return aiGatedOK
-    } else {
-      return false
-    }
+      if #available(iOS 26.0, *) {
+        return aiGatedOK
+      } else {
+        return false
+      }
     #else
-    return false
+      return false
     #endif
   }
 
@@ -164,7 +167,7 @@ struct ComposerToolbarView: ToolbarContent {
     if remaining == 0 {
       // No room to append anything
       #if DEBUG
-      print("AI Compose: No remaining characters to append.")
+        print("AI Compose: No remaining characters to append.")
       #endif
       aiError = "Post length limit reached (300 characters)."
       return
@@ -178,47 +181,50 @@ struct ComposerToolbarView: ToolbarContent {
 
   private func composeWithAI() async {
     guard aiComposeAvailable() else {
-      aiError = "Apple Intelligence not available. Enable AI in Settings or use a supported device (iOS 26+)."
+      aiError =
+        "Apple Intelligence not available. Enable AI in Settings or use a supported device (iOS 26+)."
       return
     }
 
     #if canImport(FoundationModels)
-    if #available(iOS 26.0, *) {
-      isAIGenerating = true
-      defer { isAIGenerating = false }
+      if #available(iOS 26.0, *) {
+        isAIGenerating = true
+        defer { isAIGenerating = false }
 
-      let userPrompt = aiPrompt.trimmingCharacters(in: .whitespacesAndNewlines)
-      let instructions = userPrompt.isEmpty ? "Write a brief, engaging social post about today's highlights." : userPrompt
+        let userPrompt = aiPrompt.trimmingCharacters(in: .whitespacesAndNewlines)
+        let instructions =
+          userPrompt.isEmpty
+          ? "Write a brief, engaging social post about today's highlights." : userPrompt
 
-      let systemPrompt = """
-      You are an assistant that writes short, engaging social media posts for Bluesky.
-      Constraints:
-      - Keep under 300 characters
-      - Clear, friendly tone; avoid hashtags unless requested
-      - No emojis unless explicitly asked
-      - Output plain text only suitable to paste directly as a post
-      """
+        let systemPrompt = """
+          You are an assistant that writes short, engaging social media posts for Bluesky.
+          Constraints:
+          - Keep under 300 characters
+          - Clear, friendly tone; avoid hashtags unless requested
+          - No emojis unless explicitly asked
+          - Output plain text only suitable to paste directly as a post
+          """
 
-      let session = LanguageModelSession { systemPrompt }
-      do {
-        #if DEBUG
-        print("AI Compose: Requesting response for prompt: \(instructions)")
-        #endif
-        let response = try await session.respond(to: instructions)
-        let generated = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
-        await MainActor.run {
-          appendToComposer(generated)
-          dismissAIPrompt()
-        }
-      } catch {
-        #if DEBUG
-        print("AI Compose: Error: \(error)")
-        #endif
-        await MainActor.run {
-          aiError = "Failed to generate text. Please try again."
+        let session = LanguageModelSession { systemPrompt }
+        do {
+          #if DEBUG
+            print("AI Compose: Requesting response for prompt: \(instructions)")
+          #endif
+          let response = try await session.respond(to: instructions)
+          let generated = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
+          await MainActor.run {
+            appendToComposer(generated)
+            dismissAIPrompt()
+          }
+        } catch {
+          #if DEBUG
+            print("AI Compose: Error: \(error)")
+          #endif
+          await MainActor.run {
+            aiError = "Failed to generate text. Please try again."
+          }
         }
       }
-    }
     #endif
   }
 }

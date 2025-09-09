@@ -1,3 +1,4 @@
+import Models
 import SwiftUI
 
 public struct HeaderTitleShadowModifier: ViewModifier {
@@ -147,7 +148,7 @@ public struct HeaderView: View {
           .font(.body)
           .padding(.all, 12)
       }
-      .buttonStyle(.glass)
+      .modifier(ButtonStyleModifier())
       .foregroundColor(.primary)
 
     case .custom(let systemImage, let action):
@@ -158,7 +159,7 @@ public struct HeaderView: View {
           .font(.body)
           .padding(.all, 8)
       }
-      .buttonStyle(.glass)
+      .modifier(ButtonStyleModifier())
       .foregroundColor(.primary)
 
     case .titleOnly:
@@ -245,4 +246,14 @@ public struct HeaderView: View {
     )
   }
   .padding()
+}
+
+struct ButtonStyleModifier: ViewModifier {
+  func body(content: Content) -> some View {
+    if #available(iOS 26.0, *) {
+      content.buttonStyle(.glass)
+    } else {
+      content.buttonStyle(.bordered)
+    }
+  }
 }
