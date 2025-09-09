@@ -2,6 +2,8 @@
 <img width="150" height="150" alt="butterfly" src="https://github.com/user-attachments/assets/2fb98b8a-6b5f-4ec2-87e4-4fa8fdde023f" /> <img width="150" height="150" alt="cloud" src="https://github.com/user-attachments/assets/57d066d5-319e-4c58-886d-819421f30190" /> <img width="150" height="150" alt="rain" src="https://github.com/user-attachments/assets/a76a3eb8-bd99-4f6b-ab10-322aea86206a" />
 
 
+   [![Join on TestFlight](https://img.shields.io/badge/TestFlight-Join-blue?logo=apple)](https://testflight.apple.com/join/1TqrMssv)
+
 
 # Horizon for Bluesky
 
@@ -212,5 +214,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Community** for feedback and testing
 
 ---
-
-**LiquidSky** - Where the sky meets the horizon of possibilities. 🌅
