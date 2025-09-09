@@ -1,6 +1,7 @@
 import Client
 import SwiftUI
 
+@available(iOS 26.0, *)
 struct ComposerTextEditorView: View {
   @Binding var text: AttributedString
   @Binding var selection: AttributedTextSelection

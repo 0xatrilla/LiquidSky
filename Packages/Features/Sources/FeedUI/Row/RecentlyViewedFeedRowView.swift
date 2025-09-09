@@ -62,6 +62,16 @@ struct RecentlyViewedFeedRowView: View {
     }
     .buttonStyle(PlainButtonStyle())
     .listRowSeparator(.hidden)
-    .listRowInsets(.vertical, 0)
+    .modifier(ListRowInsetsModifier())
+  }
+}
+
+struct ListRowInsetsModifier: ViewModifier {
+  func body(content: Content) -> some View {
+    if #available(iOS 26.0, *) {
+      content.listRowInsets(.vertical, 0)
+    } else {
+      content
+    }
   }
 }

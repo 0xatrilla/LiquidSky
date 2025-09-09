@@ -1,9 +1,8 @@
 import Foundation
 
-@MainActor
 @Observable
-public final class NotificationBadgeStore: Sendable {
-  public static let shared = NotificationBadgeStore()
+public final class NotificationBadgeStore {
+  public nonisolated(unsafe) static let shared = NotificationBadgeStore()
 
   private let lastSeenKey = "notifications.lastSeen"
   private let badgeCountKey = "notifications.badge.count"

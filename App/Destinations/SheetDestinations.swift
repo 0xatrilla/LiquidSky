@@ -82,19 +82,32 @@ public struct SheetDestinations: ViewModifier {
           .environment(router)
         case .composer(let mode):
           if let client, let currentUser {
-            switch mode {
-            case .newPost:
-              ComposerView(mode: .newPost)
-                .environment(client)
-                .environment(currentUser)
-                .environment(PostFilterService.shared)
-                .environment(router)
-            case .reply(let post):
-              ComposerView(mode: .reply(post))
-                .environment(client)
-                .environment(currentUser)
-                .environment(PostFilterService.shared)
-                .environment(router)
+            if #available(iOS 26.0, *) {
+              switch mode {
+              case .newPost:
+                ComposerView(mode: .newPost)
+                  .environment(client)
+                  .environment(currentUser)
+                  .environment(PostFilterService.shared)
+                  .environment(router)
+              case .reply(let post):
+                ComposerView(mode: .reply(post))
+                  .environment(client)
+                  .environment(currentUser)
+                  .environment(PostFilterService.shared)
+                  .environment(router)
+              }
+            } else {
+              // Fallback for iOS 18 - simple text editor
+              VStack {
+                Text("Composer not available on iOS 18")
+                  .foregroundStyle(.secondary)
+                Button("Done") {
+                  router.presentedSheet = nil
+                }
+                .buttonStyle(.borderedProminent)
+              }
+              .padding()
             }
           }
         case .profile(let profile):

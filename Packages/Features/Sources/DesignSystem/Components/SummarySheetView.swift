@@ -1,3 +1,4 @@
+import Models
 import SwiftUI
 
 public struct SummarySheetView: View {
@@ -58,45 +59,46 @@ public struct SummarySheetView: View {
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-              // Apple Intelligence branding
-              HStack {
-                Image(systemName: "brain.head.profile")
-                  .font(.caption)
-                  .foregroundStyle(.white)
-                  .padding(6)
-                  .background(
-                    LinearGradient(
-                      colors: [.blue, .purple], startPoint: .leading, endPoint: .trailing)
-                  )
-                  .clipShape(Circle())
+              if PlatformFeatures.supportsAppleIntelligenceBranding {
+                HStack {
+                  Image(systemName: "brain.head.profile")
+                    .font(.caption)
+                    .foregroundStyle(.white)
+                    .padding(6)
+                    .background(
+                      LinearGradient(
+                        colors: [.blue, .purple], startPoint: .leading, endPoint: .trailing)
+                    )
+                    .clipShape(Circle())
 
-                Text("Powered by Apple Intelligence")
-                  .font(.caption)
-                  .fontWeight(.semibold)
-                  .overlay(
-                    LinearGradient(
-                      colors: [.blue, .purple], startPoint: .leading, endPoint: .trailing
+                  Text("Powered by Apple Intelligence")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .overlay(
+                      LinearGradient(
+                        colors: [.blue, .purple], startPoint: .leading, endPoint: .trailing
+                      )
+                      .mask(
+                        Text("Powered by Apple Intelligence")
+                          .font(.caption)
+                          .fontWeight(.semibold)
+                      )
                     )
-                    .mask(
-                      Text("Powered by Apple Intelligence")
-                        .font(.caption)
-                        .fontWeight(.semibold)
+                    .foregroundStyle(.clear)
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 10)
+                    .background(
+                      LinearGradient(
+                        colors: [.blue.opacity(0.15), .purple.opacity(0.15)], startPoint: .leading,
+                        endPoint: .trailing
+                      )
+                      .clipShape(Capsule())
                     )
-                  )
-                  .foregroundStyle(.clear)
-                  .padding(.vertical, 6)
-                  .padding(.horizontal, 10)
-                  .background(
-                    LinearGradient(
-                      colors: [.blue.opacity(0.15), .purple.opacity(0.15)], startPoint: .leading,
-                      endPoint: .trailing
-                    )
-                    .clipShape(Capsule())
-                  )
 
-                Spacer()
+                  Spacer()
+                }
+                .padding(.top, 4)
               }
-              .padding(.top, 4)
             }
 
             // Summary content - now fills the entire sheet
@@ -141,26 +143,36 @@ public struct SummarySheetView: View {
         .frame(maxHeight: 700)  // Increased height for full summary content
       }
       .background(
-        RoundedRectangle(cornerRadius: 24)
-          .fill(.ultraThinMaterial)
-          .overlay(
-            ZStack {
-              // Outer stroke
-              RoundedRectangle(cornerRadius: 24)
-                .stroke(.white.opacity(colorScheme == .dark ? 0.08 : 0.2), lineWidth: 1)
-              // Top highlight for a glass sheen
-              RoundedRectangle(cornerRadius: 24)
-                .fill(
-                  LinearGradient(
-                    colors: [Color.white.opacity(colorScheme == .dark ? 0.10 : 0.35), .clear],
-                    startPoint: .topLeading,
-                    endPoint: .center
-                  )
-                )
-                .allowsHitTesting(false)
-            }
-          )
-          .shadow(color: .black.opacity(0.25), radius: 20, x: 0, y: 10)
+        Group {
+          if PlatformFeatures.supportsLiquidDesign {
+            RoundedRectangle(cornerRadius: 24)
+              .fill(.ultraThinMaterial)
+              .overlay(
+                ZStack {
+                  RoundedRectangle(cornerRadius: 24)
+                    .stroke(.white.opacity(colorScheme == .dark ? 0.08 : 0.2), lineWidth: 1)
+                  RoundedRectangle(cornerRadius: 24)
+                    .fill(
+                      LinearGradient(
+                        colors: [Color.white.opacity(colorScheme == .dark ? 0.10 : 0.35), .clear],
+                        startPoint: .topLeading,
+                        endPoint: .center
+                      )
+                    )
+                    .allowsHitTesting(false)
+                }
+              )
+              .shadow(color: .black.opacity(0.25), radius: 20, x: 0, y: 10)
+          } else {
+            RoundedRectangle(cornerRadius: 16)
+              .fill(Color(.secondarySystemBackground))
+              .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                  .stroke(Color(.separator), lineWidth: 0.5)
+              )
+              .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 4)
+          }
+        }
       )
       .padding(.horizontal, 16)
       .frame(maxHeight: 800)  // Increased overall sheet height limit
