@@ -1,6 +1,7 @@
 import AppRouter
 import AuthUI
-import ChatUI
+// TODO: Re-enable ChatUI import when chat functionality is ready
+// import ChatUI
 import Client
 import ComposerUI
 import DesignSystem
@@ -74,6 +75,8 @@ struct AppTabView: View {
               Label("Feed", systemImage: "square.stack")
             }
 
+          // TODO: Re-enable Messages tab when chat functionality is ready
+          /*
           case .messages:
             Tab(value: AppTab.messages) {
               NavigationStack(
@@ -83,12 +86,21 @@ struct AppTabView: View {
                 )
               ) {
                 ConversationsView()
-                  .navigationTitle("Messages")
                   .navigationBarTitleDisplayMode(.large)
-                  .toolbar {
-                    ToolbarItemGroup(placement: .topBarTrailing) {
-                      Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
-                        Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
+                  .onReceive(
+                    NotificationCenter.default.publisher(for: .init("openSendMessageFromProfile"))
+                  ) { note in
+                    if let userInfo = note.userInfo,
+                      let did = userInfo["did"] as? String,
+                      let handle = userInfo["handle"] as? String,
+                      let displayName = userInfo["displayName"] as? String
+                    {
+                      router.selectedTab = .messages
+                      Task { @MainActor in
+                        // Route to Messages tab and trigger start sheet pre-filled via global notif
+                        NotificationCenter.default.post(
+                          name: .init("startConversationWithDID"), object: nil,
+                          userInfo: ["did": did, "handle": handle, "displayName": displayName])
                       }
                     }
                   }
@@ -96,6 +108,7 @@ struct AppTabView: View {
             } label: {
               Label("Messages", systemImage: "bubble.left.and.bubble.right")
             }
+          */
 
           case .notification:
             Tab(value: AppTab.notification) {
@@ -277,7 +290,8 @@ extension AppTab {
   var displayName: String {
     switch self {
     case .feed: return "Feed"
-    case .messages: return "Messages"
+    // TODO: Re-enable messages case when chat functionality is ready
+    // case .messages: return "Messages"
     case .notification: return "Notifications"
     case .profile: return "Profile"
     case .settings: return "Settings"

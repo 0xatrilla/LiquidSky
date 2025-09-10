@@ -1,5 +1,6 @@
 import Auth
-import ChatUI
+// TODO: Re-enable ChatUI import when chat functionality is ready
+// import ChatUI
 import DesignSystem
 import Models
 import NotificationsUI
@@ -27,7 +28,8 @@ public struct SettingsView: View {
   @State private var showingLists = false
   @State private var showingListNotifications = false
   @State private var showingNotificationsCenter = false
-  @State private var showingMessages = false
+  // TODO: Re-enable showingMessages when chat functionality is ready
+  // @State private var showingMessages = false
   @State private var showingTabCustomization = false
 
   public init() {}
@@ -124,9 +126,12 @@ public struct SettingsView: View {
     .sheet(isPresented: $showingListNotifications) {
       ListNotificationSettingsView()
     }
+    // TODO: Re-enable Messages sheet when chat functionality is ready
+    /*
     .sheet(isPresented: $showingMessages) {
       ConversationsView()
     }
+    */
     .sheet(isPresented: $showingTabCustomization) {
       TabBarCustomizationView()
     }

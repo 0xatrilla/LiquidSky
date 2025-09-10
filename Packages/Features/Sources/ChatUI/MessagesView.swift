@@ -1,3 +1,5 @@
+// TODO: Re-enable MessagesView when chat functionality is ready
+/*
 import Client
 import Models
 import SwiftUI
@@ -198,5 +200,43 @@ public struct ChatMessage: Identifiable {
     let formatter = RelativeDateTimeFormatter()
     formatter.unitsStyle = .short
     return formatter.localizedString(for: sentAt, relativeTo: Date())
+  }
+}
+*/
+
+// Temporary placeholder MessagesView for compilation
+import Foundation
+import SwiftUI
+
+public struct MessagesView: View {
+  let conversation: ConversationSummary
+
+  public init(conversation: ConversationSummary) {
+    self.conversation = conversation
+  }
+
+  public var body: some View {
+    Text("Messages feature coming soon!")
+      .font(.headline)
+      .foregroundStyle(.secondary)
+  }
+}
+
+public struct ChatMessage: Identifiable {
+  public let id: String
+  public let text: String
+  public let sentAt: Date
+  public let isMine: Bool
+  public let isRead: Bool
+
+  public init(
+    id: String = "", text: String = "", sentAt: Date = Date(), isMine: Bool = false,
+    isRead: Bool = false
+  ) {
+    self.id = id
+    self.text = text
+    self.sentAt = sentAt
+    self.isMine = isMine
+    self.isRead = isRead
   }
 }

@@ -1,3 +1,5 @@
+// TODO: Re-enable ConversationsView when chat functionality is ready
+/*
 import Client
 import Models
 import SwiftUI
@@ -8,6 +10,8 @@ public struct ConversationsView: View {
   @State private var error: Error?
   @State private var conversations: [ConversationSummary] = []
   @State private var selectedConversation: ConversationSummary?
+  @State private var showStartConversation = false
+  @State private var prefillUser: (did: String, handle: String, display: String)?
   @State private var chatService: ChatService?
   @State private var cursor: String?
   @State private var hasMore = true
@@ -24,19 +28,47 @@ public struct ConversationsView: View {
             Image(systemName: "exclamationmark.triangle")
               .font(.largeTitle)
               .foregroundStyle(.secondary)
-            Text("Failed to load conversations")
+            Text("Messages Unavailable")
               .font(.headline)
             Text(error.localizedDescription)
               .font(.footnote)
               .foregroundStyle(.secondary)
+              .multilineTextAlignment(.center)
+            Button("Try Again") {
+              Task { await reloadAll() }
+            }
+            .buttonStyle(.bordered)
+            .padding(.top, 8)
           }
           .padding()
         } else if conversations.isEmpty {
-          ContentUnavailableView(
-            "No Conversations",
-            systemImage: "bubble.left.and.bubble.right",
-            description: Text("Start a new conversation from a user's profile.")
-          )
+          VStack(spacing: 16) {
+            Image(systemName: "bubble.left.and.bubble.right")
+              .font(.largeTitle)
+              .foregroundStyle(.secondary)
+            Text("Messages")
+              .font(.title2)
+              .fontWeight(.semibold)
+            Text(
+              "Chat functionality is currently being implemented. We're working on integrating with Bluesky's messaging system."
+            )
+            .font(.body)
+            .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal)
+            if let error {
+              Text("Last error: \(error.localizedDescription)")
+                .font(.caption)
+                .foregroundStyle(.red)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+            }
+            Button("Test Connection") {
+              Task { await reloadAll() }
+            }
+            .buttonStyle(.bordered)
+          }
+          .padding()
         } else {
           List {
             ForEach(conversations) { convo in
@@ -104,9 +136,9 @@ public struct ConversationsView: View {
       }
       .navigationTitle("Messages")
       .toolbar {
-        ToolbarItem(placement: .navigationBarTrailing) {
+        ToolbarItem(placement: .topBarTrailing) {
           Button {
-            // TODO: start new message flow
+            showStartConversation = true
           } label: {
             Image(systemName: "square.and.pencil")
           }
@@ -114,6 +146,38 @@ public struct ConversationsView: View {
       }
       .sheet(item: $selectedConversation) { convo in
         MessagesView(conversation: convo)
+      }
+      .sheet(isPresented: $showStartConversation) {
+        StartConversationSheet(onSelected: { user in
+          Task {
+            guard let chatService else { return }
+            do {
+              let convo = try await chatService.getOrCreateConversation(withMembers: [user.did])
+              await MainActor.run {
+                self.selectedConversation = ConversationSummary(
+                  id: convo.id,
+                  title: user.displayName ?? user.handle,
+                  lastMessagePreview: "",
+                  updatedAt: Date(),
+                  unreadCount: 0)
+              }
+            } catch {
+              // ignore for now
+            }
+          }
+        })
+        .environment(client)
+      }
+      .onReceive(NotificationCenter.default.publisher(for: .init("startConversationWithDID"))) {
+        note in
+        if let ui = note.userInfo,
+          let did = ui["did"] as? String,
+          let handle = ui["handle"] as? String,
+          let display = ui["displayName"] as? String
+        {
+          prefillUser = (did, handle, display)
+          showStartConversation = true
+        }
       }
       .task {
         chatService = ChatService(client: client)
@@ -135,7 +199,9 @@ public struct ConversationsView: View {
       return
     }
     do {
+      print("📱 Loading conversations...")
       let result = try await chatService.listConversations(cursor: nil)
+      print("✅ Loaded \(result.items.count) conversations")
       self.conversations = result.items.map { convo in
         ConversationSummary(
           id: convo.id,
@@ -148,7 +214,51 @@ public struct ConversationsView: View {
       self.cursor = result.cursor
       self.hasMore = (result.cursor != nil)
     } catch {
-      self.error = error
+      print("❌ Failed to load conversations: \(error)")
+      print("Error type: \(type(of: error))")
+
+      // Provide better error messages for common chat issues
+      if let chatError = error as? ChatError {
+        print("Chat error: \(chatError)")
+        switch chatError {
+        case .conversationNotFound:
+          // This likely means chat is not available for this user
+          let chatUnavailableError = NSError(
+            domain: "ChatService",
+            code: -1,
+            userInfo: [
+              NSLocalizedDescriptionKey:
+                "Chat functionality is not available for your account. This feature may not be enabled yet or requires special permissions."
+            ]
+          )
+          self.error = chatUnavailableError
+        default:
+          self.error = error
+        }
+      } else if let nsError = error as NSError? {
+        print("NSError details: domain=\(nsError.domain), code=\(nsError.code)")
+        if let userInfo = nsError.userInfo["NSLocalizedDescription"] as? String {
+          print("Error description: \(userInfo)")
+        }
+
+        // Handle network errors specifically
+        if nsError.domain == "NSURLErrorDomain" {
+          let networkError = NSError(
+            domain: "ChatService",
+            code: -2,
+            userInfo: [
+              NSLocalizedDescriptionKey:
+                "Network connection issue. Please check your internet connection and try again."
+            ]
+          )
+          self.error = networkError
+        } else {
+          self.error = error
+        }
+      } else {
+        self.error = error
+      }
+
       self.conversations = []
     }
   }
@@ -191,5 +301,39 @@ public struct ConversationSummary: Identifiable {
     let formatter = RelativeDateTimeFormatter()
     formatter.unitsStyle = .short
     return formatter.localizedString(for: updatedAt, relativeTo: Date())
+  }
+}
+*/
+
+// Temporary placeholders for compilation
+import Foundation
+import SwiftUI
+
+public struct ConversationSummary: Identifiable {
+  public let id: String
+  public let title: String
+  public let lastMessagePreview: String
+  public let updatedAt: Date
+  public let unreadCount: Int
+
+  public init(
+    id: String = "", title: String = "", lastMessagePreview: String = "", updatedAt: Date = Date(),
+    unreadCount: Int = 0
+  ) {
+    self.id = id
+    self.title = title
+    self.lastMessagePreview = lastMessagePreview
+    self.updatedAt = updatedAt
+    self.unreadCount = unreadCount
+  }
+}
+
+public struct ConversationsView: View {
+  public init() {}
+
+  public var body: some View {
+    Text("Messages feature coming soon!")
+      .font(.headline)
+      .foregroundStyle(.secondary)
   }
 }

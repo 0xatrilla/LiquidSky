@@ -214,6 +214,24 @@ public struct ProfileView: View {
 
       Menu {
         if !isCurrentUser {
+          // TODO: Re-enable Send Message button when chat functionality is ready
+          /*
+          Button(action: {
+            NotificationCenter.default.post(
+              name: .init("openSendMessageFromProfile"),
+              object: nil,
+              userInfo: [
+                "did": (fullProfile ?? profile).did,
+                "handle": (fullProfile ?? profile).handle,
+                "displayName": (fullProfile ?? profile).displayName
+                  ?? (fullProfile ?? profile).handle,
+              ]
+            )
+          }) {
+            Label("Send Message", systemImage: "paperplane")
+          }
+          */
+
           // Per-account post notifications
           Button(action: {
             NotificationPreferences.shared.toggleSubscription(for: profile.did)

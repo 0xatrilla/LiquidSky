@@ -6,14 +6,17 @@ extension EnvironmentValues {
 }
 
 public enum AppTab: String, TabType, CaseIterable {
-  case feed, messages, notification, profile, settings, compose
+  case feed, notification, profile, settings, compose
+  // TODO: Re-enable messages case when chat functionality is ready
+  // case messages
 
   public var id: String { rawValue }
 
   public var title: String {
     switch self {
     case .feed: return "Feed"
-    case .messages: return "Messages"
+    // TODO: Re-enable messages case when chat functionality is ready
+    // case .messages: return "Messages"
     case .notification: return "Notifications"
     case .profile: return "Profile"
     case .settings: return "Settings"
@@ -24,7 +27,8 @@ public enum AppTab: String, TabType, CaseIterable {
   public var icon: String {
     switch self {
     case .feed: return "square.stack"
-    case .messages: return "bubble.left.and.bubble.right"
+    // TODO: Re-enable messages case when chat functionality is ready
+    // case .messages: return "bubble.left.and.bubble.right"
     case .notification: return "bell"
     case .profile: return "person"
     case .settings: return "gearshape"
