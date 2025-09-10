@@ -18,12 +18,19 @@ public func processFeed(
   var missingParentURIs = Set<String>()
   var replyToParentMap: [String: String] = [:]  // reply URI -> parent URI
 
+  #if DEBUG
+    print("processFeed: Starting to process \(feed.count) feed items")
+  #endif
+
   func insert(
     post: AppBskyLexicon.Feed.PostViewDefinition,
     fromFeedItem: AppBskyLexicon.Feed.FeedViewPostDefinition
   ) {
     // Add safety check to prevent crash if uri is nil
     guard !post.uri.isEmpty else {
+      #if DEBUG
+        print("processFeed: Skipping post with empty URI")
+      #endif
       return
     }
 
@@ -31,38 +38,56 @@ public func processFeed(
       return
     }
 
-    // Use the FeedViewPostDefinition.postItem extension to get repost information
-    let item = fromFeedItem.postItem
-    // hasReply is already set correctly from replyRef in the PostItem initializer
-    postItems.append(item)
-    processedCount += 1
+    do {
+      // Use the FeedViewPostDefinition.postItem extension to get repost information
+      let item = fromFeedItem.postItem
+      // hasReply is already set correctly from replyRef in the PostItem initializer
+      postItems.append(item)
+      processedCount += 1
+    } catch {
+      #if DEBUG
+        print("processFeed: Error creating PostItem for \(post.uri): \(error)")
+      #endif
+      // Skip this post if we can't process it
+    }
   }
 
   // First pass: process all posts and identify missing parents
-  for (_, post) in feed.enumerated() {
-    // Pass both the post and the feed item to get repost information
-    insert(post: post.post, fromFeedItem: post)
+  for (index, post) in feed.enumerated() {
+    do {
+      #if DEBUG
+        print("processFeed: Processing post \(index + 1)/\(feed.count): \(post.post.uri)")
+      #endif
 
-    // Check if this is a reply and identify missing parent
-    let postItem = post.postItem
-    if let replyRef = postItem.replyRef {
-      let parentURI = replyParentURI(from: replyRef)
-      if let parentURI = parentURI {
-        // Check if parent is already in the current feed
-        let parentExists = feed.contains { $0.post.uri == parentURI }
-        if !parentExists {
-          missingParentURIs.insert(parentURI)
-          replyToParentMap[postItem.uri] = parentURI
+      // Pass both the post and the feed item to get repost information
+      insert(post: post.post, fromFeedItem: post)
+
+      // Check if this is a reply and identify missing parent
+      let postItem = post.postItem
+      if let replyRef = postItem.replyRef {
+        let parentURI = replyParentURI(from: replyRef)
+        if let parentURI = parentURI {
+          // Check if parent is already in the current feed
+          let parentExists = feed.contains { $0.post.uri == parentURI }
+          if !parentExists {
+            missingParentURIs.insert(parentURI)
+            replyToParentMap[postItem.uri] = parentURI
+          }
         }
       }
-    }
 
-    // Note: The reply field indicates that a reply exists, but doesn't contain the reply post data
-    // The main posts already have the reply information they need (isReplyTo, replyRef, etc.)
+      // Note: The reply field indicates that a reply exists, but doesn't contain the reply post data
+      // The main posts already have the reply information they need (isReplyTo, replyRef, etc.)
 
-    // Process repost - simplified to avoid type issues
-    if post.reason != nil {
-      // TODO: Implement proper reply processing when we understand the type structure
+      // Process repost - simplified to avoid type issues
+      if post.reason != nil {
+        // TODO: Implement proper reply processing when we understand the type structure
+      }
+    } catch {
+      #if DEBUG
+        print("processFeed: Error processing post \(index + 1): \(error)")
+      #endif
+      // Continue processing other posts even if one fails
     }
   }
 
@@ -88,6 +113,12 @@ public func processFeed(
       // Handle error silently - missing parent posts are not critical
     }
   }
+
+  #if DEBUG
+    print(
+      "processFeed: Successfully processed \(postItems.count) posts out of \(feed.count) feed items"
+    )
+  #endif
 
   return postItems
 }
@@ -140,6 +171,8 @@ public struct PostListView<T: PostsListViewDatasource>: View {
   @State private var summaryText: String?
   @State private var newPostsCount = 0
   @State private var previousPostsCount = 0
+  @State private var retryCount = 0
+  @State private var isRetrying = false
 
   @StateObject private var simpleSummaryService = SimpleSummaryService()
 
@@ -261,15 +294,17 @@ public struct PostListView<T: PostsListViewDatasource>: View {
 
               Button("Try Again") {
                 Task {
-                  state = .loading
-                  do {
-                    state = try await datasource.loadPosts(with: state)
-                  } catch {
-                    state = .error(error)
-                  }
+                  await retryLoad()
                 }
               }
               .buttonStyle(.borderedProminent)
+              .disabled(isRetrying)
+
+              if isRetrying {
+                ProgressView()
+                  .scaleEffect(0.8)
+                  .padding(.top, 8)
+              }
             }
             .padding()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -281,6 +316,35 @@ public struct PostListView<T: PostsListViewDatasource>: View {
         // Header will scroll naturally with content
       }
     }
+  }
+
+  private func retryLoad() async {
+    guard !isRetrying else { return }
+
+    isRetrying = true
+    retryCount += 1
+
+    #if DEBUG
+      print("PostsListView: Retrying load attempt \(retryCount)")
+    #endif
+
+    // Add exponential backoff delay
+    let delay = min(pow(2.0, Double(retryCount - 1)), 8.0)  // Max 8 seconds
+    try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+
+    state = .loading
+
+    do {
+      state = try await datasource.loadPosts(with: state)
+      retryCount = 0  // Reset retry count on success
+    } catch {
+      #if DEBUG
+        print("PostsListView: Retry \(retryCount) failed: \(error)")
+      #endif
+      state = .error(error)
+    }
+
+    isRetrying = false
   }
 
   private func filteredPosts(_ posts: [PostItem]) -> [PostItem] {
