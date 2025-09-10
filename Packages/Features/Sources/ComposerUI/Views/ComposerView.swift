@@ -4,8 +4,9 @@ import DesignSystem
 import Models
 import SwiftUI
 
+// Modern (iOS 26+) composer implementation used by the unified ComposerView
 @available(iOS 26.0, *)
-public struct ComposerView: View {
+public struct ModernComposerInnerView: View {
   @Environment(BSkyClient.self) private var client
   @Environment(\.dismiss) private var dismiss
   @Environment(PostFilterService.self) private var postFilterService
@@ -86,7 +87,7 @@ public struct ComposerView: View {
 
 // MARK: - Network
 @available(iOS 26.0, *)
-extension ComposerView {
+extension ModernComposerInnerView {
   private func sendPost() async {
     guard canSendPost else { return }
 

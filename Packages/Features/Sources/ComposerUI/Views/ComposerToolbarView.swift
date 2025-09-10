@@ -51,7 +51,13 @@ struct ComposerToolbarView: ToolbarContent {
 
     ToolbarItem(placement: .keyboard) {
       Button {
-        showCamera = true
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+          showCamera = true
+        } else {
+          #if DEBUG
+            print("Camera not available on this device")
+          #endif
+        }
       } label: {
         Image(systemName: "camera")
           .foregroundColor(.blue)
@@ -89,23 +95,24 @@ struct ComposerToolbarView: ToolbarContent {
       }
     }
 
-    // AI Compose
-    ToolbarItem(placement: .keyboard) {
-      Button {
-        showingAIPrompt = true
-      } label: {
-        Image(systemName: "sparkles")
-          .symbolRenderingMode(.multicolor)
-      }
-      .disabled(!aiComposeAvailable())
-      .sheet(isPresented: $showingAIPrompt) {
-        AIPromptSheet(
-          prompt: $aiPrompt,
-          isGenerating: $isAIGenerating,
-          errorMessage: $aiError,
-          onCancel: { showingAIPrompt = false },
-          onGenerate: { Task { await composeWithAI() } }
-        )
+    // AI Compose (only available on iOS 26+ with FoundationModels and user-gated)
+    if aiComposeAvailable() {
+      ToolbarItem(placement: .keyboard) {
+        Button {
+          showingAIPrompt = true
+        } label: {
+          Image(systemName: "sparkles")
+            .symbolRenderingMode(.multicolor)
+        }
+        .sheet(isPresented: $showingAIPrompt) {
+          AIPromptSheet(
+            prompt: $aiPrompt,
+            isGenerating: $isAIGenerating,
+            errorMessage: $aiError,
+            onCancel: { showingAIPrompt = false },
+            onGenerate: { Task { await composeWithAI() } }
+          )
+        }
       }
     }
 
@@ -132,18 +139,10 @@ struct ComposerToolbarView: ToolbarContent {
   // MARK: - AI Compose Helpers
 
   private func aiComposeAvailable() -> Bool {
-    let aiEnabledByUser = SettingsService.shared.aiSummariesEnabled
-    #if targetEnvironment(simulator)
-      let aiGatedOK = aiEnabledByUser
-    #else
-      let aiGatedOK = aiEnabledByUser && SettingsService.shared.aiDeviceExperimentalEnabled
-    #endif
+    // Show AI on iOS 26+ when FoundationModels is available.
+    // We removed user/device gates, so this returns true purely based on OS capability.
     #if canImport(FoundationModels)
-      if #available(iOS 26.0, *) {
-        return aiGatedOK
-      } else {
-        return false
-      }
+      if #available(iOS 26.0, *) { return true } else { return false }
     #else
       return false
     #endif
@@ -182,7 +181,7 @@ struct ComposerToolbarView: ToolbarContent {
   private func composeWithAI() async {
     guard aiComposeAvailable() else {
       aiError =
-        "Apple Intelligence not available. Enable AI in Settings or use a supported device (iOS 26+)."
+        "Apple Intelligence not available. Enable AI in Settings or use a supported device (iOS 26.0+)."
       return
     }
 
@@ -237,6 +236,8 @@ struct CameraView: UIViewControllerRepresentable {
     let picker = UIImagePickerController()
     picker.delegate = context.coordinator
     picker.sourceType = .camera
+    picker.allowsEditing = false
+    picker.cameraCaptureMode = .photo
     return picker
   }
 
@@ -259,6 +260,10 @@ struct CameraView: UIViewControllerRepresentable {
     ) {
       if let image = info[.originalImage] as? UIImage {
         onImageCaptured(image)
+      } else {
+        #if DEBUG
+          print("Failed to get image from camera")
+        #endif
       }
       picker.dismiss(animated: true)
     }

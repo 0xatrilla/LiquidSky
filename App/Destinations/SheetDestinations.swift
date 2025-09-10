@@ -98,16 +98,11 @@ public struct SheetDestinations: ViewModifier {
                   .environment(router)
               }
             } else {
-              // Fallback for iOS 18 - simple text editor
-              VStack {
-                Text("Composer not available on iOS 18")
-                  .foregroundStyle(.secondary)
-                Button("Done") {
-                  router.presentedSheet = nil
-                }
-                .buttonStyle(.borderedProminent)
-              }
-              .padding()
+              LegacyComposerView(mode: mode)
+                .environment(client)
+                .environment(currentUser)
+                .environment(PostFilterService.shared)
+                .environment(router)
             }
           }
         case .profile(let profile):
