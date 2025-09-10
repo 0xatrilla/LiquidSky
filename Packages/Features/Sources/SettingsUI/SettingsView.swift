@@ -71,9 +71,6 @@ public struct SettingsView: View {
         // Media Section
         mediaSection
 
-        // Support Section
-        supportSection
-
         // About Section
         aboutSection
 
@@ -374,22 +371,6 @@ public struct SettingsView: View {
     }
   }
 
-  // MARK: - Support Section
-  private var supportSection: some View {
-    VStack(spacing: 16) {
-      SettingsSectionHeader(title: "Support", icon: "questionmark.circle.fill", color: .blue)
-
-      SettingsNavigationRow(
-        title: "Help & Support",
-        subtitle: "Get help with the app",
-        icon: "questionmark.circle.fill",
-        iconColor: .blue
-      ) {
-        // TODO: Implement help and support functionality
-      }
-    }
-  }
-
   // MARK: - About Section
   private var aboutSection: some View {
     VStack(spacing: 16) {
@@ -476,7 +457,7 @@ public struct SettingsView: View {
 
   // MARK: - Helper Functions
   private func openBlueskyAccountDeletion() {
-    if let url = URL(string: "https://bsky.social/settings") {
+    if let url = URL(string: "https://bsky.app/settings") {
       UIApplication.shared.open(url)
     }
   }

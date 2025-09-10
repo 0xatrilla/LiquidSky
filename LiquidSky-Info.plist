@@ -5,9 +5,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSUserNotificationsUsageDescription</key>
-	<string>LiquidSky uses notifications to keep you updated on new followers, likes, reposts, and replies.</string>
+	<string>Horizon uses notifications to keep you updated on new followers, likes, reposts, and replies.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>LiquidSky needs camera access to let you take photos for your posts.</string>
+	<string>Horizon needs camera access to let you take photos for your posts.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
