@@ -10,7 +10,6 @@ struct NotificationSettingsView: View {
   @State private var pushNotificationsEnabled = false
   @State private var iCloudSyncEnabled = false
   @State private var showTestNotification = false
-  @State private var showTippingView = false
 
   var body: some View {
     NavigationView {
@@ -235,67 +234,6 @@ struct NotificationSettingsView: View {
           }
         }
 
-        // Tipping Section
-        Section("Support Horizon") {
-          HStack {
-            Image(systemName: "heart.fill")
-              .foregroundColor(.red)
-
-            VStack(alignment: .leading, spacing: 4) {
-              Text("Send a Tip")
-                .font(.headline)
-              Text("Support continued development")
-                .font(.caption)
-                .foregroundColor(.secondary)
-            }
-
-            Spacer()
-
-            Button("Tip Now") {
-              showTippingView = true
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(.red)
-          }
-
-          // Quick tip stats
-          if !purchaseService.getPurchaseHistory().isEmpty {
-            VStack(spacing: 8) {
-              HStack {
-                Text("Total Tips Sent")
-                Spacer()
-                Text("\(purchaseService.getPurchaseHistory().count)")
-                  .fontWeight(.semibold)
-              }
-
-              HStack {
-                Text("Total Amount")
-                Spacer()
-                Text(formatCurrency(purchaseService.getTotalTipsAmount()))
-                  .fontWeight(.semibold)
-                  .foregroundColor(.blue)
-              }
-
-              if let lastDate = purchaseService.getLastTipDate() {
-                HStack {
-                  Text("Last Tip")
-                  Spacer()
-                  Text(lastDate, style: .date)
-                    .fontWeight(.semibold)
-                }
-              }
-            }
-            .font(.caption)
-            .padding(.top, 4)
-          }
-
-          Text(
-            "Tips help cover development costs and motivate continued improvements to Horizon."
-          )
-          .font(.caption2)
-          .foregroundColor(.secondary)
-          .padding(.top, 4)
-        }
       }
       .navigationTitle("Notifications & Sync")
       .navigationBarTitleDisplayMode(.inline)
@@ -317,10 +255,6 @@ struct NotificationSettingsView: View {
     } message: {
       Text("A test notification has been sent. Check your notification center!")
     }
-    // .sheet(isPresented: $showTippingView) {
-    //   TippingView()
-    //     .environment(purchaseService)
-    // }
   }
 
   private func requestPushNotificationPermission() async {

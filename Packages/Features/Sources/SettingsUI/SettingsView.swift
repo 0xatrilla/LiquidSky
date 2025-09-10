@@ -22,7 +22,6 @@ public struct SettingsView: View {
   @State private var showingAppIconPicker = false
   @State private var showingAcknowledgementsSheet = false
   @State private var showingAccountSwitcher = false
-  @State private var showingTippingView = false
   @State private var showingBlockedUsers = false
   @State private var showingCustomDomain = false
   @State private var showingLists = false
@@ -31,6 +30,7 @@ public struct SettingsView: View {
   // TODO: Re-enable showingMessages when chat functionality is ready
   // @State private var showingMessages = false
   @State private var showingTabCustomization = false
+  @State private var showingDeleteAccountAlert = false
 
   public init() {}
 
@@ -77,10 +77,13 @@ public struct SettingsView: View {
         // About Section
         aboutSection
 
-        // Sign Out Button
-        signOutButton
-          .padding(.horizontal, 16)
-          .padding(.bottom, 32)
+        // Account Actions
+        VStack(spacing: 12) {
+          signOutButton
+          deleteAccountButton
+        }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 32)
       }
     }
     .background(Color(.systemGroupedBackground))
@@ -93,6 +96,16 @@ public struct SettingsView: View {
       }
     } message: {
       Text("This will reset all settings to their default values. This action cannot be undone.")
+    }
+    .alert("Delete Account", isPresented: $showingDeleteAccountAlert) {
+      Button("Cancel", role: .cancel) {}
+      Button("Open Bluesky", role: .destructive) {
+        openBlueskyAccountDeletion()
+      }
+    } message: {
+      Text(
+        "This will open the Bluesky website where you can delete your account. Account deletion is permanent and cannot be undone."
+      )
     }
     .sheet(isPresented: $showingAboutSheet) {
       AboutView()
@@ -110,9 +123,6 @@ public struct SettingsView: View {
       AccountSwitcherView()
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
-    }
-    .sheet(isPresented: $showingTippingView) {
-      SimpleTippingView()
     }
     .sheet(isPresented: $showingBlockedUsers) {
       BlockedUsersView()
@@ -367,24 +377,16 @@ public struct SettingsView: View {
   // MARK: - Support Section
   private var supportSection: some View {
     VStack(spacing: 16) {
-      SettingsSectionHeader(title: "Support", icon: "heart.fill", color: .red)
+      SettingsSectionHeader(title: "Support", icon: "questionmark.circle.fill", color: .blue)
 
       SettingsNavigationRow(
-        title: "Send a Tip",
-        subtitle: "Support continued development",
-        icon: "heart.fill",
-        iconColor: .red
+        title: "Help & Support",
+        subtitle: "Get help with the app",
+        icon: "questionmark.circle.fill",
+        iconColor: .blue
       ) {
-        showingTippingView = true
+        // TODO: Implement help and support functionality
       }
-
-      Text(
-        "Tips help cover development costs and motivate continued improvements to Horizon."
-      )
-      .font(.caption2)
-      .foregroundColor(.secondary)
-      .multilineTextAlignment(.center)
-      .padding(.horizontal, 16)
     }
   }
 
@@ -449,6 +451,34 @@ public struct SettingsView: View {
       .clipShape(RoundedRectangle(cornerRadius: 12))
     }
     .buttonStyle(PlainButtonStyle())
+  }
+
+  // MARK: - Delete Account Button
+  private var deleteAccountButton: some View {
+    Button {
+      showingDeleteAccountAlert = true
+    } label: {
+      HStack {
+        Image(systemName: "trash")
+          .font(.title3)
+        Text("Delete Account")
+          .font(.body)
+          .fontWeight(.medium)
+      }
+      .foregroundColor(.white)
+      .frame(maxWidth: .infinity)
+      .padding()
+      .background(Color.black)
+      .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+    .buttonStyle(PlainButtonStyle())
+  }
+
+  // MARK: - Helper Functions
+  private func openBlueskyAccountDeletion() {
+    if let url = URL(string: "https://bsky.social/settings") {
+      UIApplication.shared.open(url)
+    }
   }
 }
 
@@ -726,262 +756,6 @@ private struct FeatureRow: View {
     }
   }
 
-}
-
-// MARK: - Simple Tipping View
-private struct SimpleTippingView: View {
-  @Environment(\.dismiss) private var dismiss
-  @State private var purchaseService = InAppPurchaseService.shared
-  @State private var selectedTipAmount: InAppPurchaseService.TipAmount?
-  @State private var isPurchasing = false
-  @State private var showThankYou = false
-  @State private var showError = false
-  @State private var errorMessage = ""
-
-  var body: some View {
-    NavigationView {
-      ScrollView {
-        VStack(spacing: 24) {
-          // Header
-          VStack(spacing: 16) {
-            Image(systemName: "heart.fill")
-              .font(.system(size: 60))
-              .foregroundColor(.red)
-
-            Text("Support Horizon")
-              .font(.largeTitle)
-              .fontWeight(.bold)
-
-            Text(
-              "If you enjoy using Horizon, consider sending a tip to support continued development and improvements."
-            )
-            .font(.body)
-            .foregroundColor(.secondary)
-            .multilineTextAlignment(.center)
-            .padding(.horizontal)
-          }
-          .padding(.top)
-
-          // Tip Options
-          if purchaseService.isLoading {
-            VStack(spacing: 16) {
-              ProgressView("Loading products...")
-                .frame(maxWidth: .infinity)
-            }
-            .padding(.horizontal)
-          } else if purchaseService.products.isEmpty {
-            VStack(spacing: 16) {
-              Text("No products available")
-                .foregroundColor(.secondary)
-            }
-            .padding(.horizontal)
-          } else {
-            LazyVGrid(
-              columns: [
-                GridItem(.flexible()),
-                GridItem(.flexible()),
-              ], spacing: 16
-            ) {
-              ForEach(purchaseService.products, id: \.id) { product in
-                TipOptionCard(
-                  amount: Double(truncating: product.price as NSDecimalNumber),
-                  isSelected: selectedTipAmount?.rawValue == product.id,
-                  onTap: {
-                    selectedTipAmount = InAppPurchaseService.TipAmount(rawValue: product.id)
-                  }
-                )
-              }
-            }
-            .padding(.horizontal)
-          }
-
-          // Purchase Button
-          if let selectedTip = selectedTipAmount,
-            let product = purchaseService.products.first(where: { $0.id == selectedTip.rawValue })
-          {
-            VStack(spacing: 16) {
-              Button(action: {
-                Task {
-                  await performPurchase(product: product)
-                }
-              }) {
-                HStack {
-                  if isPurchasing {
-                    ProgressView()
-                      .scaleEffect(0.8)
-                      .tint(.white)
-                  } else {
-                    Image(systemName: "heart.fill")
-                      .font(.headline)
-                  }
-
-                  Text("Send \(product.displayName)")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .background(
-                  LinearGradient(
-                    colors: [.red, .pink],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                  )
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-              }
-              .disabled(isPurchasing || purchaseService.purchaseInProgress)
-
-              Text("You'll be charged \(product.displayName)")
-                .font(.caption)
-                .foregroundColor(.secondary)
-            }
-            .padding(.horizontal)
-          }
-
-          Spacer(minLength: 40)
-        }
-      }
-      .navigationTitle("Support Horizon")
-      .navigationBarTitleDisplayMode(.inline)
-      .toolbar {
-        ToolbarItem(placement: .navigationBarTrailing) {
-          Button("Done") {
-            dismiss()
-          }
-        }
-      }
-    }
-    .sheet(isPresented: $showThankYou) {
-      ThankYouView()
-    }
-    .alert("Purchase Error", isPresented: $showError) {
-      Button("OK") {}
-    } message: {
-      Text(errorMessage)
-    }
-    .task {
-      // Load products when view appears
-      await purchaseService.loadProducts()
-    }
-  }
-
-  private func performPurchase(product: Product) async {
-    isPurchasing = true
-
-    let success = await purchaseService.purchase(product)
-
-    if success {
-      showThankYou = true
-    } else {
-      errorMessage = purchaseService.errorMessage ?? "Purchase failed. Please try again."
-      showError = true
-    }
-
-    isPurchasing = false
-  }
-}
-
-// MARK: - Tip Option Card
-private struct TipOptionCard: View {
-  let amount: Double
-  let isSelected: Bool
-  let onTap: () -> Void
-
-  var body: some View {
-    Button(action: onTap) {
-      VStack(spacing: 12) {
-        Text(getEmoji(for: amount))
-          .font(.system(size: 32))
-
-        Text(getTitle(for: amount))
-          .font(.headline)
-          .fontWeight(.semibold)
-
-        Text("$\(String(format: "%.2f", amount))")
-          .font(.title3)
-          .fontWeight(.bold)
-          .foregroundColor(.blue)
-
-        Text(getDescription(for: amount))
-          .font(.caption)
-          .foregroundColor(.secondary)
-          .multilineTextAlignment(.center)
-      }
-      .frame(maxWidth: .infinity)
-      .padding()
-      .background(
-        RoundedRectangle(cornerRadius: 16)
-          .fill(isSelected ? Color.blue.opacity(0.1) : Color.gray.opacity(0.1))
-          .overlay(
-            RoundedRectangle(cornerRadius: 16)
-              .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
-          )
-      )
-    }
-    .buttonStyle(PlainButtonStyle())
-  }
-
-  private func getEmoji(for amount: Double) -> String {
-    switch amount {
-    case 0.99: return "☕️"
-    case 2.99: return "🍕"
-    case 4.99: return "🎉"
-    case 9.99: return "💝"
-    default: return "💙"
-    }
-  }
-
-  private func getTitle(for amount: Double) -> String {
-    switch amount {
-    case 0.99: return "Small Tip"
-    case 2.99: return "Medium Tip"
-    case 4.99: return "Large Tip"
-    case 9.99: return "Custom Amount"
-    default: return "Tip"
-    }
-  }
-
-  private func getDescription(for amount: Double) -> String {
-    switch amount {
-    case 0.99: return "Show your appreciation"
-    case 2.99: return "A generous tip"
-    case 4.99: return "A substantial tip"
-    case 9.99: return "Choose your own amount"
-    default: return "Support development"
-    }
-  }
-}
-
-// MARK: - Thank You View
-private struct ThankYouView: View {
-  @Environment(\.dismiss) private var dismiss
-
-  var body: some View {
-    VStack(spacing: 24) {
-      Image(systemName: "heart.fill")
-        .font(.system(size: 80))
-        .foregroundColor(.red)
-
-      Text("Thank You! 💙")
-        .font(.largeTitle)
-        .fontWeight(.bold)
-
-      Text("Your tip has been received and will help support continued development of Horizon.")
-        .font(.body)
-        .foregroundColor(.secondary)
-        .multilineTextAlignment(.center)
-        .padding(.horizontal)
-
-      Button("You're Welcome!") {
-        dismiss()
-      }
-      .buttonStyle(.borderedProminent)
-      .tint(.red)
-    }
-    .padding()
-  }
 }
 
 #Preview {
