@@ -54,12 +54,21 @@ public struct NotificationsListView: View {
       error = nil
       cursor = nil
 
-      await fetchNotifications()
+      do {
+        await fetchNotifications()
 
-      // Check for new notifications and offer summary if 10+
-      newNotificationsCount = notificationsGroups.count - previousNotificationsCount
-      if newNotificationsCount >= 10 {
-        await offerSummary(for: Array(notificationsGroups.prefix(newNotificationsCount)))
+        // Check for new notifications and offer summary if 10+
+        newNotificationsCount = notificationsGroups.count - previousNotificationsCount
+        if newNotificationsCount >= 10 {
+          await offerSummary(for: Array(notificationsGroups.prefix(newNotificationsCount)))
+        }
+      } catch {
+        // Handle cancellation gracefully in refresh
+        if error is CancellationError {
+          // Don't show error for cancelled refresh
+          return
+        }
+        // Other errors will be handled by fetchNotifications()
       }
     }
     .sheet(isPresented: $showingSummary) {
@@ -258,6 +267,7 @@ public struct NotificationsListView: View {
       if error is CancellationError {
         // Task was cancelled, don't show error
         isLoading = false
+        error = nil  // Clear any existing error state
         return
       }
       #if DEBUG

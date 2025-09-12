@@ -21,7 +21,10 @@ struct AppTabView: View {
   @Environment(AppRouter.self) var router
   @Environment(BSkyClient.self) var client
   @State private var settingsService = SettingsService.shared
-  @State private var selectedTab: AppTab = .feed
+  // Use router's selectedTab instead of local state
+  private var selectedTab: AppTab {
+    router.selectedTab
+  }
   @State private var showingSummary = false
   @State private var summaryText = ""
   @State private var isGeneratingSummary = false
@@ -32,7 +35,12 @@ struct AppTabView: View {
   }
 
   public var body: some View {
-    TabView(selection: $selectedTab) {
+    TabView(
+      selection: Binding(
+        get: { router.selectedTab },
+        set: { router.selectedTab = $0 }
+      )
+    ) {
       ForEach(
         settingsService.tabBarTabsRaw + settingsService.pinnedFeedURIs.map { "feed:\($0)" },
         id: \.self
@@ -207,7 +215,7 @@ struct AppTabView: View {
                   .withAppDestinations()
                   .environment(\.currentTab, .compose)
               }
-              .onAppear { selectedTab = .compose }
+              .onAppear { router.selectedTab = .compose }
             } label: {
               Label("Search", systemImage: "magnifyingglass")
             }
