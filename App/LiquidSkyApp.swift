@@ -104,82 +104,91 @@ struct LiquidSkyApp: App {
           // .environment(cloudKitSyncService)
           .environment(inAppPurchaseService)
         case .authenticated(let client, let currentUser):
-          AppTabView()
-            .environment(client)
-            .environment(currentUser)
-            .environment(auth)
-            .environment(accountManager)
-            .environment(router)
-            .environment(postDataControllerProvider)
-            .environment(postFilterService)
-            .environment(imageQualityService)
-            .environment(settingsService)
-            .environment(ColorThemeManager.shared)
-            .environment(pushNotificationService)
-            // .environment(cloudKitSyncService)
-            .environment(inAppPurchaseService)
-            .id(auth.currentAccountId)  // CRITICAL: Forces complete view recreation on account switch
-            .withTheme()
-            .themeAware()
-            .modelContainer(for: RecentFeedItem.self)
-            .withSheetDestinations(
-              router: .constant(router), auth: auth, client: client, currentUser: currentUser,
-              postDataControllerProvider: postDataControllerProvider,
-              settingsService: settingsService
-            )
-            .onAppear {
-              #if DEBUG
-                print("LiquidSkyApp: Showing authenticated state")
-              #endif
+          Group {
+            // Use iPad-optimized view on iPadOS 26+ with larger screens
+            if UIDevice.current.userInterfaceIdiom == .pad,
+              #available(iPadOS 26.0, *)
+            {
+              iPadAppView()
+            } else {
+              AppTabView()
             }
-            .onReceive(NotificationCenter.default.publisher(for: .openComposerNewPostFromShortcut))
-          { _ in
+          }
+          .environment(client)
+          .environment(currentUser)
+          .environment(auth)
+          .environment(accountManager)
+          .environment(router)
+          .environment(postDataControllerProvider)
+          .environment(postFilterService)
+          .environment(imageQualityService)
+          .environment(settingsService)
+          .environment(ColorThemeManager.shared)
+          .environment(pushNotificationService)
+          // .environment(cloudKitSyncService)
+          .environment(inAppPurchaseService)
+          .id(auth.currentAccountId)  // CRITICAL: Forces complete view recreation on account switch
+          .withTheme()
+          .themeAware()
+          .modelContainer(for: RecentFeedItem.self)
+          .withSheetDestinations(
+            router: .constant(router), auth: auth, client: client, currentUser: currentUser,
+            postDataControllerProvider: postDataControllerProvider,
+            settingsService: settingsService
+          )
+          .onAppear {
+            #if DEBUG
+              print("LiquidSkyApp: Showing authenticated state")
+            #endif
+          }
+          .onReceive(NotificationCenter.default.publisher(for: .openComposerNewPostFromShortcut)) {
+            _ in
             Task { @MainActor in
               router.presentedSheet = .composer(mode: .newPost)
             }
           }
-            .onReceive(NotificationCenter.default.publisher(for: .openNotificationsFromShortcut)) {
-              _ in
-              Task { @MainActor in
-                router.selectedTab = .notification
-              }
+          .onReceive(NotificationCenter.default.publisher(for: .openNotificationsFromShortcut)) {
+            _ in
+            Task { @MainActor in
+              router.selectedTab = .notification
             }
-            .onReceive(NotificationCenter.default.publisher(for: .openSearchFromShortcut)) { _ in
-              Task { @MainActor in
-                router.selectedTab = .compose
-              }
+          }
+          .onReceive(NotificationCenter.default.publisher(for: .openSearchFromShortcut)) { _ in
+            Task { @MainActor in
+              router.selectedTab = .compose
             }
-            .onReceive(NotificationCenter.default.publisher(for: .openProfileFromShortcut)) { _ in
-              Task { @MainActor in
-                router.selectedTab = .profile
-              }
+          }
+          .onReceive(NotificationCenter.default.publisher(for: .openProfileFromShortcut)) { _ in
+            Task { @MainActor in
+              router.selectedTab = .profile
             }
-            .onReceive(NotificationCenter.default.publisher(for: .openFeedFromShortcut)) { _ in
-              Task { @MainActor in
-                router.selectedTab = .feed
-              }
+          }
+          .onReceive(NotificationCenter.default.publisher(for: .openFeedFromShortcut)) { _ in
+            Task { @MainActor in
+              router.selectedTab = .feed
             }
-            .onReceive(NotificationCenter.default.publisher(for: .notificationsUpdated)) {
-              notification in
-              if let userInfo = notification.userInfo,
-                let title = userInfo["title"] as? String,
-                let subtitle = userInfo["subtitle"] as? String
-              {
-                let defaults = UserDefaults(suiteName: "group.com.acxtrilla.LiquidSky")
-                defaults?.set(title, forKey: "widget.recent.notification.title")
-                defaults?.set(subtitle, forKey: "widget.recent.notification.subtitle")
+          }
+          .onReceive(NotificationCenter.default.publisher(for: .notificationsUpdated)) {
+            notification in
+            if let userInfo = notification.userInfo,
+              let title = userInfo["title"] as? String,
+              let subtitle = userInfo["subtitle"] as? String
+            {
+              let defaults = UserDefaults(suiteName: "group.com.acxtrilla.LiquidSky")
+              defaults?.set(title, forKey: "widget.recent.notification.title")
+              defaults?.set(subtitle, forKey: "widget.recent.notification.subtitle")
 
-                // Reload widget timeline
-                if #available(iOS 14.0, *) {
-                  WidgetCenter.shared.reloadTimelines(ofKind: "RecentNotificationWidget")
-                }
+              // Reload widget timeline
+              if #available(iOS 14.0, *) {
+                WidgetCenter.shared.reloadTimelines(ofKind: "RecentNotificationWidget")
               }
             }
-            .onReceive(NotificationCenter.default.publisher(for: .notificationTapped)) {
-              notification in
-              // Handle push notification taps
-              handleNotificationTap(notification)
-            }
+          }
+          .onReceive(NotificationCenter.default.publisher(for: .notificationTapped)) {
+            notification in
+            // Handle push notification taps
+            handleNotificationTap(notification)
+          }
         case .unauthenticated:
           AuthView()
             .environment(accountManager)
