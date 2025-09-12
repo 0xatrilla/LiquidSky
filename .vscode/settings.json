@@ -7,4 +7,5 @@
     "git.autofetch": "all",
     "git.enableSmartCommit": true,
     "git.fetchOnPull": true,
+    "kiroAgent.configureMCP": "Disabled",
   }

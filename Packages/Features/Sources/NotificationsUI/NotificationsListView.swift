@@ -2,6 +2,7 @@ import AppRouter
 import Client
 import DesignSystem
 import Destinations
+import Foundation
 import Models
 import SwiftUI
 
@@ -12,6 +13,7 @@ public struct NotificationsListView: View {
   @State private var cursor: String?
   @State private var isLoading = false
   @State private var error: Error?
+  @State private var isRefreshing = false
   @State private var showingSummary = false
   @State private var summaryText: String?
   @State private var newNotificationsCount = 0
@@ -26,7 +28,7 @@ public struct NotificationsListView: View {
     VStack(spacing: 0) {
       if isLoading && notificationsGroups.isEmpty {
         loadingView
-      } else if let error = error, !(error is CancellationError) {
+      } else if let error = error, !isCancellationError(error) {
         errorView(error: error)
       } else if notificationsGroups.isEmpty {
         emptyStateView
@@ -45,7 +47,9 @@ public struct NotificationsListView: View {
     }
     .refreshable {
       // Prevent multiple simultaneous refreshes
-      guard !isLoading else { return }
+      guard !isLoading && !isRefreshing else { return }
+
+      isRefreshing = true
 
       // Track previous notification count to detect new ones
       previousNotificationsCount = notificationsGroups.count
@@ -54,22 +58,15 @@ public struct NotificationsListView: View {
       error = nil
       cursor = nil
 
-      do {
-        await fetchNotifications()
+      await fetchNotifications()
 
-        // Check for new notifications and offer summary if 10+
-        newNotificationsCount = notificationsGroups.count - previousNotificationsCount
-        if newNotificationsCount >= 10 {
-          await offerSummary(for: Array(notificationsGroups.prefix(newNotificationsCount)))
-        }
-      } catch {
-        // Handle cancellation gracefully in refresh
-        if error is CancellationError {
-          // Don't show error for cancelled refresh
-          return
-        }
-        // Other errors will be handled by fetchNotifications()
+      // Check for new notifications and offer summary if 10+
+      newNotificationsCount = notificationsGroups.count - previousNotificationsCount
+      if newNotificationsCount >= 10 {
+        await offerSummary(for: Array(notificationsGroups.prefix(newNotificationsCount)))
       }
+
+      isRefreshing = false
     }
     .sheet(isPresented: $showingSummary) {
       if let summaryText = summaryText {
@@ -264,15 +261,16 @@ public struct NotificationsListView: View {
       }
     } catch {
       // Handle cancellation gracefully
-      if error is CancellationError {
-        // Task was cancelled, don't show error
+      if isCancellationError(error) || isRefreshing {
+        // Task was cancelled or we're refreshing, don't show error
         isLoading = false
-        error = nil  // Clear any existing error state
+        self.error = nil  // Clear any existing error state
         return
       }
       #if DEBUG
         print("Failed to fetch notifications: \(error)")
       #endif
+      // Only set error if it's not a cancellation and we're not refreshing
       self.error = error
     }
 
@@ -283,6 +281,31 @@ public struct NotificationsListView: View {
     let summary = await simpleSummaryService.summarizeNewNotifications(newNotifications.count)
     summaryText = summary
     showingSummary = true
+  }
+
+  private func isCancellationError(_ error: Error) -> Bool {
+    // Check for various types of cancellation errors
+    if Task.isCancelled {
+      return true
+    }
+
+    // Check for URLError cancellation
+    if let urlError = error as? URLError, urlError.code == .cancelled {
+      return true
+    }
+
+    // Check for NSError cancellation
+    let nsError = error as NSError
+    if nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorCancelled {
+      return true
+    }
+
+    // Check for CocoaError cancellation
+    if nsError.domain == NSCocoaErrorDomain && nsError.code == NSUserCancelledError {
+      return true
+    }
+
+    return false
   }
 }
 

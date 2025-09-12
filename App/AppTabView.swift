@@ -21,208 +21,89 @@ struct AppTabView: View {
   @Environment(AppRouter.self) var router
   @Environment(BSkyClient.self) var client
   @State private var settingsService = SettingsService.shared
-  // Use router's selectedTab instead of local state
-  private var selectedTab: AppTab {
-    router.selectedTab
-  }
   @State private var showingSummary = false
   @State private var summaryText = ""
   @State private var isGeneratingSummary = false
   @State private var badgeStore = NotificationBadgeStore.shared
+
+  // Use router's selectedTab instead of local state
+  private var selectedTab: AppTab {
+    router.selectedTab
+  }
+
+  // Computed binding for TabView selection
+  private var tabSelectionBinding: Binding<AppTab> {
+    Binding(
+      get: { router.selectedTab },
+      set: { router.selectedTab = $0 }
+    )
+  }
+
+  // Computed property for tab keys
+  private var tabKeys: [String] {
+    settingsService.tabBarTabsRaw + settingsService.pinnedFeedURIs.map { "feed:\($0)" }
+  }
 
   private var badgeCount: Int? {
     badgeStore.unreadCount > 0 ? badgeStore.unreadCount : nil
   }
 
   public var body: some View {
-    TabView(
-      selection: Binding(
-        get: { router.selectedTab },
-        set: { router.selectedTab = $0 }
-      )
-    ) {
-      ForEach(
-        settingsService.tabBarTabsRaw + settingsService.pinnedFeedURIs.map { "feed:\($0)" },
-        id: \.self
-      ) { key in
+    TabView(selection: tabSelectionBinding) {
+      ForEach(tabKeys, id: \.self) { key in
         if let tab = AppTab(rawValue: key) {
           switch tab {
           case .feed:
             Tab(value: AppTab.feed) {
-              NavigationStack(
-                path: Binding(
-                  get: { router[.feed] },
-                  set: { router[.feed] = $0 }
-                )
-              ) {
-                FeedsListView()
-                  .navigationTitle("Discover")
-                  .navigationBarTitleDisplayMode(.large)
-                  .toolbar {
-                    ToolbarItemGroup(placement: .topBarTrailing) {
-                      Button(action: {
-                        Task { await generateGlobalSummary() }
-                      }) {
-                        if isGeneratingSummary {
-                          ProgressView().scaleEffect(0.8).foregroundColor(.themeSecondary)
-                        } else {
-                          Image(systemName: "sparkles").foregroundColor(.themeSecondary)
-                        }
-                      }
-                      .disabled(isGeneratingSummary)
-
-                      Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
-                        Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
-                      }
-                    }
-                  }
-                  .withAppDestinations()
-                  .environment(\.currentTab, .feed)
-              }
+              feedNavigationStack
             } label: {
               Label("Feed", systemImage: "square.stack")
             }
 
-          // TODO: Re-enable Messages tab when chat functionality is ready
-          /*
-          case .messages:
-            Tab(value: AppTab.messages) {
-              NavigationStack(
-                path: Binding(
-                  get: { router[.messages] },
-                  set: { router[.messages] = $0 }
-                )
-              ) {
-                ConversationsView()
-                  .navigationBarTitleDisplayMode(.large)
-                  .onReceive(
-                    NotificationCenter.default.publisher(for: .init("openSendMessageFromProfile"))
-                  ) { note in
-                    if let userInfo = note.userInfo,
-                      let did = userInfo["did"] as? String,
-                      let handle = userInfo["handle"] as? String,
-                      let displayName = userInfo["displayName"] as? String
-                    {
-                      router.selectedTab = .messages
-                      Task { @MainActor in
-                        // Route to Messages tab and trigger start sheet pre-filled via global notif
-                        NotificationCenter.default.post(
-                          name: .init("startConversationWithDID"), object: nil,
-                          userInfo: ["did": did, "handle": handle, "displayName": displayName])
-                      }
-                    }
-                  }
-              }
-            } label: {
-              Label("Messages", systemImage: "bubble.left.and.bubble.right")
-            }
-          */
-
           case .notification:
-            Tab(value: AppTab.notification) {
-              NavigationStack(
-                path: Binding(
-                  get: { router[.notification] },
-                  set: { router[.notification] = $0 }
-                )
-              ) {
-                NotificationsListView()
-                  .navigationTitle("Notifications")
-                  .navigationBarTitleDisplayMode(.large)
-                  .toolbar {
-                    ToolbarItemGroup(placement: .topBarTrailing) {
-                      Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
-                        Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
-                      }
-                    }
-                  }
-                  .withAppDestinations()
-                  .environment(\.currentTab, .notification)
+            Group {
+              if let count = badgeCount {
+                Tab(value: AppTab.notification) {
+                  notificationNavigationStack
+                } label: {
+                  Label("Notifications", systemImage: "bell")
+                }
+                .badge(count)
+              } else {
+                Tab(value: AppTab.notification) {
+                  notificationNavigationStack
+                } label: {
+                  Label("Notifications", systemImage: "bell")
+                }
               }
-            } label: {
-              Label("Notifications", systemImage: "bell")
-                .badge(badgeStore.unreadCount)
             }
 
           case .profile:
             Tab(value: AppTab.profile) {
-              NavigationStack(
-                path: Binding(
-                  get: { router[.profile] },
-                  set: { router[.profile] = $0 }
-                )
-              ) {
-                CurrentUserView()
-                  .navigationTitle("Profile")
-                  .navigationBarTitleDisplayMode(.large)
-                  .toolbar {
-                    ToolbarItemGroup(placement: .topBarTrailing) {
-                      Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
-                        Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
-                      }
-                    }
-                  }
-                  .withAppDestinations()
-                  .environment(\.currentTab, .profile)
-              }
+              profileNavigationStack
             } label: {
               Label("Profile", systemImage: "person")
             }
 
           case .settings:
             Tab(value: AppTab.settings) {
-              NavigationStack(
-                path: Binding(
-                  get: { router[.settings] },
-                  set: { router[.settings] = $0 }
-                )
-              ) {
-                SettingsView()
-                  .navigationTitle("Settings")
-                  .navigationBarTitleDisplayMode(.large)
-                  .toolbar {
-                    ToolbarItemGroup(placement: .topBarTrailing) {
-                      Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
-                        Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
-                      }
-                    }
-                  }
-                  .withAppDestinations()
-                  .environment(\.currentTab, .settings)
-              }
+              settingsNavigationStack
             } label: {
               Label("Settings", systemImage: "gearshape")
             }
 
           case .compose:
             Tab(value: AppTab.compose, role: .search) {
-              NavigationStack(
-                path: Binding(
-                  get: { router[.compose] },
-                  set: { router[.compose] = $0 }
-                )
-              ) {
-                EnhancedSearchView(client: client)
-                  .navigationTitle("Search")
-                  .navigationBarTitleDisplayMode(.large)
-                  .toolbar {
-                    ToolbarItemGroup(placement: .topBarTrailing) {
-                      Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
-                        Image(systemName: "square.and.pencil").foregroundColor(.themePrimary)
-                      }
-                    }
-                  }
-                  .withAppDestinations()
-                  .environment(\.currentTab, .compose)
-              }
-              .onAppear { router.selectedTab = .compose }
+              composeNavigationStack
+                .onAppear { router.selectedTab = .compose }
             } label: {
               Label("Search", systemImage: "magnifyingglass")
             }
           }
-          // Close switch(tab) scope before handling pinned feed keys
         } else if key.hasPrefix("feed:") {
           let feedURI = String(key.dropFirst(5))
+          let feedItem = createFeedItem(for: feedURI)
+
           Tab(value: AppTab.feed) {
             NavigationStack(
               path: Binding(
@@ -230,23 +111,15 @@ struct AppTabView: View {
                 set: { router[.feed] = $0 }
               )
             ) {
-              let item = FeedItem(
-                uri: feedURI,
-                displayName: settingsService.pinnedFeedNames[feedURI] ?? "Feed",
-                description: nil,
-                avatarImageURL: nil,
-                creatorHandle: "",
-                likesCount: 0,
-                liked: false
-              )
-              PostsFeedView(feedItem: item)
+              PostsFeedView(feedItem: feedItem)
                 .withAppDestinations()
                 .environment(\.currentTab, .feed)
             }
           } label: {
             Label(
               settingsService.pinnedFeedNames[feedURI] ?? "Feed",
-              systemImage: "dot.radiowaves.left.and.right")
+              systemImage: "dot.radiowaves.left.and.right"
+            )
           }
         }
       }
@@ -259,6 +132,151 @@ struct AppTabView: View {
         itemCount: 0,
         onDismiss: { showingSummary = false }
       )
+    }
+  }
+
+  // MARK: - Helper Methods
+
+  private func createFeedItem(for feedURI: String) -> FeedItem {
+    FeedItem(
+      uri: feedURI,
+      displayName: settingsService.pinnedFeedNames[feedURI] ?? "Feed",
+      description: nil,
+      avatarImageURL: nil,
+      creatorHandle: "",
+      likesCount: 0,
+      liked: false
+    )
+  }
+
+  // MARK: - Navigation Stacks
+
+  private var feedNavigationStack: some View {
+    NavigationStack(
+      path: Binding(
+        get: { router[.feed] },
+        set: { router[.feed] = $0 }
+      )
+    ) {
+      FeedsListView()
+        .navigationTitle("Discover")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+          ToolbarItemGroup(placement: .topBarTrailing) {
+            summaryButton
+            composeButton
+          }
+        }
+        .withAppDestinations()
+        .environment(\.currentTab, .feed)
+    }
+  }
+
+  private var notificationNavigationStack: some View {
+    NavigationStack(
+      path: Binding(
+        get: { router[.notification] },
+        set: { router[.notification] = $0 }
+      )
+    ) {
+      NotificationsListView()
+        .navigationTitle("Notifications")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+          ToolbarItemGroup(placement: .topBarTrailing) {
+            composeButton
+          }
+        }
+        .withAppDestinations()
+        .environment(\.currentTab, .notification)
+        .onAppear {
+          badgeStore.markSeenNow()
+        }
+    }
+  }
+
+  private var profileNavigationStack: some View {
+    NavigationStack(
+      path: Binding(
+        get: { router[.profile] },
+        set: { router[.profile] = $0 }
+      )
+    ) {
+      CurrentUserView()
+        .navigationTitle("Profile")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+          ToolbarItemGroup(placement: .topBarTrailing) {
+            composeButton
+          }
+        }
+        .withAppDestinations()
+        .environment(\.currentTab, .profile)
+    }
+  }
+
+  private var settingsNavigationStack: some View {
+    NavigationStack(
+      path: Binding(
+        get: { router[.settings] },
+        set: { router[.settings] = $0 }
+      )
+    ) {
+      SettingsView()
+        .navigationTitle("Settings")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+          ToolbarItemGroup(placement: .topBarTrailing) {
+            composeButton
+          }
+        }
+        .withAppDestinations()
+        .environment(\.currentTab, .settings)
+    }
+  }
+
+  private var composeNavigationStack: some View {
+    NavigationStack(
+      path: Binding(
+        get: { router[.compose] },
+        set: { router[.compose] = $0 }
+      )
+    ) {
+      EnhancedSearchView(client: client)
+        .navigationTitle("Search")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+          ToolbarItemGroup(placement: .topBarTrailing) {
+            composeButton
+          }
+        }
+        .withAppDestinations()
+        .environment(\.currentTab, .compose)
+    }
+  }
+
+  // MARK: - Button Components
+
+  private var summaryButton: some View {
+    Button(action: {
+      Task { await generateGlobalSummary() }
+    }) {
+      if isGeneratingSummary {
+        ProgressView()
+          .scaleEffect(0.8)
+          .foregroundColor(.themeSecondary)
+      } else {
+        Image(systemName: "sparkles")
+          .foregroundColor(.themeSecondary)
+      }
+    }
+    .disabled(isGeneratingSummary)
+  }
+
+  private var composeButton: some View {
+    Button(action: { router.presentedSheet = .composer(mode: .newPost) }) {
+      Image(systemName: "square.and.pencil")
+        .foregroundColor(.themePrimary)
     }
   }
 

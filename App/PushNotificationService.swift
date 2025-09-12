@@ -1,4 +1,5 @@
 import Foundation
+import Models
 import UserNotifications
 
 @Observable
@@ -107,6 +108,9 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
     willPresent notification: UNNotification,
     withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
   ) {
+    // Increment badge count when notification is received
+    NotificationBadgeStore.shared.incrementBadge()
+
     // Show notification even when app is in foreground
     completionHandler([.banner, .sound, .badge])
   }
@@ -116,6 +120,9 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
     didReceive response: UNNotificationResponse,
     withCompletionHandler completionHandler: @escaping () -> Void
   ) {
+    // Increment badge count when notification is received in background
+    NotificationBadgeStore.shared.incrementBadge()
+
     // Handle notification tap
     let userInfo = response.notification.request.content.userInfo
 

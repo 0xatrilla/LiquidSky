@@ -7,5 +7,7 @@
 			"path": "../../../../Library/Developer/Xcode/DerivedData/LiquidSky-evrseziujwtgouffdlpdcurwgram/SourcePackages/checkouts/ATProtoKit"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"kiroAgent.configureMCP": "Enabled"
+	}
 }
