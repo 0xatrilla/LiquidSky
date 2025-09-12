@@ -435,15 +435,25 @@ public struct AuthView: View {
       // Check if this is a login conflict error
       if error.localizedDescription.contains("already exists") {
         #if DEBUG
-          print("AuthView: Login conflict detected, setting fresh login state")
+          print("AuthView: Login conflict detected, clearing cached accounts and retrying")
         #endif
 
-        // Set fresh login state to clear cached accounts on next attempt
-        UserDefaults.standard.set(true, forKey: "Auth.isInFreshLoginState")
-
-        // Show a more helpful error message
-        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-          self.error = "Login conflict detected. Please try again."
+        // Immediately clear cached accounts and retry
+        do {
+          try await auth.logout()
+          // Retry the login after clearing accounts
+          _ = try await auth.addAccount(handle: trimmedHandle, appPassword: trimmedPassword)
+          #if DEBUG
+            print("AuthView: Retry successful after clearing accounts")
+          #endif
+        } catch {
+          #if DEBUG
+            print("AuthView: Retry failed after clearing accounts: \(error)")
+          #endif
+          // Show error message if retry also fails
+          withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+            self.error = error.localizedDescription
+          }
         }
       } else {
         withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
