@@ -23,35 +23,20 @@ struct SidebarNavigationView: View {
   @State private var focusedItemIndex = 0
 
   var body: some View {
-    mainContent
-      .navigationTitle("Horizon")
-      .toolbar {
-        toolbarContent
+    VStack {
+      Text("Sidebar Navigation")
+        .font(.title)
+        .padding()
+      
+      List {
+        Text("Feed")
+        Text("Notifications") 
+        Text("Search")
+        Text("Profile")
+        Text("Settings")
       }
-      .onAppear {
-        setupFocusManagement()
-      }
-      .onChange(of: focusManager.focusedColumn) { _, newColumn in
-        isSidebarFocused = (newColumn == .sidebar)
-      }
-      .onChange(of: focusManager.focusedItemIndex) { _, newIndex in
-        focusedItemIndex = newIndex
-      }
-      .onReceive(NotificationCenter.default.publisher(for: .navigateNext)) { _ in
-        if focusManager.focusedColumn == .sidebar {
-          navigateToNextItem()
-        }
-      }
-      .onReceive(NotificationCenter.default.publisher(for: .navigatePrevious)) { _ in
-        if focusManager.focusedColumn == .sidebar {
-          navigateToPreviousItem()
-        }
-      }
-      .onReceive(NotificationCenter.default.publisher(for: .activateSelected)) { _ in
-        if focusManager.focusedColumn == .sidebar {
-          activateSelectedItem()
-        }
-      }
+    }
+    .navigationTitle("Horizon")
   }
   
   @ToolbarContentBuilder
