@@ -286,7 +286,7 @@ struct QuickActionsPanel: View {
             .foregroundStyle(.secondary)
         }
         .buttonStyle(.plain)
-        .glassEffect(.regular.interactive())
+        .background(.ultraThinMaterial)
       }
 
       // Category Picker
@@ -301,7 +301,7 @@ struct QuickActionsPanel: View {
       }
     }
     .padding()
-    .glassEffect(.regular, in: .rect(cornerRadius: 16))
+    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
     .sheet(isPresented: $showingAllActions) {
       AllQuickActionsSheet()
     }
@@ -394,9 +394,10 @@ struct CategoryChip: View {
     }
     .buttonStyle(.plain)
     .foregroundStyle(isSelected ? category.color : .secondary)
-    .glassEffect(
-      isSelected ? .regular.tint(category.color).interactive() : .regular.interactive(),
-      in: .capsule
+    .background(.ultraThinMaterial, in: Capsule())
+    .overlay(
+      Capsule()
+        .stroke(isSelected ? category.color.opacity(0.3) : .clear, lineWidth: 1)
     )
   }
 }
@@ -454,7 +455,7 @@ struct QuickActionButton: View {
       RoundedRectangle(cornerRadius: 12)
         .fill(.ultraThinMaterial)
     )
-    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 12))
+    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
     .scaleEffect(isPressed ? 0.95 : 1.0)
     .onLongPressGesture(minimumDuration: 0) { pressing in
       withAnimation(.smooth(duration: 0.1)) {
@@ -510,7 +511,7 @@ struct CompactQuickActionButton: View {
       RoundedRectangle(cornerRadius: 8)
         .fill(.ultraThinMaterial)
     )
-    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 8))
+    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
   }
 }
 
@@ -553,7 +554,7 @@ struct AllQuickActionsSheet: View {
         }
       }
     }
-    .glassEffect(.regular, in: .rect(cornerRadius: 16))
+    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
   }
 
   private func filteredActions(for category: QuickActionCategory) -> [QuickAction] {
@@ -643,16 +644,3 @@ extension EnvironmentValues {
 }
 
 // MARK: - Notification Extensions
-
-extension Notification.Name {
-  static let newPost = Notification.Name("newPost")
-  static let generateSummary = Notification.Name("generateSummary")
-  static let navigateToSearch = Notification.Name("navigateToSearch")
-  static let focusSearch = Notification.Name("focusSearch")
-  static let navigateToNotifications = Notification.Name("navigateToNotifications")
-  static let navigateToProfile = Notification.Name("navigateToProfile")
-  static let refresh = Notification.Name("refresh")
-  static let navigateToSettings = Notification.Name("navigateToSettings")
-  static let showKeyboardShortcuts = Notification.Name("showKeyboardShortcuts")
-  static let toggleSidebar = Notification.Name("toggleSidebar")
-}

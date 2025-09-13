@@ -112,8 +112,22 @@ struct HorizonAppShortcuts: AppShortcutsProvider {
   nonisolated static var shortcutTileColor: ShortcutTileColor { .blue }
 
   @AppShortcutsBuilder
-  nonisolated static var appShortcuts: [AppShortcut] {
-    AppShortcut(
+  nonisolated static var appShortcuts: [AppIntents.AppShortcut] {
+    AppIntents.AppShortcut(
+      intent: SearchIntent(), phrases: ["Search in LiquidSky"], shortTitle: "Search")
+
+    AppIntents.AppShortcut(
+      intent: ToggleGlassEffectsIntent(), phrases: ["Toggle glass effects"],
+      shortTitle: "Toggle Glass")
+
+    AppIntents.AppShortcut(
+      intent: GenerateAISummaryIntent(), phrases: ["Generate AI summary"],
+      shortTitle: "AI Summary")
+  }
+
+  @AppShortcutsBuilder
+  nonisolated static var additionalShortcuts: [AppIntents.AppShortcut] {
+    AppIntents.AppShortcut(
       intent: NewPostIntent(),
       phrases: [
         "Compose with ${applicationName}",
@@ -125,7 +139,7 @@ struct HorizonAppShortcuts: AppShortcutsProvider {
       systemImageName: "square.and.pencil"
     )
 
-    AppShortcut(
+    AppIntents.AppShortcut(
       intent: CheckNotificationsIntent(),
       phrases: [
         "Check notifications in ${applicationName}",
@@ -137,7 +151,7 @@ struct HorizonAppShortcuts: AppShortcutsProvider {
       systemImageName: "bell.fill"
     )
 
-    AppShortcut(
+    AppIntents.AppShortcut(
       intent: SearchUsersIntent(),
       phrases: [
         "Search users in ${applicationName}",
@@ -149,7 +163,7 @@ struct HorizonAppShortcuts: AppShortcutsProvider {
       systemImageName: "magnifyingglass"
     )
 
-    AppShortcut(
+    AppIntents.AppShortcut(
       intent: ViewProfileIntent(),
       phrases: [
         "View profile in ${applicationName}",
@@ -161,7 +175,7 @@ struct HorizonAppShortcuts: AppShortcutsProvider {
       systemImageName: "person.circle.fill"
     )
 
-    AppShortcut(
+    AppIntents.AppShortcut(
       intent: CheckFeedIntent(),
       phrases: [
         "Check feed in ${applicationName}",
@@ -172,5 +186,59 @@ struct HorizonAppShortcuts: AppShortcutsProvider {
       shortTitle: "Check Feed",
       systemImageName: "house.fill"
     )
+  }
+}
+
+@preconcurrency
+struct SearchIntent: AppIntent {
+  nonisolated static var title: LocalizedStringResource { "Search" }
+
+  nonisolated static var description: IntentDescription {
+    IntentDescription("Search for posts and users")
+  }
+
+  nonisolated static var openAppWhenRun: Bool { true }
+
+  func perform() async throws -> some IntentResult {
+    await MainActor.run {
+      NotificationCenter.default.post(name: .focusSearch, object: nil)
+    }
+    return .result()
+  }
+}
+
+@preconcurrency
+struct ToggleGlassEffectsIntent: AppIntent {
+  nonisolated static var title: LocalizedStringResource { "Toggle Glass Effects" }
+
+  nonisolated static var description: IntentDescription {
+    IntentDescription("Toggle glass effects on or off")
+  }
+
+  nonisolated static var openAppWhenRun: Bool { true }
+
+  func perform() async throws -> some IntentResult {
+    await MainActor.run {
+      NotificationCenter.default.post(name: .toggleGlassEffects, object: nil)
+    }
+    return .result()
+  }
+}
+
+@preconcurrency
+struct GenerateAISummaryIntent: AppIntent {
+  nonisolated static var title: LocalizedStringResource { "Generate AI Summary" }
+
+  nonisolated static var description: IntentDescription {
+    IntentDescription("Generate an AI summary of your feed")
+  }
+
+  nonisolated static var openAppWhenRun: Bool { true }
+
+  func perform() async throws -> some IntentResult {
+    await MainActor.run {
+      NotificationCenter.default.post(name: .generateSummary, object: nil)
+    }
+    return .result()
   }
 }

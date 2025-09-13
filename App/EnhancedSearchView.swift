@@ -113,7 +113,12 @@ struct EnhancedSearchView: View {
           .padding(.horizontal, 12)
           .padding(.vertical, 6)
           .background(.ultraThinMaterial, in: Capsule())
-          .glassEffect(.regular.interactive(), in: .capsule)
+          .background {
+            if #available(iOS 26.0, *) {
+              Capsule()
+                .glassEffect(.regular.interactive(), in: .capsule)
+            }
+          }
         }
         .padding(.trailing, 16)
       }
@@ -156,7 +161,12 @@ struct EnhancedSearchView: View {
         .foregroundStyle(.secondary)
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .glassEffect(.regular, in: .rect(cornerRadius: 16))
+    .background {
+      if #available(iOS 26.0, *) {
+        Rectangle()
+          .glassEffect(.regular, in: .rect(cornerRadius: 16))
+      }
+    }
   }
 
   @ViewBuilder
@@ -166,7 +176,12 @@ struct EnhancedSearchView: View {
       systemImage: "magnifyingglass",
       description: Text("Try adjusting your search terms or filters")
     )
-    .glassEffect(.regular, in: .rect(cornerRadius: 16))
+    .background {
+      if #available(iOS 26.0, *) {
+        Rectangle()
+          .glassEffect(.regular, in: .rect(cornerRadius: 16))
+      }
+    }
   }
 
   // MARK: - Grid Configuration
@@ -330,21 +345,26 @@ struct SearchFilterChip: View {
       .padding(.vertical, 6)
       .background(
         Capsule()
-          .fill(isSelected ? Color.blue.opacity(0.2) : .clear)
+          .fill(isSelected ? Color.blue.opacity(0.2) : Color.clear)
       )
       .overlay {
         if isSelected {
           Capsule()
-            .stroke(.blue, lineWidth: 1)
+            .stroke(Color.blue, lineWidth: 1)
         }
       }
     }
     .buttonStyle(.plain)
-    .foregroundStyle(isSelected ? .blue : .secondary)
-    .glassEffect(
-      isSelected ? .regular.tint(.blue).interactive() : .regular.interactive(),
-      in: .capsule
-    )
+    .foregroundStyle(isSelected ? Color.blue : .secondary)
+    .background {
+      if #available(iOS 26.0, *) {
+        Capsule()
+          .glassEffect(
+            isSelected ? .regular.tint(Color.blue).interactive() : .regular.interactive(),
+            in: .capsule
+          )
+      }
+    }
   }
 }
 
@@ -376,7 +396,12 @@ struct SearchResultCard: View {
               Circle()
                 .fill(result.type.color.opacity(0.1))
             )
-            .glassEffect(.regular.tint(result.type.color))
+            .background {
+              if #available(iOS 26.0, *) {
+                Circle()
+                  .glassEffect(.regular.tint(result.type.color))
+              }
+            }
 
           // Author info
           VStack(alignment: .leading, spacing: 2) {
@@ -418,14 +443,19 @@ struct SearchResultCard: View {
               .aspectRatio(contentMode: .fill)
           } placeholder: {
             RoundedRectangle(cornerRadius: 8)
-              .fill(.quaternary)
+              .fill(Color.gray.opacity(0.1))
               .overlay {
                 ProgressView()
               }
           }
           .frame(height: 120)
           .clipShape(RoundedRectangle(cornerRadius: 8))
-          .glassEffect(.regular, in: .rect(cornerRadius: 8))
+          .background {
+            if #available(iOS 26.0, *) {
+              RoundedRectangle(cornerRadius: 8)
+                .glassEffect(.regular, in: .rect(cornerRadius: 8))
+            }
+          }
         }
 
         // Footer
@@ -436,19 +466,19 @@ struct SearchResultCard: View {
               MetricView(
                 icon: "heart",
                 count: result.engagement.likes,
-                color: .red
+                color: Color.red
               )
 
               MetricView(
                 icon: "arrow.2.squarepath",
                 count: result.engagement.reposts,
-                color: .green
+                color: Color.green
               )
 
               MetricView(
                 icon: "bubble.left",
                 count: result.engagement.replies,
-                color: .blue
+                color: Color.blue
               )
             }
           } else if result.type == .user {
@@ -467,22 +497,27 @@ struct SearchResultCard: View {
               } label: {
                 Text(result.isFollowing == true ? "Following" : "Follow")
                   .font(.caption.weight(.medium))
-                  .foregroundStyle(result.isFollowing == true ? .secondary : .blue)
+                  .foregroundStyle(result.isFollowing == true ? .secondary : Color.blue)
                   .padding(.horizontal, 12)
                   .padding(.vertical, 4)
                   .background(
                     Capsule()
-                      .fill(result.isFollowing == true ? .quaternary : .blue.opacity(0.1))
+                      .fill(result.isFollowing == true ? Color.gray.opacity(0.1) : Color.blue.opacity(0.1))
                   )
                   .overlay {
                     if result.isFollowing != true {
                       Capsule()
-                        .stroke(.blue, lineWidth: 1)
+                        .stroke(Color.blue, lineWidth: 1)
                     }
                   }
               }
               .buttonStyle(.plain)
-              .glassEffect(.regular.interactive(), in: .capsule)
+              .background {
+                if #available(iOS 26.0, *) {
+                  Capsule()
+                    .glassEffect(.regular.interactive(), in: .capsule)
+                }
+              }
             }
           }
 
@@ -492,7 +527,7 @@ struct SearchResultCard: View {
           HStack(spacing: 4) {
             ForEach(0..<5) { index in
               Circle()
-                .fill(index < Int(result.relevanceScore * 5) ? .blue : .quaternary)
+                .fill(index < Int(result.relevanceScore * 5) ? Color.blue : Color.gray.opacity(0.3))
                 .frame(width: 4, height: 4)
             }
           }
@@ -661,8 +696,8 @@ enum SearchResultType {
 
   var color: Color {
     switch self {
-    case .post: return .blue
-    case .user: return .green
+    case .post: return Color.blue
+    case .user: return Color.green
     }
   }
 }

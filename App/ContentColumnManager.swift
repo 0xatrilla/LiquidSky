@@ -2,19 +2,18 @@ import Foundation
 import SwiftUI
 
 @available(iPadOS 26.0, *)
-@Observable
-class ContentColumnManager {
-  var currentContentType: ContentType = .feed
-  var isLoading = false
-  var loadingProgress: Double = 0.0
-  var error: ContentError?
-  var refreshTrigger = false
+class ContentColumnManager: ObservableObject {
+  @Published var currentContentType: ContentType = .feed
+  @Published var isLoading = false
+  @Published var loadingProgress: Double = 0.0
+  @Published var error: ContentError?
+  @Published var refreshTrigger = false
 
   // Content state management
   var feedState = FeedContentState()
   var notificationState = NotificationContentState()
   var searchState = SearchContentState()
-  var profileState = ProfileContentState()
+  var profileState = LiquidSkyUserProfileState()
   var settingsState = SettingsContentState()
 
   // Layout configuration
@@ -192,68 +191,62 @@ enum ContentType: Hashable {
 // MARK: - Content States
 
 @available(iPadOS 26.0, *)
-@Observable
-class FeedContentState {
-  var columnCount: Int = 2
-  var isRefreshing = false
-  var lastRefreshTime: Date?
-  var sortOrder: FeedSortOrder = .chronological
-  var filterOptions: FeedFilterOptions = FeedFilterOptions()
-  var scrollPosition: CGPoint = .zero
+class FeedContentState: ObservableObject {
+  @Published var columnCount: Int = 2
+  @Published var isRefreshing = false
+  @Published var lastRefreshTime: Date?
+  @Published var sortOrder: FeedSortOrder = .chronological
+  @Published var filterOptions: FeedFilterOptions = FeedFilterOptions()
+  @Published var scrollPosition: CGPoint = .zero
 }
 
 @available(iPadOS 26.0, *)
-@Observable
-class NotificationContentState {
-  var groupingEnabled = true
-  var isRefreshing = false
-  var lastRefreshTime: Date?
-  var density: NotificationDensity = .comfortable
-  var filterType: NotificationFilterType = .all
-  var scrollPosition: CGPoint = .zero
+class NotificationContentState: ObservableObject {
+  @Published var groupingEnabled = true
+  @Published var isRefreshing = false
+  @Published var lastRefreshTime: Date?
+  @Published var density: NotificationDensity = .comfortable
+  @Published var filterType: NotificationFilterType = .all
+  @Published var scrollPosition: CGPoint = .zero
 }
 
 @available(iPadOS 26.0, *)
-@Observable
-class SearchContentState {
-  var columnCount: Int = 2
-  var previewEnabled = true
-  var isRefreshing = false
-  var lastRefreshTime: Date?
-  var searchQuery = ""
-  var filterOptions: SearchFilterOptions = SearchFilterOptions()
-  var sortOrder: SearchSortOrder = .relevance
-  var scrollPosition: CGPoint = .zero
+class SearchContentState: ObservableObject {
+  @Published var columnCount: Int = 2
+  @Published var previewEnabled = true
+  @Published var isRefreshing = false
+  @Published var lastRefreshTime: Date?
+  @Published var searchQuery = ""
+  @Published var filterOptions: SearchFilterOptions = SearchFilterOptions()
+  @Published var sortOrder: SearchSortOrder = .relevance
+  @Published var scrollPosition: CGPoint = .zero
 }
 
 @available(iPadOS 26.0, *)
-@Observable
-class ProfileContentState {
+class LiquidSkyUserProfileState {
   var layoutMode: ProfileLayoutMode = .twoColumn
   var isRefreshing = false
   var lastRefreshTime: Date?
-  var selectedTab: ProfileTab = .posts
+  var selectedTab: ContentProfileTab = .posts
   var scrollPosition: CGPoint = .zero
 }
 
 @available(iPadOS 26.0, *)
-@Observable
-class SettingsContentState {
-  var isRefreshing = false
-  var lastRefreshTime: Date?
-  var selectedSection: SettingsSection?
-  var scrollPosition: CGPoint = .zero
+class SettingsContentState: ObservableObject {
+  @Published var isRefreshing = false
+  @Published var lastRefreshTime: Date?
+  @Published var selectedSection: SettingsSection?
+  @Published var scrollPosition: CGPoint = .zero
 }
 
 // MARK: - Adaptive Content Layout
 
 @available(iPadOS 26.0, *)
-@Observable
-class AdaptiveContentLayout {
-  var preferredLayout: LayoutType = .grid
-  var feedColumnCount: Int = 2
-  var searchColumnCount: Int = 2
-  var notificationDensity: NotificationDensity = .comfortable
+class AdaptiveContentLayout: ObservableObject {
+  @Published var preferredLayout: LayoutType = .grid
+  @Published var feedColumnCount: Int = 2
+  @Published var searchColumnCount: Int = 2
+  @Published var notificationDensity: NotificationDensity = .comfortable
 
   func updateLayout(
     horizontalSizeClass: UserInterfaceSizeClass?, verticalSizeClass: UserInterfaceSizeClass?,
@@ -311,7 +304,7 @@ enum ProfileLayoutMode {
 }
 
 @available(iPadOS 26.0, *)
-enum ProfileTab {
+enum ContentProfileTab {
   case posts, replies, media, likes
 }
 

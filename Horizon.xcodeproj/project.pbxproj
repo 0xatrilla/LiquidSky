@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1D9964982E74DE27000D6127 /* AcknowList in Frameworks */ = {isa = PBXBuildFile; productRef = 1D9964972E74DE27000D6127 /* AcknowList */; };
+		1D99649B2E74DE34000D6127 /* KeychainSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 1D99649A2E74DE34000D6127 /* KeychainSwift */; };
 		9F1552E62CEF35B200DD9F6E /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 9F1552E52CEF35B200DD9F6E /* Auth */; };
 		9F1552E82CEF35B200DD9F6E /* Models in Frameworks */ = {isa = PBXBuildFile; productRef = 9F1552E72CEF35B200DD9F6E /* Models */; };
 		9F1552ED2CEF35C000DD9F6E /* AuthUI in Frameworks */ = {isa = PBXBuildFile; productRef = 9F1552EC2CEF35C000DD9F6E /* AuthUI */; };
@@ -122,8 +124,10 @@
 				9FA556A32CF49E55008A62B4 /* FeedUI in Frameworks */,
 				9F1552F12CEF35C000DD9F6E /* FeedUI in Frameworks */,
 				9FAEE3BA2CF09BB400F86CDC /* SettingsUI in Frameworks */,
+				1D99649B2E74DE34000D6127 /* KeychainSwift in Frameworks */,
 				DB3EFFD82E6276C6000A1DFA /* StoreKit.framework in Frameworks */,
 				9FB136012DEEB30A003D7ABE /* ComposerUI in Frameworks */,
+				1D9964982E74DE27000D6127 /* AcknowList in Frameworks */,
 				9F1552F32CEF35C000DD9F6E /* PostUI in Frameworks */,
 				9FA3256B2E05439D007BAC14 /* Client in Frameworks */,
 				9F58939F2CEDF04200798943 /* Models in Frameworks */,
@@ -243,6 +247,8 @@
 				9F21FACA2D00411D003B9250 /* ProfileUI */,
 				9FB136002DEEB30A003D7ABE /* ComposerUI */,
 				9FA3256A2E05439D007BAC14 /* Client */,
+				1D9964972E74DE27000D6127 /* AcknowList */,
+				1D99649A2E74DE34000D6127 /* KeychainSwift */,
 			);
 			productName = LiquidSky;
 			productReference = 9F2142232CE9DAA1004167D7 /* LiquidSky.app */;
@@ -350,6 +356,8 @@
 			packageReferences = (
 				DB3EF7FE2E611961000A1DFA /* XCLocalSwiftPackageReference "Packages/Features" */,
 				DB3EF8092E61197D000A1DFA /* XCLocalSwiftPackageReference "Packages/Model" */,
+				1D9964962E74DE27000D6127 /* XCRemoteSwiftPackageReference "AcknowList" */,
+				1D9964992E74DE34000D6127 /* XCRemoteSwiftPackageReference "keychain-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9F2142242CE9DAA1004167D7 /* Products */;
@@ -876,7 +884,36 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		1D9964962E74DE27000D6127 /* XCRemoteSwiftPackageReference "AcknowList" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/vtourraine/AcknowList";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.3.0;
+			};
+		};
+		1D9964992E74DE34000D6127 /* XCRemoteSwiftPackageReference "keychain-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/evgenyneu/keychain-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 24.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
+		1D9964972E74DE27000D6127 /* AcknowList */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1D9964962E74DE27000D6127 /* XCRemoteSwiftPackageReference "AcknowList" */;
+			productName = AcknowList;
+		};
+		1D99649A2E74DE34000D6127 /* KeychainSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1D9964992E74DE34000D6127 /* XCRemoteSwiftPackageReference "keychain-swift" */;
+			productName = KeychainSwift;
+		};
 		9F1552E52CEF35B200DD9F6E /* Auth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DB3EF8092E61197D000A1DFA /* XCLocalSwiftPackageReference "Packages/Model" */;

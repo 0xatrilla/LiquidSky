@@ -183,7 +183,12 @@ struct EnhancedHoverEffect: ViewModifier {
         if glassEffect && isHovering {
           RoundedRectangle(cornerRadius: 8)
             .stroke(.blue.opacity(hoverIntensity), lineWidth: 2)
-            .glassEffect(.regular.tint(.blue))
+            .background {
+              if #available(iOS 26.0, *) {
+                RoundedRectangle(cornerRadius: 8)
+                  .glassEffect(.regular.tint(.blue), in: .rect(cornerRadius: 8))
+              }
+            }
         }
       }
       .applePencilHover(id: id) { hovering, location, intensity in
@@ -240,8 +245,8 @@ struct TrackpadGestureModifier: ViewModifier {
         // Scroll gesture
         DragGesture()
           .onChanged { value in
-            let deltaX = value.translation.x - dragOffset.width
-            let deltaY = value.translation.y - dragOffset.height
+            let deltaX = value.translation.width - dragOffset.width
+            let deltaY = value.translation.height - dragOffset.height
             dragOffset = value.translation
             onScroll?(deltaX, deltaY)
           }
@@ -285,7 +290,7 @@ struct KeyboardNavigationModifier: ViewModifier {
         }
       }
       .onKeyPress { keyPress in
-        return onKeyPress?(keyPress.key) ?? false
+        return onKeyPress?(keyPress.key) ?? .ignored
       }
   }
 }

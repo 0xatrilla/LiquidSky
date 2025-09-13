@@ -199,7 +199,7 @@ struct EnhancedFeedCard: View {
       }
       .frame(width: 40, height: 40)
       .clipShape(Circle())
-      .glassEffect(.regular, in: .circle)
+      .background(.ultraThinMaterial, in: Circle())
 
       // Author info
       VStack(alignment: .leading, spacing: 2) {
@@ -246,7 +246,7 @@ struct EnhancedFeedCard: View {
       }
       .frame(height: 200)
       .clipShape(RoundedRectangle(cornerRadius: 12))
-      .glassEffect(.regular, in: .rect(cornerRadius: 12))
+      .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
     }
   }
 
@@ -294,7 +294,6 @@ struct EnhancedFeedCard: View {
           .foregroundStyle(.secondary)
       }
       .buttonStyle(.plain)
-      .glassEffect(.regular.interactive())
     }
   }
 
@@ -359,8 +358,9 @@ struct InteractionButton: View {
       }
     }
     .buttonStyle(.plain)
-    .glassEffect(
-      isActive ? .regular.tint(color).interactive() : .regular.interactive()
+    .background(
+      isActive ? color.opacity(0.1) : .clear,
+      in: RoundedRectangle(cornerRadius: 6)
     )
     .scaleEffect(isActive ? 1.05 : 1.0)
     .animation(.smooth(duration: 0.2), value: isActive)
@@ -392,7 +392,6 @@ struct GlassRefreshIndicator: View {
     .padding(.horizontal, 16)
     .padding(.vertical, 8)
     .background(.ultraThinMaterial, in: Capsule())
-    .glassEffect(.regular, in: .capsule)
   }
 }
 

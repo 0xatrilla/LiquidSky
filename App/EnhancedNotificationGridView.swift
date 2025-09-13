@@ -209,7 +209,7 @@ struct NotificationFilterChip: View {
       .padding(.vertical, 6)
       .background(
         Capsule()
-          .fill(isSelected ? filter.color.opacity(0.2) : .clear)
+          .fill(isSelected ? filter.color.opacity(0.2) : Color.clear)
       )
       .overlay {
         if isSelected {
@@ -220,10 +220,6 @@ struct NotificationFilterChip: View {
     }
     .buttonStyle(.plain)
     .foregroundStyle(isSelected ? filter.color : .secondary)
-    .glassEffect(
-      isSelected ? .regular.tint(filter.color).interactive() : .regular.interactive(),
-      in: .capsule
-    )
   }
 }
 
@@ -250,7 +246,6 @@ struct NotificationGroupView: View {
       .padding(.horizontal, 16)
       .padding(.vertical, 8)
       .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
-      .glassEffect(.regular, in: .rect(cornerRadius: 8))
 
       // Notifications
       LazyVStack(spacing: 8) {
@@ -297,7 +292,6 @@ struct EnhancedNotificationRow: View {
         }
         .frame(width: 36, height: 36)
         .clipShape(Circle())
-        .glassEffect(.regular, in: .circle)
 
         // Content
         VStack(alignment: .leading, spacing: 4) {
@@ -340,7 +334,6 @@ struct EnhancedNotificationRow: View {
           }
           .frame(width: 40, height: 40)
           .clipShape(RoundedRectangle(cornerRadius: 6))
-          .glassEffect(.regular, in: .rect(cornerRadius: 6))
         }
 
         // Unread indicator
@@ -348,7 +341,6 @@ struct EnhancedNotificationRow: View {
           Circle()
             .fill(.blue)
             .frame(width: 8, height: 8)
-            .glassEffect(.regular.tint(.blue))
         }
       }
       .padding(12)
@@ -395,7 +387,6 @@ struct EnhancedNotificationRow: View {
         Circle()
           .fill(notification.type.color.opacity(0.1))
       )
-      .glassEffect(.regular.tint(notification.type.color))
   }
 
   @ViewBuilder

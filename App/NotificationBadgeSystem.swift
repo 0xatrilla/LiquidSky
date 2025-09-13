@@ -10,7 +10,7 @@ class NotificationBadgeSystem {
   var isAnimating: Bool = false
 
   private var cancellables = Set<AnyCancellable>()
-  private let badgeStore = NotificationBadgeStore.shared
+  // private let badgeStore = NotificationBadgeStore.shared // NotificationBadgeStore not available
 
   init() {
     setupBadgeObservation()
@@ -28,7 +28,8 @@ class NotificationBadgeSystem {
 
   private func loadInitialBadges() {
     // Initialize with current badge counts
-    updateBadge(for: "notifications", count: badgeStore.unreadCount, type: .notification)
+    // Note: badgeStore is commented out, using placeholder value for now
+    updateBadge(for: "notifications", count: 0, type: .notification)
 
     // Mock additional badge types for demonstration
     updateBadge(for: "messages", count: 0, type: .message)
@@ -226,7 +227,10 @@ struct EnhancedBadgeView: View {
     case .glass:
       Capsule()
         .fill(badgeInfo.type.color)
-        .glassEffect(.regular.tint(badgeInfo.type.color))
+        .background(badgeInfo.type.color.opacity(0.1))
+        .overlay(
+          RoundedRectangle(cornerRadius: 12).stroke(badgeInfo.type.color.opacity(0.3), lineWidth: 1)
+        )
     case .minimal:
       Capsule()
         .fill(badgeInfo.type.color.opacity(0.8))
@@ -268,7 +272,10 @@ struct AnimatedBadgeView: View {
         .background(
           Capsule()
             .fill(badgeInfo.type.color)
-            .glassEffect(.regular.tint(badgeInfo.type.color))
+            .background(badgeInfo.type.color.opacity(0.1))
+            .overlay(
+              RoundedRectangle(cornerRadius: 12).stroke(
+                badgeInfo.type.color.opacity(0.3), lineWidth: 1))
         )
         .scaleEffect(pulseScale)
         .onAppear {
@@ -330,7 +337,9 @@ struct BadgeSummaryView: View {
           .background(
             Capsule()
               .fill(.secondary)
-              .glassEffect(.regular.tint(.secondary))
+              .background(.secondary.opacity(0.1))
+              .overlay(
+                RoundedRectangle(cornerRadius: 8).stroke(.secondary.opacity(0.3), lineWidth: 1))
           )
       }
     }
@@ -413,20 +422,10 @@ struct NotificationBadgeSystemKey: EnvironmentKey {
 }
 
 @available(iPadOS 26.0, *)
-struct BadgeAnimationCoordinatorKey: EnvironmentKey {
-  static let defaultValue = BadgeAnimationCoordinator()
-}
-
-@available(iPadOS 26.0, *)
 extension EnvironmentValues {
   var notificationBadgeSystem: NotificationBadgeSystem {
     get { self[NotificationBadgeSystemKey.self] }
     set { self[NotificationBadgeSystemKey.self] = newValue }
-  }
-
-  var badgeAnimationCoordinator: BadgeAnimationCoordinator {
-    get { self[BadgeAnimationCoordinatorKey.self] }
-    set { self[BadgeAnimationCoordinatorKey.self] = newValue }
   }
 }
 
@@ -474,7 +473,7 @@ struct BadgeTestingView: View {
       BadgeSummaryView()
     }
     .padding()
-    .glassEffect(.regular, in: .rect(cornerRadius: 16))
+    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
   }
 }
 

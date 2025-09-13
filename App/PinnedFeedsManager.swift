@@ -196,7 +196,12 @@ struct PinnedFeedsSection: View {
         .foregroundStyle(.secondary)
     }
     .padding()
-    .glassEffect(.regular, in: .rect(cornerRadius: 8))
+    .background {
+      if #available(iOS 26.0, *) {
+        RoundedRectangle(cornerRadius: 8)
+          .glassEffect(.regular, in: .rect(cornerRadius: 8))
+      }
+    }
   }
 
   // MARK: - Header
@@ -217,7 +222,12 @@ struct PinnedFeedsSection: View {
           .foregroundStyle(.blue)
       }
       .buttonStyle(.plain)
-      .glassEffect(.regular.tint(.blue).interactive())
+      .background {
+        if #available(iOS 26.0, *) {
+          RoundedRectangle(cornerRadius: 8)
+            .glassEffect(.regular.tint(.blue).interactive())
+        }
+      }
     }
   }
 
@@ -238,7 +248,12 @@ struct PinnedFeedsSection: View {
       .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 10))
     }
     .buttonStyle(.plain)
-    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 10))
+    .background {
+      if #available(iOS 26.0, *) {
+        RoundedRectangle(cornerRadius: 10)
+          .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 10))
+      }
+    }
     .sheet(isPresented: $showingFeedPicker) {
       FeedPickerSheet()
     }
@@ -377,12 +392,18 @@ struct PinnedFeedRow: View {
 
   @ViewBuilder
   private var backgroundView: some View {
-    RoundedRectangle(cornerRadius: 8)
-      .fill(backgroundFill)
-      .glassEffect(
-        isSelected ? .regular.tint(.blue).interactive() : .regular.interactive(),
-        in: .rect(cornerRadius: 8)
-      )
+    ZStack {
+      RoundedRectangle(cornerRadius: 8)
+        .fill(backgroundFill)
+
+      if #available(iOS 26.0, *) {
+        RoundedRectangle(cornerRadius: 8)
+          .glassEffect(
+            isSelected ? .regular.tint(.blue).interactive() : .regular.interactive(),
+            in: .rect(cornerRadius: 8)
+          )
+      }
+    }
   }
 
   private var backgroundFill: Color {
@@ -398,15 +419,27 @@ struct PinnedFeedRow: View {
   @ViewBuilder
   private var focusOverlay: some View {
     if isFocused {
+      ZStack {
       RoundedRectangle(cornerRadius: 8)
         .stroke(.blue, lineWidth: 2)
-        .glassEffect(.regular.tint(.blue))
+
+      if #available(iOS 26.0, *) {
+        RoundedRectangle(cornerRadius: 8)
+          .glassEffect(.regular.tint(.blue))
+      }
+    }
     }
 
     if isPencilHovering {
+      ZStack {
       RoundedRectangle(cornerRadius: 8)
         .stroke(.blue.opacity(hoverIntensity), lineWidth: 1)
-        .glassEffect(.regular.tint(.blue))
+
+      if #available(iOS 26.0, *) {
+        RoundedRectangle(cornerRadius: 8)
+          .glassEffect(.regular.tint(.blue))
+      }
+    }
     }
   }
 
@@ -464,7 +497,12 @@ struct FeedPickerSheet: View {
         }
       }
     }
-    .glassEffect(.regular, in: .rect(cornerRadius: 16))
+    .background {
+      if #available(iOS 26.0, *) {
+        RoundedRectangle(cornerRadius: 16)
+          .glassEffect(.regular, in: .rect(cornerRadius: 16))
+      }
+    }
     .task {
       await loadAvailableFeeds()
     }
@@ -595,7 +633,12 @@ struct EditFeedSheet: View {
         }
       }
     }
-    .glassEffect(.regular, in: .rect(cornerRadius: 16))
+    .background {
+      if #available(iOS 26.0, *) {
+        RoundedRectangle(cornerRadius: 16)
+          .glassEffect(.regular, in: .rect(cornerRadius: 16))
+      }
+    }
   }
 }
 

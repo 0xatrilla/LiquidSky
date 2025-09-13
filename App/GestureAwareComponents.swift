@@ -48,15 +48,15 @@ struct GestureAwareGlassButton: View {
     .disabled(!isEnabled)
     .scaleEffect(isPressed ? 0.95 : (isPencilHovering ? 1.05 : (isHovering ? 1.02 : 1.0)))
     .brightness(hoverIntensity * 0.1)
-    .glassEffect(
-      glassEffectForStyle.interactive(),
-      in: .rect(cornerRadius: 8)
-    )
+    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
     .overlay {
       if isPencilHovering {
         RoundedRectangle(cornerRadius: 8)
           .stroke(.blue.opacity(hoverIntensity), lineWidth: 2)
-          .glassEffect(.regular.tint(.blue))
+          .overlay(
+            RoundedRectangle(cornerRadius: 8)
+              .stroke(.blue.opacity(hoverIntensity), lineWidth: 2)
+          )
       }
     }
     .enhancedHover(id: buttonId, glassEffect: true)
@@ -102,18 +102,6 @@ struct GestureAwareGlassButton: View {
     )
   }
 
-  private var glassEffectForStyle: Glass {
-    switch style {
-    case .regular:
-      return .regular
-    case .prominent:
-      return .regular.tint(.blue)
-    case .tinted(let color):
-      return .regular.tint(color)
-    case .interactive:
-      return .regular
-    }
-  }
 }
 
 @available(iPadOS 26.0, *)
@@ -154,10 +142,6 @@ struct GestureAwareGlassCard<Content: View>: View {
     content
       .padding(padding)
       .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius))
-      .glassEffect(
-        isInteractive ? .regular.interactive() : .regular,
-        in: .rect(cornerRadius: cornerRadius)
-      )
       .scaleEffect(scale * (isPencilHovering ? 1.02 : (isHovering ? 1.01 : 1.0)))
       .rotationEffect(rotation)
       .offset(dragOffset)
@@ -166,7 +150,6 @@ struct GestureAwareGlassCard<Content: View>: View {
         if isPencilHovering {
           RoundedRectangle(cornerRadius: cornerRadius)
             .stroke(.blue.opacity(hoverIntensity * 0.5), lineWidth: 1)
-            .glassEffect(.regular.tint(.blue))
         }
       }
       .applePencilHover(id: cardId) { hovering, location, intensity in
@@ -245,25 +228,27 @@ struct GestureAwareNavigationItem: View {
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
             .background(.red, in: Capsule())
-            .glassEffect(.regular.tint(.red))
+            .background(.ultraThinMaterial)
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(.red.opacity(0.3), lineWidth: 1))
         }
       }
       .padding(.horizontal, 16)
       .padding(.vertical, 12)
       .background(
         RoundedRectangle(cornerRadius: 10)
-          .fill(isSelected ? .blue.opacity(0.15) : .clear)
+          .fill(isSelected ? Color.blue.opacity(0.15) : Color.clear)
       )
     }
     .buttonStyle(.plain)
     .scaleEffect(isPencilHovering ? 1.03 : (isHovering ? 1.01 : 1.0))
     .brightness(hoverIntensity * 0.1)
-    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 10))
+    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
     .overlay {
       if isPencilHovering {
         RoundedRectangle(cornerRadius: 10)
           .stroke(.blue.opacity(hoverIntensity), lineWidth: 2)
-          .glassEffect(.regular.tint(.blue))
+          .background(.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: 10))
+          .overlay(RoundedRectangle(cornerRadius: 10).stroke(.blue.opacity(0.3), lineWidth: 1))
       }
 
       if isFocused {
@@ -345,21 +330,22 @@ struct GestureAwareSearchBar: View {
             .foregroundStyle(.secondary)
         }
         .buttonStyle(.plain)
-        .glassEffect(.regular.interactive())
+        .background(.ultraThinMaterial)
         .enhancedHover(id: "\(searchId)-clear")
       }
     }
     .padding(.horizontal, 16)
     .padding(.vertical, 12)
     .background(.ultraThinMaterial, in: Capsule())
-    .glassEffect(.regular.interactive(), in: .capsule)
+    .background(.ultraThinMaterial, in: Capsule())
     .scaleEffect(isPencilHovering ? 1.02 : (isHovering ? 1.01 : 1.0))
     .brightness(hoverIntensity * 0.1)
     .overlay {
       if isPencilHovering {
         Capsule()
           .stroke(.blue.opacity(hoverIntensity), lineWidth: 2)
-          .glassEffect(.regular.tint(.blue))
+          .background(.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: 10))
+          .overlay(RoundedRectangle(cornerRadius: 10).stroke(.blue.opacity(0.3), lineWidth: 1))
       }
 
       if isFocused {
@@ -419,12 +405,13 @@ struct GestureAwareMediaView: View {
     .rotationEffect(rotation)
     .offset(dragOffset)
     .brightness(hoverIntensity * 0.05)
-    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 12))
+    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
     .overlay {
       if isPencilHovering {
         RoundedRectangle(cornerRadius: 12)
           .stroke(.blue.opacity(hoverIntensity * 0.5), lineWidth: 2)
-          .glassEffect(.regular.tint(.blue))
+          .background(.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: 10))
+          .overlay(RoundedRectangle(cornerRadius: 10).stroke(.blue.opacity(0.3), lineWidth: 1))
       }
     }
     .applePencilHover(id: mediaId) { hovering, location, intensity in

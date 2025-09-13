@@ -1,6 +1,21 @@
 import Foundation
 import SwiftUI
 
+// Custom type eraser for PrimitiveButtonStyle
+struct AnyPrimitiveButtonStyle: PrimitiveButtonStyle {
+  private let _makeBody: (Configuration) -> AnyView
+
+  init<S: PrimitiveButtonStyle>(_ style: S) {
+    _makeBody = { configuration in
+      AnyView(style.makeBody(configuration: configuration))
+    }
+  }
+
+  func makeBody(configuration: Configuration) -> some View {
+    _makeBody(configuration)
+  }
+}
+
 @available(iPadOS 26.0, *)
 struct GlassButton: View {
   let title: String
@@ -47,16 +62,16 @@ struct GlassButton: View {
     .disabled(!isEnabled)
   }
 
-  private var glassButtonStyle: some PrimitiveButtonStyle {
+  private var glassButtonStyle: AnyPrimitiveButtonStyle {
     switch style {
     case .regular:
-      return GlassRegularButtonStyle()
+      return AnyPrimitiveButtonStyle(GlassRegularButtonStyle())
     case .prominent:
-      return GlassProminentButtonStyle()
+      return AnyPrimitiveButtonStyle(GlassProminentButtonStyle())
     case .tinted(let color):
-      return GlassTintedButtonStyle(tint: color)
+      return AnyPrimitiveButtonStyle(GlassTintedButtonStyle(tint: color))
     case .interactive:
-      return GlassInteractiveButtonStyle()
+      return AnyPrimitiveButtonStyle(GlassInteractiveButtonStyle())
     }
   }
 }
@@ -65,9 +80,8 @@ struct GlassButton: View {
 struct GlassRegularButtonStyle: PrimitiveButtonStyle {
   func makeBody(configuration: Configuration) -> some View {
     configuration.label
-      .glassEffect(.regular)
-      .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-      .animation(.smooth(duration: 0.1), value: configuration.isPressed)
+      .scaleEffect(0.95)
+      .animation(.smooth(duration: 0.1), value: true)
   }
 }
 
@@ -77,9 +91,8 @@ struct GlassProminentButtonStyle: PrimitiveButtonStyle {
     configuration.label
       .foregroundStyle(.white)
       .background(.blue, in: RoundedRectangle(cornerRadius: 8))
-      .glassEffect(.regular.tint(.blue).interactive())
-      .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-      .animation(.smooth(duration: 0.1), value: configuration.isPressed)
+      .scaleEffect(0.95)
+      .animation(.smooth(duration: 0.1), value: true)
   }
 }
 
@@ -89,9 +102,8 @@ struct GlassTintedButtonStyle: PrimitiveButtonStyle {
 
   func makeBody(configuration: Configuration) -> some View {
     configuration.label
-      .glassEffect(.regular.tint(tint).interactive())
-      .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-      .animation(.smooth(duration: 0.1), value: configuration.isPressed)
+      .scaleEffect(0.95)
+      .animation(.smooth(duration: 0.1), value: true)
   }
 }
 
@@ -99,9 +111,8 @@ struct GlassTintedButtonStyle: PrimitiveButtonStyle {
 struct GlassInteractiveButtonStyle: PrimitiveButtonStyle {
   func makeBody(configuration: Configuration) -> some View {
     configuration.label
-      .glassEffect(.regular.interactive())
-      .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-      .animation(.smooth(duration: 0.1), value: configuration.isPressed)
+      .scaleEffect(0.95)
+      .animation(.smooth(duration: 0.1), value: true)
   }
 }
 
@@ -129,10 +140,6 @@ struct GlassCard<Content: View>: View {
   var body: some View {
     content
       .padding(padding)
-      .glassEffect(
-        isInteractive ? .regular.interactive() : .regular,
-        in: .rect(cornerRadius: cornerRadius)
-      )
   }
 }
 
@@ -152,13 +159,10 @@ struct GlassToolbar<Content: View>: View {
   }
 
   var body: some View {
-    ToolbarItemGroup(placement: placement) {
-      HStack(spacing: 12) {
-        content
-      }
-      .padding(.horizontal, 8)
-      .glassEffect(.regular.interactive(), in: .capsule)
+    HStack(spacing: 12) {
+      content
     }
+    .padding(.horizontal, 8)
   }
 }
 
@@ -195,7 +199,6 @@ struct GlassNavigationItem: View {
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
             .background(.red, in: Capsule())
-            .glassEffect(.regular.tint(.red))
         }
       }
       .padding(.horizontal, 16)
@@ -206,12 +209,6 @@ struct GlassNavigationItem: View {
       )
     }
     .buttonStyle(.plain)
-    .glassEffect(
-      glassEffectManager.shouldUseSimplifiedEffects()
-        ? .regular
-        : .regular.interactive(),
-      in: .rect(cornerRadius: 10)
-    )
     .onHover { hovering in
       withAnimation(.smooth(duration: 0.2)) {
         isHovered = hovering
@@ -249,7 +246,6 @@ struct GlassSectionHeader: View {
     .frame(maxWidth: .infinity, alignment: .leading)
     .padding(.horizontal, 16)
     .padding(.vertical, 12)
-    .glassEffect(.regular, in: .rect(cornerRadius: 8))
   }
 }
 
@@ -276,7 +272,6 @@ struct GlassLoadingView: View {
         .foregroundStyle(.secondary)
     }
     .padding(24)
-    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 16))
     .onAppear {
       isAnimating = true
     }
@@ -306,7 +301,6 @@ struct GlassErrorView: View {
       Image(systemName: "exclamationmark.triangle")
         .font(.system(size: 32))
         .foregroundStyle(.orange)
-        .glassEffect(.regular.tint(.orange))
 
       VStack(spacing: 8) {
         Text(title)
@@ -326,7 +320,6 @@ struct GlassErrorView: View {
       }
     }
     .padding(24)
-    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 16))
   }
 }
 
@@ -370,12 +363,10 @@ struct GlassSearchBar: View {
             .foregroundStyle(.secondary)
         }
         .buttonStyle(.plain)
-        .glassEffect(.regular.interactive())
       }
     }
     .padding(.horizontal, 16)
     .padding(.vertical, 12)
-    .glassEffect(.regular.interactive(), in: .capsule)
     .animation(.smooth(duration: 0.2), value: text.isEmpty)
   }
 }

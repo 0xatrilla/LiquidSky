@@ -1,8 +1,11 @@
 import Foundation
 import SwiftUI
 
+// MARK: - Notification Names
+
 @available(iPadOS 26.0, *)
 @Observable
+@MainActor
 class KeyboardShortcutsManager {
   var shortcuts: [KeyboardShortcut] = []
   var isEnabled = true
@@ -18,31 +21,43 @@ class KeyboardShortcutsManager {
         key: .init("1"),
         modifiers: .command,
         title: "Go to Feed",
-        action: { NotificationCenter.default.post(name: .navigateToFeed, object: nil) }
+        action: {
+          NotificationCenter.default.post(name: Notification.Name("navigateToFeed"), object: nil)
+        }
       ),
       KeyboardShortcut(
         key: .init("2"),
         modifiers: .command,
         title: "Go to Notifications",
-        action: { NotificationCenter.default.post(name: .navigateToNotifications, object: nil) }
+        action: {
+          NotificationCenter.default.post(
+            name: Notification.Name("navigateToNotifications"), object: nil)
+        }
       ),
       KeyboardShortcut(
         key: .init("3"),
         modifiers: .command,
         title: "Go to Search",
-        action: { NotificationCenter.default.post(name: .navigateToSearch, object: nil) }
+        action: {
+          NotificationCenter.default.post(name: Notification.Name("navigateToSearch"), object: nil)
+        }
       ),
       KeyboardShortcut(
         key: .init("4"),
         modifiers: .command,
         title: "Go to Profile",
-        action: { NotificationCenter.default.post(name: .navigateToProfile, object: nil) }
+        action: {
+          NotificationCenter.default.post(name: Notification.Name("navigateToProfile"), object: nil)
+        }
       ),
       KeyboardShortcut(
         key: .init("5"),
         modifiers: .command,
         title: "Go to Settings",
-        action: { NotificationCenter.default.post(name: .navigateToSettings, object: nil) }
+        action: {
+          NotificationCenter.default.post(
+            name: Notification.Name("navigateToSettings"), object: nil)
+        }
       ),
 
       // Action shortcuts
@@ -50,19 +65,21 @@ class KeyboardShortcutsManager {
         key: .init("n"),
         modifiers: .command,
         title: "New Post",
-        action: { NotificationCenter.default.post(name: .newPost, object: nil) }
+        action: { NotificationCenter.default.post(name: Notification.Name("newPost"), object: nil) }
       ),
       KeyboardShortcut(
         key: .init("f"),
         modifiers: .command,
         title: "Search",
-        action: { NotificationCenter.default.post(name: .focusSearch, object: nil) }
+        action: {
+          NotificationCenter.default.post(name: Notification.Name("focusSearch"), object: nil)
+        }
       ),
       KeyboardShortcut(
         key: .init("r"),
         modifiers: .command,
         title: "Refresh",
-        action: { NotificationCenter.default.post(name: .refresh, object: nil) }
+        action: { NotificationCenter.default.post(name: Notification.Name("refresh"), object: nil) }
       ),
 
       // Column management
@@ -70,59 +87,79 @@ class KeyboardShortcutsManager {
         key: .init("w"),
         modifiers: .command,
         title: "Toggle Sidebar",
-        action: { NotificationCenter.default.post(name: .toggleSidebar, object: nil) }
+        action: {
+          NotificationCenter.default.post(name: Notification.Name("toggleSidebar"), object: nil)
+        }
       ),
       KeyboardShortcut(
         key: .init("d"),
         modifiers: .command,
         title: "Toggle Detail",
-        action: { NotificationCenter.default.post(name: .toggleDetail, object: nil) }
+        action: {
+          NotificationCenter.default.post(name: Notification.Name("toggleDetail"), object: nil)
+        }
       ),
 
       // Navigation within columns
       KeyboardShortcut(
-        key: .init(.upArrow),
+        key: .upArrow,
         modifiers: [],
         title: "Previous Item",
-        action: { NotificationCenter.default.post(name: .navigatePrevious, object: nil) }
+        action: {
+          NotificationCenter.default.post(name: Notification.Name("navigatePrevious"), object: nil)
+        }
       ),
       KeyboardShortcut(
-        key: .init(.downArrow),
+        key: .downArrow,
         modifiers: [],
         title: "Next Item",
-        action: { NotificationCenter.default.post(name: .navigateNext, object: nil) }
+        action: {
+          NotificationCenter.default.post(name: Notification.Name("navigateNext"), object: nil)
+        }
       ),
       KeyboardShortcut(
-        key: .init(.leftArrow),
+        key: .leftArrow,
         modifiers: [],
         title: "Previous Column",
-        action: { NotificationCenter.default.post(name: .navigateLeftColumn, object: nil) }
+        action: {
+          NotificationCenter.default.post(
+            name: Notification.Name("navigateLeftColumn"), object: nil)
+        }
       ),
       KeyboardShortcut(
-        key: .init(.rightArrow),
+        key: .rightArrow,
         modifiers: [],
         title: "Next Column",
-        action: { NotificationCenter.default.post(name: .navigateRightColumn, object: nil) }
+        action: {
+          NotificationCenter.default.post(
+            name: Notification.Name("navigateRightColumn"), object: nil)
+        }
       ),
 
       // Quick actions
       KeyboardShortcut(
-        key: .init(.space),
+        key: .space,
         modifiers: [],
         title: "Select/Activate",
-        action: { NotificationCenter.default.post(name: .activateSelected, object: nil) }
+        action: {
+          NotificationCenter.default.post(name: Notification.Name("activateSelected"), object: nil)
+        }
       ),
       KeyboardShortcut(
-        key: .init(.escape),
+        key: .escape,
         modifiers: [],
         title: "Cancel/Back",
-        action: { NotificationCenter.default.post(name: .cancelAction, object: nil) }
+        action: {
+          NotificationCenter.default.post(name: Notification.Name("cancelAction"), object: nil)
+        }
       ),
       KeyboardShortcut(
-        key: .init(.return),
+        key: .return,
         modifiers: [],
         title: "Confirm/Open",
-        action: { NotificationCenter.default.post(name: .confirmAction, object: nil) }
+        action: {
+          NotificationCenter.default.post(name: Notification.Name("confirmAction"), object: nil)
+        }
       ),
     ]
   }
@@ -225,7 +262,8 @@ struct KeyboardShortcutsModifier: ViewModifier {
   func body(content: Content) -> some View {
     content
       .onKeyPress { keyPress in
-        return shortcutsManager.handleKeyPress(keyPress.key, modifiers: keyPress.modifiers)
+        let handled = shortcutsManager.handleKeyPress(keyPress.key, modifiers: keyPress.modifiers)
+        return handled ? .handled : .ignored
       }
   }
 }
@@ -330,30 +368,7 @@ struct KeyboardShortcutsHelpView: View {
         }
       }
     }
-    .glassEffect(.regular, in: .rect(cornerRadius: 16))
   }
-}
-
-// MARK: - Notification Names
-
-extension Notification.Name {
-  static let navigateToFeed = Notification.Name("navigateToFeed")
-  static let navigateToNotifications = Notification.Name("navigateToNotifications")
-  static let navigateToSearch = Notification.Name("navigateToSearch")
-  static let navigateToProfile = Notification.Name("navigateToProfile")
-  static let navigateToSettings = Notification.Name("navigateToSettings")
-  static let newPost = Notification.Name("newPost")
-  static let focusSearch = Notification.Name("focusSearch")
-  static let refresh = Notification.Name("refresh")
-  static let toggleSidebar = Notification.Name("toggleSidebar")
-  static let toggleDetail = Notification.Name("toggleDetail")
-  static let navigatePrevious = Notification.Name("navigatePrevious")
-  static let navigateNext = Notification.Name("navigateNext")
-  static let navigateLeftColumn = Notification.Name("navigateLeftColumn")
-  static let navigateRightColumn = Notification.Name("navigateRightColumn")
-  static let activateSelected = Notification.Name("activateSelected")
-  static let cancelAction = Notification.Name("cancelAction")
-  static let confirmAction = Notification.Name("confirmAction")
 }
 
 // MARK: - Environment Keys

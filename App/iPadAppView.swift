@@ -14,6 +14,7 @@ import ProfileUI
 import SettingsUI
 import SwiftUI
 import User
+import ATProtoKit
 
 @available(iPadOS 26.0, *)
 @MainActor
@@ -39,8 +40,26 @@ struct iPadAppView: View {
   @State private var notificationBadgeSystem = NotificationBadgeSystem()
   @State private var badgeAnimationCoordinator = BadgeAnimationCoordinator()
   @State private var quickActionsSystem = QuickActionsSystem()
+  @State private var pictureInPictureManager = PictureInPictureManager()
+  @State private var advancedApplePencilManager = AdvancedApplePencilManager()
+  @State private var advancedTrackpadManager = AdvancedTrackpadManager()
+  @State private var advancedMultiTouchManager = AdvancedMultiTouchManager()
+  @State private var lazyContentManager = LazyContentManager()
+  @State private var memoryManagementSystem = MemoryManagementSystem()
   @State private var contentColumnManager = ContentColumnManager()
   @State private var detailColumnManager = DetailColumnManager()
+  @State private var accessibilityManager = AccessibilityManager()
+  @State private var voiceOverSupport = VoiceOverSupport()
+  @State private var dynamicTypeSupport = DynamicTypeSupport()
+  @State private var visualAccessibilitySupport = VisualAccessibilitySupport()
+  @State private var assistiveTechnologySupport = AssistiveTechnologySupport()
+  @State private var handoffManager = HandoffManager()
+  @State private var shortcutsIntegrationManager = ShortcutsIntegrationManager()
+  @State private var focusModeManager = FocusModeManager()
+  @State private var sharingManager = SharingManager()
+  @State private var iPadIntegration = iPadIntegrationManager()
+  @State private var uiPolishManager = UIPolishManager()
+  @State private var finalOptimizationManager = FinalOptimizationManager()
 
   // Adaptive layout configuration
   @Environment(\.horizontalSizeClass) var horizontalSizeClass
@@ -64,6 +83,7 @@ struct iPadAppView: View {
         // Content/List view with adaptive layout
         contentView
           .navigationSplitViewColumnWidth(min: 300, ideal: 400, max: 500)
+          .withDetailNavigation()
       } detail: {
         // Detail view with rich presentation
         detailView
@@ -77,7 +97,7 @@ struct iPadAppView: View {
           horizontalSizeClass: horizontalSizeClass,
           verticalSizeClass: verticalSizeClass
         )
-        
+
         // Set adaptive column visibility
         navigationState.columnVisibility = adaptiveColumnVisibility
       }
@@ -118,6 +138,24 @@ struct iPadAppView: View {
       .environment(quickActionsSystem)
       .environment(contentColumnManager)
       .environment(detailColumnManager)
+      .environment(pictureInPictureManager)
+      .environment(advancedApplePencilManager)
+      .environment(advancedTrackpadManager)
+      .environment(advancedMultiTouchManager)
+      .environment(lazyContentManager)
+      .environment(memoryManagementSystem)
+      .environment(accessibilityManager)
+      .environment(voiceOverSupport)
+      .environment(dynamicTypeSupport)
+      .environment(visualAccessibilitySupport)
+      .environment(assistiveTechnologySupport)
+      .environment(handoffManager)
+      .environment(shortcutsIntegrationManager)
+      .environment(focusModeManager)
+      .environment(sharingManager)
+      .environment(iPadIntegrationManager)
+      .environment(uiPolishManager)
+      .environment(finalOptimizationManager)
       .keyboardShortcuts()
       .onReceive(NotificationCenter.default.publisher(for: .navigateToFeed)) { _ in
         navigationState.selectSidebarItem(.feed)
@@ -151,6 +189,28 @@ struct iPadAppView: View {
       .onReceive(NotificationCenter.default.publisher(for: .showKeyboardShortcuts)) { _ in
         // Handle keyboard shortcuts display
       }
+      .overlay {
+        // Picture-in-Picture overlay
+        PictureInPictureView()
+      }
+      .overlay {
+        // Hover preview overlay
+        HoverPreviewOverlay()
+      }
+      .overlay {
+        // Custom cursor overlay
+        CustomCursorOverlay()
+      }
+      .overlay {
+        // Gesture recognition overlay
+        GestureRecognitionOverlay()
+      }
+      .hoverNavigation()
+      .simultaneousGestures(allowedCombinations: [
+        [.pinch, .rotation],
+        [.drag, .pinch],
+        [.tap, .drag],
+      ])
     }
   }
 
@@ -163,129 +223,128 @@ struct iPadAppView: View {
       }
   }
 
-    // MARK: - Content View
+  // MARK: - Content View
 
-    @ViewBuilder
-    private var contentView: some View {
-      NavigationStack(
-        path: Binding(
-          get: { router[navigationState.selectedSidebarItem.routerDestination] },
-          set: { router[navigationState.selectedSidebarItem.routerDestination] = $0 }
-        )
-      ) {
-        GlassEffectContainer(spacing: 16.0) {
-          switch navigationState.selectedSidebarItem {
-          case .feed:
-            EnhancedFeedGridView()
-              .navigationTitle("Discover")
-              .navigationBarTitleDisplayMode(.large)
-              .withAppDestinations()
-              .environment(\.currentTab, .feed)
-              .onAppear {
-                contentColumnManager.switchContent(to: .feed)
-              }
+  @ViewBuilder
+  private var contentView: some View {
+    NavigationStack(
+      path: Binding(
+        get: { router[navigationState.selectedSidebarItem.routerDestination] },
+        set: { router[navigationState.selectedSidebarItem.routerDestination] = $0 }
+      )
+    ) {
+      GlassEffectContainer(spacing: 16.0) {
+        switch navigationState.selectedSidebarItem {
+        case .feed:
+          EnhancedFeedGridView()
+            .navigationTitle("Discover")
+            .navigationBarTitleDisplayMode(.large)
+            .withAppDestinations()
+            .environment(\.currentTab, .feed)
+            .onAppear {
+              contentColumnManager.switchContent(to: .feed)
+            }
 
-          case .notifications:
-            EnhancedNotificationGridView()
-              .navigationTitle("Notifications")
-              .navigationBarTitleDisplayMode(.large)
-              .withAppDestinations()
-              .environment(\.currentTab, .notification)
-              .onAppear {
-                badgeStore.markSeenNow()
-                contentColumnManager.switchContent(to: .notifications)
-              }
+        case .notifications:
+          EnhancedNotificationGridView()
+            .navigationTitle("Notifications")
+            .navigationBarTitleDisplayMode(.large)
+            .withAppDestinations()
+            .environment(\.currentTab, .notification)
+            .onAppear {
+              badgeStore.markSeenNow()
+              contentColumnManager.switchContent(to: .notifications)
+            }
 
-          case .profile:
-            EnhancedProfileView()
-              .navigationTitle("Profile")
-              .navigationBarTitleDisplayMode(.large)
-              .withAppDestinations()
-              .environment(\.currentTab, .profile)
-              .onAppear {
-                contentColumnManager.switchContent(to: .profile)
-              }
+        case .profile:
+          EnhancedProfileView()
+            .navigationTitle("Profile")
+            .navigationBarTitleDisplayMode(.large)
+            .withAppDestinations()
+            .environment(\.currentTab, .profile)
+            .onAppear {
+              contentColumnManager.switchContent(to: .profile)
+            }
 
-          case .search:
-            EnhancedSearchView(client: client)
-              .navigationTitle("Search")
-              .navigationBarTitleDisplayMode(.large)
-              .withAppDestinations()
-              .environment(\.currentTab, .compose)
-              .onAppear {
-                contentColumnManager.switchContent(to: .search)
-              }
+        case .search:
+          EnhancedSearchView(client: client)
+            .navigationTitle("Search")
+            .navigationBarTitleDisplayMode(.large)
+            .withAppDestinations()
+            .environment(\.currentTab, .compose)
+            .onAppear {
+              contentColumnManager.switchContent(to: .search)
+            }
 
-          case .settings:
-            AdaptiveSettingsView()
-              .navigationTitle("Settings")
-              .navigationBarTitleDisplayMode(.large)
-              .withAppDestinations()
-              .environment(\.currentTab, .settings)
-              .onAppear {
-                contentColumnManager.switchContent(to: .settings)
-              }
+        case .settings:
+          AdaptiveSettingsView()
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.large)
+            .withAppDestinations()
+            .environment(\.currentTab, .settings)
+            .onAppear {
+              contentColumnManager.switchContent(to: .settings)
+            }
 
-          case .pinnedFeed(let uri, _):
-            let feedItem = createFeedItem(for: uri)
-            EnhancedFeedGridView()
-              .navigationTitle(feedItem.displayName)
-              .navigationBarTitleDisplayMode(.large)
-              .withAppDestinations()
-              .environment(\.currentTab, .feed)
-              .onAppear {
-                contentColumnManager.switchContent(to: .pinnedFeed(uri: uri))
-              }
-          }
+        case .pinnedFeed(let uri, _):
+          let feedItem = createFeedItem(for: uri)
+          EnhancedFeedGridView()
+            .navigationTitle(feedItem.displayName)
+            .navigationBarTitleDisplayMode(.large)
+            .withAppDestinations()
+            .environment(\.currentTab, .feed)
+            .onAppear {
+              contentColumnManager.switchContent(to: .pinnedFeed(uri: uri))
+            }
         }
       }
-      .background(.ultraThinMaterial)
     }
-
-    // MARK: - Helper Methods
-
-    private func createFeedItem(for feedURI: String) -> FeedItem {
-      FeedItem(
-        uri: feedURI,
-        displayName: settingsService.pinnedFeedNames[feedURI] ?? "Feed",
-        description: nil,
-        avatarImageURL: nil,
-        creatorHandle: "",
-        likesCount: 0,
-        liked: false
-      )
-    }
-
-    // MARK: - Detail View
-
-    @ViewBuilder
-    private var detailView: some View {
-      DetailColumnView()
-    }
+    .background(.ultraThinMaterial)
   }
 
-  // MARK: - Helper Properties
+  // MARK: - Helper Methods
 
-  private var badgeCount: Int? {
-    badgeStore.unreadCount > 0 ? badgeStore.unreadCount : nil
+  private func createFeedItem(for feedURI: String) -> FeedItem {
+    FeedItem(
+      uri: feedURI,
+      displayName: settingsService.pinnedFeedNames[feedURI] ?? "Feed",
+      description: nil,
+      avatarImageURL: nil,
+      creatorHandle: "",
+      likesCount: 0,
+      liked: false
+    )
   }
 
-  // MARK: - Summary Generation
+  // MARK: - Detail View
 
-  private func generateGlobalSummary() async {
-    isGeneratingSummary = true
-
-    do {
-      let summary = await FeedSummaryService.shared.summarizeFeedPosts([], feedName: "your feeds")
-      summaryText = summary
-      showingSummary = true
-    } catch {
-      summaryText = "Unable to generate AI summary at this time. Please try again later."
-      showingSummary = true
-    }
-
-    isGeneratingSummary = false
+  @ViewBuilder
+  private var detailView: some View {
+    DetailColumnView()
   }
+}
+
+// MARK: - Helper Properties
+
+private var badgeCount: Int? {
+  badgeStore.unreadCount > 0 ? badgeStore.unreadCount : nil
+}
+
+// MARK: - Summary Generation
+
+private func generateGlobalSummary() async {
+  isGeneratingSummary = true
+
+  do {
+    let summary = await FeedSummaryService.shared.summarizeFeedPosts([], feedName: "your feeds")
+    summaryText = summary
+    showingSummary = true
+  } catch {
+    summaryText = "Unable to generate AI summary at this time. Please try again later."
+    showingSummary = true
+  }
+
+  isGeneratingSummary = false
 }
 
 // MARK: - Adaptive View Wrappers
@@ -439,7 +498,7 @@ enum SidebarItem: Hashable, CaseIterable, Identifiable {
     }
   }
 
-  var routerDestination: AppRouter.Destination {
+  var routerDestination: Destinations.RouterDestination {
     switch self {
     case .feed, .pinnedFeed: return .feed
     case .notifications: return .notification
@@ -498,8 +557,20 @@ struct GlassSidebarRow: View {
   if #available(iPadOS 26.0, *) {
     iPadAppView()
       .environment(AppRouter(initialTab: .feed))
-      .environment(BSkyClient.mock)
-      .environment(CurrentUser.mock)
+      .environment(
+        BSkyClient(
+          configuration: ATProtocolConfiguration(
+            keychainProtocol: AppleSecureKeychain(identifier: UUID()))
+        )
+      )
+      .environment(
+        CurrentUser(
+          client: BSkyClient(
+            configuration: ATProtocolConfiguration(
+              keychainProtocol: AppleSecureKeychain(identifier: UUID()))
+          )
+        )
+      )
   } else {
     Text("iPadOS 26.0 required")
   }

@@ -108,7 +108,7 @@ struct EnhancedMediaDetailView: View {
         .resizable()
         .aspectRatio(contentMode: .fit)
         .scaleEffect(zoomScale * magnification)
-        .offset(x: offset.x, y: offset.y)
+        .offset(offset)
         .gesture(
           SimultaneousGesture(
             // Zoom gesture
@@ -127,8 +127,8 @@ struct EnhancedMediaDetailView: View {
             DragGesture()
               .onChanged { value in
                 offset = CGSize(
-                  width: lastOffset.width + value.translation.x,
-                  height: lastOffset.height + value.translation.y
+                  width: lastOffset.width + value.translation.width,
+                  height: lastOffset.height + value.translation.height
                 )
               }
               .onEnded { _ in
@@ -225,7 +225,12 @@ struct EnhancedMediaDetailView: View {
           .background(.black.opacity(0.6), in: Circle())
       }
       .buttonStyle(.plain)
-      .glassEffect(.regular.interactive(), in: .circle)
+      .background {
+        if #available(iOS 26.0, *) {
+          Circle()
+            .glassEffect(.regular.interactive(), in: .circle)
+        }
+      }
 
       Button {
         withAnimation(.smooth(duration: 0.3)) {
@@ -239,7 +244,12 @@ struct EnhancedMediaDetailView: View {
           .background(.black.opacity(0.6), in: Circle())
       }
       .buttonStyle(.plain)
-      .glassEffect(.regular.interactive(), in: .circle)
+      .background {
+        if #available(iOS 26.0, *) {
+          Circle()
+            .glassEffect(.regular.interactive(), in: .circle)
+        }
+      }
 
       Button {
         withAnimation(.smooth(duration: 0.3)) {
@@ -255,7 +265,12 @@ struct EnhancedMediaDetailView: View {
           .background(.black.opacity(0.6), in: Circle())
       }
       .buttonStyle(.plain)
-      .glassEffect(.regular.interactive(), in: .circle)
+      .background {
+        if #available(iOS 26.0, *) {
+          Circle()
+            .glassEffect(.regular.interactive(), in: .circle)
+        }
+      }
     }
     .opacity(zoomScale > 1.0 ? 1.0 : 0.6)
   }
@@ -359,7 +374,12 @@ struct EnhancedMediaDetailView: View {
         .foregroundStyle(.secondary)
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .glassEffect(.regular, in: .rect(cornerRadius: 20))
+    .background {
+      if #available(iOS 26.0, *) {
+        RoundedRectangle(cornerRadius: 20)
+          .glassEffect(.regular, in: .rect(cornerRadius: 20))
+      }
+    }
   }
 
   @ViewBuilder
@@ -369,7 +389,12 @@ struct EnhancedMediaDetailView: View {
       systemImage: "photo.badge.exclamationmark",
       description: Text("This media may have been deleted or is no longer available")
     )
-    .glassEffect(.regular, in: .rect(cornerRadius: 20))
+    .background {
+      if #available(iOS 26.0, *) {
+        RoundedRectangle(cornerRadius: 20)
+          .glassEffect(.regular, in: .rect(cornerRadius: 20))
+      }
+    }
   }
 
   // MARK: - Toolbar
@@ -382,7 +407,12 @@ struct EnhancedMediaDetailView: View {
       Image(systemName: "square.and.arrow.up")
         .font(.subheadline)
     }
-    .glassEffect(.regular.interactive())
+    .background {
+      if #available(iOS 26.0, *) {
+        Rectangle()
+          .glassEffect(.regular.interactive())
+      }
+    }
 
     Button {
       // Handle more options
@@ -390,7 +420,12 @@ struct EnhancedMediaDetailView: View {
       Image(systemName: "ellipsis.circle")
         .font(.subheadline)
     }
-    .glassEffect(.regular.interactive())
+    .background {
+      if #available(iOS 26.0, *) {
+        Rectangle()
+          .glassEffect(.regular.interactive())
+      }
+    }
   }
 }
 
@@ -423,7 +458,12 @@ struct MediaActionButton: View {
       }
     }
     .buttonStyle(.plain)
-    .glassEffect(.regular.tint(color).interactive(), in: .rect(cornerRadius: 12))
+    .background {
+      if #available(iOS 26.0, *) {
+        RoundedRectangle(cornerRadius: 12)
+          .glassEffect(.regular.tint(color).interactive(), in: .rect(cornerRadius: 12))
+      }
+    }
   }
 }
 
@@ -451,7 +491,7 @@ struct FullScreenMediaViewer: View {
             .resizable()
             .aspectRatio(contentMode: .fit)
             .scaleEffect(zoomScale * magnification)
-            .offset(x: offset.x, y: offset.y)
+            .offset(offset)
             .gesture(
               SimultaneousGesture(
                 // Zoom gesture
@@ -470,8 +510,8 @@ struct FullScreenMediaViewer: View {
                 DragGesture()
                   .onChanged { value in
                     offset = CGSize(
-                      width: lastOffset.width + value.translation.x,
-                      height: lastOffset.height + value.translation.y
+                      width: lastOffset.width + value.translation.width,
+                      height: lastOffset.height + value.translation.height
                     )
                   }
                   .onEnded { _ in
@@ -550,7 +590,12 @@ struct MediaShareSheet: View {
           }
           .frame(height: 200)
           .clipShape(RoundedRectangle(cornerRadius: 12))
-          .glassEffect(.regular, in: .rect(cornerRadius: 12))
+          .background {
+            if #available(iOS 26.0, *) {
+              RoundedRectangle(cornerRadius: 12)
+                .glassEffect(.regular, in: .rect(cornerRadius: 12))
+            }
+          }
 
           // Share options
           VStack(spacing: 12) {
@@ -596,7 +641,12 @@ struct MediaShareSheet: View {
         }
       }
     }
-    .glassEffect(.regular, in: .rect(cornerRadius: 16))
+    .background {
+      if #available(iOS 26.0, *) {
+        RoundedRectangle(cornerRadius: 16)
+          .glassEffect(.regular, in: .rect(cornerRadius: 16))
+      }
+    }
   }
 }
 
@@ -629,8 +679,12 @@ struct ShareOptionButton: View {
       }
       .padding(.horizontal, 20)
       .padding(.vertical, 16)
-      .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-      .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 12))
+      .background {
+        if #available(iOS 26.0, *) {
+          RoundedRectangle(cornerRadius: 12)
+            .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 12))
+        }
+      }
     }
     .buttonStyle(.plain)
   }

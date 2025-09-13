@@ -82,7 +82,7 @@ struct SidebarNavigationView: View {
           }
         )
         .tag(item)
-        .glassEffectID(item.id, in: sidebarNamespace)
+        .id(item.id)
       }
     } header: {
       SidebarSectionHeader(
@@ -116,7 +116,7 @@ struct SidebarNavigationView: View {
             }
           )
           .tag(feedItem)
-          .glassEffectID(feedItem.id, in: sidebarNamespace)
+          .id(feedItem.id)
           .contextMenu {
             pinnedFeedContextMenu(for: pinnedFeed)
           }
@@ -137,7 +137,7 @@ struct SidebarNavigationView: View {
           .padding(.vertical, 8)
         }
         .buttonStyle(.plain)
-        .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 8))
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
       } header: {
         SidebarSectionHeader(
           title: "Pinned Feeds",
@@ -166,7 +166,7 @@ struct SidebarNavigationView: View {
           .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
-        .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 12))
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
       } header: {
         SidebarSectionHeader(
           title: "Pinned Feeds",
@@ -240,7 +240,7 @@ struct SidebarNavigationView: View {
         .padding(.vertical, 8)
       }
       .buttonStyle(.plain)
-      .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 8))
+      .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
     }
     .padding(.vertical, 8)
   }
@@ -473,9 +473,10 @@ struct SidebarNavigationRow: View {
   private var backgroundView: some View {
     RoundedRectangle(cornerRadius: 10)
       .fill(backgroundFill)
-      .glassEffect(
-        isSelected ? .regular.tint(.blue).interactive() : .regular.interactive(),
-        in: .rect(cornerRadius: 10)
+      .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+      .overlay(
+        RoundedRectangle(cornerRadius: 10)
+          .stroke(isSelected ? .blue.opacity(0.3) : .clear, lineWidth: 1)
       )
   }
 
@@ -494,13 +495,15 @@ struct SidebarNavigationRow: View {
     if isFocused {
       RoundedRectangle(cornerRadius: 10)
         .stroke(.blue, lineWidth: 2)
-        .glassEffect(.regular.tint(.blue))
+        .background(.blue.opacity(0.1), in: Circle())
+        .overlay(Circle().stroke(.blue.opacity(0.3), lineWidth: 1))
     }
 
     if isPencilHovering {
       RoundedRectangle(cornerRadius: 10)
         .stroke(.blue.opacity(hoverIntensity), lineWidth: 2)
-        .glassEffect(.regular.tint(.blue))
+        .background(.blue.opacity(0.1), in: Circle())
+        .overlay(Circle().stroke(.blue.opacity(0.3), lineWidth: 1))
     }
   }
 }
@@ -532,7 +535,7 @@ struct SidebarSectionHeader: View {
     .frame(maxWidth: .infinity, alignment: .leading)
     .padding(.horizontal, 16)
     .padding(.vertical, 8)
-    .glassEffect(.regular, in: .rect(cornerRadius: 6))
+    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 6))
   }
 }
 
@@ -622,35 +625,12 @@ extension Notification.Name {
 
 @available(iPadOS 26.0, *)
 extension EnvironmentValues {
-  var pinnedFeedsManager: PinnedFeedsManager {
-    get { self[PinnedFeedsManagerKey.self] }
-    set { self[PinnedFeedsManagerKey.self] = newValue }
-  }
-
-  var notificationBadgeSystem: NotificationBadgeSystem {
-    get { self[NotificationBadgeSystemKey.self] }
-    set { self[NotificationBadgeSystemKey.self] = newValue }
-  }
 
   var badgeAnimationCoordinator: BadgeAnimationCoordinator {
     get { self[BadgeAnimationCoordinatorKey.self] }
     set { self[BadgeAnimationCoordinatorKey.self] = newValue }
   }
 
-  var quickActionsSystem: QuickActionsSystem {
-    get { self[QuickActionsSystemKey.self] }
-    set { self[QuickActionsSystemKey.self] = newValue }
-  }
-}
-
-@available(iPadOS 26.0, *)
-struct PinnedFeedsManagerKey: EnvironmentKey {
-  static let defaultValue = PinnedFeedsManager()
-}
-
-@available(iPadOS 26.0, *)
-struct NotificationBadgeSystemKey: EnvironmentKey {
-  static let defaultValue = NotificationBadgeSystem()
 }
 
 @available(iPadOS 26.0, *)

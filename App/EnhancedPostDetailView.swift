@@ -76,7 +76,7 @@ struct EnhancedPostDetailView: View {
       }
       .padding(20)
     }
-    .glassEffectID("main-post-\(post.id)", in: postDetailNamespace)
+    .id("main-post-\(post.id)")
   }
 
   @ViewBuilder
@@ -97,7 +97,6 @@ struct EnhancedPostDetailView: View {
       }
       .frame(width: 50, height: 50)
       .clipShape(Circle())
-      .glassEffect(.regular, in: .circle)
 
       // Author info
       VStack(alignment: .leading, spacing: 4) {
@@ -132,7 +131,6 @@ struct EnhancedPostDetailView: View {
           }
       }
       .buttonStyle(.plain)
-      .glassEffect(.regular.tint(.blue).interactive(), in: .capsule)
     }
   }
 
@@ -173,7 +171,6 @@ struct EnhancedPostDetailView: View {
             }
             .frame(width: 200, height: 150)
             .clipShape(RoundedRectangle(cornerRadius: 12))
-            .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 12))
           }
           .buttonStyle(.plain)
         }
@@ -215,7 +212,7 @@ struct EnhancedPostDetailView: View {
   private func postInteractionButtons(_ post: PostDetailData) -> some View {
     HStack(spacing: 32) {
       // Reply button
-      InteractionButton(
+      PostInteractionButton(
         systemImage: "bubble.left",
         isActive: false,
         color: .blue,
@@ -225,7 +222,7 @@ struct EnhancedPostDetailView: View {
       }
 
       // Repost button
-      InteractionButton(
+      PostInteractionButton(
         systemImage: "arrow.2.squarepath",
         isActive: post.isReposted,
         color: .green,
@@ -235,7 +232,7 @@ struct EnhancedPostDetailView: View {
       }
 
       // Like button
-      InteractionButton(
+      PostInteractionButton(
         systemImage: post.isLiked ? "heart.fill" : "heart",
         isActive: post.isLiked,
         color: .red,
@@ -255,7 +252,6 @@ struct EnhancedPostDetailView: View {
           .foregroundStyle(.secondary)
       }
       .buttonStyle(.plain)
-      .glassEffect(.regular.interactive())
     }
   }
 
@@ -291,7 +287,6 @@ struct EnhancedPostDetailView: View {
             .lineLimit(3...6)
             .padding(12)
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
-            .glassEffect(.regular, in: .rect(cornerRadius: 8))
 
           HStack {
             Spacer()
@@ -308,7 +303,6 @@ struct EnhancedPostDetailView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 10)
             .background(.blue, in: Capsule())
-            .glassEffect(.regular.tint(.blue).interactive(), in: .capsule)
             .disabled(replyText.isEmpty)
           }
         }
@@ -340,7 +334,7 @@ struct EnhancedPostDetailView: View {
         LazyVStack(spacing: 8) {
           ForEach(detailManager.postDetailState.replies) { reply in
             ReplyRowView(reply: reply)
-              .glassEffectID("reply-\(reply.id)", in: postDetailNamespace)
+              .id("reply-\(reply.id)")
           }
         }
       }
@@ -351,16 +345,65 @@ struct EnhancedPostDetailView: View {
 
   @ViewBuilder
   private var postLoadingView: some View {
-    VStack(spacing: 20) {
-      ProgressView()
-        .scaleEffect(1.5)
+    if #available(iOS 26.0, *) {
+      VStack(spacing: 20) {
+        ProgressView()
+          .scaleEffect(1.5)
 
-      Text("Loading post...")
-        .font(.subheadline.weight(.medium))
-        .foregroundStyle(.secondary)
+        Text("Loading post...")
+          .font(.subheadline.weight(.medium))
+          .foregroundStyle(.secondary)
+      }
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
+      .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+    } else {
+      // Fallback on earlier versions
     }
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .glassEffect(.regular, in: .rect(cornerRadius: 20))
+
+    if #available(iOS 26.0, *) {
+      VStack(spacing: 20) {
+        ProgressView()
+          .scaleEffect(1.5)
+
+        Text("Loading post...")
+          .font(.subheadline.weight(.medium))
+          .foregroundStyle(.secondary)
+      }
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
+      .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+    } else {
+      // Fallback on earlier versions
+    }
+
+    if #available(iOS 26.0, *) {
+      VStack(spacing: 20) {
+        ProgressView()
+          .scaleEffect(1.5)
+
+        Text("Loading post...")
+          .font(.subheadline.weight(.medium))
+          .foregroundStyle(.secondary)
+      }
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
+      .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+    } else {
+      // Fallback on earlier versions
+    }
+
+    if #available(iOS 26.0, *) {
+      VStack(spacing: 20) {
+        ProgressView()
+          .scaleEffect(1.5)
+
+        Text("Loading post...")
+          .font(.subheadline.weight(.medium))
+          .foregroundStyle(.secondary)
+      }
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
+      .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+    } else {
+      // Fallback on earlier versions
+    }
   }
 
   @ViewBuilder
@@ -370,7 +413,6 @@ struct EnhancedPostDetailView: View {
       systemImage: "doc.text",
       description: Text("This post may have been deleted or is no longer available")
     )
-    .glassEffect(.regular, in: .rect(cornerRadius: 20))
   }
 
   // MARK: - Toolbar
@@ -383,7 +425,6 @@ struct EnhancedPostDetailView: View {
       Image(systemName: "bookmark")
         .font(.subheadline)
     }
-    .glassEffect(.regular.interactive())
 
     Button {
       // Handle more options
@@ -391,7 +432,6 @@ struct EnhancedPostDetailView: View {
       Image(systemName: "ellipsis.circle")
         .font(.subheadline)
     }
-    .glassEffect(.regular.interactive())
   }
 }
 
@@ -429,7 +469,6 @@ struct ReplyRowView: View {
           }
           .frame(width: 32, height: 32)
           .clipShape(Circle())
-          .glassEffect(.regular, in: .circle)
 
           // Author info
           VStack(alignment: .leading, spacing: 2) {
@@ -457,7 +496,7 @@ struct ReplyRowView: View {
 
         // Reply interactions
         HStack(spacing: 20) {
-          InteractionButton(
+          PostInteractionButton(
             systemImage: "bubble.left",
             isActive: false,
             color: .blue,
@@ -466,7 +505,7 @@ struct ReplyRowView: View {
             // Handle reply to reply
           }
 
-          InteractionButton(
+          PostInteractionButton(
             systemImage: reply.isLiked ? "heart.fill" : "heart",
             isActive: reply.isLiked,
             color: .red,
@@ -567,7 +606,7 @@ struct EngagementMetric: View {
 // MARK: - Interaction Button
 
 @available(iPadOS 26.0, *)
-struct InteractionButton: View {
+struct PostInteractionButton: View {
   let systemImage: String
   let isActive: Bool
   let color: Color
@@ -604,10 +643,6 @@ struct InteractionButton: View {
         )
     }
     .buttonStyle(.plain)
-    .glassEffect(
-      isActive ? .regular.tint(color).interactive() : .regular.interactive(),
-      in: .circle
-    )
     .scaleEffect(isActive ? 1.1 : 1.0)
     .animation(.smooth(duration: 0.2), value: isActive)
   }

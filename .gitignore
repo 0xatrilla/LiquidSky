@@ -83,3 +83,9 @@ build/
 .build/
 SourcePackages/
 Package.resolved
+verify_packages.sh
+.gitignore
+PACKAGE_SETUP_GUIDE.md
+Documentation/PerformanceOptimizationGuide.md
+Documentation/iPadLiquidGlassAPI.md
+Documentation/AccessibilityImplementationGuide.md

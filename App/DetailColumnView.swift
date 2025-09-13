@@ -77,7 +77,8 @@ struct DetailColumnView: View {
       systemImage: "list.bullet",
       description: Text("List detail view would be implemented here")
     )
-    .glassEffect(.regular, in: .rect(cornerRadius: 20))
+    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+    .clipShape(RoundedRectangle(cornerRadius: 20))
   }
 
   // MARK: - Empty State View
@@ -99,7 +100,8 @@ struct DetailColumnView: View {
             .font(.system(size: 40, weight: .light))
             .foregroundStyle(.blue)
         }
-        .glassEffect(.regular.tint(.blue), in: .circle)
+        .background(.blue.opacity(0.1), in: Circle())
+        .overlay(Circle().stroke(.blue.opacity(0.3), lineWidth: 2))
 
         VStack(spacing: 12) {
           Text("Select an item")
@@ -134,7 +136,8 @@ struct DetailColumnView: View {
       }
       .padding(32)
     }
-    .glassEffectID("detail-empty-state", in: detailNamespace)
+    .background(.ultraThinMaterial.opacity(0.8))
+    .clipShape(RoundedRectangle(cornerRadius: 16))
   }
 
   // MARK: - Navigation Components
@@ -156,7 +159,8 @@ struct DetailColumnView: View {
       .foregroundStyle(.blue)
     }
     .buttonStyle(.plain)
-    .glassEffect(.regular.tint(.blue).interactive())
+    .background(.blue.opacity(0.1))
+    .clipShape(Capsule())
   }
 
   @ViewBuilder
@@ -208,7 +212,8 @@ struct DetailColumnView: View {
           .stroke(.blue.opacity(0.3), lineWidth: 1)
       }
     }
-    .glassEffect(.regular.tint(.blue).interactive(), in: .capsule)
+    .background(.ultraThinMaterial.opacity(0.9), in: Capsule())
+    .overlay(Capsule().stroke(.blue.opacity(0.3), lineWidth: 1))
   }
 
   // MARK: - Helper Properties

@@ -368,7 +368,7 @@ class PostDetailState {
 class ProfileDetailState {
   var profile: ProfileDetailData?
   var posts: [PostDetailData] = []
-  var selectedTab: ProfileTab = .posts
+  var selectedTab: DetailProfileTab = .posts
   var isLoading = false
   var showingFollowSheet = false
 
@@ -475,7 +475,7 @@ struct MediaDetailData: Identifiable, Hashable {
 }
 
 @available(iPadOS 26.0, *)
-enum ProfileTab: CaseIterable {
+enum DetailProfileTab: CaseIterable {
   case posts, replies, media, likes
 
   var title: String {

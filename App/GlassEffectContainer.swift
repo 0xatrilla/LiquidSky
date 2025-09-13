@@ -242,14 +242,24 @@ struct GlassEffectPreview: View {
           Rectangle()
             .fill(.blue)
             .frame(width: 100, height: 100)
-            .glassEffect(.regular.interactive())
+            .background {
+              if #available(iOS 26.0, *) {
+                Rectangle()
+                  .glassEffect(.regular.interactive())
+              }
+            }
             .glassEffectID("first", in: glassNamespace)
 
           if showSecondElement {
             Rectangle()
               .fill(.green)
               .frame(width: 100, height: 100)
-              .glassEffect(.regular.interactive())
+              .background {
+                if #available(iOS 26.0, *) {
+                  Rectangle()
+                    .glassEffect(.regular.interactive())
+                }
+              }
               .glassEffectID("second", in: glassNamespace)
               .glassEffectTransition(.matchedGeometry)
           }

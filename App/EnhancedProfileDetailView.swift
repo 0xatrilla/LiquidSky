@@ -1,6 +1,8 @@
 import Foundation
 import SwiftUI
 
+// ProfileTab enum is defined in EnhancedProfileView.swift
+
 @available(iPadOS 26.0, *)
 struct EnhancedProfileDetailView: View {
   let profileId: String
@@ -109,7 +111,7 @@ struct EnhancedProfileDetailView: View {
               .fill(.ultraThickMaterial)
               .frame(width: 88, height: 88)
           )
-          .glassEffect(.regular, in: .circle)
+          .background(.ultraThinMaterial, in: Circle())
           .offset(x: 20, y: 40)
         }
 
@@ -155,7 +157,7 @@ struct EnhancedProfileDetailView: View {
         .padding(20)
       }
     }
-    .glassEffectID("profile-header-\(profile.id)", in: profileNamespace)
+    .id("profile-header-\(profile.id)")
   }
 
   @ViewBuilder
@@ -173,7 +175,7 @@ struct EnhancedProfileDetailView: View {
             .background(.quaternary, in: Capsule())
         }
         .buttonStyle(.plain)
-        .glassEffect(.regular.interactive(), in: .capsule)
+        .background(.ultraThinMaterial, in: Capsule())
       } else {
         Button {
           // Handle follow
@@ -186,7 +188,8 @@ struct EnhancedProfileDetailView: View {
             .background(.blue, in: Capsule())
         }
         .buttonStyle(.plain)
-        .glassEffect(.regular.tint(.blue).interactive(), in: .capsule)
+        .background(.blue.opacity(0.1), in: Capsule())
+        .overlay(Capsule().stroke(.blue.opacity(0.3), lineWidth: 1))
       }
 
       Button {
@@ -199,7 +202,7 @@ struct EnhancedProfileDetailView: View {
           .background(.quaternary, in: Circle())
       }
       .buttonStyle(.plain)
-      .glassEffect(.regular.interactive(), in: .circle)
+      .background(.ultraThinMaterial, in: Circle())
     }
   }
 
@@ -217,8 +220,9 @@ struct EnhancedProfileDetailView: View {
           showingFollowSheet = true
         } label: {
           ProfileStatView(
+            title: "Followers",
             count: profile.followersCount,
-            label: "Followers"
+            color: .primary
           )
         }
         .buttonStyle(.plain)
@@ -231,8 +235,9 @@ struct EnhancedProfileDetailView: View {
           showingFollowSheet = true
         } label: {
           ProfileStatView(
+            title: "Following",
             count: profile.followingCount,
-            label: "Following"
+            color: .primary
           )
         }
         .buttonStyle(.plain)
@@ -242,14 +247,15 @@ struct EnhancedProfileDetailView: View {
 
         // Posts
         ProfileStatView(
+          title: "Posts",
           count: profile.postsCount,
-          label: "Posts"
+          color: .primary
         )
       }
       .padding(.horizontal, 20)
       .padding(.vertical, 16)
     }
-    .glassEffectID("profile-stats-\(profile.id)", in: profileNamespace)
+    .id("profile-stats-\(profile.id)")
   }
 
   // MARK: - Profile Tabs
@@ -258,15 +264,36 @@ struct EnhancedProfileDetailView: View {
   private var profileTabsView: some View {
     ScrollView(.horizontal, showsIndicators: false) {
       HStack(spacing: 8) {
-        ForEach(ProfileTab.allCases, id: \.self) { tab in
-          ProfileTabChip(
-            tab: tab,
-            isSelected: detailManager.profileDetailState.selectedTab == tab
-          ) {
+        ForEach(DetailProfileTab.allCases, id: \.self) { tab in
+          Button(action: {
             withAnimation(.smooth(duration: 0.2)) {
               detailManager.profileDetailState.selectedTab = tab
             }
+          }) {
+            HStack(spacing: 6) {
+              Image(systemName: tab.icon)
+                .font(.caption)
+
+              Text(tab.title)
+                .font(.caption.weight(.medium))
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(
+              Capsule()
+                .fill(
+                  detailManager.profileDetailState.selectedTab == tab
+                    ? Color.blue.opacity(0.2) : .clear)
+            )
+            .overlay {
+              if detailManager.profileDetailState.selectedTab == tab {
+                Capsule()
+                  .stroke(Color.blue, lineWidth: 1)
+              }
+            }
           }
+          .buttonStyle(.plain)
+          .foregroundStyle(detailManager.profileDetailState.selectedTab == tab ? .blue : .secondary)
         }
       }
       .padding(.horizontal, 16)
@@ -306,9 +333,21 @@ struct EnhancedProfileDetailView: View {
           GridItem(.flexible(), spacing: 12),
         ], spacing: 12
       ) {
-        ForEach(posts) { post in
-          ProfilePostCard(post: post)
-            .glassEffectID("profile-post-\(post.id)", in: profileNamespace)
+        ForEach(posts, id: \.id) { post in
+          VStack(alignment: .leading, spacing: 8) {
+            Text(post.content)
+              .font(.body)
+              .lineLimit(3)
+
+            if !post.mediaItems.isEmpty {
+              Text("\(post.mediaItems.count) media items")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+          }
+          .padding()
+          .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+          .id("profile-post-\(post.id)")
         }
       }
     }
@@ -344,7 +383,7 @@ struct EnhancedProfileDetailView: View {
         ForEach(mediaPosts) { post in
           if let mediaItem = post.mediaItems.first {
             ProfileMediaCard(mediaItem: mediaItem, post: post)
-              .glassEffectID("profile-media-\(mediaItem.id)", in: profileNamespace)
+              .id("profile-media-\(mediaItem.id)")
           }
         }
       }
@@ -368,7 +407,7 @@ struct EnhancedProfileDetailView: View {
       description: Text(subtitle)
     )
     .frame(minHeight: 200)
-    .glassEffect(.regular, in: .rect(cornerRadius: 16))
+    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
   }
 
   // MARK: - Loading and Error States
@@ -384,7 +423,7 @@ struct EnhancedProfileDetailView: View {
         .foregroundStyle(.secondary)
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .glassEffect(.regular, in: .rect(cornerRadius: 20))
+    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
   }
 
   @ViewBuilder
@@ -394,7 +433,7 @@ struct EnhancedProfileDetailView: View {
       systemImage: "person.slash",
       description: Text("This profile may have been deleted or is no longer available")
     )
-    .glassEffect(.regular, in: .rect(cornerRadius: 20))
+    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
   }
 
   // MARK: - Toolbar
@@ -407,7 +446,7 @@ struct EnhancedProfileDetailView: View {
       Image(systemName: "square.and.arrow.up")
         .font(.subheadline)
     }
-    .glassEffect(.regular.interactive())
+    .background(.ultraThinMaterial)
 
     Button {
       showingActionSheet = true
@@ -415,164 +454,19 @@ struct EnhancedProfileDetailView: View {
       Image(systemName: "ellipsis.circle")
         .font(.subheadline)
     }
-    .glassEffect(.regular.interactive())
+    .background(.ultraThinMaterial)
   }
 }
 
-// MARK: - Profile Stat View
+// ProfileStatView is defined in EnhancedProfileView.swift
 
-@available(iPadOS 26.0, *)
-struct ProfileStatView: View {
-  let count: Int
-  let label: String
-
-  var body: some View {
-    VStack(spacing: 4) {
-      Text(formatCount(count))
-        .font(.title3.weight(.bold))
-        .foregroundStyle(.primary)
-
-      Text(label)
-        .font(.caption)
-        .foregroundStyle(.secondary)
-    }
-    .frame(maxWidth: .infinity)
-  }
-
-  private func formatCount(_ count: Int) -> String {
-    if count >= 1_000_000 {
-      return String(format: "%.1fM", Double(count) / 1_000_000)
-    } else if count >= 1_000 {
-      return String(format: "%.1fK", Double(count) / 1_000)
-    } else {
-      return "\(count)"
-    }
-  }
-}
-
-// MARK: - Profile Tab Chip
-
-@available(iPadOS 26.0, *)
-struct ProfileTabChip: View {
-  let tab: ProfileTab
-  let isSelected: Bool
-  let onTap: () -> Void
-
-  var body: some View {
-    Button(action: onTap) {
-      HStack(spacing: 6) {
-        Image(systemName: tab.icon)
-          .font(.caption)
-
-        Text(tab.title)
-          .font(.caption.weight(.medium))
-      }
-      .padding(.horizontal, 16)
-      .padding(.vertical, 8)
-      .background(
-        Capsule()
-          .fill(isSelected ? Color.blue.opacity(0.2) : .clear)
-      )
-      .overlay {
-        if isSelected {
-          Capsule()
-            .stroke(.blue, lineWidth: 1)
-        }
-      }
-    }
-    .buttonStyle(.plain)
-    .foregroundStyle(isSelected ? .blue : .secondary)
-    .glassEffect(
-      isSelected ? .regular.tint(.blue).interactive() : .regular.interactive(),
-      in: .capsule
-    )
-  }
-}
+// ProfileTabChip is defined in EnhancedProfileView.swift
 
 // MARK: - Profile Post Card
 
 @available(iPadOS 26.0, *)
-struct ProfilePostCard: View {
-  let post: PostDetailData
-  @State private var isHovering = false
-  @State private var isPencilHovering = false
-  @State private var hoverIntensity: CGFloat = 0
-
-  private let cardId = UUID().uuidString
-
-  var body: some View {
-    Button {
-      // Navigate to post detail
-    } label: {
-      GestureAwareGlassCard(
-        cornerRadius: 12,
-        isInteractive: true
-      ) {
-        VStack(alignment: .leading, spacing: 8) {
-          Text(post.content)
-            .font(.body)
-            .foregroundStyle(.primary)
-            .lineLimit(4)
-            .multilineTextAlignment(.leading)
-
-          Spacer()
-
-          HStack {
-            Text(post.timestamp, style: .relative)
-              .font(.caption)
-              .foregroundStyle(.tertiary)
-
-            Spacer()
-
-            HStack(spacing: 12) {
-              HStack(spacing: 2) {
-                Image(systemName: "heart")
-                  .font(.caption2)
-                Text("\(post.likesCount)")
-                  .font(.caption2)
-              }
-              .foregroundStyle(.secondary)
-
-              HStack(spacing: 2) {
-                Image(systemName: "bubble.left")
-                  .font(.caption2)
-                Text("\(post.repliesCount)")
-                  .font(.caption2)
-              }
-              .foregroundStyle(.secondary)
-            }
-          }
-        }
-        .padding(12)
-        .frame(minHeight: 120)
-      }
-    }
-    .buttonStyle(.plain)
-    .scaleEffect(scaleEffect)
-    .brightness(hoverIntensity * 0.05)
-    .applePencilHover(id: cardId) { hovering, location, intensity in
-      withAnimation(.smooth(duration: 0.2)) {
-        isPencilHovering = hovering
-        hoverIntensity = intensity
-      }
-    }
-    .onHover { hovering in
-      withAnimation(.smooth(duration: 0.2)) {
-        isHovering = hovering && !isPencilHovering
-      }
-    }
-  }
-
-  private var scaleEffect: CGFloat {
-    if isPencilHovering {
-      return 1.02
-    } else if isHovering {
-      return 1.01
-    } else {
-      return 1.0
-    }
-  }
-}
+// ProfilePostCard is defined in EnhancedProfileView.swift
+// ProfilePostCard is defined in EnhancedProfileView.swift
 
 // MARK: - Profile Media Card
 
@@ -599,7 +493,7 @@ struct ProfileMediaCard: View {
       }
       .frame(height: 120)
       .clipShape(RoundedRectangle(cornerRadius: 8))
-      .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 8))
+      .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
     }
     .buttonStyle(.plain)
     .scaleEffect(isHovering ? 1.05 : 1.0)
@@ -638,7 +532,7 @@ struct ProfileFollowSheet: View {
         }
       }
     }
-    .glassEffect(.regular, in: .rect(cornerRadius: 16))
+    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
   }
 }
 
@@ -659,7 +553,8 @@ struct ProfileActionSheet: View {
         .frame(maxWidth: .infinity)
         .padding()
         .background(.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
-        .glassEffect(.regular.tint(.blue).interactive(), in: .rect(cornerRadius: 12))
+        .background(.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(.blue.opacity(0.3), lineWidth: 1))
 
         Button("Mute User") {
           // Handle mute
@@ -668,7 +563,8 @@ struct ProfileActionSheet: View {
         .frame(maxWidth: .infinity)
         .padding()
         .background(.orange.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
-        .glassEffect(.regular.tint(.orange).interactive(), in: .rect(cornerRadius: 12))
+        .background(.orange.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(.orange.opacity(0.3), lineWidth: 1))
 
         Button("Block User") {
           // Handle block
@@ -677,7 +573,8 @@ struct ProfileActionSheet: View {
         .frame(maxWidth: .infinity)
         .padding()
         .background(.red.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
-        .glassEffect(.regular.tint(.red).interactive(), in: .rect(cornerRadius: 12))
+        .background(.red.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(.red.opacity(0.3), lineWidth: 1))
 
         Spacer()
       }
@@ -692,6 +589,6 @@ struct ProfileActionSheet: View {
         }
       }
     }
-    .glassEffect(.regular, in: .rect(cornerRadius: 16))
+    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
   }
 }

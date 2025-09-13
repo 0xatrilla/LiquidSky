@@ -2,6 +2,23 @@ import Foundation
 import SwiftUI
 
 @available(iPadOS 26.0, *)
+enum ProfileTab: Int, CaseIterable {
+  case posts = 0
+  case replies = 1
+  case media = 2
+  case likes = 3
+
+  var title: String {
+    switch self {
+    case .posts: return "Posts"
+    case .replies: return "Replies"
+    case .media: return "Media"
+    case .likes: return "Likes"
+    }
+  }
+}
+
+@available(iPadOS 26.0, *)
 struct EnhancedProfileView: View {
   @Environment(\.contentColumnManager) var contentManager
   @Environment(\.glassEffectManager) var glassEffectManager
@@ -67,13 +84,23 @@ struct EnhancedProfileView: View {
       }
       .frame(height: 200)
       .clipShape(RoundedRectangle(cornerRadius: 0))
-      .glassEffect(.regular, in: .rect(cornerRadius: 0))
+      .background {
+        if #available(iOS 26.0, *) {
+          Rectangle()
+            .glassEffect(.regular, in: .rect(cornerRadius: 0))
+        }
+      }
 
       // Glass overlay for better text readability
       Rectangle()
         .fill(.ultraThinMaterial)
         .frame(height: 80)
-        .glassEffect(.regular)
+        .background {
+          if #available(iOS 26.0, *) {
+            Rectangle()
+              .glassEffect(.regular, in: .rect(cornerRadius: 0))
+          }
+        }
 
       // Profile avatar and basic info
       HStack(spacing: 16) {
@@ -97,7 +124,12 @@ struct EnhancedProfileView: View {
           Circle()
             .stroke(.white, lineWidth: 3)
         }
-        .glassEffect(.regular, in: .circle)
+        .background {
+          if #available(iOS 26.0, *) {
+            Circle()
+              .glassEffect(.regular, in: .circle)
+          }
+        }
 
         // Name and handle
         VStack(alignment: .leading, spacing: 4) {
@@ -175,7 +207,12 @@ struct EnhancedProfileView: View {
           }
           .foregroundStyle(.blue)
         }
-        .glassEffect(.regular.interactive())
+        .background {
+          if #available(iOS 26.0, *) {
+            Rectangle()
+              .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 0))
+          }
+        }
       }
 
       if let joinDate = profileData?.joinDate {
@@ -258,16 +295,21 @@ struct EnhancedProfileView: View {
       } label: {
         Text(profileData?.isFollowing == true ? "Following" : "Follow")
           .font(.subheadline.weight(.semibold))
-          .foregroundStyle(profileData?.isFollowing == true ? .secondary : .white)
+          .foregroundStyle(profileData?.isFollowing == true ? .secondary : Color.white)
           .padding(.horizontal, 20)
           .padding(.vertical, 8)
           .background(
             Capsule()
-              .fill(profileData?.isFollowing == true ? .quaternary : .blue)
+              .fill(profileData?.isFollowing == true ? Color.gray.opacity(0.2) : Color.blue)
           )
       }
       .buttonStyle(.plain)
-      .glassEffect(.regular.interactive(), in: .capsule)
+      .background {
+          if #available(iOS 26.0, *) {
+            Capsule()
+              .glassEffect(.regular.interactive(), in: .capsule)
+          }
+        }
 
       // Message button
       Button {
@@ -283,7 +325,12 @@ struct EnhancedProfileView: View {
           }
       }
       .buttonStyle(.plain)
-      .glassEffect(.regular.interactive(), in: .circle)
+      .background {
+          if #available(iOS 26.0, *) {
+            Circle()
+              .glassEffect(.regular.interactive(), in: .circle)
+          }
+        }
 
       // More actions button
       Menu {
@@ -312,7 +359,12 @@ struct EnhancedProfileView: View {
           .background(Circle().fill(.quaternary))
       }
       .buttonStyle(.plain)
-      .glassEffect(.regular.interactive(), in: .circle)
+      .background {
+          if #available(iOS 26.0, *) {
+            Circle()
+              .glassEffect(.regular.interactive(), in: .circle)
+          }
+        }
     }
   }
 
@@ -338,7 +390,12 @@ struct EnhancedProfileView: View {
     }
     .padding(.vertical, 12)
     .background(.ultraThinMaterial)
-    .glassEffect(.regular)
+    .background {
+          if #available(iOS 26.0, *) {
+            Rectangle()
+              .glassEffect(.regular, in: .rect(cornerRadius: 0))
+          }
+        }
   }
 
   // MARK: - Profile Content
@@ -405,7 +462,12 @@ struct EnhancedProfileView: View {
           }
           .frame(height: 120)
           .clipShape(RoundedRectangle(cornerRadius: 8))
-          .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 8))
+          .background {
+            if #available(iOS 26.0, *) {
+              RoundedRectangle(cornerRadius: 8)
+                .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 8))
+            }
+          }
           .onTapGesture {
             // Handle media tap
           }
@@ -584,10 +646,15 @@ struct ProfileTabChip: View {
     }
     .buttonStyle(.plain)
     .foregroundStyle(isSelected ? tab.color : .secondary)
-    .glassEffect(
-      isSelected ? .regular.tint(tab.color).interactive() : .regular.interactive(),
-      in: .capsule
-    )
+    .background {
+      if #available(iOS 26.0, *) {
+        Capsule()
+          .glassEffect(
+            isSelected ? .regular.tint(tab.color).interactive() : .regular.interactive(),
+            in: .capsule
+          )
+      }
+    }
   }
 }
 
@@ -630,7 +697,12 @@ struct ProfilePostCard: View {
           }
           .frame(height: 150)
           .clipShape(RoundedRectangle(cornerRadius: 8))
-          .glassEffect(.regular, in: .rect(cornerRadius: 8))
+          .background {
+            if #available(iOS 26.0, *) {
+              RoundedRectangle(cornerRadius: 8)
+                .glassEffect(.regular, in: .rect(cornerRadius: 8))
+            }
+          }
         }
 
         // Footer with timestamp and engagement
@@ -758,15 +830,6 @@ extension ProfileTab {
     case .replies: return "bubble.left"
     case .media: return "photo"
     case .likes: return "heart"
-    }
-  }
-
-  var title: String {
-    switch self {
-    case .posts: return "Posts"
-    case .replies: return "Replies"
-    case .media: return "Media"
-    case .likes: return "Likes"
     }
   }
 
