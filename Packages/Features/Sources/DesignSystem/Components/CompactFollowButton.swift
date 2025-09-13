@@ -134,5 +134,5 @@ public struct CompactFollowButton: View {
     )
   }
   .padding()
-  .background(Color(.systemBackground))
+  .background(Color(UIColor.systemBackground))
 }

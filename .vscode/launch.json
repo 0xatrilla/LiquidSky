@@ -9,6 +9,24 @@
             "request": "launch",
             "name": "Debug",
             "preLaunchTask": "sweetpad: launch"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:Horizon}",
+            "name": "Debug LiquidSky",
+            "program": "${workspaceFolder:Horizon}/.build/debug/LiquidSky",
+            "preLaunchTask": "swift: Build Debug LiquidSky"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:Horizon}",
+            "name": "Release LiquidSky",
+            "program": "${workspaceFolder:Horizon}/.build/release/LiquidSky",
+            "preLaunchTask": "swift: Build Release LiquidSky"
         }
     ]
 }

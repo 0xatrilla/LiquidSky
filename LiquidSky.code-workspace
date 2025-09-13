@@ -9,5 +9,27 @@
 	],
 	"settings": {
 		"kiroAgent.configureMCP": "Enabled"
+	},
+	"launch": {
+		"configurations": [
+			{
+				"type": "swift",
+				"request": "launch",
+				"args": [],
+				"cwd": "${workspaceFolder:Horizon}",
+				"name": "Debug LiquidSky (Horizon)",
+				"program": "${workspaceFolder:Horizon}/.build/debug/LiquidSky",
+				"preLaunchTask": "swift: Build Debug LiquidSky (Horizon)"
+			},
+			{
+				"type": "swift",
+				"request": "launch",
+				"args": [],
+				"cwd": "${workspaceFolder:Horizon}",
+				"name": "Release LiquidSky (Horizon)",
+				"program": "${workspaceFolder:Horizon}/.build/release/LiquidSky",
+				"preLaunchTask": "swift: Build Release LiquidSky (Horizon)"
+			}
+		]
 	}
 }
