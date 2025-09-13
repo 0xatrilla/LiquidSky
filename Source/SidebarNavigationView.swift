@@ -2,6 +2,7 @@ import AppRouter
 import Foundation
 import Models
 import SwiftUI
+import UIKit
 
 @available(iPadOS 26.0, *)
 struct SidebarNavigationView: View {
@@ -14,6 +15,7 @@ struct SidebarNavigationView: View {
   @Environment(\.quickActionsSystem) var quickActionsSystem
   @State private var settingsService = SettingsService.shared
   @State private var badgeStore = NotificationBadgeStore.shared
+  @State private var showingFeedPicker = false
   @Namespace private var sidebarNamespace
 
   // Focus management
@@ -21,48 +23,58 @@ struct SidebarNavigationView: View {
   @State private var focusedItemIndex = 0
 
   var body: some View {
+    mainContent
+      .navigationTitle("Horizon")
+      .toolbar {
+        toolbarContent
+      }
+      .onAppear {
+        setupFocusManagement()
+      }
+      .onChange(of: focusManager.focusedColumn) { _, newColumn in
+        isSidebarFocused = (newColumn == .sidebar)
+      }
+      .onChange(of: focusManager.focusedItemIndex) { _, newIndex in
+        focusedItemIndex = newIndex
+      }
+      .onReceive(NotificationCenter.default.publisher(for: .navigateNext)) { _ in
+        if focusManager.focusedColumn == .sidebar {
+          navigateToNextItem()
+        }
+      }
+      .onReceive(NotificationCenter.default.publisher(for: .navigatePrevious)) { _ in
+        if focusManager.focusedColumn == .sidebar {
+          navigateToPreviousItem()
+        }
+      }
+      .onReceive(NotificationCenter.default.publisher(for: .activateSelected)) { _ in
+        if focusManager.focusedColumn == .sidebar {
+          activateSelectedItem()
+        }
+      }
+  }
+  
+  @ToolbarContentBuilder
+  private var toolbarContent: some ToolbarContent {
+    ToolbarItemGroup(placement: .topBarLeading) {
+      sidebarToggleButton
+    }
+
+    ToolbarItemGroup(placement: .topBarTrailing) {
+      keyboardShortcutsButton
+    }
+  }
+  
+  @ViewBuilder
+  private var mainContent: some View {
     GlassEffectContainer(spacing: 8.0) {
-      List(selection: $navigationState.selectedSidebarItem) {
+      List {
         mainNavigationSection
         pinnedFeedsSection
         quickActionsSection
       }
       .listStyle(.sidebar)
       .focused($isSidebarFocused)
-    }
-    .navigationTitle("Horizon")
-    .toolbar {
-      ToolbarItemGroup(placement: .topBarLeading) {
-        sidebarToggleButton
-      }
-
-      ToolbarItemGroup(placement: .topBarTrailing) {
-        keyboardShortcutsButton
-      }
-    }
-    .onAppear {
-      setupFocusManagement()
-    }
-    .onChange(of: focusManager.focusedColumn) { _, newColumn in
-      isSidebarFocused = (newColumn == .sidebar)
-    }
-    .onChange(of: focusManager.focusedItemIndex) { _, newIndex in
-      focusedItemIndex = newIndex
-    }
-    .onReceive(NotificationCenter.default.publisher(for: .navigateNext)) { _ in
-      if focusManager.focusedColumn == .sidebar {
-        navigateToNextItem()
-      }
-    }
-    .onReceive(NotificationCenter.default.publisher(for: .navigatePrevious)) { _ in
-      if focusManager.focusedColumn == .sidebar {
-        navigateToPreviousItem()
-      }
-    }
-    .onReceive(NotificationCenter.default.publisher(for: .activateSelected)) { _ in
-      if focusManager.focusedColumn == .sidebar {
-        activateSelectedItem()
-      }
     }
   }
 
@@ -124,7 +136,7 @@ struct SidebarNavigationView: View {
 
         // Add feed button
         Button {
-          pinnedFeedsManager.showFeedPicker = true
+          showingFeedPicker = true
         } label: {
           HStack {
             Image(systemName: "plus.circle.fill")
@@ -147,7 +159,7 @@ struct SidebarNavigationView: View {
     } else {
       Section {
         Button {
-          pinnedFeedsManager.showFeedPicker = true
+          showingFeedPicker = true
         } label: {
           VStack(spacing: 8) {
             Image(systemName: "pin.circle")
@@ -278,15 +290,19 @@ struct SidebarNavigationView: View {
   @ViewBuilder
   private func pinnedFeedContextMenu(for pinnedFeed: PinnedFeed) -> some View {
     Button("Rename Feed") {
-      pinnedFeedsManager.startRenaming(pinnedFeed)
+      // Handle rename via settings service or custom UI
     }
 
     Button("Move Up") {
-      pinnedFeedsManager.moveFeed(pinnedFeed, direction: .up)
+      if let index = pinnedFeedsManager.pinnedFeeds.firstIndex(where: { $0.uri == pinnedFeed.uri }) {
+        pinnedFeedsManager.moveFeed(from: index, to: index - 1)
+      }
     }
 
     Button("Move Down") {
-      pinnedFeedsManager.moveFeed(pinnedFeed, direction: .down)
+      if let index = pinnedFeedsManager.pinnedFeeds.firstIndex(where: { $0.uri == pinnedFeed.uri }) {
+        pinnedFeedsManager.moveFeed(from: index, to: index + 1)
+      }
     }
 
     Divider()
@@ -299,7 +315,7 @@ struct SidebarNavigationView: View {
   // MARK: - Helper Properties
 
   private var badgeCount: Int? {
-    let totalCount = notificationBadgeSystem.getTotalBadgeCount()
+    let totalCount = notificationBadgeSystem.totalUnreadCount
     return totalCount > 0 ? totalCount : nil
   }
 
@@ -606,12 +622,19 @@ struct BadgeView: View {
   @Environment(\.badgeAnimationCoordinator) var badgeAnimationCoordinator
 
   var body: some View {
-    EnhancedBadgeView(
-      count: count,
-      type: .notification,
-      style: .compact
-    )
-    .scaleEffect(count > 99 ? 0.9 : 1.0)
+    if count > 0 {
+      EnhancedBadgeView(
+        badgeInfo: BadgeInfo(
+          count: count,
+          type: .notification,
+          lastUpdated: Date(),
+          isNew: false
+        ),
+        style: .standard,
+        size: .small
+      )
+      .scaleEffect(count > 99 ? 0.9 : 1.0)
+    }
   }
 }
 
