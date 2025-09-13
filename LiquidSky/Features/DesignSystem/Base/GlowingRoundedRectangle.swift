@@ -1,0 +1,29 @@
+import SwiftUI
+
+public struct GlowingRoundedRectangle: ViewModifier {
+  let cornerRadius: CGFloat
+
+  public init(cornerRadius: CGFloat = 8) {
+    self.cornerRadius = cornerRadius
+  }
+
+  public func body(content: Content) -> some View {
+    content.overlay {
+      RoundedRectangle(cornerRadius: cornerRadius)
+        .stroke(
+          LinearGradient(
+            colors: [.shadowPrimary.opacity(0.5), .blueskyBackground.opacity(0.5)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing),
+          lineWidth: 1)
+    }
+    .clipShape(.rect(cornerRadius: cornerRadius))
+    .shadow(color: .blueskyBackground.opacity(0.3), radius: 2)
+  }
+}
+
+extension View {
+  public func glowingRoundedRectangle(cornerRadius: CGFloat = 8) -> some View {
+    modifier(GlowingRoundedRectangle(cornerRadius: cornerRadius))
+  }
+}
