@@ -89,3 +89,44 @@ PACKAGE_SETUP_GUIDE.md
 Documentation/PerformanceOptimizationGuide.md
 Documentation/iPadLiquidGlassAPI.md
 Documentation/AccessibilityImplementationGuide.md
+
+# Cache directories and package managers
+~/.bun/
+~/.npm/
+~/.yarn/
+~/.pnpm/
+~/.cache/
+node_modules/
+.pnpm-store/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# System files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
