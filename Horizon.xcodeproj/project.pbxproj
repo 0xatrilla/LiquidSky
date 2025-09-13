@@ -79,6 +79,27 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1D7685462E76250E007F61EB /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Pods.xcodeproj; sourceTree = "<group>"; };
+		1D7685482E76250E007F61EB /* AcknowExampleCocoaPods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AcknowExampleCocoaPods.xcodeproj; sourceTree = "<group>"; };
+		1D7685622E76250E007F61EB /* AcknowExample.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AcknowExample.xcodeproj; sourceTree = "<group>"; };
+		1D7685702E76250E007F61EB /* AcknowExampleSPM.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AcknowExampleSPM.xcodeproj; sourceTree = "<group>"; };
+		1D7685AD2E76250E007F61EB /* AcknowList.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AcknowList.xcodeproj; sourceTree = "<group>"; };
+		1D7688A72E76250E007F61EB /* KeychainSwift.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = KeychainSwift.xcodeproj; sourceTree = "<group>"; };
+		1D7689842E76250E007F61EB /* Nuke.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Nuke.xcodeproj; sourceTree = "<group>"; };
+		1D7689D52E76250E007F61EB /* SwiftRefactorExtension.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SwiftRefactorExtension.xcodeproj; sourceTree = "<group>"; };
+		1D768C302E76250E007F61EB /* watchOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = watchOS.xcodeproj; sourceTree = "<group>"; };
+		1D768D5A2E76250E007F61EB /* ViewInspector.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = ViewInspector.xcodeproj; sourceTree = "<group>"; };
+		1D76B9372E76250E007F61EB /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Pods.xcodeproj; sourceTree = "<group>"; };
+		1D76B9392E76250E007F61EB /* AcknowExampleCocoaPods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AcknowExampleCocoaPods.xcodeproj; sourceTree = "<group>"; };
+		1D76B9532E76250E007F61EB /* AcknowExample.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AcknowExample.xcodeproj; sourceTree = "<group>"; };
+		1D76B9612E76250E007F61EB /* AcknowExampleSPM.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AcknowExampleSPM.xcodeproj; sourceTree = "<group>"; };
+		1D76B99E2E76250E007F61EB /* AcknowList.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AcknowList.xcodeproj; sourceTree = "<group>"; };
+		1D76BC982E76250E007F61EB /* KeychainSwift.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = KeychainSwift.xcodeproj; sourceTree = "<group>"; };
+		1D76BD752E76250E007F61EB /* Nuke.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Nuke.xcodeproj; sourceTree = "<group>"; };
+		1D76BDC62E76250E007F61EB /* SwiftRefactorExtension.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SwiftRefactorExtension.xcodeproj; sourceTree = "<group>"; };
+		1D76C0212E76250E007F61EB /* watchOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = watchOS.xcodeproj; sourceTree = "<group>"; };
+		1D76C14B2E76250E007F61EB /* ViewInspector.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = ViewInspector.xcodeproj; sourceTree = "<group>"; };
+		1D76C6F82E76250E007F61EB /* Horizon.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Horizon.xcodeproj; sourceTree = "<group>"; };
 		9F2142232CE9DAA1004167D7 /* LiquidSky.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LiquidSky.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F5F5E102CEE46B200A4712C /* LiquidSky-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "LiquidSky-Info.plist"; sourceTree = "<group>"; };
 		9FAEE3A72CF0994400F86CDC /* Features */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Features; path = Packages/Features; sourceTree = "<group>"; };
@@ -94,7 +115,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		9F2142252CE9DAA1004167D7 /* LiquidSky */ = {
+		9F2142252CE9DAA1004167D7 /* . */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = .;
 			sourceTree = "<group>";
@@ -169,13 +190,158 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1D76C71C2E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C71E2E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7202E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7222E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7242E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7262E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7282E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C72A2E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C72C2E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C72E2E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7302E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7322E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7342E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7362E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7382E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C73A2E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C73C2E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C73E2E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7402E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7422E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7442E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		9F21421A2CE9DAA1004167D7 = {
 			isa = PBXGroup;
 			children = (
 				DB722B912E608AB900644142 /* Configuration.storekit */,
 				E9FE37002DF0661A00EB0418 /* FeaturesTests.xctestplan */,
 				9F5F5E102CEE46B200A4712C /* LiquidSky-Info.plist */,
-				9F2142252CE9DAA1004167D7 /* LiquidSky */,
+				9F2142252CE9DAA1004167D7 /* . */,
 				9FAEE3A82CF0994C00F86CDC /* Model */,
 				9FAEE3A72CF0994400F86CDC /* Features */,
 				DB21B0F82E53F69B00B27D22 /* LiquidSkyWidgets */,
@@ -225,7 +391,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				9F2142252CE9DAA1004167D7 /* LiquidSky */,
+				9F2142252CE9DAA1004167D7 /* . */,
 			);
 			name = LiquidSky;
 			packageProductDependencies = (
@@ -350,6 +516,20 @@
 			knownRegions = (
 				en,
 				Base,
+				fr,
+				de,
+				"zh-Hans",
+				ja,
+				es,
+				da,
+				it,
+				sv,
+				"zh-Hant",
+				"pt-BR",
+				nl,
+				"pt-PT",
+				"en-AU",
+				ru,
 			);
 			mainGroup = 9F21421A2CE9DAA1004167D7;
 			minimizedProjectReferenceProxies = 1;
@@ -362,6 +542,92 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9F2142242CE9DAA1004167D7 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 1D76C7262E76250E007F61EB /* Products */;
+					ProjectRef = 1D7685622E76250E007F61EB /* AcknowExample.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7322E76250E007F61EB /* Products */;
+					ProjectRef = 1D76B9532E76250E007F61EB /* AcknowExample.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C71C2E76250E007F61EB /* Products */;
+					ProjectRef = 1D7685482E76250E007F61EB /* AcknowExampleCocoaPods.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C73C2E76250E007F61EB /* Products */;
+					ProjectRef = 1D76B9392E76250E007F61EB /* AcknowExampleCocoaPods.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C72A2E76250E007F61EB /* Products */;
+					ProjectRef = 1D76B9612E76250E007F61EB /* AcknowExampleSPM.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7222E76250E007F61EB /* Products */;
+					ProjectRef = 1D7685702E76250E007F61EB /* AcknowExampleSPM.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C72C2E76250E007F61EB /* Products */;
+					ProjectRef = 1D7685AD2E76250E007F61EB /* AcknowList.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7242E76250E007F61EB /* Products */;
+					ProjectRef = 1D76B99E2E76250E007F61EB /* AcknowList.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7422E76250E007F61EB /* Products */;
+					ProjectRef = 1D76C6F82E76250E007F61EB /* Horizon.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7402E76250E007F61EB /* Products */;
+					ProjectRef = 1D7688A72E76250E007F61EB /* KeychainSwift.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C71E2E76250E007F61EB /* Products */;
+					ProjectRef = 1D76BC982E76250E007F61EB /* KeychainSwift.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7202E76250E007F61EB /* Products */;
+					ProjectRef = 1D76BD752E76250E007F61EB /* Nuke.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C72E2E76250E007F61EB /* Products */;
+					ProjectRef = 1D7689842E76250E007F61EB /* Nuke.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7302E76250E007F61EB /* Products */;
+					ProjectRef = 1D7685462E76250E007F61EB /* Pods.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7282E76250E007F61EB /* Products */;
+					ProjectRef = 1D76B9372E76250E007F61EB /* Pods.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7382E76250E007F61EB /* Products */;
+					ProjectRef = 1D7689D52E76250E007F61EB /* SwiftRefactorExtension.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7442E76250E007F61EB /* Products */;
+					ProjectRef = 1D76BDC62E76250E007F61EB /* SwiftRefactorExtension.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7362E76250E007F61EB /* Products */;
+					ProjectRef = 1D76C14B2E76250E007F61EB /* ViewInspector.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C73A2E76250E007F61EB /* Products */;
+					ProjectRef = 1D768D5A2E76250E007F61EB /* ViewInspector.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C73E2E76250E007F61EB /* Products */;
+					ProjectRef = 1D768C302E76250E007F61EB /* watchOS.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7342E76250E007F61EB /* Products */;
+					ProjectRef = 1D76C0212E76250E007F61EB /* watchOS.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				9F2142222CE9DAA1004167D7 /* LiquidSky */,
@@ -619,6 +885,11 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/./.build/index-build/prebuilts/swift-syntax/600.0.1/swiftlang-6.2.0.19.9-MacroSupport-macos_aarch64/lib",
+					"$(PROJECT_DIR)/./.build/prebuilts/swift-syntax/600.0.1/swiftlang-6.2.0.19.9-MacroSupport-macos_aarch64/lib",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.acxtrilla.horizon;
@@ -674,6 +945,11 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/./.build/index-build/prebuilts/swift-syntax/600.0.1/swiftlang-6.2.0.19.9-MacroSupport-macos_aarch64/lib",
+					"$(PROJECT_DIR)/./.build/prebuilts/swift-syntax/600.0.1/swiftlang-6.2.0.19.9-MacroSupport-macos_aarch64/lib",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.acxtrilla.horizon;
