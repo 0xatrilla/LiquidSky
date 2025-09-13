@@ -115,19 +115,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		9F2142252CE9DAA1004167D7 /* . */ = {
+		9F2142252CE9DAA1004167D7 /* Source */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = .;
+			path = Source;
 			sourceTree = "<group>";
 		};
 		DB21B0F82E53F69B00B27D22 /* LiquidSkyWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = LiquidSkyWidgets;
-			sourceTree = "<group>";
-		};
-		DB3E01F22E629D21000A1DFA /* fastlanescreenshots */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = fastlanescreenshots;
 			sourceTree = "<group>";
 		};
 		DB722DB42E60FADA00644142 /* LiquidSkyWidgets */ = {
@@ -341,12 +336,11 @@
 				DB722B912E608AB900644142 /* Configuration.storekit */,
 				E9FE37002DF0661A00EB0418 /* FeaturesTests.xctestplan */,
 				9F5F5E102CEE46B200A4712C /* LiquidSky-Info.plist */,
-				9F2142252CE9DAA1004167D7 /* . */,
+				9F2142252CE9DAA1004167D7 /* Source */,
 				9FAEE3A82CF0994C00F86CDC /* Model */,
 				9FAEE3A72CF0994400F86CDC /* Features */,
 				DB21B0F82E53F69B00B27D22 /* LiquidSkyWidgets */,
 				DB722DB42E60FADA00644142 /* LiquidSkyWidgets */,
-				DB3E01F22E629D21000A1DFA /* fastlanescreenshots */,
 				9FAEE3B82CF09BB400F86CDC /* Frameworks */,
 				9F2142242CE9DAA1004167D7 /* Products */,
 			);
@@ -391,7 +385,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				9F2142252CE9DAA1004167D7 /* . */,
+				9F2142252CE9DAA1004167D7 /* Source */,
 			);
 			name = LiquidSky;
 			packageProductDependencies = (
@@ -472,9 +466,6 @@
 			);
 			dependencies = (
 				DB3E01F82E629D21000A1DFA /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				DB3E01F22E629D21000A1DFA /* fastlanescreenshots */,
 			);
 			name = fastlanescreenshots;
 			packageProductDependencies = (
@@ -850,12 +841,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = LiquidSky.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Source/LiquidSky.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 5;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Source/Preview Content\"";
 				DEVELOPMENT_TEAM = LAXTJRK98P;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -910,12 +901,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = LiquidSky.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Source/LiquidSky.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 5;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Source/Preview Content\"";
 				DEVELOPMENT_TEAM = LAXTJRK98P;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
