@@ -290,7 +290,7 @@ struct KeyboardNavigationModifier: ViewModifier {
         }
       }
       .onKeyPress { keyPress in
-        return onKeyPress?(keyPress.key) ?? .ignored
+        return onKeyPress?(keyPress.key) == true ? .handled : .ignored
       }
   }
 }
