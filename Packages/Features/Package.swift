@@ -60,13 +60,14 @@ let package = Package(
       name: "PostUI",
       dependencies: baseDeps + [
         "FeedUI",
+        "MediaUI",
         .product(name: "Nuke", package: "Nuke"),
         .product(name: "NukeUI", package: "Nuke"),
       ]
     ),
     .target(
       name: "ProfileUI",
-      dependencies: baseDeps + ["FeedUI", "PostUI"]
+      dependencies: baseDeps + ["FeedUI", "PostUI", "MediaUI"]
     ),
     .target(
       name: "AuthUI",
@@ -78,6 +79,7 @@ let package = Package(
         .product(name: "AcknowList", package: "AcknowList"),
         "ChatUI",
         "NotificationsUI",
+        "MediaUI",
       ]
     ),
     .target(
@@ -90,7 +92,8 @@ let package = Package(
     .target(
       name: "NotificationsUI",
       dependencies: baseDeps + [
-        "PostUI"
+        "PostUI",
+        "MediaUI"
       ]
     ),
     .target(

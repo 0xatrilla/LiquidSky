@@ -16,7 +16,7 @@ import SwiftUI
 import User
 import ATProtoKit
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @MainActor
 struct iPadAppView: View {
   @Environment(AppRouter.self) var router
@@ -75,47 +75,24 @@ struct iPadAppView: View {
         columnVisibility: $navigationState.columnVisibility,
         preferredCompactColumn: $navigationState.preferredCompactColumn
       ) {
-        // Sidebar with Liquid Glass effects
         sidebarContent
           .navigationSplitViewColumnWidth(min: 200, ideal: 250, max: 300)
           .background(.ultraThinMaterial)
       } content: {
-        // Content/List view with adaptive layout
         contentView
           .navigationSplitViewColumnWidth(min: 300, ideal: 400, max: 500)
-          .withDetailNavigation()
       } detail: {
-        // Detail view with rich presentation
         detailView
           .navigationSplitViewColumnWidth(min: 400, ideal: 600)
       }
       .navigationSplitViewStyle(.balanced)
       .onAppear {
-        // Update layout manager with current screen size
         layoutManager.updateLayout(
           screenSize: geometry.size,
           horizontalSizeClass: horizontalSizeClass,
           verticalSizeClass: verticalSizeClass
         )
-
-        // Set adaptive column visibility
         navigationState.columnVisibility = adaptiveColumnVisibility
-      }
-      .onChange(of: horizontalSizeClass) { _, _ in
-        layoutManager.updateLayout(
-          screenSize: geometry.size,
-          horizontalSizeClass: horizontalSizeClass,
-          verticalSizeClass: verticalSizeClass
-        )
-        navigationState.updateColumnVisibility(for: (horizontalSizeClass, verticalSizeClass))
-      }
-      .onChange(of: verticalSizeClass) { _, _ in
-        layoutManager.updateLayout(
-          screenSize: geometry.size,
-          horizontalSizeClass: horizontalSizeClass,
-          verticalSizeClass: verticalSizeClass
-        )
-        navigationState.updateColumnVisibility(for: (horizontalSizeClass, verticalSizeClass))
       }
       .sheet(isPresented: $showingSummary) {
         SummarySheetView(
@@ -136,14 +113,6 @@ struct iPadAppView: View {
       .environment(notificationBadgeSystem)
       .environment(badgeAnimationCoordinator)
       .environment(quickActionsSystem)
-      .environment(contentColumnManager)
-      .environment(detailColumnManager)
-      .environment(pictureInPictureManager)
-      .environment(advancedApplePencilManager)
-      .environment(advancedTrackpadManager)
-      .environment(advancedMultiTouchManager)
-      .environment(lazyContentManager)
-      .environment(memoryManagementSystem)
       .environment(accessibilityManager)
       .environment(voiceOverSupport)
       .environment(dynamicTypeSupport)
@@ -153,7 +122,6 @@ struct iPadAppView: View {
       .environment(shortcutsIntegrationManager)
       .environment(focusModeManager)
       .environment(sharingManager)
-      .environment(iPadIntegrationManager)
       .environment(uiPolishManager)
       .environment(finalOptimizationManager)
       .keyboardShortcuts()
@@ -189,28 +157,6 @@ struct iPadAppView: View {
       .onReceive(NotificationCenter.default.publisher(for: .showKeyboardShortcuts)) { _ in
         // Handle keyboard shortcuts display
       }
-      .overlay {
-        // Picture-in-Picture overlay
-        PictureInPictureView()
-      }
-      .overlay {
-        // Hover preview overlay
-        HoverPreviewOverlay()
-      }
-      .overlay {
-        // Custom cursor overlay
-        CustomCursorOverlay()
-      }
-      .overlay {
-        // Gesture recognition overlay
-        GestureRecognitionOverlay()
-      }
-      .hoverNavigation()
-      .simultaneousGestures(allowedCombinations: [
-        [.pinch, .rotation],
-        [.drag, .pinch],
-        [.tap, .drag],
-      ])
     }
   }
 
@@ -227,12 +173,7 @@ struct iPadAppView: View {
 
   @ViewBuilder
   private var contentView: some View {
-    NavigationStack(
-      path: Binding(
-        get: { router[navigationState.selectedSidebarItem.routerDestination] },
-        set: { router[navigationState.selectedSidebarItem.routerDestination] = $0 }
-      )
-    ) {
+    NavigationStack {
       GlassEffectContainer(spacing: 16.0) {
         switch navigationState.selectedSidebarItem {
         case .feed:
@@ -322,34 +263,34 @@ struct iPadAppView: View {
   private var detailView: some View {
     DetailColumnView()
   }
-}
 
-// MARK: - Helper Properties
+  // MARK: - Helper Properties
 
-private var badgeCount: Int? {
-  badgeStore.unreadCount > 0 ? badgeStore.unreadCount : nil
-}
-
-// MARK: - Summary Generation
-
-private func generateGlobalSummary() async {
-  isGeneratingSummary = true
-
-  do {
-    let summary = await FeedSummaryService.shared.summarizeFeedPosts([], feedName: "your feeds")
-    summaryText = summary
-    showingSummary = true
-  } catch {
-    summaryText = "Unable to generate AI summary at this time. Please try again later."
-    showingSummary = true
+  private var badgeCount: Int? {
+    badgeStore.unreadCount > 0 ? badgeStore.unreadCount : nil
   }
 
-  isGeneratingSummary = false
+  // MARK: - Summary Generation
+
+  private func generateGlobalSummary() async {
+    isGeneratingSummary = true
+
+    do {
+      let summary = await FeedSummaryService.shared.summarizeFeedPosts([], feedName: "your feeds")
+      summaryText = summary
+      showingSummary = true
+    } catch {
+      summaryText = "Unable to generate AI summary at this time. Please try again later."
+      showingSummary = true
+    }
+
+    isGeneratingSummary = false
+  }
 }
 
 // MARK: - Adaptive View Wrappers
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AdaptiveFeedsListView: View {
   @Environment(\.horizontalSizeClass) var sizeClass
 
@@ -360,7 +301,7 @@ struct AdaptiveFeedsListView: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AdaptiveNotificationsListView: View {
   var body: some View {
     GestureAwareGlassCard(cornerRadius: 12, isInteractive: true) {
@@ -369,7 +310,7 @@ struct AdaptiveNotificationsListView: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AdaptiveCurrentUserView: View {
   var body: some View {
     GestureAwareGlassCard(cornerRadius: 12, isInteractive: true) {
@@ -378,7 +319,7 @@ struct AdaptiveCurrentUserView: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AdaptiveSearchView: View {
   let client: BSkyClient
 
@@ -389,7 +330,7 @@ struct AdaptiveSearchView: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AdaptiveSettingsView: View {
   var body: some View {
     GestureAwareGlassCard(cornerRadius: 12, isInteractive: true) {
@@ -398,7 +339,7 @@ struct AdaptiveSettingsView: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AdaptivePostsFeedView: View {
   let feedItem: FeedItem
 
@@ -409,7 +350,7 @@ struct AdaptivePostsFeedView: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassDetailContentView: View {
   var body: some View {
     GestureAwareGlassCard(cornerRadius: 16, isInteractive: true) {
@@ -434,7 +375,7 @@ struct GlassDetailContentView: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassEmptyStateView: View {
   var body: some View {
     GestureAwareGlassCard(cornerRadius: 20, isInteractive: true) {
@@ -498,20 +439,20 @@ enum SidebarItem: Hashable, CaseIterable, Identifiable {
     }
   }
 
-  var routerDestination: Destinations.RouterDestination {
+  var routerDestination: String {
     switch self {
-    case .feed, .pinnedFeed: return .feed
-    case .notifications: return .notification
-    case .profile: return .profile
-    case .search: return .compose
-    case .settings: return .settings
+    case .feed, .pinnedFeed: return "feed"
+    case .notifications: return "notifications"
+    case .profile: return "profile"
+    case .search: return "search"
+    case .settings: return "settings"
     }
   }
 }
 
 // MARK: - Glass Sidebar Row
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassSidebarRow: View {
   let item: SidebarItem
   let isSelected: Bool
@@ -538,7 +479,6 @@ struct GlassSidebarRow: View {
           .padding(.horizontal, 6)
           .padding(.vertical, 2)
           .background(.red, in: Capsule())
-          .glassEffect(.regular.tint(.red))
       }
     }
     .padding(.horizontal, 12)
@@ -554,24 +494,10 @@ struct GlassSidebarRow: View {
 // MARK: - Preview
 
 #Preview {
-  if #available(iPadOS 26.0, *) {
+  if #available(iOS 18.0, *) {
     iPadAppView()
       .environment(AppRouter(initialTab: .feed))
-      .environment(
-        BSkyClient(
-          configuration: ATProtocolConfiguration(
-            keychainProtocol: AppleSecureKeychain(identifier: UUID()))
-        )
-      )
-      .environment(
-        CurrentUser(
-          client: BSkyClient(
-            configuration: ATProtocolConfiguration(
-              keychainProtocol: AppleSecureKeychain(identifier: UUID()))
-          )
-        )
-      )
   } else {
-    Text("iPadOS 26.0 required")
+    Text("iOS 18.0 required")
   }
 }

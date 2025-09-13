@@ -349,7 +349,7 @@ extension View {
 
 // MARK: - Pencil Pressure Sensitivity
 
-@available(iPadOS 26.0, *)
+@available(iOS 26.0, *)
 struct PencilPressureSensitiveModifier: ViewModifier {
   let onPressureChange: (CGFloat) -> Void
 
@@ -369,7 +369,7 @@ struct PencilPressureSensitiveModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 26.0, *)
 extension View {
   func pencilPressureSensitive(
     onPressureChange: @escaping (CGFloat) -> Void = { _ in }

@@ -4,23 +4,9 @@ import Models
 import SwiftUI
 import UIKit
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct SidebarNavigationView: View {
   @Environment(\.iPadNavigationState) var navigationState
-  @Environment(\.gestureCoordinator) var gestureCoordinator
-  @Environment(\.focusManager) var focusManager
-  @Environment(\.glassEffectManager) var glassEffectManager
-  @Environment(\.pinnedFeedsManager) var pinnedFeedsManager
-  @Environment(\.notificationBadgeSystem) var notificationBadgeSystem
-  @Environment(\.quickActionsSystem) var quickActionsSystem
-  @State private var settingsService = SettingsService.shared
-  @State private var badgeStore = NotificationBadgeStore.shared
-  @State private var showingFeedPicker = false
-  @Namespace private var sidebarNamespace
-
-  // Focus management
-  @FocusState private var isSidebarFocused: Bool
-  @State private var focusedItemIndex = 0
 
   var body: some View {
     VStack {
@@ -357,7 +343,7 @@ struct SidebarNavigationView: View {
 
 // MARK: - Sidebar Navigation Row
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct SidebarNavigationRow: View {
   let item: SidebarItem
   let isSelected: Bool
@@ -511,7 +497,7 @@ struct SidebarNavigationRow: View {
 
 // MARK: - Sidebar Section Header
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct SidebarSectionHeader: View {
   let title: String
   let subtitle: String?
@@ -542,7 +528,7 @@ struct SidebarSectionHeader: View {
 
 // MARK: - Sidebar Action Button
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct SidebarActionButton: View {
   let title: String
   let systemImage: String
@@ -601,7 +587,7 @@ struct SidebarActionButton: View {
 
 // MARK: - Badge View
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct BadgeView: View {
   let count: Int
   @Environment(\.badgeAnimationCoordinator) var badgeAnimationCoordinator
@@ -631,7 +617,7 @@ extension Notification.Name {
 }
 // MARK: - Environment Keys
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
 
   var badgeAnimationCoordinator: BadgeAnimationCoordinator {
@@ -641,7 +627,7 @@ extension EnvironmentValues {
 
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct BadgeAnimationCoordinatorKey: EnvironmentKey {
   static let defaultValue = BadgeAnimationCoordinator()
 }
