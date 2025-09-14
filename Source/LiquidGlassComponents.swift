@@ -16,7 +16,7 @@ struct AnyPrimitiveButtonStyle: PrimitiveButtonStyle {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassButton: View {
   let title: String
   let systemImage: String?
@@ -76,7 +76,7 @@ struct GlassButton: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassRegularButtonStyle: PrimitiveButtonStyle {
   func makeBody(configuration: Configuration) -> some View {
     configuration.label
@@ -85,7 +85,7 @@ struct GlassRegularButtonStyle: PrimitiveButtonStyle {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassProminentButtonStyle: PrimitiveButtonStyle {
   func makeBody(configuration: Configuration) -> some View {
     configuration.label
@@ -96,7 +96,7 @@ struct GlassProminentButtonStyle: PrimitiveButtonStyle {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassTintedButtonStyle: PrimitiveButtonStyle {
   let tint: Color
 
@@ -107,7 +107,7 @@ struct GlassTintedButtonStyle: PrimitiveButtonStyle {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassInteractiveButtonStyle: PrimitiveButtonStyle {
   func makeBody(configuration: Configuration) -> some View {
     configuration.label
@@ -118,7 +118,7 @@ struct GlassInteractiveButtonStyle: PrimitiveButtonStyle {
 
 // MARK: - Glass Card Component
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassCard<Content: View>: View {
   let content: Content
   let cornerRadius: CGFloat
@@ -145,7 +145,7 @@ struct GlassCard<Content: View>: View {
 
 // MARK: - Glass Toolbar Component
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassToolbar<Content: View>: View {
   let content: Content
   let placement: ToolbarItemPlacement
@@ -168,7 +168,7 @@ struct GlassToolbar<Content: View>: View {
 
 // MARK: - Glass Navigation Item
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassNavigationItem: View {
   let title: String
   let systemImage: String
@@ -221,7 +221,7 @@ struct GlassNavigationItem: View {
 
 // MARK: - Glass Section Header
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassSectionHeader: View {
   let title: String
   let subtitle: String?
@@ -251,7 +251,7 @@ struct GlassSectionHeader: View {
 
 // MARK: - Glass Loading View
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassLoadingView: View {
   let message: String
   @State private var isAnimating = false
@@ -280,7 +280,7 @@ struct GlassLoadingView: View {
 
 // MARK: - Glass Error View
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassErrorView: View {
   let title: String
   let message: String
@@ -325,7 +325,7 @@ struct GlassErrorView: View {
 
 // MARK: - Glass Search Bar
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassSearchBar: View {
   @Binding var text: String
   let placeholder: String

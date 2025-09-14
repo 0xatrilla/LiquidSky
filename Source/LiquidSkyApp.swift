@@ -107,7 +107,7 @@ struct LiquidSkyApp: App {
           Group {
             // Use iPad-optimized view on iPadOS 26+ with larger screens
             if UIDevice.current.userInterfaceIdiom == .pad,
-              #available(iPadOS 26.0, *)
+              #available(iOS 26.0, *)
             {
               iPadAppView()
             } else {

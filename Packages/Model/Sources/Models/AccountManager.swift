@@ -99,7 +99,7 @@ public final class AccountManager {
   }
 
   public func switchToAccount(_ accountId: UUID) async throws {
-    guard let account = accounts.first(where: { $0.id == accountId }) else {
+    guard accounts.first(where: { $0.id == accountId }) != nil else {
       throw AccountError.accountNotFound
     }
 

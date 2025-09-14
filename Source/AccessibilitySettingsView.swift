@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AccessibilitySettingsView: View {
   @Environment(\.dismiss) var dismiss
   @State private var accessibilityManager = AccessibilityManager()
@@ -403,7 +403,7 @@ struct AccessibilitySettingsView: View {
 
 // MARK: - Supporting Views
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AccessibilitySystemStatusRow: View {
   let title: String
   let isEnabled: Bool
@@ -444,7 +444,7 @@ struct AccessibilitySystemStatusRow: View {
 
 // MARK: - Accessibility Tab Enum
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum AccessibilityTab: String, CaseIterable {
   case general = "general"
   case voiceOver = "voiceOver"
@@ -472,7 +472,7 @@ enum AccessibilityTab: String, CaseIterable {
 
 // MARK: - ContentSizeCategory Extension
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension ContentSizeCategory {
   var displayName: String {
     switch self {
@@ -495,7 +495,7 @@ extension ContentSizeCategory {
 
 // MARK: - Missing Type Definitions
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum VerbosityLevel: CaseIterable {
   case minimal, standard, detailed
   
@@ -508,7 +508,7 @@ enum VerbosityLevel: CaseIterable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum ContrastLevel: CaseIterable {
   case normal, high, maximum
   
@@ -529,7 +529,7 @@ enum ContrastLevel: CaseIterable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum TransparencyLevel: CaseIterable {
   case normal, reduced, maximum
   
@@ -542,7 +542,7 @@ enum TransparencyLevel: CaseIterable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum MotionLevel: CaseIterable {
   case normal, reduced, disabled
   
@@ -557,7 +557,7 @@ enum MotionLevel: CaseIterable {
 
 // MARK: - Data Model Classes
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 @MainActor
 class VoiceOverSupport {
@@ -568,7 +568,7 @@ class VoiceOverSupport {
   var landmarkElements: [String] = []
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 @MainActor
 class DynamicTypeSupport {
@@ -578,7 +578,7 @@ class DynamicTypeSupport {
   var isAccessibilitySizeEnabled: Bool = false
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 @MainActor
 class VisualAccessibilitySupport {

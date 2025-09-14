@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassEffectContainer<Content: View>: View {
   let content: Content
   let spacing: CGFloat
@@ -33,7 +33,7 @@ struct GlassEffectContainer<Content: View>: View {
 
 // MARK: - Glass Effect Transition Coordinator
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassTransitionCoordinator: View {
   let sourceID: String
   let destinationID: String
@@ -47,15 +47,25 @@ struct GlassTransitionCoordinator: View {
     EmptyView()
       .onAppear {
         if isActive {
-          glassEffectManager.setTransition(transition, for: sourceID)
+          let managerTransition = mapToManagerTransition(transition)
+          glassEffectManager.setTransition(managerTransition, for: sourceID)
         }
       }
+  }
+  
+  private func mapToManagerTransition(_ transition: GlassEffectTransition) -> LiquidGlassEffectManager.GlassEffectTransition {
+    switch transition {
+    case .matchedGeometry:
+      return .morph
+    case .materialize:
+      return .scale
+    }
   }
 }
 
 // MARK: - Morphing Glass Container
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct MorphingGlassContainer<Content: View>: View {
   let content: Content
   let spacing: CGFloat
@@ -85,7 +95,7 @@ struct MorphingGlassContainer<Content: View>: View {
 
 // MARK: - Glass Effect Modifiers
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func glassEffectID(_ id: String, in namespace: Namespace.ID) -> some View {
     self.modifier(GlassEffectIDModifier(id: id, namespace: namespace))
@@ -100,7 +110,7 @@ extension View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassEffectIDModifier: ViewModifier {
   let id: String
   let namespace: Namespace.ID
@@ -111,7 +121,7 @@ struct GlassEffectIDModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassEffectTransitionModifier: ViewModifier {
   let transition: GlassEffectTransition
 
@@ -136,7 +146,7 @@ struct GlassEffectTransitionModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassEffectUnionModifier: ViewModifier {
   let id: String
   let namespace: Namespace.ID
@@ -149,7 +159,7 @@ struct GlassEffectUnionModifier: ViewModifier {
 
 // MARK: - Glass Effect Transition Types
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum GlassEffectTransition {
   case matchedGeometry
   case materialize
@@ -157,17 +167,17 @@ enum GlassEffectTransition {
 
 // MARK: - Environment Keys
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassEffectNamespaceKey: EnvironmentKey {
   static let defaultValue: Namespace.ID? = nil
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassEffectSpacingKey: EnvironmentKey {
   static let defaultValue: CGFloat = 16.0
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var glassEffectNamespace: Namespace.ID? {
     get { self[GlassEffectNamespaceKey.self] }
@@ -182,7 +192,7 @@ extension EnvironmentValues {
 
 // MARK: - Performance Optimized Glass Container
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct OptimizedGlassContainer<Content: View>: View {
   let content: Content
   let spacing: CGFloat
@@ -230,7 +240,7 @@ struct OptimizedGlassContainer<Content: View>: View {
 
 // MARK: - Glass Effect Preview Helpers
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassEffectPreview: View {
   @State private var showSecondElement = false
   @Namespace private var glassNamespace
@@ -278,10 +288,10 @@ struct GlassEffectPreview: View {
 }
 
 #Preview {
-  if #available(iPadOS 26.0, *) {
+  if #available(iOS 26.0, *) {
     GlassEffectPreview()
       .environment(LiquidGlassEffectManager())
   } else {
-    Text("iPadOS 26.0 required")
+    Text("iOS 26.0 required")
   }
 }

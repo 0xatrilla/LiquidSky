@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct EnhancedPostDetailView: View {
   let postId: String
   @Environment(\.detailColumnManager) var detailManager
@@ -437,7 +437,7 @@ struct EnhancedPostDetailView: View {
 
 // MARK: - Reply Row View
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ReplyRowView: View {
   let reply: PostDetailData
   @State private var isHovering = false
@@ -577,7 +577,7 @@ struct ReplyRowView: View {
 
 // MARK: - Engagement Metric
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct EngagementMetric: View {
   let icon: String
   let count: Int
@@ -605,7 +605,7 @@ struct EngagementMetric: View {
 
 // MARK: - Interaction Button
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct PostInteractionButton: View {
   let systemImage: String
   let isActive: Bool

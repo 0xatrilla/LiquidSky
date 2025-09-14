@@ -6,7 +6,7 @@ import ProfileUI
 import SettingsUI
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AdaptiveGridView<Item: Identifiable, Content: View>: View {
   let items: [Item]
   let content: (Item) -> Content
@@ -41,7 +41,7 @@ struct AdaptiveGridView<Item: Identifiable, Content: View>: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct FeedCardView: View {
   let feed: FeedItem
   @State private var isHovered = false

@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 class AssistiveTechnologySupport {
   // Switch Control support
@@ -359,7 +359,7 @@ class AssistiveTechnologySupport {
 
 // MARK: - Data Models
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct SwitchControlGroup {
   let id: String
   let name: String
@@ -371,10 +371,10 @@ struct SwitchControlGroup {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 // SwitchControlAction is defined in AccessibilityManager.swift
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct VoiceControlCommand {
   let phrase: String
   let action: VoiceAction
@@ -387,14 +387,14 @@ struct VoiceControlCommand {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct CustomVoiceCommand {
   let identifier: String
   let phrase: String
   let action: VoiceControlCommand.VoiceAction
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AssistiveTouchGesture {
   let id: String
   let name: String
@@ -406,7 +406,7 @@ struct AssistiveTouchGesture {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AssistiveDevice {
   let id: String
   let name: String
@@ -423,7 +423,7 @@ struct AssistiveDevice {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct DeviceInput {
   let id: String
   let type: InputType
@@ -434,20 +434,20 @@ struct DeviceInput {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct InputMapping {
   let deviceId: String
   let inputMappings: [String: AssistiveAction]
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum AssistiveAction {
   case tap, navigate, select, gesture, scroll
 }
 
 // MARK: - Assistive Technology Modifier
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AssistiveTechnologyModifier: ViewModifier {
   let elementId: String
   let switchControlGroup: String?
@@ -535,7 +535,7 @@ struct AssistiveTechnologyModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func assistiveTechnologySupport(
     elementId: String,
@@ -556,12 +556,12 @@ extension View {
 
 // MARK: - Environment Key
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AssistiveTechnologySupportKey: EnvironmentKey {
   static let defaultValue = AssistiveTechnologySupport()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var assistiveTechnologySupport: AssistiveTechnologySupport {
     get { self[AssistiveTechnologySupportKey.self] }

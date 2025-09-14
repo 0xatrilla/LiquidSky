@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct EnhancedNotificationGridView: View {
   @Environment(\.contentColumnManager) var contentManager
   @Environment(\.glassEffectManager) var glassEffectManager
@@ -180,7 +180,7 @@ struct EnhancedNotificationGridView: View {
 
 // MARK: - Notification Filter Chip
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct NotificationFilterChip: View {
   let filter: NotificationFilterType
   let isSelected: Bool
@@ -225,7 +225,7 @@ struct NotificationFilterChip: View {
 
 // MARK: - Notification Group View
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct NotificationGroupView: View {
   let group: NotificationGroup
 
@@ -259,7 +259,7 @@ struct NotificationGroupView: View {
 
 // MARK: - Enhanced Notification Row
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct EnhancedNotificationRow: View {
   let notification: NotificationItemData
   @State private var isHovering = false
@@ -431,14 +431,14 @@ struct EnhancedNotificationRow: View {
 
 // MARK: - Data Models
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct NotificationGroup: Identifiable {
   let id: String
   let date: Date
   let notifications: [NotificationItemData]
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct NotificationItemData: Identifiable, Hashable {
   let id: String
   let type: NotificationType
@@ -496,7 +496,7 @@ struct NotificationItemData: Identifiable, Hashable {
 
 // MARK: - Extensions
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension NotificationFilterType {
   static var allCases: [NotificationFilterType] {
     [.all, .mentions, .likes, .reposts, .follows]

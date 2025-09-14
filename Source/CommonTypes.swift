@@ -1,6 +1,6 @@
 import Foundation
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 public enum ContentPriority: Int, CaseIterable {
   case low = 0
   case normal = 1

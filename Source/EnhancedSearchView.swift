@@ -2,7 +2,7 @@ import Client
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct EnhancedSearchView: View {
   let client: BSkyClient
   @Environment(\.contentColumnManager) var contentManager
@@ -326,7 +326,7 @@ struct EnhancedSearchView: View {
 
 // MARK: - Search Filter Chip
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct SearchFilterChip: View {
   let filter: SearchContentType
   let isSelected: Bool
@@ -370,7 +370,7 @@ struct SearchFilterChip: View {
 
 // MARK: - Search Result Card
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct SearchResultCard: View {
   let result: SearchResultData
   @State private var isHovering = false
@@ -603,7 +603,7 @@ struct SearchResultCard: View {
 
 // MARK: - Metric View
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct MetricView: View {
   let icon: String
   let count: Int
@@ -624,7 +624,7 @@ struct MetricView: View {
 
 // MARK: - Data Models
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct SearchResultData: Identifiable, Hashable {
   let id: String
   let type: SearchResultType
@@ -672,7 +672,7 @@ struct SearchResultData: Identifiable, Hashable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct SearchEngagement {
   let likes: Int
   let reposts: Int
@@ -683,7 +683,7 @@ struct SearchEngagement {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum SearchResultType {
   case post, user
 
@@ -704,7 +704,7 @@ enum SearchResultType {
 
 // MARK: - Extensions
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension SearchContentType {
   static var allCases: [SearchContentType] {
     [.all, .posts, .users, .media]
@@ -729,7 +729,7 @@ extension SearchContentType {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension SearchSortOrder {
   static var allCases: [SearchSortOrder] {
     [.relevance, .recent, .popular]

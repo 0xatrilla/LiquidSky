@@ -304,10 +304,10 @@ public struct PostRowActionsView: View {
 
   private func submitBlueskyReport(reason: String) async throws {
     // Get the client from the PostContext
-    let client = dataController.getClient()
+    let _ = dataController.getClient()
 
     // Map our UI reasons to Bluesky's internal reporting reasons
-    let blueskyReason = mapToBlueskyReason(reason)
+    let _ = mapToBlueskyReason(reason)
 
     // TODO: Implement actual Bluesky reporting when ATProtoKit supports it
     // For now, we'll simulate the API call and always fall back to local storage
@@ -382,7 +382,7 @@ public struct PostRowActionsView: View {
   private func performBlockUser() async {
     do {
       // Get the client from the PostContext
-      let client = dataController.getClient()
+      let _ = dataController.getClient()
 
       // TODO: Implement actual Bluesky blocking when ATProtoKit supports it
       // For now, we'll simulate the API call and always fall back to local storage
@@ -413,7 +413,7 @@ public struct PostRowActionsView: View {
   private func performMuteUser() async {
     do {
       // Get the client from the PostContext
-      let client = dataController.getClient()
+      let _ = dataController.getClient()
 
       // TODO: Implement actual Bluesky muting when ATProtoKit supports it
       // For now, we'll simulate the API call and always fall back to local storage

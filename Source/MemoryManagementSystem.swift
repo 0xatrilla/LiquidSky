@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 @MainActor
 class MemoryManagementSystem {
@@ -225,7 +225,7 @@ class MemoryManagementSystem {
 
 // MARK: - Object Pool
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 class ObjectPool<T: AnyObject> {
   private var pool: [T] = []
   private var activeObjects: Set<ObjectIdentifier> = []
@@ -271,7 +271,7 @@ class ObjectPool<T: AnyObject> {
 
 // MARK: - Image Memory Cache
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 @MainActor
 class ImageMemoryCache {
@@ -357,7 +357,7 @@ class ImageMemoryCache {
 
 // MARK: - Automatic Cleanup Manager
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @MainActor
 class AutomaticCleanupManager {
   private var cleanupTimer: Timer?
@@ -394,7 +394,7 @@ class AutomaticCleanupManager {
 
 // MARK: - Background Task Manager
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @MainActor
 class BackgroundTaskManager {
   private var backgroundTaskId: UIBackgroundTaskIdentifier = .invalid
@@ -430,7 +430,7 @@ class BackgroundTaskManager {
 
 // MARK: - Data Models
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum MemoryWarningLevel: Int, CaseIterable {
   case normal = 0
   case warning = 1
@@ -453,7 +453,7 @@ enum MemoryWarningLevel: Int, CaseIterable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum MemoryTrend {
   case increasing
   case stable
@@ -476,7 +476,7 @@ enum MemoryTrend {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct MemoryMetrics {
   let currentUsage: Double
   let warningLevel: MemoryWarningLevel
@@ -486,7 +486,7 @@ struct MemoryMetrics {
   let trend: MemoryTrend
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct MemorySnapshot {
   let timestamp: Date
   let memoryUsage: Double
@@ -495,14 +495,14 @@ struct MemorySnapshot {
   let imageCacheSize: Int
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct CachedImage {
   let image: UIImage
   let size: Int
   let timestamp: Date
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 class GlassEffectState {
   let id: String
   var isActive: Bool = false
@@ -515,7 +515,7 @@ class GlassEffectState {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 class ViewState {
   let id: String
   var isVisible: Bool = false
@@ -530,12 +530,12 @@ class ViewState {
 
 // MARK: - Environment Key
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct MemoryManagementSystemKey: EnvironmentKey {
   static let defaultValue = MemoryManagementSystem()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var memoryManagementSystem: MemoryManagementSystem {
     get { self[MemoryManagementSystemKey.self] }

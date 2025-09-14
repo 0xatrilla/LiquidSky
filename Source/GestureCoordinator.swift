@@ -1,9 +1,11 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
-class GestureCoordinator {
+final class GestureCoordinator: @unchecked Sendable {
+  private let lock = NSLock()
+
   var isApplePencilConnected = false
   var isTrackpadConnected = false
   var isKeyboardConnected = false
@@ -35,7 +37,13 @@ class GestureCoordinator {
       object: nil,
       queue: .main
     ) { [weak self] notification in
-      self?.isApplePencilConnected = notification.userInfo?["connected"] as? Bool ?? false
+      // Extract data before sending across concurrency boundary
+      let isConnected = notification.userInfo?["connected"] as? Bool ?? false
+      Task { @MainActor in
+        self?.lock.withLock {
+          self?.isApplePencilConnected = isConnected
+        }
+      }
     }
 
     // Monitor for trackpad/mouse connection
@@ -44,7 +52,13 @@ class GestureCoordinator {
       object: nil,
       queue: .main
     ) { [weak self] notification in
-      self?.isTrackpadConnected = notification.userInfo?["connected"] as? Bool ?? false
+      // Extract data before sending across concurrency boundary
+      let isConnected = notification.userInfo?["connected"] as? Bool ?? false
+      Task { @MainActor in
+        self?.lock.withLock {
+          self?.isTrackpadConnected = isConnected
+        }
+      }
     }
 
     // Monitor for keyboard connection
@@ -53,7 +67,13 @@ class GestureCoordinator {
       object: nil,
       queue: .main
     ) { [weak self] notification in
-      self?.isKeyboardConnected = notification.userInfo?["connected"] as? Bool ?? false
+      // Extract data before sending across concurrency boundary
+      let isConnected = notification.userInfo?["connected"] as? Bool ?? false
+      Task { @MainActor in
+        self?.lock.withLock {
+          self?.isKeyboardConnected = isConnected
+        }
+      }
     }
   }
 
@@ -116,7 +136,7 @@ class GestureCoordinator {
 
 // MARK: - Apple Pencil Hover Support
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ApplePencilHoverModifier: ViewModifier {
   let id: String
   let onHover: (Bool, CGPoint?, CGFloat) -> Void
@@ -154,7 +174,7 @@ struct ApplePencilHoverModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func applePencilHover(
     id: String,
@@ -166,7 +186,7 @@ extension View {
 
 // MARK: - Enhanced Hover Effects
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct EnhancedHoverEffect: ViewModifier {
   let id: String
   let glassEffect: Bool
@@ -212,7 +232,7 @@ struct EnhancedHoverEffect: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func enhancedHover(id: String, glassEffect: Bool = true) -> some View {
     self.modifier(EnhancedHoverEffect(id: id, glassEffect: glassEffect))
@@ -221,7 +241,7 @@ extension View {
 
 // MARK: - Trackpad and Mouse Support
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct TrackpadGestureModifier: ViewModifier {
   let onRightClick: (() -> Void)?
   let onScroll: ((CGFloat, CGFloat) -> Void)?
@@ -257,7 +277,7 @@ struct TrackpadGestureModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func trackpadGestures(
     onRightClick: (() -> Void)? = nil,
@@ -269,7 +289,7 @@ extension View {
 
 // MARK: - Keyboard Navigation Support
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct KeyboardNavigationModifier: ViewModifier {
   let id: String
   let onFocus: (Bool) -> Void
@@ -295,7 +315,7 @@ struct KeyboardNavigationModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func keyboardNavigation(
     id: String,
@@ -308,7 +328,7 @@ extension View {
 
 // MARK: - Multi-touch Gesture Support
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct MultiTouchGestureModifier: ViewModifier {
   let onPinch: ((CGFloat) -> Void)?
   let onRotate: ((Angle) -> Void)?
@@ -357,7 +377,7 @@ struct MultiTouchGestureModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func multiTouchGestures(
     onPinch: ((CGFloat) -> Void)? = nil,
@@ -380,12 +400,12 @@ extension Notification.Name {
 
 // MARK: - Environment Key
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GestureCoordinatorKey: EnvironmentKey {
   static let defaultValue = GestureCoordinator()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var gestureCoordinator: GestureCoordinator {
     get { self[GestureCoordinatorKey.self] }

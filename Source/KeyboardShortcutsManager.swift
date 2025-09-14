@@ -3,7 +3,7 @@ import SwiftUI
 
 // MARK: - Notification Names
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 @MainActor
 class KeyboardShortcutsManager {
@@ -200,7 +200,7 @@ class KeyboardShortcutsManager {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct KeyboardShortcut {
   let key: KeyEquivalent
   let modifiers: EventModifiers
@@ -247,7 +247,7 @@ struct KeyboardShortcut {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct KeyboardShortcutGroup {
   let title: String
   let shortcuts: [KeyboardShortcut]
@@ -255,7 +255,7 @@ struct KeyboardShortcutGroup {
 
 // MARK: - Keyboard Shortcuts View Modifier
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct KeyboardShortcutsModifier: ViewModifier {
   @Environment(\.keyboardShortcutsManager) var shortcutsManager
 
@@ -268,7 +268,7 @@ struct KeyboardShortcutsModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func keyboardShortcuts() -> some View {
     self.modifier(KeyboardShortcutsModifier())
@@ -277,7 +277,7 @@ extension View {
 
 // MARK: - Focus Management
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 class FocusManager {
   var focusedColumn: FocusedColumn = .sidebar
@@ -331,7 +331,7 @@ class FocusManager {
 
 // MARK: - Keyboard Shortcuts Help View
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct KeyboardShortcutsHelpView: View {
   @Environment(\.keyboardShortcutsManager) var shortcutsManager
   @Environment(\.dismiss) var dismiss
@@ -373,17 +373,17 @@ struct KeyboardShortcutsHelpView: View {
 
 // MARK: - Environment Keys
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct KeyboardShortcutsManagerKey: EnvironmentKey {
   static let defaultValue = KeyboardShortcutsManager()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct FocusManagerKey: EnvironmentKey {
   static let defaultValue = FocusManager()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var keyboardShortcutsManager: KeyboardShortcutsManager {
     get { self[KeyboardShortcutsManagerKey.self] }

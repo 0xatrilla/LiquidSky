@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 import UniformTypeIdentifiers
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 @MainActor
 class SharingManager {
@@ -96,7 +96,9 @@ class SharingManager {
       object: nil,
       queue: .main
     ) { [weak self] _ in
-      self?.handleClipboardChange()
+      Task { @MainActor in
+        self?.handleClipboardChange()
+      }
     }
   }
 
@@ -254,7 +256,7 @@ class SharingManager {
 
   private func createAirDropVersion(_ item: ShareableItem) -> ShareableItem {
     // Optimize for AirDrop transfer
-    var optimizedContent = item.content
+    let optimizedContent = item.content
 
     // Add AirDrop-specific metadata
     let airDropMetadata = ShareMetadata(
@@ -410,6 +412,7 @@ class SharingManager {
     shareSheetConfiguration = nil
   }
 
+  @MainActor
   private func handleClipboardChange() {
     // Handle clipboard changes for Universal Clipboard
     guard universalClipboardEnabled else { return }
@@ -432,7 +435,7 @@ class SharingManager {
 
 // MARK: - Data Models
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ShareableItem {
   let id: String
   let type: ShareableItemType
@@ -441,12 +444,12 @@ struct ShareableItem {
   let glassEffectData: GlassEffectData?
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum ShareableItemType {
   case text, url, image, post, profile
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ShareMetadata {
   let title: String?
   let description: String?
@@ -472,14 +475,14 @@ struct ShareMetadata {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassEffectData {
   let effectType: String
   let parameters: [String: Any]
   let renderingData: Data?
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ShareSheetConfiguration {
   let item: ShareableItem
   let sourceView: UIView?
@@ -487,7 +490,7 @@ struct ShareSheetConfiguration {
   let glassEffectEnabled: Bool
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct CustomSharingOption: Identifiable {
   let id: String
   let title: String
@@ -497,12 +500,12 @@ struct CustomSharingOption: Identifiable {
   let glassEffectEnabled: Bool
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum SharingAction {
   case glassScreenshot, richPreview, universalClipboard, qrCode
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AirDropDevice {
   let id: String
   let name: String
@@ -510,7 +513,7 @@ struct AirDropDevice {
   let isAvailable: Bool
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ClipboardItem: Identifiable {
   let id: String
   let content: Any
@@ -521,7 +524,7 @@ struct ClipboardItem: Identifiable {
 
 // MARK: - Sharing UI Components
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassShareSheet: View {
   let configuration: ShareSheetConfiguration
   @Environment(\.sharingManager) var sharingManager
@@ -656,7 +659,7 @@ struct GlassShareSheet: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension ShareableItemType {
   var displayName: String {
     switch self {
@@ -671,12 +674,12 @@ extension ShareableItemType {
 
 // MARK: - Environment Key
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct SharingManagerKey: EnvironmentKey {
   static let defaultValue = SharingManager()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var sharingManager: SharingManager {
     get { self[SharingManagerKey.self] }

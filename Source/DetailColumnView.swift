@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct DetailColumnView: View {
   @Environment(\.detailColumnManager) var detailManager
   @Environment(\.glassEffectManager) var glassEffectManager
@@ -246,7 +246,7 @@ struct DetailColumnView: View {
 
 // MARK: - Detail Tip Row
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct DetailTipRow: View {
   let icon: String
   let text: String
@@ -269,7 +269,7 @@ struct DetailTipRow: View {
 
 // MARK: - Detail Navigation Extensions
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension DetailColumnManager {
   func showPostDetail(postId: String, title: String = "Post") {
     let detailItem = DetailItem(id: postId, type: .post, title: title)
@@ -311,11 +311,11 @@ extension DetailColumnManager {
 // MARK: - Preview
 
 #Preview {
-  if #available(iPadOS 26.0, *) {
+  if #available(iOS 26.0, *) {
     DetailColumnView()
       .environment(DetailColumnManager())
       .environment(LiquidGlassEffectManager())
   } else {
-    Text("iPadOS 26.0 required")
+    Text("iOS 26.0 required")
   }
 }

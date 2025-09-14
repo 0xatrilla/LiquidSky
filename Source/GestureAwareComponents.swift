@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GestureAwareGlassButton: View {
   let title: String
   let systemImage: String?
@@ -104,7 +104,7 @@ struct GestureAwareGlassButton: View {
 
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GestureAwareGlassCard<Content: View>: View {
   let content: Content
   let cornerRadius: CGFloat
@@ -192,7 +192,7 @@ struct GestureAwareGlassCard<Content: View>: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GestureAwareNavigationItem: View {
   let title: String
   let systemImage: String
@@ -287,7 +287,7 @@ struct GestureAwareNavigationItem: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GestureAwareSearchBar: View {
   @Binding var text: String
   let placeholder: String
@@ -371,7 +371,7 @@ struct GestureAwareSearchBar: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GestureAwareMediaView: View {
   let imageURL: URL?
   let aspectRatio: CGFloat?

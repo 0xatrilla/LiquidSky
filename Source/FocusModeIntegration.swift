@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 @MainActor
 class FocusModeManager {
@@ -344,7 +344,7 @@ class FocusModeManager {
 
 // MARK: - Data Models
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct FocusMode: Sendable {
   let id: String
   let name: String
@@ -352,7 +352,7 @@ struct FocusMode: Sendable {
   let startTime: Date
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct FocusModeConfiguration: Sendable {
   let id: String
   let name: String
@@ -364,23 +364,23 @@ struct FocusModeConfiguration: Sendable {
   let reducedAnimations: Bool
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassEffectConfiguration: Sendable {
   let level: GlassEffectLevel
   let colorScheme: FocusColorScheme
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum GlassEffectLevel: Sendable {
   case disabled, minimal, subtle, standard, enhanced
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum InteractionType: CaseIterable, Sendable {
   case reading, composing, browsing, social, searching, voice, tracking, meditation, emergency
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum FocusColorScheme: Sendable {
   case neutral, vibrant, dark, highContrast, energetic, calm
 
@@ -407,7 +407,7 @@ enum FocusColorScheme: Sendable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum FocusContext: Sendable {
   case calendar(String)
   case location(String)
@@ -416,7 +416,7 @@ enum FocusContext: Sendable {
 
 // MARK: - Focus Mode UI Components
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct FocusModeIndicator: View {
   @Environment(\.focusModeManager) var focusModeManager
 
@@ -441,7 +441,7 @@ struct FocusModeIndicator: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct FocusModeAdaptiveView<Content: View>: View {
   let content: Content
   let elementId: String
@@ -466,7 +466,7 @@ struct FocusModeAdaptiveView<Content: View>: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct FocusModeGlassEffect: ViewModifier {
   @Environment(\.focusModeManager) var focusModeManager
 
@@ -479,7 +479,7 @@ struct FocusModeGlassEffect: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func focusModeAdaptive(elementId: String) -> some View {
     FocusModeAdaptiveView(elementId: elementId) {
@@ -494,12 +494,12 @@ extension View {
 
 // MARK: - Environment Key
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct FocusModeManagerKey: EnvironmentKey {
   static let defaultValue = FocusModeManager()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var focusModeManager: FocusModeManager {
     get { self[FocusModeManagerKey.self] }

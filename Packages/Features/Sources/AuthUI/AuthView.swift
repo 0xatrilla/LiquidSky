@@ -402,12 +402,7 @@ public struct AuthView: View {
 
   private func safeHapticFeedback(_ style: ImpactStyle) {
     // Safe haptic feedback with error handling
-    do {
-      HapticManager.shared.impact(style)
-    } catch {
-      // Silently fail if haptic feedback fails
-      print("Haptic feedback failed: \(error)")
-    }
+    HapticManager.shared.impact(style)
   }
 
   @State private var showingSafari = false

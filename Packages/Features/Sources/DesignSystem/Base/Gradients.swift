@@ -57,9 +57,39 @@ extension LinearGradient {
 }
 
 extension ShapeStyle where Self == LinearGradient {
-  public static var blueskyBlue: LinearGradient { .blueskyBlue }
-  public static var blueBluesky: LinearGradient { .blueBluesky }
-  public static var blueCyan: LinearGradient { .blueCyan }
-  public static var blueskyBlueHorizontal: LinearGradient { .blueskyBlueHorizontal }
-  public static var blueskyBlueAvatar: LinearGradient { .blueskyBlueAvatar }
+  public static var blueskyBlue: LinearGradient { 
+    LinearGradient(
+      colors: [.blue, .cyan],
+      startPoint: .topLeading,
+      endPoint: .bottomTrailing
+    )
+  }
+  public static var blueBluesky: LinearGradient { 
+    LinearGradient(
+      colors: [.blue, .blue.opacity(0.8)],
+      startPoint: .topLeading,
+      endPoint: .bottomTrailing
+    )
+  }
+  public static var blueCyan: LinearGradient { 
+    LinearGradient(
+      colors: [.blue, .cyan],
+      startPoint: .top,
+      endPoint: .bottom
+    )
+  }
+  public static var blueskyBlueHorizontal: LinearGradient { 
+    LinearGradient(
+      colors: [.blue, .cyan],
+      startPoint: .leading,
+      endPoint: .trailing
+    )
+  }
+  public static var blueskyBlueAvatar: LinearGradient { 
+    LinearGradient(
+      colors: [.blue, .cyan],
+      startPoint: .topLeading,
+      endPoint: .bottomTrailing
+    )
+  }
 }

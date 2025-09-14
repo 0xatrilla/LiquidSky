@@ -1,6 +1,6 @@
 import Client
 import SwiftUI
-import UserNotifications
+@preconcurrency import UserNotifications
 
 public struct ListNotificationSettingsView: View {
   @Environment(BSkyClient.self) private var client
@@ -45,7 +45,7 @@ public struct ListNotificationSettingsView: View {
                 let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
                 let request = UNNotificationRequest(
                   identifier: UUID().uuidString, content: content, trigger: trigger)
-                center.add(request)
+                UNUserNotificationCenter.current().add(request)
               }
             }
             .foregroundColor(.blue)

@@ -38,7 +38,7 @@ struct MaterialEffect {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 @MainActor
 class UIPolishManager {
@@ -291,7 +291,7 @@ class UIPolishManager {
 
 // MARK: - Loading Views
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassOrbLoadingView: View {
   @State private var isAnimating = false
 
@@ -313,7 +313,7 @@ struct GlassOrbLoadingView: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct LiquidWaveLoadingView: View {
   @State private var waveOffset: CGFloat = 0
 
@@ -342,7 +342,7 @@ struct LiquidWaveLoadingView: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ShimmerLoadingView: View {
   @State private var shimmerOffset: CGFloat = -200
 
@@ -370,7 +370,7 @@ struct ShimmerLoadingView: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct PulseLoadingView: View {
   @State private var isPulsing = false
 
@@ -391,7 +391,7 @@ struct PulseLoadingView: View {
 
 // MARK: - Empty State Views
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct NoContentEmptyState: View {
   var body: some View {
     VStack(spacing: 20) {
@@ -416,7 +416,7 @@ struct NoContentEmptyState: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct NoResultsEmptyState: View {
   var body: some View {
     VStack(spacing: 20) {
@@ -441,7 +441,7 @@ struct NoResultsEmptyState: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct OfflineEmptyState: View {
   var body: some View {
     VStack(spacing: 20) {
@@ -467,7 +467,7 @@ struct OfflineEmptyState: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ErrorEmptyState: View {
   var body: some View {
     VStack(spacing: 20) {
@@ -502,7 +502,7 @@ struct ErrorEmptyState: View {
 
 // MARK: - Data Models and Enums
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum AnimationTiming {
   case fast, standard, slow
   case custom(Double)
@@ -517,49 +517,49 @@ enum AnimationTiming {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum GlassEffectQuality {
   case low, medium, high, ultra
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum TransitionStyle {
   case fluid, sharp, bouncy
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum LoadingAnimationStyle {
   case glassOrb, liquidWave, shimmer, pulse
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum GlassEffectContext {
   case navigation, content, interactive, modal, toolbar
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum AnimationType {
   case glassAppear, glassDisappear, columnTransition, contentLoad, microInteraction, hoverEffect
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum HapticInteraction {
   case buttonPress, glassEffectActivation, navigationChange, contentLoad, error, success, warning
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum EmptyStateContext {
   case noContent, noResults, offline, error
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum PerformanceLevel {
   case optimal, good, degraded, poor
 }
 
 // MARK: - Animation Constants
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AnimationCurves {
   static var glassAppear: Animation = .easeOut
   static var glassDisappear: Animation = .easeIn
@@ -567,7 +567,7 @@ struct AnimationCurves {
   static var glassHover: Animation = .easeOut
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct TransitionTimings {
   static var glassEffectAppear: Double = 0.4
   static var glassEffectDisappear: Double = 0.3
@@ -576,14 +576,14 @@ struct TransitionTimings {
   static var microInteraction: Double = 0.15
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct MicroInteractions {
   static var buttonPress: Animation = .easeInOut(duration: 0.1)
   static var hoverEffect: Animation = .easeOut(duration: 0.2)
   static var selectionChange: Animation = .easeInOut(duration: 0.25)
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct HapticPatterns {
   static var lightTap: UIImpactFeedbackGenerator = UIImpactFeedbackGenerator(style: .light)
   static var mediumTap: UIImpactFeedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
@@ -594,12 +594,12 @@ struct HapticPatterns {
 
 // MARK: - Environment Key
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct UIPolishManagerKey: EnvironmentKey {
   static let defaultValue = UIPolishManager()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var uiPolishManager: UIPolishManager {
     get { self[UIPolishManagerKey.self] }

@@ -403,7 +403,7 @@ public struct NotificationRow: View {
           postItem: group.postItem,
           actionText: "interacted with your post"
         )
-      @unknown default:
+      default:
         SingleNotificationRow(
           notification: group.notifications[0],
           postItem: group.postItem,

@@ -1,13 +1,13 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ConstrainedDragValue {
   let originalValue: DragGesture.Value
   let constrainedTranslation: CGSize
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 class AdvancedMultiTouchManager {
   var isMultiTouchEnabled = true
@@ -166,7 +166,7 @@ class AdvancedMultiTouchManager {
 
 // MARK: - Gesture Types and Models
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum GestureType: Hashable {
   case tap
   case longPress
@@ -177,7 +177,7 @@ enum GestureType: Hashable {
   case custom(String)
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum GesturePhase {
   case began
   case changed
@@ -185,7 +185,7 @@ enum GesturePhase {
   case cancelled
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GestureEvent {
   let type: GestureType
   let phase: GesturePhase
@@ -204,7 +204,7 @@ struct GestureEvent {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 class TouchPoint: ObservableObject {
   let id: String
   @Published var location: CGPoint
@@ -219,7 +219,7 @@ class TouchPoint: ObservableObject {
 
 // MARK: - Advanced Pinch-to-Zoom Modifier
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AdvancedPinchToZoomModifier: ViewModifier {
   let minScale: CGFloat
   let maxScale: CGFloat
@@ -260,7 +260,7 @@ struct AdvancedPinchToZoomModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func advancedPinchToZoom(
     minScale: CGFloat = 0.5,
@@ -281,7 +281,7 @@ extension View {
 
 // MARK: - Advanced Rotation Gesture Modifier
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AdvancedRotationGestureModifier: ViewModifier {
   let onRotationChange: (Angle) -> Void
   let onRotationEnd: (Angle) -> Void
@@ -339,7 +339,7 @@ struct AdvancedRotationGestureModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func advancedRotationGesture(
     snapToAngles: [Angle] = [],
@@ -358,7 +358,7 @@ extension View {
 
 // MARK: - Advanced Drag Gesture Modifier
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AdvancedDragGestureModifier: ViewModifier {
   let onDragChange: (DragGesture.Value) -> Void
   let onDragEnd: (DragGesture.Value) -> Void
@@ -424,7 +424,7 @@ struct AdvancedDragGestureModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func advancedDragGesture(
     threshold: CGFloat = 10.0,
@@ -445,7 +445,7 @@ extension View {
 
 // MARK: - Simultaneous Gesture Coordinator
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct SimultaneousGestureCoordinator: ViewModifier {
   let allowedCombinations: Set<Set<GestureType>>
 
@@ -491,7 +491,7 @@ struct SimultaneousGestureCoordinator: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func simultaneousGestures(
     allowedCombinations: Set<Set<GestureType>>
@@ -504,7 +504,7 @@ extension View {
 
 // MARK: - Gesture Recognition Overlay
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GestureRecognitionOverlay: View {
   @Environment(\.advancedMultiTouchManager) var multiTouchManager
   @State private var showGestureIndicators = false
@@ -547,12 +547,12 @@ struct GestureRecognitionOverlay: View {
 
 // MARK: - Environment Key
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AdvancedMultiTouchManagerKey: EnvironmentKey {
   static let defaultValue = AdvancedMultiTouchManager()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var advancedMultiTouchManager: AdvancedMultiTouchManager {
     get { self[AdvancedMultiTouchManagerKey.self] }

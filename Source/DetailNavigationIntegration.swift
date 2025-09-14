@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   /// Adds detail navigation capability to content views
   func withDetailNavigation() -> some View {
@@ -9,7 +9,7 @@ extension View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct DetailNavigationModifier: ViewModifier {
   @Environment(\.detailColumnManager) var detailManager
 
@@ -52,7 +52,7 @@ struct DetailNavigationModifier: ViewModifier {
 
 // MARK: - Detail Navigation Helpers
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct DetailNavigationHelper {
   static func showPostDetail(postId: String, title: String = "Post") {
     NotificationCenter.default.post(
@@ -91,7 +91,7 @@ struct DetailNavigationHelper {
 
 // MARK: - Content View Integration Extensions
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnhancedFeedCard {
   /// Adds tap gesture to show post detail
   func withPostDetailNavigation() -> some View {
@@ -101,7 +101,7 @@ extension EnhancedFeedCard {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnhancedNotificationRow {
   /// Adds tap gesture to show appropriate detail based on notification type
   func withNotificationDetailNavigation() -> some View {
@@ -124,7 +124,7 @@ extension EnhancedNotificationRow {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension SearchResultCard {
   /// Adds tap gesture to show appropriate detail based on result type
   func withSearchResultDetailNavigation() -> some View {
@@ -141,7 +141,7 @@ extension SearchResultCard {
 
 // MARK: - Picture-in-Picture Support
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 class PictureInPictureManager {
   var isActive = false
@@ -168,7 +168,7 @@ class PictureInPictureManager {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct PictureInPictureView: View {
   @Environment(\.pictureInPictureManager) var pipManager
   @Environment(\.detailColumnManager) var detailManager
@@ -283,12 +283,12 @@ struct PictureInPictureView: View {
 
 // MARK: - Environment Keys
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct PictureInPictureManagerKey: EnvironmentKey {
   static let defaultValue = PictureInPictureManager()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var pictureInPictureManager: PictureInPictureManager {
     get { self[PictureInPictureManagerKey.self] }

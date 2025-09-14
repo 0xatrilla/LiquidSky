@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct EnhancedFeedGridView: View {
   @Environment(\.contentColumnManager) var contentManager
   @Environment(\.glassEffectManager) var glassEffectManager
@@ -123,7 +123,7 @@ struct EnhancedFeedGridView: View {
 
 // MARK: - Enhanced Feed Card
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct EnhancedFeedCard: View {
   let item: FeedItemData
   @State private var isHovering = false
@@ -335,7 +335,7 @@ struct EnhancedFeedCard: View {
 
 // MARK: - Interaction Button
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct InteractionButton: View {
   let systemImage: String
   let count: Int
@@ -369,7 +369,7 @@ struct InteractionButton: View {
 
 // MARK: - Glass Refresh Indicator
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct GlassRefreshIndicator: View {
   @State private var rotation: Double = 0
 
@@ -397,7 +397,7 @@ struct GlassRefreshIndicator: View {
 
 // MARK: - Feed Item Data Model
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct FeedItemData: Identifiable, Hashable {
   let id: String
   let authorName: String
@@ -422,7 +422,7 @@ struct FeedItemData: Identifiable, Hashable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct MediaItem: Identifiable, Hashable {
   let id: String
   let type: MediaType
@@ -435,7 +435,7 @@ struct MediaItem: Identifiable, Hashable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum FeedItemType {
   case post, repost, reply
 }

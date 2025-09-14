@@ -148,7 +148,7 @@ public final class AppSettings {
 }
 
 // MARK: - Supporting Enums
-public enum AppIcon: String, CaseIterable {
+public enum AppIcon: String, CaseIterable, Sendable {
   case cloud = "AppIcon"
   case og = "AppIcon2"
   case blueprint = "AppIcon3"

@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 @MainActor
 class LazyContentManager {
@@ -124,7 +124,7 @@ class LazyContentManager {
 
 // MARK: - Content Cache Manager
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 class ContentCacheManager {
   private var cache: [String: CachedItem] = [:]
@@ -243,7 +243,7 @@ class ContentCacheManager {
 
 // MARK: - Content Preload Manager
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 class ContentPreloadManager {
   private var preloadQueue: [PreloadRequest] = []
@@ -297,7 +297,7 @@ class ContentPreloadManager {
 
 // MARK: - Lazy Content Column
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct LazyContentColumn<Content: View>: View {
   let content: Content
   let contentId: String
@@ -391,7 +391,7 @@ struct LazyContentColumn<Content: View>: View {
 
 // MARK: - Data Models
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum LoadingState: Equatable {
   case notLoaded
   case loading
@@ -410,7 +410,7 @@ enum LoadingState: Equatable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct CachedItem {
   let id: String
   let content: Any
@@ -418,21 +418,21 @@ struct CachedItem {
   let timestamp: Date
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ContentLoadRequest {
   let id: String
   let priority: ContentPriority
   let timestamp: Date
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct PreloadRequest {
   let id: String
   let priority: ContentPriority
   let timestamp: Date
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum ContentLoadError: Error, LocalizedError {
   case loadingFailed
   case networkError
@@ -449,12 +449,12 @@ enum ContentLoadError: Error, LocalizedError {
 
 // MARK: - Environment Key
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct LazyContentManagerKey: EnvironmentKey {
   static let defaultValue = LazyContentManager()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var lazyContentManager: LazyContentManager {
     get { self[LazyContentManagerKey.self] }

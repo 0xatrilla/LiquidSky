@@ -3,7 +3,7 @@ import SwiftUI
 
 // ProfileTab enum is defined in EnhancedProfileView.swift
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct EnhancedProfileDetailView: View {
   let profileId: String
   @Environment(\.detailColumnManager) var detailManager
@@ -464,13 +464,13 @@ struct EnhancedProfileDetailView: View {
 
 // MARK: - Profile Post Card
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 // ProfilePostCard is defined in EnhancedProfileView.swift
 // ProfilePostCard is defined in EnhancedProfileView.swift
 
 // MARK: - Profile Media Card
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ProfileMediaCard: View {
   let mediaItem: MediaDetailData
   let post: PostDetailData
@@ -507,7 +507,7 @@ struct ProfileMediaCard: View {
 
 // MARK: - Profile Follow Sheet
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ProfileFollowSheet: View {
   let profile: ProfileDetailData?
   @Environment(\.dismiss) var dismiss
@@ -538,7 +538,7 @@ struct ProfileFollowSheet: View {
 
 // MARK: - Profile Action Sheet
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ProfileActionSheet: View {
   let profile: ProfileDetailData?
   @Environment(\.dismiss) var dismiss

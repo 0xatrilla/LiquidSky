@@ -84,7 +84,7 @@ extension AppBskyLexicon.Feed.FeedViewPostDefinition {
       // Check if this is a repost
       // Try to extract repost information from ATProtoKit
       // Since we don't know the exact type, let's use reflection to find the structure
-      let mirror = Mirror(reflecting: reason)
+      let _ = Mirror(reflecting: reason)
 
       // Try to extract the repost author from the reason field
       // Based on ATProtoKit structure, the reason should contain author information
@@ -343,7 +343,7 @@ private func extractProfileFromValue(_ value: Any) -> Profile? {
             print("PostsListView: Found DID: \(stringValue)")
           #endif
         }
-      case "handle", "actorHandle", "actorHandle":
+      case "handle", "actorHandle":
         if let stringValue = child.value as? String {
           handle = stringValue
           #if DEBUG

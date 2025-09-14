@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 class QuickActionsSystem {
   var actions: [QuickAction] = []
@@ -214,7 +214,7 @@ class QuickActionsSystem {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct QuickAction: Identifiable, Hashable {
   let id: String
   let title: String
@@ -233,7 +233,7 @@ struct QuickAction: Identifiable, Hashable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum QuickActionCategory: String, CaseIterable {
   case primary = "Primary"
   case navigation = "Navigation"
@@ -264,7 +264,7 @@ enum QuickActionCategory: String, CaseIterable {
 
 // MARK: - Quick Actions Panel
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct QuickActionsPanel: View {
   @Environment(\.quickActionsSystem) var quickActionsSystem
   @State private var selectedCategory: QuickActionCategory = .primary
@@ -365,7 +365,7 @@ struct QuickActionsPanel: View {
 
 // MARK: - Category Chip
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct CategoryChip: View {
   let category: QuickActionCategory
   let isSelected: Bool
@@ -404,7 +404,7 @@ struct CategoryChip: View {
 
 // MARK: - Quick Action Button
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct QuickActionButton: View {
   let action: QuickAction
   @Environment(\.quickActionsSystem) var quickActionsSystem
@@ -481,7 +481,7 @@ struct QuickActionButton: View {
 
 // MARK: - Compact Quick Action Button
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct CompactQuickActionButton: View {
   let action: QuickAction
   @Environment(\.quickActionsSystem) var quickActionsSystem
@@ -517,7 +517,7 @@ struct CompactQuickActionButton: View {
 
 // MARK: - All Quick Actions Sheet
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AllQuickActionsSheet: View {
   @Environment(\.dismiss) var dismiss
   @Environment(\.quickActionsSystem) var quickActionsSystem
@@ -573,7 +573,7 @@ struct AllQuickActionsSheet: View {
 
 // MARK: - Quick Action Row
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct QuickActionRow: View {
   let action: QuickAction
   @Environment(\.quickActionsSystem) var quickActionsSystem
@@ -630,12 +630,12 @@ struct QuickActionRow: View {
 
 // MARK: - Environment Key
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct QuickActionsSystemKey: EnvironmentKey {
   static let defaultValue = QuickActionsSystem()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var quickActionsSystem: QuickActionsSystem {
     get { self[QuickActionsSystemKey.self] }

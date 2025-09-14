@@ -2,7 +2,7 @@ import Combine
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 class NotificationBadgeSystem {
   var badges: [String: BadgeInfo] = [:]
@@ -104,7 +104,7 @@ class NotificationBadgeSystem {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct BadgeInfo {
   let count: Int
   let type: BadgeType
@@ -124,7 +124,7 @@ struct BadgeInfo {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum BadgeType: String, CaseIterable {
   case notification = "notification"
   case message = "message"
@@ -158,7 +158,7 @@ enum BadgeType: String, CaseIterable {
 
 // MARK: - Enhanced Badge View
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct EnhancedBadgeView: View {
   let badgeInfo: BadgeInfo?
   let style: BadgeStyle
@@ -240,7 +240,7 @@ struct EnhancedBadgeView: View {
 
 // MARK: - Animated Badge View
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AnimatedBadgeView: View {
   let badgeInfo: BadgeInfo?
   let showIcon: Bool
@@ -307,7 +307,7 @@ struct AnimatedBadgeView: View {
 
 // MARK: - Badge Summary View
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct BadgeSummaryView: View {
   @Environment(\.notificationBadgeSystem) var badgeSystem
   let maxVisible: Int
@@ -348,7 +348,7 @@ struct BadgeSummaryView: View {
 
 // MARK: - Badge Modifier
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct BadgeModifier: ViewModifier {
   let badgeInfo: BadgeInfo?
   let alignment: Alignment
@@ -376,7 +376,7 @@ struct BadgeModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func badge(
     _ badgeInfo: BadgeInfo?, alignment: Alignment = .topTrailing,
@@ -389,7 +389,7 @@ extension View {
 
 // MARK: - Badge Animation Coordinator
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 class BadgeAnimationCoordinator {
   var activeAnimations: Set<String> = []
@@ -416,12 +416,12 @@ extension Notification.Name {
 
 // MARK: - Environment Keys
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct NotificationBadgeSystemKey: EnvironmentKey {
   static let defaultValue = NotificationBadgeSystem()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var notificationBadgeSystem: NotificationBadgeSystem {
     get { self[NotificationBadgeSystemKey.self] }
@@ -431,7 +431,7 @@ extension EnvironmentValues {
 
 // MARK: - Badge Testing View
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct BadgeTestingView: View {
   @Environment(\.notificationBadgeSystem) var badgeSystem
   @State private var testCount = 0
@@ -478,10 +478,10 @@ struct BadgeTestingView: View {
 }
 
 #Preview {
-  if #available(iPadOS 26.0, *) {
+  if #available(iOS 26.0, *) {
     BadgeTestingView()
       .environment(NotificationBadgeSystem())
   } else {
-    Text("iPadOS 26.0 required")
+    Text("iOS 26.0 required")
   }
 }

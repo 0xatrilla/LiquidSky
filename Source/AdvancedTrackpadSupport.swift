@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 class AdvancedTrackpadManager {
   var isConnected = false
@@ -100,7 +100,7 @@ class AdvancedTrackpadManager {
 
 // MARK: - Cursor Styles
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum CursorStyle: Equatable {
   case `default`
   case pointer
@@ -127,7 +127,7 @@ enum CursorStyle: Equatable {
 
 // MARK: - Advanced Trackpad Hover Modifier
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AdvancedTrackpadHoverModifier: ViewModifier {
   let elementId: String
   let cursorStyle: CursorStyle
@@ -193,7 +193,7 @@ struct AdvancedTrackpadHoverModifier: ViewModifier {
 
 // MARK: - Hover Effects
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum HoverEffect {
   case none
   case scale(CGFloat)
@@ -230,7 +230,7 @@ enum HoverEffect {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func advancedTrackpadHover(
     elementId: String,
@@ -253,7 +253,7 @@ extension View {
 
 // MARK: - Trackpad Hover Preview
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct TrackpadHoverPreview: View {
   let elementId: String
 
@@ -276,7 +276,7 @@ struct TrackpadHoverPreview: View {
 
 // MARK: - Custom Cursor Overlay
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct CustomCursorOverlay: View {
   @Environment(\.advancedTrackpadManager) var trackpadManager
 
@@ -299,7 +299,7 @@ struct CustomCursorOverlay: View {
 
 // MARK: - Trackpad Scroll Modifier
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct TrackpadScrollModifier: ViewModifier {
   let onScroll: (CGPoint) -> Void
   let scrollSensitivity: CGFloat
@@ -328,7 +328,7 @@ struct TrackpadScrollModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func trackpadScroll(
     sensitivity: CGFloat = 1.0,
@@ -340,7 +340,7 @@ extension View {
 
 // MARK: - Force Click Support
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ForceClickModifier: ViewModifier {
   let onForceClick: (CGFloat) -> Void
   let threshold: CGFloat
@@ -378,7 +378,7 @@ struct ForceClickModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func forceClick(
     threshold: CGFloat = 0.7,
@@ -390,7 +390,7 @@ extension View {
 
 // MARK: - Right-Click Context Menu
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct RightClickContextMenu<MenuContent: View>: ViewModifier {
   let menuContent: MenuContent
 
@@ -421,7 +421,7 @@ struct RightClickContextMenu<MenuContent: View>: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct RightClickMenuOverlay<MenuContent: View>: View {
   let content: MenuContent
   let location: CGPoint
@@ -442,7 +442,7 @@ struct RightClickMenuOverlay<MenuContent: View>: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func rightClickContextMenu<MenuContent: View>(
     @ViewBuilder menuContent: @escaping () -> MenuContent
@@ -453,12 +453,12 @@ extension View {
 
 // MARK: - Environment Key
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AdvancedTrackpadManagerKey: EnvironmentKey {
   static let defaultValue = AdvancedTrackpadManager()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var advancedTrackpadManager: AdvancedTrackpadManager {
     get { self[AdvancedTrackpadManagerKey.self] }

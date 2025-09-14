@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct EnhancedMediaDetailView: View {
   let mediaId: String
   @Environment(\.detailColumnManager) var detailManager
@@ -431,7 +431,7 @@ struct EnhancedMediaDetailView: View {
 
 // MARK: - Media Action Button
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct MediaActionButton: View {
   let title: String
   let systemImage: String
@@ -469,7 +469,7 @@ struct MediaActionButton: View {
 
 // MARK: - Full Screen Media Viewer
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct FullScreenMediaViewer: View {
   let mediaItem: MediaDetailData?
   @Binding var isPresented: Bool
@@ -567,7 +567,7 @@ struct FullScreenMediaViewer: View {
 
 // MARK: - Media Share Sheet
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct MediaShareSheet: View {
   let mediaItem: MediaDetailData?
   @Environment(\.dismiss) var dismiss
@@ -652,7 +652,7 @@ struct MediaShareSheet: View {
 
 // MARK: - Share Option Button
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ShareOptionButton: View {
   let title: String
   let systemImage: String
@@ -692,7 +692,7 @@ struct ShareOptionButton: View {
 
 // MARK: - Extensions
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension MediaDetailData.MediaType {
   var displayName: String {
     switch self {

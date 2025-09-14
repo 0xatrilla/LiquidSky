@@ -38,18 +38,11 @@ public func processFeed(
       return
     }
 
-    do {
-      // Use the FeedViewPostDefinition.postItem extension to get repost information
+    // Use the FeedViewPostDefinition.postItem extension to get repost information
       let item = fromFeedItem.postItem
       // hasReply is already set correctly from replyRef in the PostItem initializer
       postItems.append(item)
       processedCount += 1
-    } catch {
-      #if DEBUG
-        print("processFeed: Error creating PostItem for \(post.uri): \(error)")
-      #endif
-      // Skip this post if we can't process it
-    }
   }
 
   // First pass: process all posts and identify missing parents
@@ -83,11 +76,6 @@ public func processFeed(
       if post.reason != nil {
         // TODO: Implement proper reply processing when we understand the type structure
       }
-    } catch {
-      #if DEBUG
-        print("processFeed: Error processing post \(index + 1): \(error)")
-      #endif
-      // Continue processing other posts even if one fails
     }
   }
 

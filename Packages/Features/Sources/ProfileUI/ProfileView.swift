@@ -465,7 +465,7 @@ private struct ClickableBioText: View {
     for match in matches {
       if let range = Range(match.range, in: text) {
         let attributedRange = AttributedString(text[range]).range(of: String(text[range]))
-        if let url = match.url, let attributedRange = attributedRange {
+        if let _ = match.url, let attributedRange = attributedRange {
           attributedString[attributedRange].foregroundColor = .blue
           attributedString[attributedRange].underlineStyle = .single
         }

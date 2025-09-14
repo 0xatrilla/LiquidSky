@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 class ContentColumnManager: ObservableObject {
   @Published var currentContentType: ContentType = .feed
   @Published var isLoading = false
@@ -156,7 +156,7 @@ class ContentColumnManager: ObservableObject {
 
 // MARK: - Content Types
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum ContentType: Hashable {
   case feed
   case notifications
@@ -190,7 +190,7 @@ enum ContentType: Hashable {
 
 // MARK: - Content States
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 class FeedContentState: ObservableObject {
   @Published var columnCount: Int = 2
   @Published var isRefreshing = false
@@ -200,7 +200,7 @@ class FeedContentState: ObservableObject {
   @Published var scrollPosition: CGPoint = .zero
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 class NotificationContentState: ObservableObject {
   @Published var groupingEnabled = true
   @Published var isRefreshing = false
@@ -210,7 +210,7 @@ class NotificationContentState: ObservableObject {
   @Published var scrollPosition: CGPoint = .zero
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 class SearchContentState: ObservableObject {
   @Published var columnCount: Int = 2
   @Published var previewEnabled = true
@@ -222,7 +222,7 @@ class SearchContentState: ObservableObject {
   @Published var scrollPosition: CGPoint = .zero
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 class LiquidSkyUserProfileState {
   var layoutMode: ProfileLayoutMode = .twoColumn
   var isRefreshing = false
@@ -231,7 +231,7 @@ class LiquidSkyUserProfileState {
   var scrollPosition: CGPoint = .zero
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 class SettingsContentState: ObservableObject {
   @Published var isRefreshing = false
   @Published var lastRefreshTime: Date?
@@ -241,7 +241,7 @@ class SettingsContentState: ObservableObject {
 
 // MARK: - Adaptive Content Layout
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 class AdaptiveContentLayout: ObservableObject {
   @Published var preferredLayout: LayoutType = .grid
   @Published var feedColumnCount: Int = 2
@@ -273,47 +273,47 @@ class AdaptiveContentLayout: ObservableObject {
 
 // MARK: - Supporting Enums
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum LayoutType {
   case grid, list, custom
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum FeedSortOrder {
   case chronological, algorithmic, engagement
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum NotificationDensity {
   case compact, comfortable, spacious
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum NotificationFilterType {
   case all, mentions, likes, reposts, follows
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum SearchSortOrder {
   case relevance, recent, popular
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum ProfileLayoutMode {
   case singleColumn, twoColumn
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum ContentProfileTab {
   case posts, replies, media, likes
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum SettingsSection {
   case account, privacy, notifications, appearance, advanced
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct FeedFilterOptions {
   var showReplies = true
   var showReposts = true
@@ -321,24 +321,24 @@ struct FeedFilterOptions {
   var timeRange: TimeRange = .all
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct SearchFilterOptions {
   var contentType: SearchContentType = .all
   var timeRange: TimeRange = .all
   var sortBy: SearchSortOrder = .relevance
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum SearchContentType {
   case all, posts, users, media
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum TimeRange {
   case all, today, week, month, year
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum ContentError: Error, LocalizedError {
   case networkError
   case loadingFailed
@@ -361,12 +361,12 @@ enum ContentError: Error, LocalizedError {
 
 // MARK: - Environment Key
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ContentColumnManagerKey: EnvironmentKey {
   static let defaultValue = ContentColumnManager()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var contentColumnManager: ContentColumnManager {
     get { self[ContentColumnManagerKey.self] }

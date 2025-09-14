@@ -2,7 +2,7 @@ import Foundation
 import PencilKit
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 @MainActor
 class AdvancedApplePencilManager {
@@ -120,7 +120,7 @@ class AdvancedApplePencilManager {
 
 // MARK: - Hover Element State
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct HoverElementState {
   let location: CGPoint
   let distance: CGFloat
@@ -140,7 +140,7 @@ struct HoverElementState {
 
 // MARK: - Hover Preview Content
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct HoverPreviewContent {
   let type: PreviewType
   let title: String
@@ -154,7 +154,7 @@ struct HoverPreviewContent {
 
 // MARK: - Advanced Apple Pencil Hover Modifier
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AdvancedApplePencilHoverModifier: ViewModifier {
   let elementId: String
   let previewType: HoverPreviewContent.PreviewType
@@ -225,7 +225,7 @@ struct AdvancedApplePencilHoverModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func advancedApplePencilHover(
     elementId: String,
@@ -246,7 +246,7 @@ extension View {
 
 // MARK: - Hover Preview Overlay
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct HoverPreviewOverlay: View {
   @Environment(\.advancedApplePencilManager) var pencilManager
 
@@ -260,7 +260,7 @@ struct HoverPreviewOverlay: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct HoverPreviewCard: View {
   let content: HoverPreviewContent
 
@@ -287,7 +287,7 @@ struct HoverPreviewCard: View {
 
 // MARK: - Hover Navigation Shortcuts
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct HoverNavigationModifier: ViewModifier {
   @Environment(\.advancedApplePencilManager) var pencilManager
   @Environment(\.detailColumnManager) var detailManager
@@ -340,7 +340,7 @@ struct HoverNavigationModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func hoverNavigation() -> some View {
     self.modifier(HoverNavigationModifier())
@@ -380,16 +380,25 @@ extension View {
 
 // MARK: - Environment Key
 
-@available(iPadOS 26.0, *)
+@available(iOS 26.0, *)
 struct AdvancedApplePencilManagerKey: EnvironmentKey {
   static let defaultValue = AdvancedApplePencilManager()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var advancedApplePencilManager: AdvancedApplePencilManager {
-    get { self[AdvancedApplePencilManagerKey.self] }
-    set { self[AdvancedApplePencilManagerKey.self] = newValue }
+      get { if #available(iOS 26.0, *) {
+          return self[AdvancedApplePencilManagerKey.self]
+      } else {
+          // Fallback on earlier versions
+          return AdvancedApplePencilManager()
+      } }
+      set { if #available(iOS 26.0, *) {
+          self[AdvancedApplePencilManagerKey.self] = newValue
+      } else {
+          // Fallback on earlier versions
+      } }
   }
 }
 

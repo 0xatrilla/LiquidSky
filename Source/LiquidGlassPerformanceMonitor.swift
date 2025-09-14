@@ -2,7 +2,7 @@ import Combine
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 class LiquidGlassPerformanceMonitor: ObservableObject {
   @Published var frameRate: Double = 120.0
   @Published var effectCount: Int = 0
@@ -327,7 +327,7 @@ class LiquidGlassPerformanceMonitor: ObservableObject {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct PerformanceMetrics {
   let frameRate: Double
   let effectCount: Int
@@ -340,7 +340,7 @@ struct PerformanceMetrics {
   let trend: PerformanceTrend
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct PerformanceSnapshot {
   let timestamp: Date
   let frameRate: Double
@@ -351,7 +351,7 @@ struct PerformanceSnapshot {
   let batteryLevel: Float
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum PerformanceProfile: CaseIterable {
   case performance
   case balanced
@@ -374,7 +374,7 @@ enum PerformanceProfile: CaseIterable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum PerformanceTrend {
   case improving
   case stable
@@ -397,7 +397,7 @@ enum PerformanceTrend {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct PerformanceThresholds {
   let maxEffectCount: Int
   let minFrameRate: Double
@@ -405,7 +405,7 @@ struct PerformanceThresholds {
   let maxCPUUsage: Double
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 class AdaptivePerformanceThresholds {
   private var thresholds: [PerformanceProfile: PerformanceThresholds] = [
     .performance: PerformanceThresholds(
@@ -437,42 +437,6 @@ class AdaptivePerformanceThresholds {
   }
 }
 
-// MARK: - Glass Effect State Manager
-
-@available(iPadOS 26.0, *)
-@Observable
-class LiquidGlassEffectManager {
-  var activeEffects: Set<String> = []
-  var interactiveElements: [String: Bool] = [:]
-  var effectTransitions: [String: GlassEffectTransition] = [:]
-
-  private let performanceMonitor = LiquidGlassPerformanceMonitor()
-
-  func registerEffect(id: String, interactive: Bool = false) {
-    activeEffects.insert(id)
-    interactiveElements[id] = interactive
-    performanceMonitor.registerGlassEffect(id: id)
-  }
-
-  func unregisterEffect(id: String) {
-    activeEffects.remove(id)
-    interactiveElements.removeValue(forKey: id)
-    effectTransitions.removeValue(forKey: id)
-    performanceMonitor.unregisterGlassEffect(id: id)
-  }
-
-  func setTransition(_ transition: GlassEffectTransition, for id: String) {
-    effectTransitions[id] = transition
-  }
-
-  func shouldUseSimplifiedEffects() -> Bool {
-    return performanceMonitor.performanceWarning
-  }
-
-  func getPerformanceMetrics() -> PerformanceMetrics {
-    return performanceMonitor.getPerformanceMetrics()
-  }
-}
 
 // MARK: - Notifications
 
@@ -482,25 +446,15 @@ extension Notification.Name {
 
 // MARK: - Environment Keys
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct LiquidGlassPerformanceMonitorKey: EnvironmentKey {
   static let defaultValue = LiquidGlassPerformanceMonitor()
 }
 
-@available(iPadOS 26.0, *)
-struct LiquidGlassEffectManagerKey: EnvironmentKey {
-  static let defaultValue = LiquidGlassEffectManager()
-}
-
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var glassPerformanceMonitor: LiquidGlassPerformanceMonitor {
     get { self[LiquidGlassPerformanceMonitorKey.self] }
     set { self[LiquidGlassPerformanceMonitorKey.self] = newValue }
-  }
-
-  var glassEffectManager: LiquidGlassEffectManager {
-    get { self[LiquidGlassEffectManagerKey.self] }
-    set { self[LiquidGlassEffectManagerKey.self] = newValue }
   }
 }

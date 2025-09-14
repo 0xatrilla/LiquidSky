@@ -2,7 +2,7 @@ import CoreSpotlight
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 class HandoffManager {
   // Handoff state
@@ -286,7 +286,7 @@ class HandoffManager {
 
 // MARK: - Cross-Device Sync Manager
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 class CrossDeviceSyncManager {
   weak var delegate: CrossDeviceSyncDelegate?
 
@@ -324,7 +324,7 @@ class CrossDeviceSyncManager {
 
 // MARK: - Data Models
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum HandoffActivityType: String, CaseIterable {
   case browsing = "com.liquidsky.browsing"
   case reading = "com.liquidsky.reading"
@@ -361,14 +361,14 @@ enum HandoffActivityType: String, CaseIterable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct HandoffRestoration {
   let activityType: HandoffActivityType
   let userInfo: [String: Any]
   let timestamp: Date
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct SyncableContent {
   let id: String
   let type: ContentType
@@ -380,7 +380,7 @@ struct SyncableContent {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 protocol CrossDeviceSyncDelegate: AnyObject {
   func didSyncState(_ state: [String: Any])
   func didSyncContent(_ content: SyncableContent)
@@ -389,7 +389,7 @@ protocol CrossDeviceSyncDelegate: AnyObject {
 
 // MARK: - CrossDeviceSyncDelegate Implementation
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension HandoffManager: CrossDeviceSyncDelegate {
   func didSyncState(_ state: [String: Any]) {
     DispatchQueue.main.async {
@@ -424,7 +424,7 @@ extension HandoffManager: CrossDeviceSyncDelegate {
 
 // MARK: - Handoff Indicator View
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct HandoffIndicatorView: View {
   @Environment(\.handoffManager) var handoffManager
 
@@ -449,12 +449,12 @@ struct HandoffIndicatorView: View {
 
 // MARK: - Environment Key
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct HandoffManagerKey: EnvironmentKey {
   static let defaultValue = HandoffManager()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var handoffManager: HandoffManager {
     get { self[HandoffManagerKey.self] }
@@ -477,7 +477,7 @@ extension Notification.Name {
 
 // MARK: - Core Spotlight Support
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension HandoffManager {
   func indexContentForSpotlight(_ content: SyncableContent) {
     let attributeSet = CSSearchableItemAttributeSet(itemContentType: "com.liquidsky.content")

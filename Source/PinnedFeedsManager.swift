@@ -2,7 +2,7 @@ import Foundation
 import Models
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 26.0, *)
 @Observable
 class PinnedFeedsManager {
   var pinnedFeeds: [PinnedFeed] = []
@@ -113,7 +113,7 @@ class PinnedFeedsManager {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 26.0, *)
 struct PinnedFeed: Identifiable, Hashable {
   let id: String
   let uri: String
@@ -135,10 +135,9 @@ struct PinnedFeed: Identifiable, Hashable {
 
 // MARK: - Pinned Feeds Section View
 
-@available(iPadOS 26.0, *)
+@available(iOS 26.0, *)
 struct PinnedFeedsSection: View {
   @Environment(\.pinnedFeedsManager) var pinnedFeedsManager
-  @Environment(\.iPadNavigationState) var navigationState
   @Environment(\.focusManager) var focusManager
   @State private var showingFeedPicker = false
   @State private var editingFeed: PinnedFeed?
@@ -179,7 +178,7 @@ struct PinnedFeedsSection: View {
           pinnedFeedsManager.unpinFeed(feed.uri)
         }
       )
-      .tag(SidebarItem.pinnedFeed(uri: feed.uri, name: feed.displayName))
+      .tag(feed.uri)
     }
     .onMove(perform: moveFeed)
   }
@@ -197,10 +196,8 @@ struct PinnedFeedsSection: View {
     }
     .padding()
     .background {
-      if #available(iOS 26.0, *) {
-        RoundedRectangle(cornerRadius: 8)
-          .glassEffect(.regular, in: .rect(cornerRadius: 8))
-      }
+      RoundedRectangle(cornerRadius: 8)
+        .fill(.ultraThinMaterial)
     }
   }
 
@@ -209,10 +206,15 @@ struct PinnedFeedsSection: View {
   @ViewBuilder
   private var pinnedFeedsHeader: some View {
     HStack {
-      SidebarSectionHeader(
-        title: "Pinned Feeds",
-        subtitle: "\(pinnedFeedsManager.pinnedFeeds.count) feeds"
-      )
+      VStack(alignment: .leading, spacing: 2) {
+        Text("Pinned Feeds")
+          .font(.headline.weight(.semibold))
+          .foregroundStyle(.primary)
+        
+        Text("\(pinnedFeedsManager.pinnedFeeds.count) feeds")
+          .font(.caption)
+          .foregroundStyle(.secondary)
+      }
 
       Spacer()
 
@@ -222,12 +224,6 @@ struct PinnedFeedsSection: View {
           .foregroundStyle(.blue)
       }
       .buttonStyle(.plain)
-      .background {
-        if #available(iOS 26.0, *) {
-          RoundedRectangle(cornerRadius: 8)
-            .glassEffect(.regular.tint(.blue).interactive())
-        }
-      }
     }
   }
 
@@ -249,10 +245,8 @@ struct PinnedFeedsSection: View {
     }
     .buttonStyle(.plain)
     .background {
-      if #available(iOS 26.0, *) {
-        RoundedRectangle(cornerRadius: 10)
-          .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 10))
-      }
+      RoundedRectangle(cornerRadius: 10)
+        .fill(.ultraThinMaterial)
     }
     .sheet(isPresented: $showingFeedPicker) {
       FeedPickerSheet()
@@ -265,20 +259,18 @@ struct PinnedFeedsSection: View {
   // MARK: - Helper Methods
 
   private func isSelected(_ feed: PinnedFeed) -> Bool {
-    if case .pinnedFeed(let uri, _) = navigationState.selectedSidebarItem {
-      return uri == feed.uri
-    }
+    // Selection state simplified for iPad
     return false
   }
 
   private func isFocused(at index: Int) -> Bool {
-    let adjustedIndex = SidebarItem.mainItems.count + index
+    let adjustedIndex = 5 + index // 5 main items: feed, notifications, search, profile, settings
     return focusManager.focusedColumn == .sidebar && focusManager.focusedItemIndex == adjustedIndex
   }
 
   private func selectFeed(_ feed: PinnedFeed) {
-    let sidebarItem = SidebarItem.pinnedFeed(uri: feed.uri, name: feed.displayName)
-    navigationState.selectSidebarItem(sidebarItem)
+    // Feed selection simplified for iPad
+    // Navigation handled by TabView
   }
 
   private func editFeed(_ feed: PinnedFeed) {
@@ -294,7 +286,7 @@ struct PinnedFeedsSection: View {
 
 // MARK: - Pinned Feed Row
 
-@available(iPadOS 26.0, *)
+@available(iOS 26.0, *)
 struct PinnedFeedRow: View {
   let feed: PinnedFeed
   let isSelected: Bool
@@ -396,13 +388,8 @@ struct PinnedFeedRow: View {
       RoundedRectangle(cornerRadius: 8)
         .fill(backgroundFill)
 
-      if #available(iOS 26.0, *) {
-        RoundedRectangle(cornerRadius: 8)
-          .glassEffect(
-            isSelected ? .regular.tint(.blue).interactive() : .regular.interactive(),
-            in: .rect(cornerRadius: 8)
-          )
-      }
+      RoundedRectangle(cornerRadius: 8)
+        .fill(.ultraThinMaterial)
     }
   }
 
@@ -423,10 +410,8 @@ struct PinnedFeedRow: View {
       RoundedRectangle(cornerRadius: 8)
         .stroke(.blue, lineWidth: 2)
 
-      if #available(iOS 26.0, *) {
-        RoundedRectangle(cornerRadius: 8)
-          .glassEffect(.regular.tint(.blue))
-      }
+      RoundedRectangle(cornerRadius: 8)
+        .fill(.ultraThinMaterial)
     }
     }
 
@@ -435,10 +420,8 @@ struct PinnedFeedRow: View {
       RoundedRectangle(cornerRadius: 8)
         .stroke(.blue.opacity(hoverIntensity), lineWidth: 1)
 
-      if #available(iOS 26.0, *) {
-        RoundedRectangle(cornerRadius: 8)
-          .glassEffect(.regular.tint(.blue))
-      }
+      RoundedRectangle(cornerRadius: 8)
+        .fill(.ultraThinMaterial)
     }
     }
   }
@@ -467,7 +450,7 @@ struct PinnedFeedRow: View {
 
 // MARK: - Feed Picker Sheet
 
-@available(iPadOS 26.0, *)
+@available(iOS 26.0, *)
 struct FeedPickerSheet: View {
   @Environment(\.dismiss) var dismiss
   @Environment(\.pinnedFeedsManager) var pinnedFeedsManager
@@ -498,10 +481,8 @@ struct FeedPickerSheet: View {
       }
     }
     .background {
-      if #available(iOS 26.0, *) {
-        RoundedRectangle(cornerRadius: 16)
-          .glassEffect(.regular, in: .rect(cornerRadius: 16))
-      }
+      RoundedRectangle(cornerRadius: 16)
+        .fill(.ultraThinMaterial)
     }
     .task {
       await loadAvailableFeeds()
@@ -547,7 +528,7 @@ struct FeedPickerSheet: View {
 
 // MARK: - Feed Picker Row
 
-@available(iPadOS 26.0, *)
+@available(iOS 26.0, *)
 struct FeedPickerRow: View {
   let feed: FeedItem
   let onSelect: () -> Void
@@ -600,7 +581,7 @@ struct FeedPickerRow: View {
 
 // MARK: - Edit Feed Sheet
 
-@available(iPadOS 26.0, *)
+@available(iOS 26.0, *)
 struct EditFeedSheet: View {
   let feed: PinnedFeed
   @Binding var newName: String
@@ -634,22 +615,20 @@ struct EditFeedSheet: View {
       }
     }
     .background {
-      if #available(iOS 26.0, *) {
-        RoundedRectangle(cornerRadius: 16)
-          .glassEffect(.regular, in: .rect(cornerRadius: 16))
-      }
+      RoundedRectangle(cornerRadius: 16)
+        .fill(.ultraThinMaterial)
     }
   }
 }
 
 // MARK: - Environment Key
 
-@available(iPadOS 26.0, *)
+@available(iOS 26.0, *)
 struct PinnedFeedsManagerKey: EnvironmentKey {
   static let defaultValue = PinnedFeedsManager()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 26.0, *)
 extension EnvironmentValues {
   var pinnedFeedsManager: PinnedFeedsManager {
     get { self[PinnedFeedsManagerKey.self] }

@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 class DetailColumnManager {
   var currentDetailType: DetailType?
@@ -297,7 +297,7 @@ class DetailColumnManager {
 
 // MARK: - Detail Types and Models
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum DetailType {
   case post, profile, media, thread, list
 
@@ -312,7 +312,7 @@ enum DetailType {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct DetailItem: Identifiable, Hashable {
   let id: String
   let type: DetailType
@@ -336,7 +336,7 @@ struct DetailItem: Identifiable, Hashable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct BreadcrumbItem: Identifiable {
   let id: String
   let title: String
@@ -345,7 +345,7 @@ struct BreadcrumbItem: Identifiable {
 
 // MARK: - Content States
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 class PostDetailState {
   var post: PostDetailData?
@@ -363,7 +363,7 @@ class PostDetailState {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 class ProfileDetailState {
   var profile: ProfileDetailData?
@@ -381,7 +381,7 @@ class ProfileDetailState {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 class MediaDetailState {
   var mediaItem: MediaDetailData?
@@ -401,7 +401,7 @@ class MediaDetailState {
 
 // MARK: - Data Models
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct PostDetailData: Identifiable, Hashable {
   let id: String
   let authorName: String
@@ -426,7 +426,7 @@ struct PostDetailData: Identifiable, Hashable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ProfileDetailData: Identifiable, Hashable {
   let id: String
   let displayName: String
@@ -450,7 +450,7 @@ struct ProfileDetailData: Identifiable, Hashable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct MediaDetailData: Identifiable, Hashable {
   let id: String
   let type: MediaType
@@ -474,7 +474,7 @@ struct MediaDetailData: Identifiable, Hashable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum DetailProfileTab: CaseIterable {
   case posts, replies, media, likes
 
@@ -497,7 +497,7 @@ enum DetailProfileTab: CaseIterable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum DetailError: Error, LocalizedError {
   case loadingFailed
   case notFound
@@ -520,12 +520,12 @@ enum DetailError: Error, LocalizedError {
 
 // MARK: - Environment Key
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct DetailColumnManagerKey: EnvironmentKey {
   static let defaultValue = DetailColumnManager()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var detailColumnManager: DetailColumnManager {
     get { self[DetailColumnManagerKey.self] }

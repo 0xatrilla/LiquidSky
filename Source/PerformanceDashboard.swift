@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct PerformanceDashboard: View {
   @Environment(\.glassPerformanceMonitor) var performanceMonitor
   @Environment(\.memoryManagementSystem) var memorySystem
@@ -531,10 +531,10 @@ struct PerformanceDashboard: View {
 
 // MARK: - Supporting Views
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 // MARK: - Performance Metric View
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct PerformanceMetricView: View {
   let title: String
   let value: String
@@ -561,7 +561,7 @@ struct PerformanceMetricView: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct MemoryBreakdownRow: View {
   let title: String
   let count: Int
@@ -594,7 +594,7 @@ struct MemoryBreakdownRow: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct RecommendationRow: View {
   let icon: String
   let title: String
@@ -625,7 +625,7 @@ struct RecommendationRow: View {
 
 // MARK: - Performance Settings View
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct PerformanceSettingsView: View {
   @Environment(\.dismiss) var dismiss
 
@@ -667,7 +667,7 @@ struct PerformanceSettingsView: View {
 
 // MARK: - Dashboard Tab Enum
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum DashboardTab: CaseIterable {
   case performance
   case memory

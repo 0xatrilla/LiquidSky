@@ -8,7 +8,8 @@
 		}
 	],
 	"settings": {
-		"kiroAgent.configureMCP": "Enabled"
+		"kiroAgent.configureMCP": "Enabled",
+		"sweetpad.build.xcodeWorkspacePath": "Horizon.xcodeproj/project.xcworkspace"
 	},
 	"launch": {
 		"configurations": [

@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum ProfileTab: Int, CaseIterable {
   case posts = 0
   case replies = 1
@@ -18,7 +18,7 @@ enum ProfileTab: Int, CaseIterable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct EnhancedProfileView: View {
   @Environment(\.contentColumnManager) var contentManager
   @Environment(\.glassEffectManager) var glassEffectManager
@@ -585,7 +585,7 @@ struct EnhancedProfileView: View {
 
 // MARK: - Profile Stat View
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ProfileStatView: View {
   let title: String
   let count: Int
@@ -606,7 +606,7 @@ struct ProfileStatView: View {
 
 // MARK: - Profile Tab Chip
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ProfileTabChip: View {
   let tab: ProfileTab
   let isSelected: Bool
@@ -660,7 +660,7 @@ struct ProfileTabChip: View {
 
 // MARK: - Profile Post Card
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ProfilePostCard: View {
   let post: ProfilePostData
   @State private var isHovering = false
@@ -770,7 +770,7 @@ struct ProfilePostCard: View {
 
 // MARK: - Data Models
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ProfileData {
   let id: String
   let displayName: String
@@ -789,7 +789,7 @@ struct ProfileData {
   let isFollowing: Bool
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ProfilePostData: Identifiable, Hashable {
   let id: String
   let content: String
@@ -811,14 +811,14 @@ struct ProfilePostData: Identifiable, Hashable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum ProfilePostType {
   case post, reply
 }
 
 // MARK: - Extensions
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension ProfileTab {
   static var allCases: [ProfileTab] {
     [.posts, .replies, .media, .likes]

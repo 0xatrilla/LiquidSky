@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 @MainActor
 class AccessibilityManager {
@@ -45,8 +45,10 @@ class AccessibilityManager {
       object: nil,
       queue: .main
     ) { [weak self] _ in
-      self?.isVoiceOverEnabled = UIAccessibility.isVoiceOverRunning
-      self?.adaptToVoiceOver()
+      Task { @MainActor in
+        self?.isVoiceOverEnabled = UIAccessibility.isVoiceOverRunning
+        self?.adaptToVoiceOver()
+      }
     }
 
     // Reduce Motion
@@ -55,8 +57,10 @@ class AccessibilityManager {
       object: nil,
       queue: .main
     ) { [weak self] _ in
-      self?.isReduceMotionEnabled = UIAccessibility.isReduceMotionEnabled
-      self?.adaptToMotionPreferences()
+      Task { @MainActor in
+        self?.isReduceMotionEnabled = UIAccessibility.isReduceMotionEnabled
+        self?.adaptToMotionPreferences()
+      }
     }
 
     // Reduce Transparency
@@ -65,8 +69,10 @@ class AccessibilityManager {
       object: nil,
       queue: .main
     ) { [weak self] _ in
-      self?.isReduceTransparencyEnabled = UIAccessibility.isReduceTransparencyEnabled
-      self?.adaptToTransparencyPreferences()
+      Task { @MainActor in
+        self?.isReduceTransparencyEnabled = UIAccessibility.isReduceTransparencyEnabled
+        self?.adaptToTransparencyPreferences()
+      }
     }
 
     // High Contrast
@@ -75,8 +81,10 @@ class AccessibilityManager {
       object: nil,
       queue: .main
     ) { [weak self] _ in
-      self?.isHighContrastEnabled = UIAccessibility.isDarkerSystemColorsEnabled
-      self?.adaptToContrastPreferences()
+      Task { @MainActor in
+        self?.isHighContrastEnabled = UIAccessibility.isDarkerSystemColorsEnabled
+        self?.adaptToContrastPreferences()
+      }
     }
 
     // Button Shapes
@@ -85,8 +93,10 @@ class AccessibilityManager {
       object: nil,
       queue: .main
     ) { [weak self] _ in
-      self?.isButtonShapesEnabled = UIAccessibility.buttonShapesEnabled
-      self?.adaptToButtonShapes()
+      Task { @MainActor in
+        self?.isButtonShapesEnabled = UIAccessibility.buttonShapesEnabled
+        self?.adaptToButtonShapes()
+      }
     }
 
     // Switch Control
@@ -95,8 +105,10 @@ class AccessibilityManager {
       object: nil,
       queue: .main
     ) { [weak self] _ in
-      self?.isSwitchControlEnabled = UIAccessibility.isSwitchControlRunning
-      self?.adaptToSwitchControl()
+      Task { @MainActor in
+        self?.isSwitchControlEnabled = UIAccessibility.isSwitchControlRunning
+        self?.adaptToSwitchControl()
+      }
     }
   }
 
@@ -236,7 +248,7 @@ class AccessibilityManager {
 
 // MARK: - Accessibility Configuration
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AccessibilityConfiguration {
   let isVoiceOverEnabled: Bool
   let isReduceMotionEnabled: Bool
@@ -246,7 +258,7 @@ struct AccessibilityConfiguration {
   let hapticLevel: HapticFeedbackLevel
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum GlassEffectAccessibilityMode: CaseIterable {
   case standard
   case simplified
@@ -272,7 +284,7 @@ enum GlassEffectAccessibilityMode: CaseIterable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum HapticFeedbackLevel: CaseIterable {
   case disabled
   case light
@@ -291,7 +303,7 @@ enum HapticFeedbackLevel: CaseIterable {
 
 // MARK: - Accessibility Rotor Item
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AccessibilityRotorItem: Identifiable {
   let id: String
   let label: String
@@ -308,7 +320,7 @@ struct AccessibilityRotorItem: Identifiable {
 
 // MARK: - Accessible Glass Effect Modifier
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AccessibleGlassEffectModifier: ViewModifier {
   let accessibilityLabel: String?
   let accessibilityHint: String?
@@ -331,7 +343,7 @@ struct AccessibleGlassEffectModifier: ViewModifier {
 
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func accessibleGlassEffect(
     label: String? = nil,
@@ -352,7 +364,7 @@ extension View {
 
 // MARK: - VoiceOver Navigation Support
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct VoiceOverNavigationModifier: ViewModifier {
   let navigationItems: [VoiceOverNavigationItem]
 
@@ -385,14 +397,14 @@ struct VoiceOverNavigationModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct VoiceOverNavigationItem {
   let id: String
   let label: String
   let targetElementId: String
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func voiceOverNavigation(items: [VoiceOverNavigationItem]) -> some View {
     self.modifier(VoiceOverNavigationModifier(navigationItems: items))
@@ -401,7 +413,7 @@ extension View {
 
 // MARK: - Reduced Motion Support
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ReducedMotionModifier: ViewModifier {
   let standardAnimation: Animation
   let reducedMotionAnimation: Animation
@@ -417,7 +429,7 @@ struct ReducedMotionModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func adaptiveAnimation(
     standard: Animation = .smooth(duration: 0.3),
@@ -434,7 +446,7 @@ extension View {
 
 // MARK: - High Contrast Support
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct HighContrastModifier: ViewModifier {
   let standardColors: ColorScheme
   let highContrastColors: ColorScheme
@@ -457,7 +469,7 @@ struct HighContrastModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func adaptiveColors(
     standard: HighContrastModifier.ColorScheme,
@@ -474,7 +486,7 @@ extension View {
 
 // MARK: - Switch Control Support
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct SwitchControlModifier: ViewModifier {
   let switchControlActions: [AccessibleSwitchAction]
 
@@ -507,7 +519,7 @@ struct SwitchControlModifier: ViewModifier {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AccessibleSwitchAction {
   let id: String
   let label: String
@@ -515,7 +527,7 @@ struct AccessibleSwitchAction {
   let handler: () -> Void
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension View {
   func switchControlActions(_ actions: [AccessibleSwitchAction]) -> some View {
     self.modifier(SwitchControlModifier(switchControlActions: actions))
@@ -523,12 +535,12 @@ extension View {
 }
 
 // Backwards compatibility alias to resolve ambiguity
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 typealias SwitchControlAction = AccessibleSwitchAction
 
 // MARK: - Accessibility Announcements
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AccessibilityAnnouncementManager {
   static func announceContentChange(_ message: String) {
     UIAccessibility.post(notification: .screenChanged, argument: message)
@@ -549,12 +561,12 @@ struct AccessibilityAnnouncementManager {
 
 // MARK: - Environment Key
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AccessibilityManagerKey: EnvironmentKey {
   static let defaultValue = AccessibilityManager()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var accessibilityManager: AccessibilityManager {
     get { self[AccessibilityManagerKey.self] }

@@ -7,7 +7,7 @@ import SwiftUI
 // MARK: - App Intents
 // Note: Intent definitions are in AppShortcuts.swift
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 @Observable
 class ShortcutsIntegrationManager {
   // Shortcuts state
@@ -136,7 +136,9 @@ class ShortcutsIntegrationManager {
       queue: .main
     ) { [weak self] notification in
       if let shortcutId = notification.userInfo?["shortcutId"] as? String {
-        self?.trackShortcutUsage(shortcutId)
+        Task { @MainActor in
+          self?.trackShortcutUsage(shortcutId)
+        }
       }
     }
   }
@@ -171,7 +173,7 @@ class ShortcutsIntegrationManager {
     )
   }
 
-  private func executeIntent(_ intent: AppIntent, with shortcut: AppShortcut) {
+  private func executeIntent(_ intent: any AppIntent, with shortcut: AppShortcut) {
     switch intent {
     case is NewPostIntent:
       executeNewPostIntent()
@@ -231,6 +233,7 @@ class ShortcutsIntegrationManager {
 
   // MARK: - Usage Tracking and Suggestions
 
+  @MainActor
   private func trackShortcutUsage(_ shortcutId: String) {
     let currentUsage = actionUsageTracker[shortcutId] ?? ActionUsage(count: 0, lastUsed: Date())
 
@@ -363,7 +366,7 @@ class ShortcutsIntegrationManager {
 
 // MARK: - Data Models
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct AppShortcut: Identifiable, Hashable {
   let id: String
   let title: String
@@ -374,7 +377,7 @@ struct AppShortcut: Identifiable, Hashable {
   let glassEffectEnabled: Bool
 
   // Computed property to create the actual intent when needed
-  var intent: AppIntent {
+  var intent: any AppIntent {
     switch intentType {
     case "newPost":
       return NewPostIntent()
@@ -407,7 +410,7 @@ struct AppShortcut: Identifiable, Hashable {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct UserShortcut: Identifiable {
   let id: String
   let title: String
@@ -416,20 +419,20 @@ struct UserShortcut: Identifiable {
   let createdDate: Date
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct VoiceShortcut {
   let phrase: String
   let shortcut: AppShortcut
   let isEnabled: Bool
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ActionUsage {
   let count: Int
   let lastUsed: Date
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 enum ShortcutAction {
   case navigate(String)
   case execute(String)
@@ -441,7 +444,7 @@ enum ShortcutAction {
 
 // MARK: - Shortcuts Widget View
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ShortcutsWidgetView: View {
   @Environment(\.shortcutsIntegrationManager) var shortcutsManager
 
@@ -461,7 +464,7 @@ struct ShortcutsWidgetView: View {
   }
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ShortcutButton: View {
   let shortcut: AppShortcut
   @Environment(\.shortcutsIntegrationManager) var shortcutsManager
@@ -492,12 +495,12 @@ struct ShortcutButton: View {
 
 // MARK: - Environment Key
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 struct ShortcutsIntegrationManagerKey: EnvironmentKey {
   static let defaultValue = ShortcutsIntegrationManager()
 }
 
-@available(iPadOS 26.0, *)
+@available(iOS 18.0, *)
 extension EnvironmentValues {
   var shortcutsIntegrationManager: ShortcutsIntegrationManager {
     get { self[ShortcutsIntegrationManagerKey.self] }
