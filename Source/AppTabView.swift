@@ -136,33 +136,15 @@ struct AppTabView: View {
             )
         }
         .sheet(isPresented: $showingDiscoverSheet) {
-            NavigationStack {
-                DiscoverFeedsListView { selectedFeed in
+            DiscoverFeedsListView { selectedFeed in
+                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                     currentFeed = selectedFeed
                     showingDiscoverSheet = false
-                }
-                .navigationTitle("Discover Feeds")
-                .navigationBarTitleDisplayMode(.large)
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button("Done") {
-                            showingDiscoverSheet = false
-                        }
-                    }
-                }
-                .safeAreaInset(edge: .top) {
-                    if currentFeed != nil {
-                        Text("Currently: \(currentFeed!.displayName)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .padding(.horizontal)
-                            .padding(.top, 8)
-                    }
                 }
             }
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
-            .glassEffect()
+            .interactiveDismissDisabled()
         }
     }
 

@@ -11,13 +11,11 @@ public struct DiscoverFeedsListView: View {
 
     @Environment(BSkyClient.self) var client
     @Environment(CurrentUser.self) var currentUser
+    @Environment(\.dismiss) var dismiss
 
     @State var feeds: [FeedItem] = []
-    @State var filter: FeedsListFilter = .suggested
+    @State var filter: FeedsListFilter = .myFeeds
     @State var isLoading: Bool = false
-
-    @State var isRecentFeedExpanded: Bool = true
-
     @State var error: Error?
 
     public init(onFeedSelected: @escaping (FeedItem) -> Void) {
@@ -25,92 +23,116 @@ public struct DiscoverFeedsListView: View {
     }
 
     public var body: some View {
-        List {
-            headerView
-                .padding(.bottom, 16)
-            if let error {
-                FeedsListErrorView(error: error) {
-                    await fetchSuggestedFeed()
+        NavigationStack {
+            List {
+                if let error {
+                    errorSection
+                }
+
+                if isLoading {
+                    loadingSection
+                } else if feeds.isEmpty {
+                    emptySection
+                } else {
+                    feedsSection
                 }
             }
-            FeedsListRecentSection(isRecentFeedExpanded: $isRecentFeedExpanded)
-            feedsSection
-        }
-        .screenContainer()
-        .scrollDismissesKeyboard(.immediately)
-        .scrollContentBackground(.hidden)
-        .scrollIndicators(.hidden)
-        .task(id: filter) {
-            #if DEBUG
-                print("Filter changed to: \(filter)")
-            #endif
-            await loadFeedsForCurrentFilter()
-        }
-        .onAppear {
-            checkForSearchNavigation()
+            .listStyle(.plain)
+            .navigationTitle("Discover Feeds")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Picker("Filter", selection: $filter) {
+                        Text("My Feeds").tag(FeedsListFilter.myFeeds)
+                        Text("Suggested").tag(FeedsListFilter.suggested)
+                    }
+                    .pickerStyle(.segmented)
+                }
+            }
+            .task(id: filter) {
+                await loadFeedsForCurrentFilter()
+            }
         }
     }
 
-    private var headerView: some View {
-        FeedsListTitleView(
-            filter: $filter
-        )
-        .onChange(of: currentUser.savedFeeds.count) {
-            #if DEBUG
-                print("Saved feeds count changed: \(currentUser.savedFeeds.count)")
-            #endif
-            switch filter {
-            case .suggested:
-                feeds = feeds.filter { feed in
-                    !currentUser.savedFeeds.contains { $0.value == feed.uri }
+    private var errorSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+                    Text("Unable to Load Feeds")
+                        .font(.headline)
                 }
-            case .myFeeds:
-                Task { await fetchMyFeeds() }
+
+                Text("There was an error loading the feeds. Please try again.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                Button("Retry") {
+                    Task {
+                        await loadFeedsForCurrentFilter()
+                    }
+                }
+                .buttonStyle(.borderedProminent)
             }
+            .padding()
         }
-        .listRowSeparator(.hidden)
+    }
+
+    private var loadingSection: some View {
+        Section {
+            HStack {
+                ProgressView()
+                    .scaleEffect(0.8)
+                Text("Loading feeds...")
+                    .foregroundStyle(.secondary)
+                Spacer()
+            }
+            .padding()
+        }
+    }
+
+    private var emptySection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Image(systemName: filter == .myFeeds ? "star.slash" : "magnifyingglass")
+                        .foregroundStyle(.secondary)
+                    Text(filter == .myFeeds ? "No Saved Feeds" : "No Suggested Feeds")
+                        .font(.headline)
+                }
+
+                Text(
+                    filter == .myFeeds
+                        ? "You haven't saved any feeds yet. Try exploring suggested feeds!"
+                        : "Unable to load suggested feeds. Please try again."
+                )
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            }
+            .padding()
+        }
     }
 
     private var feedsSection: some View {
         Section {
-            if isLoading {
-                HStack {
-                    ProgressView()
-                        .scaleEffect(0.8)
-                    Text("Loading feeds...")
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                }
-                .padding()
-                .frame(maxWidth: .infinity)
-            } else if feeds.isEmpty {
-                VStack(spacing: 16) {
-                    Image(
-                        systemName: filter == .myFeeds
-                            ? "person.crop.rectangle.stack" : "sparkles.rectangle.stack"
-                    )
-                    .font(.system(size: 48))
-                    .foregroundStyle(.secondary)
-
-                    Text(filter == .myFeeds ? "No Saved Feeds" : "No Suggested Feeds")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-
-                    Text(
-                        filter == .myFeeds
-                            ? "You haven\'t saved any feeds yet. Try exploring suggested feeds!"
-                            : "Unable to load suggested feeds. Please try again."
-                    )
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                }
-                .padding()
-                .frame(maxWidth: .infinity)
-            } else {
-                ForEach(feeds, id: \.uri) { feed in
-                    DiscoverFeedRowView(
-                        feed: feed, currentFilter: filter, onFeedSelected: onFeedSelected)
+            ForEach(feeds, id: \.uri) { feed in
+                DiscoverFeedRowView(
+                    feed: feed,
+                    currentFilter: filter,
+                    onFeedSelected: onFeedSelected
+                )
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    onFeedSelected(feed)
                 }
             }
         }
@@ -127,55 +149,27 @@ public struct DiscoverFeedsListView: View {
             await fetchMyFeeds()
         }
     }
-}
 
-// MARK: - Network
-extension DiscoverFeedsListView {
     private func fetchSuggestedFeed() async {
         error = nil
         do {
-            #if DEBUG
-                print("Fetching suggested feeds...")
-            #endif
             let feeds = try await client.protoClient.getPopularFeedGenerators(matching: nil)
-            #if DEBUG
-                print("Suggested feeds API response: \(feeds)")
-                print("Suggested feeds received: \(feeds.feeds.count)")
-            #endif
-
             let feedItems = feeds.feeds.map { $0.feedItem }.filter { feed in
                 !currentUser.savedFeeds.contains { $0.value == feed.uri }
             }
 
-            #if DEBUG
-                print("Filtered suggested feeds: \(feedItems.count)")
-                print("Feed items: \(feedItems.map { $0.displayName })")
-            #endif
-
-            withAnimation {
+            withAnimation(.easeInOut(duration: 0.3)) {
                 self.feeds = feedItems
             }
         } catch {
-            #if DEBUG
-                print("Error fetching suggested feeds: \(error)")
-            #endif
             self.error = error
         }
     }
 
     private func fetchMyFeeds() async {
         do {
-            #if DEBUG
-                print("Fetching my feeds...")
-                print("Saved feeds count: \(currentUser.savedFeeds.count)")
-                print("Saved feeds URIs: \(currentUser.savedFeeds.map { $0.value })")
-            #endif
-
             guard !currentUser.savedFeeds.isEmpty else {
-                #if DEBUG
-                    print("No saved feeds to fetch")
-                #endif
-                withAnimation {
+                withAnimation(.easeInOut(duration: 0.3)) {
                     self.feeds = []
                 }
                 return
@@ -183,96 +177,99 @@ extension DiscoverFeedsListView {
 
             let feeds = try await client.protoClient.getFeedGenerators(
                 by: currentUser.savedFeeds.map { $0.value })
-            #if DEBUG
-                print("My feeds API response: \(feeds)")
-                print("My feeds received: \(feeds.feeds.count)")
-            #endif
-
             let feedItems = feeds.feeds.map { $0.feedItem }
-            #if DEBUG
-                print("Processed my feeds: \(feedItems.count)")
-                print("Feed items: \(feedItems.map { $0.displayName })")
-            #endif
 
-            withAnimation {
+            withAnimation(.easeInOut(duration: 0.3)) {
                 self.feeds = feedItems
             }
         } catch {
-            #if DEBUG
-                print("Error fetching my feeds: \(error)")
-            #endif
-            // Don't set error state for my feeds, just show empty state
-            withAnimation {
+            withAnimation(.easeInOut(duration: 0.3)) {
                 self.feeds = []
             }
         }
     }
-
-    // MARK: - Search Navigation
-    private func checkForSearchNavigation() {
-        // This method is no longer needed since we're using sheet destinations
-        // The search navigation is now handled directly in SearchView.swift
-    }
 }
 
-// Custom feed row view for discover sheet
-struct DiscoverFeedRowView: View {
+// MARK: - Discover Feed Row View
+private struct DiscoverFeedRowView: View {
     let feed: FeedItem
     let currentFilter: FeedsListFilter
     let onFeedSelected: (FeedItem) -> Void
-    @Namespace private var namespace
     @Environment(CurrentUser.self) var currentUser
-    @State private var showingPinAlert = false
-    @State private var showingUnpinAlert = false
 
     var body: some View {
-        Button(action: {
-            HapticManager.shared.impact(.light)
-            onFeedSelected(feed)
-        }) {
-            VStack(alignment: .leading, spacing: 12) {
-                headerView
+        HStack(spacing: 16) {
+            // Avatar
+            FeedAvatarView(feed: feed)
+
+            // Content
+            VStack(alignment: .leading, spacing: 4) {
+                Text(feed.displayName)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+
                 if let description = feed.description {
                     Text(description)
-                        .font(.callout)
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
+                        .lineLimit(2)
                 }
-                Text("By @\(feed.creatorHandle)")
-                    .font(.callout)
-                    .foregroundStyle(.tertiary)
+
+                HStack {
+                    Text("@\(feed.creatorHandle)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Spacer()
+
+                    HStack(spacing: 4) {
+                        Image(systemName: feed.liked ? "heart.fill" : "heart")
+                            .foregroundStyle(feed.liked ? .red : .secondary)
+                            .font(.caption)
+                        Text("\(feed.likesCount)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
-            .padding(.vertical, 12)
-            .contentShape(Rectangle())  // Make entire area tappable
+
+            // Chevron
+            Image(systemName: "chevron.right")
+                .foregroundStyle(.tertiary)
+                .font(.caption)
         }
-        .buttonStyle(PlainButtonStyle())  // Remove default button styling
-        .listRowSeparator(.hidden)
+        .padding(.vertical, 4)
         .contextMenu {
-            if currentFilter == .suggested {
-                Button {
-                    HapticManager.shared.impact(.light)
-                    pinFeed()
-                } label: {
-                    Label("Save to My Feeds", systemImage: "pin")
-                }
-                Button {
-                    HapticManager.shared.impact(.light)
-                    pinFeedToTabBar()
-                } label: {
-                    Label("Pin to Tab Bar", systemImage: "square.stack.3d.up")
-                }
-            } else {
-                Button(role: .destructive) {
-                    HapticManager.shared.impact(.light)
-                    unpinFeed()
-                } label: {
-                    Label("Remove from My Feeds", systemImage: "trash")
-                }
-                Button {
-                    HapticManager.shared.impact(.light)
-                    pinFeedToTabBar()
-                } label: {
-                    Label("Pin to Tab Bar", systemImage: "square.stack.3d.up")
-                }
+            contextMenuContent
+        }
+    }
+
+    @ViewBuilder
+    private var contextMenuContent: some View {
+        if currentFilter == .suggested {
+            Button {
+                pinFeed()
+            } label: {
+                Label("Save to My Feeds", systemImage: "pin")
+            }
+
+            Button {
+                pinFeedToTabBar()
+            } label: {
+                Label("Pin to Tab Bar", systemImage: "square.stack.3d.up")
+            }
+        } else {
+            Button(role: .destructive) {
+                unpinFeed()
+            } label: {
+                Label("Remove from My Feeds", systemImage: "trash")
+            }
+
+            Button {
+                pinFeedToTabBar()
+            } label: {
+                Label("Pin to Tab Bar", systemImage: "square.stack.3d.up")
             }
         }
     }
@@ -290,11 +287,10 @@ struct DiscoverFeedRowView: View {
     }
 
     private func pinFeed() {
-        let feedToPin = feed
         Task {
             do {
                 try await currentUser.pinFeed(
-                    uri: feedToPin.uri, displayName: feedToPin.displayName)
+                    uri: feed.uri, displayName: feed.displayName)
             } catch {
                 #if DEBUG
                     print("Failed to pin feed: \(error)")
@@ -304,11 +300,10 @@ struct DiscoverFeedRowView: View {
     }
 
     private func unpinFeed() {
-        let feedToUnpin = feed
         Task {
             do {
                 try await currentUser.unpinFeed(
-                    uri: feedToUnpin.uri, displayName: feedToUnpin.displayName)
+                    uri: feed.uri, displayName: feed.displayName)
             } catch {
                 #if DEBUG
                     print("Failed to unpin feed: \(error)")
@@ -316,62 +311,35 @@ struct DiscoverFeedRowView: View {
             }
         }
     }
+}
 
-    @ViewBuilder
-    var headerView: some View {
-        HStack {
-            LazyImage(url: feed.avatarImageURL) { state in
-                if let image = state.image {
-                    image
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 44, height: 44)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .shadow(color: .shadowPrimary.opacity(0.7), radius: 2)
-                } else {
-                    Image(systemName: "antenna.radiowaves.left.and.right")
-                        .imageScale(.medium)
-                        .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8).fill(LinearGradient.blueskySubtle)
+// MARK: - Feed Avatar View
+private struct FeedAvatarView: View {
+    let feed: FeedItem
+
+    var body: some View {
+        LazyImage(url: feed.avatarImageURL) { state in
+            if let image = state.image {
+                image
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(
+                            LinearGradient(
+                                colors: [.blue.opacity(0.7), .indigo.opacity(0.7)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
                         )
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .shadow(color: .shadowPrimary.opacity(0.7), radius: 2)
+                    Image(systemName: "antenna.radiowaves.left.and.right")
+                        .foregroundStyle(.white)
+                        .font(.system(size: 16, weight: .semibold))
                 }
             }
-
-            VStack(alignment: .leading) {
-                Text(feed.displayName)
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundStyle(
-                        .primary.shadow(
-                            .inner(
-                                color: .shadowSecondary.opacity(0.5),
-                                radius: 2, x: -1, y: -1)))
-                likeView
-            }
         }
-    }
-
-    @ViewBuilder
-    var likeView: some View {
-        HStack(spacing: 2) {
-            Image(systemName: feed.liked ? "heart.fill" : "heart")
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [.indigo.opacity(0.4), .red],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .shadow(.inner(color: .red, radius: 3))
-                )
-                .shadow(color: .red, radius: 1)
-            Text("\(feed.likesCount) likes")
-                .font(.callout)
-                .foregroundStyle(.secondary)
-
-        }
+        .frame(width: 48, height: 48)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
