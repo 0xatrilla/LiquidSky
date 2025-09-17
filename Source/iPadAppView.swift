@@ -137,7 +137,9 @@ struct iPadAppView: View {
                         Button("Done") {
                             showingDiscoverSheet = false
                         }
+                        .buttonStyle(.bordered)
                     }
+                    ToolbarSpacer()
                 }
                 .safeAreaInset(edge: .top) {
                     if currentFeed != nil {

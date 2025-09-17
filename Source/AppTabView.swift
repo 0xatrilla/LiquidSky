@@ -145,6 +145,7 @@ struct AppTabView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
             .interactiveDismissDisabled()
+            .glassEffect()
         }
     }
 

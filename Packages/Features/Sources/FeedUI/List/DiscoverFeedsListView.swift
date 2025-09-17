@@ -47,6 +47,7 @@ public struct DiscoverFeedsListView: View {
                             dismiss()
                         }
                     }
+                    .buttonStyle(.bordered)
                 }
             }
             .toolbar {
@@ -56,6 +57,9 @@ public struct DiscoverFeedsListView: View {
                         Text("Suggested").tag(FeedsListFilter.suggested)
                     }
                     .pickerStyle(.segmented)
+                }
+                if #available(iOS 26.0, *) {
+                    ToolbarSpacer()
                 }
             }
             .task(id: filter) {
