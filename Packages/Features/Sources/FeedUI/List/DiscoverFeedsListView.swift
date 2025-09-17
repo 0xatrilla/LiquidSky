@@ -43,7 +43,9 @@ public struct DiscoverFeedsListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
-                        dismiss()
+                        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                            dismiss()
+                        }
                     }
                 }
             }
@@ -58,6 +60,15 @@ public struct DiscoverFeedsListView: View {
             }
             .task(id: filter) {
                 await loadFeedsForCurrentFilter()
+            }
+        }
+        .presentationCompactAdaptation(.sheet)
+        .interactiveDismissDisabled()
+        .presentationCornerRadius(24)
+        .onAppear {
+            // Add entrance animation
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                // Animation will be handled by the system
             }
         }
     }
