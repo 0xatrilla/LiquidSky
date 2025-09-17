@@ -38,6 +38,7 @@ struct LiquidSkyApp: App {
     @State var pushNotificationService: PushNotificationService = .shared
     // @State var cloudKitSyncService: CloudKitSyncService = .shared
     @State var inAppPurchaseService: InAppPurchaseService = .shared
+    @State var feedPositionService: FeedPositionService = .shared
 
     init() {
         #if DEBUG
@@ -103,6 +104,7 @@ struct LiquidSkyApp: App {
                     .environment(pushNotificationService)
                     // .environment(cloudKitSyncService)
                     .environment(inAppPurchaseService)
+                    .environment(feedPositionService)
                 case .authenticated(let client, let currentUser):
                     Group {
                         // Use iPad-optimized view on iPadOS 26+ with larger screens
@@ -127,6 +129,7 @@ struct LiquidSkyApp: App {
                     .environment(pushNotificationService)
                     // .environment(cloudKitSyncService)
                     .environment(inAppPurchaseService)
+                    .environment(feedPositionService)
                     .id(auth.currentAccountId)  // CRITICAL: Forces complete view recreation on account switch
                     .withTheme()
                     .themeAware()
