@@ -490,7 +490,16 @@ private struct ReplyChainView: View {
 
           // Post content navigates via row-managed navigation to avoid gesture conflicts
           Button(action: {
+            print("🚀 PostsListView: Post tapped - \(post.uri)")
+            // Post notification for detail pane navigation
+            NotificationCenter.default.post(
+              name: Notification.Name("routerNavigation"),
+              object: RouterDestination.post(post)
+            )
+            print("🚀 PostsListView: Posted routerNavigation notification")
+            // Also do normal router navigation as fallback
             router[.feed].append(.post(post))
+            print("🚀 PostsListView: Did router navigation")
           }) {
             VStack(alignment: .leading, spacing: 8) {
               // Author info

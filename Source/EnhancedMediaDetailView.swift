@@ -48,7 +48,17 @@ struct EnhancedMediaDetailView: View {
     }
     .onAppear {
       Task {
-        let detailItem = DetailItem(id: mediaId, type: .media, title: "Media")
+        let detailItem = DetailItem.media(MediaDetailData(
+          id: mediaId,
+          url: "",
+          title: "Media",
+          type: .image,
+          aspectRatio: nil,
+          altText: nil,
+          duration: nil,
+          fileSize: nil,
+          dimensions: nil
+        ))
         await detailManager.loadDetailContent(for: detailItem)
       }
     }
@@ -96,6 +106,10 @@ struct EnhancedMediaDetailView: View {
         videoViewer(mediaItem, geometry: geometry)
       case .gif:
         gifViewer(mediaItem, geometry: geometry)
+      case .audio:
+        audioViewer(mediaItem, geometry: geometry)
+      case .document:
+        documentViewer(mediaItem, geometry: geometry)
       }
     }
     .clipShape(RoundedRectangle(cornerRadius: 20))
@@ -206,6 +220,40 @@ struct EnhancedMediaDetailView: View {
           }
         }
     }
+  }
+  
+  @ViewBuilder
+  private func audioViewer(_ mediaItem: MediaDetailData, geometry: GeometryProxy) -> some View {
+    // Audio viewer implementation
+    VStack {
+      Image(systemName: "music.note")
+        .font(.system(size: 60))
+        .foregroundStyle(.secondary)
+      Text("Audio File")
+        .font(.headline)
+      Text(mediaItem.title)
+        .font(.caption)
+        .foregroundStyle(.secondary)
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .background(.quaternary)
+  }
+  
+  @ViewBuilder
+  private func documentViewer(_ mediaItem: MediaDetailData, geometry: GeometryProxy) -> some View {
+    // Document viewer implementation
+    VStack {
+      Image(systemName: "doc.text")
+        .font(.system(size: 60))
+        .foregroundStyle(.secondary)
+      Text("Document")
+        .font(.headline)
+      Text(mediaItem.title)
+        .font(.caption)
+        .foregroundStyle(.secondary)
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .background(.quaternary)
   }
 
   // MARK: - Zoom Controls Overlay
@@ -319,8 +367,8 @@ struct EnhancedMediaDetailView: View {
           .foregroundStyle(.secondary)
       }
 
-      if let width = mediaItem.width, let height = mediaItem.height {
-        Text("\(width) × \(height)")
+      if let dimensions = mediaItem.dimensions {
+        Text("\(Int(dimensions.width)) × \(Int(dimensions.height))")
           .font(.caption)
           .foregroundStyle(.tertiary)
       }
@@ -699,6 +747,8 @@ extension MediaDetailData.MediaType {
     case .image: return "Image"
     case .video: return "Video"
     case .gif: return "GIF"
+    case .audio: return "Audio"
+    case .document: return "Document"
     }
   }
 }

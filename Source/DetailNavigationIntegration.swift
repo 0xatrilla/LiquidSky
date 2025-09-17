@@ -1,11 +1,28 @@
 import Foundation
 import SwiftUI
+import Destinations
+
+// MARK: - Notification Names
+
+extension Notification.Name {
+  static let showPostDetail = Notification.Name("showPostDetail")
+  static let showProfileDetail = Notification.Name("showProfileDetail")
+  static let showMediaDetail = Notification.Name("showMediaDetail")
+  static let showThreadDetail = Notification.Name("showThreadDetail")
+  static let navigationToDetail = Notification.Name("navigationToDetail")
+  static let routerNavigation = Notification.Name("routerNavigation")
+}
 
 @available(iOS 18.0, *)
 extension View {
   /// Adds detail navigation capability to content views
   func withDetailNavigation() -> some View {
     self.modifier(DetailNavigationModifier())
+  }
+  
+  /// Intercepts router navigation and redirects to detail pane
+  func withDetailPaneRedirect() -> some View {
+    self.modifier(DetailPaneRedirectModifier())
   }
 }
 
@@ -20,7 +37,7 @@ struct DetailNavigationModifier: ViewModifier {
           let postId = userInfo["postId"] as? String,
           let title = userInfo["title"] as? String
         {
-          detailManager.showPostDetail(postId: postId, title: title)
+          detailManager.displayPostDetail(postId: postId, title: title)
         }
       }
       .onReceive(NotificationCenter.default.publisher(for: .showProfileDetail)) { notification in
@@ -28,7 +45,7 @@ struct DetailNavigationModifier: ViewModifier {
           let profileId = userInfo["profileId"] as? String,
           let title = userInfo["title"] as? String
         {
-          detailManager.showProfileDetail(profileId: profileId, title: title)
+          detailManager.displayProfileDetail(profileId: profileId, title: title)
         }
       }
       .onReceive(NotificationCenter.default.publisher(for: .showMediaDetail)) { notification in
@@ -36,7 +53,7 @@ struct DetailNavigationModifier: ViewModifier {
           let mediaId = userInfo["mediaId"] as? String,
           let title = userInfo["title"] as? String
         {
-          detailManager.showMediaDetail(mediaId: mediaId, title: title)
+          detailManager.displayMediaDetail(mediaId: mediaId, title: title)
         }
       }
       .onReceive(NotificationCenter.default.publisher(for: .showThreadDetail)) { notification in
@@ -44,7 +61,39 @@ struct DetailNavigationModifier: ViewModifier {
           let threadId = userInfo["threadId"] as? String,
           let title = userInfo["title"] as? String
         {
-          detailManager.showThreadDetail(threadId: threadId, title: title)
+          detailManager.displayThreadDetail(threadId: threadId, title: title)
+        }
+      }
+      .onReceive(NotificationCenter.default.publisher(for: .navigationToDetail)) { notification in
+        print("📱 DetailNavigationModifier: Received navigationToDetail notification")
+        if let destination = notification.object as? RouterDestination {
+          print("📱 DetailNavigationModifier: Setting detail destination - \(destination)")
+          detailManager.currentDestination = destination
+          detailManager.isShowingDetail = true
+          print("📱 DetailNavigationModifier: Detail manager updated - isShowingDetail: \(detailManager.isShowingDetail)")
+        } else {
+          print("📱 DetailNavigationModifier: No destination found in notification")
+        }
+      }
+  }
+}
+
+@available(iOS 18.0, *)
+struct DetailPaneRedirectModifier: ViewModifier {
+  func body(content: Content) -> some View {
+    content
+      .onReceive(NotificationCenter.default.publisher(for: .routerNavigation)) { notification in
+        print("🔄 DetailPaneRedirectModifier: Received routerNavigation notification")
+        if let destination = notification.object as? RouterDestination {
+          print("🔄 DetailPaneRedirectModifier: Redirecting to detail pane - \(destination)")
+          // Redirect router navigation to detail pane
+          NotificationCenter.default.post(
+            name: .navigationToDetail,
+            object: destination
+          )
+          print("🔄 DetailPaneRedirectModifier: Posted navigationToDetail notification")
+        } else {
+          print("🔄 DetailPaneRedirectModifier: No destination found in notification")
         }
       }
   }
@@ -142,6 +191,49 @@ extension SearchResultCard {
 // MARK: - Picture-in-Picture Support
 
 @available(iOS 18.0, *)
+public struct MediaDetailData: Identifiable {
+  public let id: String
+  public let url: String
+  public let title: String
+  public let type: MediaType
+  public let aspectRatio: CGFloat?
+  public let altText: String?
+  public let duration: TimeInterval?
+  public let fileSize: Int64?
+  public let dimensions: CGSize?
+  
+  public enum MediaType {
+    case image
+    case video
+    case audio
+    case document
+    case gif
+  }
+  
+  public init(
+    id: String,
+    url: String,
+    title: String,
+    type: MediaType,
+    aspectRatio: CGFloat? = nil,
+    altText: String? = nil,
+    duration: TimeInterval? = nil,
+    fileSize: Int64? = nil,
+    dimensions: CGSize? = nil
+  ) {
+    self.id = id
+    self.url = url
+    self.title = title
+    self.type = type
+    self.aspectRatio = aspectRatio
+    self.altText = altText
+    self.duration = duration
+    self.fileSize = fileSize
+    self.dimensions = dimensions
+  }
+}
+
+@available(iOS 18.0, *)
 @Observable
 class PictureInPictureManager {
   var isActive = false
@@ -211,7 +303,7 @@ struct PictureInPictureView: View {
             HStack {
               Button {
                 // Expand to full detail
-                detailManager.showMediaDetail(mediaId: mediaItem.id, title: "Media")
+                detailManager.displayMediaDetail(mediaId: mediaItem.id, title: "Media")
                 pipManager.stopPictureInPicture()
               } label: {
                 Image(systemName: "arrow.up.left.and.arrow.down.right")
@@ -266,7 +358,7 @@ struct PictureInPictureView: View {
           )
           .onTapGesture {
             // Expand to full detail
-            detailManager.showMediaDetail(mediaId: mediaItem.id, title: "Media")
+            detailManager.displayMediaDetail(mediaId: mediaItem.id, title: "Media")
             pipManager.stopPictureInPicture()
           }
 
@@ -298,9 +390,3 @@ extension EnvironmentValues {
 
 // MARK: - Notification Names
 
-extension Notification.Name {
-  static let showPostDetail = Notification.Name("showPostDetail")
-  static let showProfileDetail = Notification.Name("showProfileDetail")
-  static let showMediaDetail = Notification.Name("showMediaDetail")
-  static let showThreadDetail = Notification.Name("showThreadDetail")
-}

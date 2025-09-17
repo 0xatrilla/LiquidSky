@@ -1,7 +1,29 @@
 import Foundation
 import SwiftUI
+import Models
 
 // ProfileTab enum is defined in EnhancedProfileView.swift
+
+@available(iOS 18.0, *)
+public enum DetailProfileTab: String, CaseIterable {
+  case posts = "Posts"
+  case replies = "Replies"
+  case media = "Media"
+  case likes = "Likes"
+  
+  var icon: String {
+    switch self {
+    case .posts: return "square.stack.3d.up"
+    case .replies: return "bubble.left"
+    case .media: return "photo"
+    case .likes: return "heart"
+    }
+  }
+  
+  var title: String {
+    return self.rawValue
+  }
+}
 
 @available(iOS 18.0, *)
 struct EnhancedProfileDetailView: View {
@@ -53,7 +75,12 @@ struct EnhancedProfileDetailView: View {
     }
     .onAppear {
       Task {
-        let detailItem = DetailItem(id: profileId, type: .profile, title: "Profile")
+        let detailItem = DetailItem(profile: Profile(
+          did: profileId,
+          handle: "placeholder",
+          displayName: "Loading...",
+          avatarImageURL: nil
+        ))
         await detailManager.loadDetailContent(for: detailItem)
       }
     }
@@ -119,7 +146,7 @@ struct EnhancedProfileDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
           HStack {
             VStack(alignment: .leading, spacing: 4) {
-              Text(profile.displayName)
+              Text(profile.displayName ?? "Unknown User")
                 .font(.title2.weight(.bold))
                 .foregroundStyle(.primary)
 
@@ -136,8 +163,8 @@ struct EnhancedProfileDetailView: View {
           .padding(.top, 50)  // Account for overlapping avatar
 
           // Bio
-          if !profile.bio.isEmpty {
-            Text(profile.bio)
+          if let bio = profile.bio, !bio.isEmpty {
+            Text(bio)
               .font(.body)
               .foregroundStyle(.primary)
               .lineLimit(nil)
@@ -149,9 +176,11 @@ struct EnhancedProfileDetailView: View {
               .font(.caption)
               .foregroundStyle(.secondary)
 
-            Text("Joined \(profile.joinDate, style: .date)")
-              .font(.caption)
-              .foregroundStyle(.secondary)
+            if let joinDate = profile.joinDate {
+              Text("Joined \(joinDate, style: .date)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
           }
         }
         .padding(20)
@@ -339,8 +368,8 @@ struct EnhancedProfileDetailView: View {
               .font(.body)
               .lineLimit(3)
 
-            if !post.mediaItems.isEmpty {
-              Text("\(post.mediaItems.count) media items")
+            if post.embed != nil {
+              Text("Contains media")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             }
@@ -364,7 +393,7 @@ struct EnhancedProfileDetailView: View {
 
   @ViewBuilder
   private var profileMediaGrid: some View {
-    let mediaPosts = detailManager.profileDetailState.posts.filter { !$0.mediaItems.isEmpty }
+    let mediaPosts = detailManager.profileDetailState.posts.filter { $0.embed != nil }
 
     if mediaPosts.isEmpty {
       emptyContentView(
@@ -381,9 +410,9 @@ struct EnhancedProfileDetailView: View {
         ], spacing: 8
       ) {
         ForEach(mediaPosts) { post in
-          if let mediaItem = post.mediaItems.first {
-            ProfileMediaCard(mediaItem: mediaItem, post: post)
-              .id("profile-media-\(mediaItem.id)")
+          if let embed = post.embed {
+            ProfileMediaCard(embed: embed, post: post)
+              .id("profile-media-\(post.id)")
           }
         }
       }
@@ -472,24 +501,71 @@ struct EnhancedProfileDetailView: View {
 
 @available(iOS 18.0, *)
 struct ProfileMediaCard: View {
-  let mediaItem: MediaDetailData
-  let post: PostDetailData
+  let embed: EmbedData
+  let post: PostItem
   @State private var isHovering = false
 
   var body: some View {
     Button {
       // Navigate to media detail
     } label: {
-      AsyncImage(url: URL(string: mediaItem.url)) { image in
-        image
-          .resizable()
-          .aspectRatio(contentMode: .fill)
-      } placeholder: {
-        Rectangle()
-          .fill(.quaternary)
-          .overlay {
-            ProgressView()
+      ZStack {
+        switch embed {
+        case .images(let imagesEmbed):
+          if let firstImage = imagesEmbed.images.first {
+            AsyncImage(url: firstImage.fullSizeImageURL) { image in
+              image
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+            } placeholder: {
+              Rectangle()
+                .fill(.quaternary)
+                .overlay {
+                  ProgressView()
+                }
+            }
+          } else {
+            Rectangle()
+              .fill(.quaternary)
+              .overlay {
+                Image(systemName: "photo")
+                  .foregroundStyle(.secondary)
+              }
           }
+        case .videos(let videoEmbed):
+          AsyncImage(url: videoEmbed.thumbnailImageURL.flatMap { URL(string: $0) }) { image in
+            image
+              .resizable()
+              .aspectRatio(contentMode: .fill)
+          } placeholder: {
+            Rectangle()
+              .fill(.quaternary)
+              .overlay {
+                Image(systemName: "play.rectangle")
+                  .foregroundStyle(.secondary)
+              }
+          }
+        case .external(let externalEmbed):
+          AsyncImage(url: URL(string: externalEmbed.external.uri)) { image in
+            image
+              .resizable()
+              .aspectRatio(contentMode: .fill)
+          } placeholder: {
+            Rectangle()
+              .fill(.quaternary)
+              .overlay {
+                Image(systemName: "link")
+                  .foregroundStyle(.secondary)
+              }
+          }
+        case .quotedPost, .none:
+          Rectangle()
+            .fill(.quaternary)
+            .overlay {
+              Image(systemName: "doc.text")
+                .foregroundStyle(.secondary)
+            }
+        }
       }
       .frame(height: 120)
       .clipShape(RoundedRectangle(cornerRadius: 8))

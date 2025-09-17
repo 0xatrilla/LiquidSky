@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import Models
 
 @available(iOS 18.0, *)
 struct EnhancedPostDetailView: View {
@@ -42,7 +43,24 @@ struct EnhancedPostDetailView: View {
     }
     .onAppear {
       Task {
-        let detailItem = DetailItem(id: postId, type: .post, title: "Post")
+        let detailItem = DetailItem(post: PostItem(
+          uri: postId,
+          cid: "placeholder",
+          indexedAt: Date(),
+          author: Profile(
+            did: "placeholder",
+            handle: "placeholder",
+            displayName: "Loading...",
+            avatarImageURL: nil
+          ),
+          content: "Loading post...",
+          replyCount: 0,
+          repostCount: 0,
+          likeCount: 0,
+          likeURI: nil,
+          repostURI: nil,
+          replyRef: nil
+        ))
         await detailManager.loadDetailContent(for: detailItem)
       }
     }
@@ -151,11 +169,7 @@ struct EnhancedPostDetailView: View {
         ForEach(mediaItems) { mediaItem in
           Button {
             // Show media detail
-            let detailItem = DetailItem(
-              id: mediaItem.id,
-              type: .media,
-              title: "Media"
-            )
+            let detailItem = DetailItem(media: mediaItem)
             detailManager.pushDetail(detailItem)
           } label: {
             AsyncImage(url: URL(string: mediaItem.url)) { image in

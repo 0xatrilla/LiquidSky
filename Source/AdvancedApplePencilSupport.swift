@@ -321,11 +321,11 @@ struct HoverNavigationModifier: ViewModifier {
   private func handleHoverNavigation(itemId: String, itemType: String) {
     switch itemType {
     case "post":
-      detailManager.showPostDetail(postId: itemId, title: "Post")
+      detailManager.displayPostDetail(postId: itemId, title: "Post")
     case "profile":
-      detailManager.showProfileDetail(profileId: itemId, title: "Profile")
+      detailManager.displayProfileDetail(profileId: itemId, title: "Profile")
     case "media":
-      detailManager.showMediaDetail(mediaId: itemId, title: "Media")
+      detailManager.displayMediaDetail(mediaId: itemId, title: "Media")
     default:
       break
     }
