@@ -384,6 +384,7 @@ struct EnhancedSearchView: View {
       return "Similar interests"
     }
   }
+  
 
   private func startDynamicUpdates() {
     // Update trending topics every 30 seconds
@@ -964,7 +965,7 @@ struct SuggestedUserCard: View {
       Spacer()
       
       VStack(alignment: .trailing, spacing: 4) {
-        Text("\(user.followersCount)")
+        Text(formatFollowerCount(user.followersCount))
           .font(.caption)
           .foregroundColor(.secondary)
         
@@ -1006,5 +1007,18 @@ struct SuggestedUserCard: View {
       )
       router[.compose].append(.profile(profile))
     }
+  }
+}
+
+// MARK: - Helper Functions
+
+@available(iOS 18.0, *)
+private func formatFollowerCount(_ count: Int) -> String {
+  if count >= 1_000_000 {
+    return String(format: "%.1fM", Double(count) / 1_000_000)
+  } else if count >= 1_000 {
+    return String(format: "%.1fK", Double(count) / 1_000)
+  } else {
+    return "\(count)"
   }
 }

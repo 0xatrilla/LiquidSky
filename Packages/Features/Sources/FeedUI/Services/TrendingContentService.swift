@@ -175,27 +175,55 @@ public class TrendingContentService {
         !followingDIDs.contains(actor.actorDID) // Exclude already followed accounts
       }
       
-      // Convert to Profile objects
-      let suggestedUsers = filteredActors.map { actor in
-        Profile(
-          did: actor.actorDID,
-          handle: actor.actorHandle,
-          displayName: actor.displayName,
-          avatarImageURL: actor.avatarImageURL,
-          description: actor.description,
-          followersCount: 0,  // Will be updated when full profile is fetched
-          followingCount: 0,
-          postsCount: 0,
-          isFollowing: actor.viewer?.followingURI != nil,
-          isFollowedBy: actor.viewer?.followedByURI != nil,
-          isBlocked: actor.viewer?.isBlocked == true,
-          isBlocking: actor.viewer?.blockingURI != nil,
-          isMuted: actor.viewer?.isMuted == true
-        )
-      }.uniqued(by: \.did) // Remove duplicates based on DID
+      // Convert to Profile objects and fetch detailed information
+      var suggestedUsers: [Profile] = []
+      
+      // Fetch detailed profiles for each actor to get accurate follower counts
+      for actor in filteredActors.prefix(12) {
+        do {
+          let detailedProfile = try await client.protoClient.getProfile(for: actor.actorDID)
+          let profile = Profile(
+            did: detailedProfile.actorDID,
+            handle: detailedProfile.actorHandle,
+            displayName: detailedProfile.displayName,
+            avatarImageURL: detailedProfile.avatarImageURL,
+            description: detailedProfile.description,
+            followersCount: detailedProfile.followerCount ?? 0,
+            followingCount: detailedProfile.followCount ?? 0,
+            postsCount: detailedProfile.postCount ?? 0,
+            isFollowing: detailedProfile.viewer?.followingURI != nil,
+            isFollowedBy: detailedProfile.viewer?.followedByURI != nil,
+            isBlocked: detailedProfile.viewer?.isBlocked == true,
+            isBlocking: detailedProfile.viewer?.blockingURI != nil,
+            isMuted: detailedProfile.viewer?.isMuted == true
+          )
+          suggestedUsers.append(profile)
+        } catch {
+          #if DEBUG
+          print("TrendingContentService: Failed to fetch detailed profile for \(actor.actorHandle): \(error)")
+          #endif
+          // Fallback to basic profile if detailed fetch fails
+          let profile = Profile(
+            did: actor.actorDID,
+            handle: actor.actorHandle,
+            displayName: actor.displayName,
+            avatarImageURL: actor.avatarImageURL,
+            description: actor.description,
+            followersCount: 0,  // Unknown if we can't fetch detailed profile
+            followingCount: 0,
+            postsCount: 0,
+            isFollowing: actor.viewer?.followingURI != nil,
+            isFollowedBy: actor.viewer?.followedByURI != nil,
+            isBlocked: actor.viewer?.isBlocked == true,
+            isBlocking: actor.viewer?.blockingURI != nil,
+            isMuted: actor.viewer?.isMuted == true
+          )
+          suggestedUsers.append(profile)
+        }
+      }
 
-      // Return a curated selection, prioritizing verified/established accounts
-      return Array(suggestedUsers.prefix(12))
+      // Return the suggested users with accurate follower counts
+      return suggestedUsers
 
     } catch {
       #if DEBUG
