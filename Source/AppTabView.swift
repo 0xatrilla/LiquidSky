@@ -2,6 +2,7 @@ import AppRouter
 import AuthUI
 // TODO: Re-enable ChatUI import when chat functionality is ready
 // import ChatUI
+import BookmarksUI
 import Client
 import ComposerUI
 import DesignSystem
@@ -59,7 +60,7 @@ struct AppTabView: View {
                         Tab(value: AppTab.feed) {
                             feedNavigationStack
                         } label: {
-                            Label("Feed", systemImage: "square.stack")
+                            Label("Home", systemImage: "house")
                         }
 
                     case .notification:
@@ -100,6 +101,13 @@ struct AppTabView: View {
                                 .onAppear { router.selectedTab = .compose }
                         } label: {
                             Label("Search", systemImage: "magnifyingglass")
+                        }
+                        
+                    case .bookmarks:
+                        Tab(value: AppTab.bookmarks) {
+                            bookmarksNavigationStack
+                        } label: {
+                            Label("Bookmarks", systemImage: "bookmark")
                         }
                     }
                 } else if key.hasPrefix("feed:") {
@@ -269,6 +277,26 @@ struct AppTabView: View {
                 .environment(\.currentTab, .compose)
         }
     }
+    
+    private var bookmarksNavigationStack: some View {
+        NavigationStack(
+            path: Binding(
+                get: { router[.bookmarks] },
+                set: { router[.bookmarks] = $0 }
+            )
+        ) {
+            BookmarksListView()
+                .navigationTitle("Bookmarks")
+                .navigationBarTitleDisplayMode(.large)
+                .toolbar {
+                    ToolbarItemGroup(placement: .topBarTrailing) {
+                        composeButton
+                    }
+                }
+                .withAppDestinations()
+                .environment(\.currentTab, .bookmarks)
+        }
+    }
 
     // MARK: - Button Components
 
@@ -282,16 +310,10 @@ struct AppTabView: View {
                 showingDiscoverSheet = true
             }
         }) {
-            HStack(spacing: 4) {
-                Image(systemName: currentFeed != nil ? "arrow.left" : "square.grid.2x2")
-                if currentFeed != nil {
-                    Text("Following")
-                        .font(.caption)
-                }
-            }
-            .foregroundColor(.themePrimary)
+            Image(systemName: currentFeed != nil ? "arrow.left" : "square.grid.2x2")
+                .foregroundColor(.themePrimary)
         }
-        .help(currentFeed != nil ? "Back to Following feed" : "Switch to a different feed")
+        .help(currentFeed != nil ? "Back to Home feed" : "Switch to a different feed")
     }
 
     private var summaryButton: some View {
@@ -353,13 +375,14 @@ extension AppTabView {
 extension AppTab {
     var displayName: String {
         switch self {
-        case .feed: return "Feed"
+        case .feed: return "Home"
         // TODO: Re-enable messages case when chat functionality is ready
         // case .messages: return "Messages"
         case .notification: return "Notifications"
         case .profile: return "Profile"
         case .settings: return "Settings"
         case .compose: return "Search"
+        case .bookmarks: return "Bookmarks"
         }
     }
 }

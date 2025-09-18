@@ -17,8 +17,13 @@ public struct PostRowActionsView: View {
     @Environment(AppRouter.self) var router
     @Environment(PostFilterService.self) var postFilterService
     @Environment(CurrentUser.self) var currentUser
+    @Environment(BSkyClient.self) var client
 
     let post: PostItem
+    
+    @State private var isBookmarked = false
+    @State private var isBookmarking = false
+    @State private var bookmarkService: BookmarkService?
 
     public init(post: PostItem) {
         self.post = post
@@ -107,12 +112,18 @@ public struct PostRowActionsView: View {
                         Label("Copy Link", systemImage: "link")
                     }
 
-                    // Bookmark post (placeholder for future implementation)
+                    // Bookmark post
                     Button(action: {
-                        bookmarkPost()
+                        Task {
+                            await toggleBookmark()
+                        }
                     }) {
-                        Label("Bookmark", systemImage: "bookmark")
+                        Label(
+                            isBookmarked ? "Remove Bookmark" : "Bookmark",
+                            systemImage: isBookmarked ? "bookmark.fill" : "bookmark"
+                        )
                     }
+                    .disabled(isBookmarking)
 
                     Divider()
 
@@ -210,6 +221,12 @@ public struct PostRowActionsView: View {
         .font(.callout)
         .padding(.top, 8)
         .padding(.bottom, 16)
+        .onAppear {
+            bookmarkService = BookmarkService(client: client)
+            Task {
+                await checkBookmarkStatus()
+            }
+        }
     }
 
     // MARK: - Action Methods
@@ -244,10 +261,41 @@ public struct PostRowActionsView: View {
         showToast(message: "Link copied to clipboard")
     }
 
-    private func bookmarkPost() {
-        // Placeholder for future bookmark implementation
-        // This could save posts to a local database or sync with Bluesky bookmarks
-        showToast(message: "Post bookmarked")
+    private func toggleBookmark() async {
+        guard let bookmarkService = bookmarkService else { return }
+        
+        isBookmarking = true
+        
+        do {
+            if isBookmarked {
+                try await bookmarkService.removeBookmark(for: post)
+                isBookmarked = false
+                showToast(message: "Bookmark removed")
+            } else {
+                try await bookmarkService.createBookmark(for: post)
+                isBookmarked = true
+                showToast(message: "Post bookmarked")
+            }
+        } catch {
+            showToast(message: "Failed to update bookmark")
+            #if DEBUG
+            print("PostRowActionsView: Bookmark error: \(error)")
+            #endif
+        }
+        
+        isBookmarking = false
+    }
+    
+    private func checkBookmarkStatus() async {
+        guard let bookmarkService = bookmarkService else { return }
+        
+        do {
+            isBookmarked = try await bookmarkService.isBookmarked(post)
+        } catch {
+            #if DEBUG
+            print("PostRowActionsView: Failed to check bookmark status: \(error)")
+            #endif
+        }
     }
 
     private func translatePost() {

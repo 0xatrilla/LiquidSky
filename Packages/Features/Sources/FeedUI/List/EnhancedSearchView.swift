@@ -142,6 +142,17 @@ public struct EnhancedSearchView: View {
 
             Spacer()
 
+            Button(action: {
+              Task {
+                await trendingContentService.fetchTrendingContent()
+              }
+            }) {
+              Image(systemName: "arrow.clockwise")
+                .font(.caption)
+                .foregroundColor(.blue)
+            }
+            .disabled(trendingContentService.isLoading)
+
             if trendingContentService.isLoading {
               ProgressView()
                 .scaleEffect(0.8)
@@ -149,7 +160,7 @@ public struct EnhancedSearchView: View {
           }
 
           LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
-            ForEach(fallbackHashtags, id: \.tag) { hashtag in
+            ForEach(trendingContentService.trendingHashtags.isEmpty ? fallbackHashtags : trendingContentService.trendingHashtags, id: \.tag) { hashtag in
               Button(action: {
                 let hashtagWithoutHash =
                   hashtag.tag.hasPrefix("#") ? String(hashtag.tag.dropFirst()) : hashtag.tag
@@ -195,6 +206,17 @@ public struct EnhancedSearchView: View {
 
             Spacer()
 
+            Button(action: {
+              Task {
+                await trendingContentService.fetchTrendingContent()
+              }
+            }) {
+              Image(systemName: "arrow.clockwise")
+                .font(.caption)
+                .foregroundColor(.blue)
+            }
+            .disabled(trendingContentService.isLoading)
+
             if trendingContentService.isLoading {
               ProgressView()
                 .scaleEffect(0.8)
@@ -214,43 +236,17 @@ public struct EnhancedSearchView: View {
             ScrollView(.horizontal, showsIndicators: false) {
               HStack(spacing: 12) {
                 ForEach(trendingContentService.suggestedUsers.prefix(8)) { user in
-                  Button(action: {
-                    // Force navigation within the current tab (search/compose)
-                    router[.compose].append(.profile(user))
-                  }) {
-                    VStack(spacing: 8) {
-                      AsyncImage(url: user.avatarImageURL) { phase in
-                        switch phase {
-                        case .success(let image):
-                          image
-                            .resizable()
-                            .scaledToFit()
-                        default:
-                          Circle()
-                            .fill(Color.gray.opacity(0.3))
-                        }
-                      }
-                      .frame(width: 50, height: 50)
-                      .clipShape(Circle())
-
-                      VStack(spacing: 2) {
-                        Text(user.displayName ?? user.handle)
-                          .font(.caption)
-                          .fontWeight(.medium)
-                          .lineLimit(1)
-
-                        Text("@\(user.handle)")
-                          .font(.caption2)
-                          .foregroundStyle(.secondary)
-                          .lineLimit(1)
+                  SuggestedUserCard(
+                    user: user,
+                    onProfileTap: {
+                      router[.compose].append(.profile(user))
+                    },
+                    onFollowTap: {
+                      Task {
+                        await toggleFollow(user: user)
                       }
                     }
-                    .frame(width: 80)
-                    .padding(.vertical, 8)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
-                  }
-                  .buttonStyle(.plain)
+                  )
                 }
               }
               .padding(.horizontal, 20)
@@ -356,6 +352,9 @@ public struct EnhancedSearchView: View {
       .padding(.horizontal, 20)
       .padding(.bottom, 40)
     }
+    .refreshable {
+      await trendingContentService.fetchTrendingContent()
+    }
   }
 
   // MARK: - Search Results View
@@ -397,7 +396,7 @@ public struct EnhancedSearchView: View {
         .font(.title2)
         .fontWeight(.semibold)
 
-      Text(error.localizedDescription)
+      Text("Unable to search at the moment. Please check your connection and try again.")
         .font(.body)
         .foregroundColor(.secondary)
         .multilineTextAlignment(.center)
@@ -408,6 +407,11 @@ public struct EnhancedSearchView: View {
         }
       }
       .buttonStyle(.borderedProminent)
+      
+      Button("Browse Trending Content") {
+        searchText = ""
+      }
+      .buttonStyle(.bordered)
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .padding(.horizontal, 40)
@@ -429,8 +433,17 @@ public struct EnhancedSearchView: View {
         .foregroundColor(.secondary)
         .multilineTextAlignment(.center)
 
-      // Show trending content below
-      trendingContentView
+      VStack(spacing: 12) {
+        Button("Clear Search") {
+          searchText = ""
+        }
+        .buttonStyle(.borderedProminent)
+        
+        Button("Browse Trending Content") {
+          searchText = ""
+        }
+        .buttonStyle(.bordered)
+      }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .padding(.horizontal, 40)
@@ -492,6 +505,45 @@ public struct EnhancedSearchView: View {
     "science", "gaming", "food", "travel", "books",
     "fitness", "cooking", "design", "writing", "podcasts",
   ]
+  
+  // MARK: - Follow Functionality
+  private func toggleFollow(user: Profile) async {
+    do {
+      if user.isFollowing {
+        // Unfollow user
+        try await client.protoClient.deleteRecord(uri: user.followingURI ?? "")
+        // Update the user in the suggested users list
+        if let index = trendingContentService.suggestedUsers.firstIndex(where: { $0.did == user.did }) {
+          var updatedUser = user
+          updatedUser.isFollowing = false
+          updatedUser.followingURI = nil
+          trendingContentService.suggestedUsers[index] = updatedUser
+        }
+      } else {
+        // Follow user
+        let followRecord = AppBskyLexicon.Graph.FollowDefinition(
+          subject: user.did,
+          createdAt: Date()
+        )
+        let response = try await client.protoClient.createRecord(
+          repo: client.configuration.handle,
+          collection: "app.bsky.graph.follow",
+          record: followRecord
+        )
+        // Update the user in the suggested users list
+        if let index = trendingContentService.suggestedUsers.firstIndex(where: { $0.did == user.did }) {
+          var updatedUser = user
+          updatedUser.isFollowing = true
+          updatedUser.followingURI = response.uri
+          trendingContentService.suggestedUsers[index] = updatedUser
+        }
+      }
+    } catch {
+      #if DEBUG
+      print("EnhancedSearchView: Failed to toggle follow: \(error)")
+      #endif
+    }
+  }
 }
 
 // MARK: - Filter Button
@@ -512,5 +564,71 @@ struct FilterButton: View {
         .cornerRadius(20)
     }
     .buttonStyle(.plain)
+  }
+}
+
+// MARK: - Suggested User Card
+struct SuggestedUserCard: View {
+  let user: Profile
+  let onProfileTap: () -> Void
+  let onFollowTap: () -> Void
+  
+  @State private var isFollowing = false
+  
+  var body: some View {
+    VStack(spacing: 8) {
+      Button(action: onProfileTap) {
+        AsyncImage(url: user.avatarImageURL) { phase in
+          switch phase {
+          case .success(let image):
+            image
+              .resizable()
+              .scaledToFit()
+          default:
+            Circle()
+              .fill(Color.gray.opacity(0.3))
+          }
+        }
+        .frame(width: 50, height: 50)
+        .clipShape(Circle())
+      }
+      .buttonStyle(.plain)
+
+      VStack(spacing: 2) {
+        Text(user.displayName ?? user.handle)
+          .font(.caption)
+          .fontWeight(.medium)
+          .lineLimit(1)
+
+        Text("@\(user.handle)")
+          .font(.caption2)
+          .foregroundStyle(.secondary)
+          .lineLimit(1)
+      }
+      
+      Button(action: onFollowTap) {
+        Text(user.isFollowing ? "Following" : "Follow")
+          .font(.caption2)
+          .fontWeight(.medium)
+          .foregroundColor(user.isFollowing ? .secondary : .white)
+          .padding(.horizontal, 12)
+          .padding(.vertical, 4)
+          .background(
+            RoundedRectangle(cornerRadius: 6)
+              .fill(user.isFollowing ? Color(.systemGray5) : Color.blue)
+          )
+      }
+      .buttonStyle(.plain)
+    }
+    .frame(width: 80)
+    .padding(.vertical, 8)
+    .background(Color(.systemGray6))
+    .cornerRadius(12)
+    .onAppear {
+      isFollowing = user.isFollowing
+    }
+    .onChange(of: user.isFollowing) { _, newValue in
+      isFollowing = newValue
+    }
   }
 }

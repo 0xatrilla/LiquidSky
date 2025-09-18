@@ -132,29 +132,38 @@ public class TrendingContentService {
 
   private func fetchSuggestedUsers() async throws -> [Profile] {
     do {
+      // Get current user's following list to exclude them from suggestions
+      let followingDIDs = try await getCurrentUserFollowing()
+      
       // Try multiple search strategies to get better suggested users
-      _ = [Profile]()
+      var allActors: [AppBskyLexicon.Actor.ProfileViewBasic] = []
       
       // Strategy 1: Search for popular tech/developer accounts
       let techUsers = try await client.protoClient.searchActors(
         matching: "developer",
-        limit: 10
+        limit: 15
       )
       
       // Strategy 2: Search for popular content creators
       let creatorUsers = try await client.protoClient.searchActors(
         matching: "artist",
-        limit: 10
+        limit: 15
       )
       
       // Strategy 3: Search for popular tech companies/accounts
       let companyUsers = try await client.protoClient.searchActors(
         matching: "tech",
-        limit: 10
+        limit: 15
       )
       
-      // Combine and filter results
-      let allActors = techUsers.actors + creatorUsers.actors + companyUsers.actors
+      // Strategy 4: Search for popular accounts by followers
+      let popularUsers = try await client.protoClient.searchActors(
+        matching: "bluesky",
+        limit: 15
+      )
+      
+      // Combine all results
+      allActors = techUsers.actors + creatorUsers.actors + companyUsers.actors + popularUsers.actors
       
       let suggestedUsers = allActors
         .filter { actor in
@@ -163,7 +172,8 @@ public class TrendingContentService {
           !actor.actorHandle.contains("spam") &&
           !actor.actorHandle.contains("test") &&
           actor.actorHandle.count > 3 &&
-          actor.displayName?.count ?? 0 > 2
+          actor.displayName?.count ?? 0 > 2 &&
+          !followingDIDs.contains(actor.actorDID) // Exclude already followed accounts
         }
         .map { actor in
           Profile(
@@ -178,20 +188,35 @@ public class TrendingContentService {
             isFollowing: actor.viewer?.followingURI != nil,
             isFollowedBy: actor.viewer?.followedByURI != nil,
             isBlocked: actor.viewer?.isBlocked == true,
-            isBlocking: actor.viewer?.blockingURI != nil,
+            isBlocking: actor.blockingURI != nil,
             isMuted: actor.viewer?.isMuted == true
           )
         }
         .uniqued(by: \.did) // Remove duplicates based on DID
 
       // Return a curated selection, prioritizing verified/established accounts
-      return Array(suggestedUsers.prefix(8))
+      return Array(suggestedUsers.prefix(12))
 
     } catch {
       #if DEBUG
       print("TrendingContentService: Failed to fetch suggested users: \(error)")
       #endif
       throw error
+    }
+  }
+  
+  private func getCurrentUserFollowing() async throws -> Set<String> {
+    do {
+      let following = try await client.protoClient.getFollows(
+        actor: client.configuration.handle,
+        limit: 100
+      )
+      return Set(following.follows.map { $0.did })
+    } catch {
+      #if DEBUG
+      print("TrendingContentService: Failed to get following list: \(error)")
+      #endif
+      return Set() // Return empty set if we can't get following list
     }
   }
 

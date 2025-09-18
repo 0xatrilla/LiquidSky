@@ -14,4 +14,5 @@ public enum RouterDestination: DestinationType, Hashable {
   case profileLikes(Profile)
   case timeline
   case hashtag(String)
+  case bookmarks
 }

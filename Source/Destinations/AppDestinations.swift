@@ -1,4 +1,5 @@
 import AppRouter
+import BookmarksUI
 import Destinations
 import FeedUI
 import Models
@@ -33,6 +34,8 @@ public struct AppDestinations: ViewModifier {
           PostsLikesView(profile: profile)
         case .hashtag(let hashtag):
           HashtagFeedView(hashtag: hashtag)
+        case .bookmarks:
+          BookmarksListView()
         }
       }
   }
