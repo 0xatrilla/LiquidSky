@@ -233,26 +233,6 @@ struct LiquidSkyApp: App {
                     let _ = print("Direct sheet: Creating sheet for \(presentedSheet)")
                 #endif
                 switch presentedSheet {
-                case .auth:
-                    #if DEBUG
-                        let _ = print("Direct sheet: Creating auth view")
-                    #endif
-                    AuthView()
-                        .environment(auth)
-                        .environment(accountManager)
-                        .environment(router)
-                        .environment(pushNotificationService)
-                        // .environment(cloudKitSyncService)
-                        .onAppear {
-                            #if DEBUG
-                                print("Direct sheet: Auth view appeared successfully")
-                            #endif
-                        }
-                        .onDisappear {
-                            #if DEBUG
-                                print("Direct sheet: Auth view disappeared")
-                            #endif
-                        }
                 case .feedsList:
                     FeedsListView()
                         .environment(appState.client)
@@ -480,14 +460,6 @@ struct LiquidSkyApp: App {
                     print("Auth is properly initialized: \(auth)")
                 #endif
 
-                // Ensure auth screen shows if no configuration exists
-                if auth.configuration == nil && router.presentedSheet != .auth {
-                    #if DEBUG
-                        print("Fallback: Ensuring auth screen is shown")
-                    #endif
-                    router.presentedSheet = .auth
-                }
-
                 // Request push notification permissions
                 Task {
                     await requestPushNotificationPermissions()
@@ -572,23 +544,11 @@ struct LiquidSkyApp: App {
                         // Keep the auth sheet visible while we're setting up the environment
                         // Only clear it after authentication is fully complete
                         await refreshEnvWith(configuration: configuration)
-
-                        // Now that authentication is complete, clear the auth sheet
-                        if router.presentedSheet == .auth {
-                            #if DEBUG
-                                print("Authentication complete, clearing auth sheet")
-                            #endif
-                            router.presentedSheet = nil
-                        }
                     } else {
                         #if DEBUG
                             print("No configuration available, showing auth screen")
                         #endif
                         appState = .unauthenticated
-                        router.presentedSheet = .auth
-                        #if DEBUG
-                            print("Auth sheet requested after configuration update")
-                        #endif
                     }
                 }
             }
@@ -690,18 +650,10 @@ struct LiquidSkyApp: App {
             #endif
             // Don't set to unauthenticated while auth sheet is showing
             // This prevents the "Unauthenticated" screen from appearing
-            if router.presentedSheet != .auth {
-                await MainActor.run {
-                    appState = .unauthenticated
-                    #if DEBUG
-                        print("App state set to unauthenticated due to error")
-                    #endif
-                }
-            } else {
+            await MainActor.run {
+                appState = .unauthenticated
                 #if DEBUG
-                    print(
-                        "Auth sheet is showing, keeping current state to avoid 'Unauthenticated' screen"
-                    )
+                    print("App state set to unauthenticated due to error")
                 #endif
             }
         }

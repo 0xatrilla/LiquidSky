@@ -10,7 +10,6 @@ public enum ComposerDestinationMode: Hashable {
 public enum SheetDestination: SheetType, Hashable, Identifiable {
     public var id: Int { self.hashValue }
 
-    case auth
     case feedsList
     case fullScreenMedia(
         images: [Media],

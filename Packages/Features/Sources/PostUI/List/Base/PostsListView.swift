@@ -193,20 +193,21 @@ public struct PostListView<T: PostsListViewDatasource>: View {
             }
             .onDisappear {
                 // Save current position when view disappears
-                if case .loaded(let posts, _) = state, let topPost = visiblePosts.first {
+                if case .loaded(_, _) = state, let topPost = visiblePosts.first {
                     feedPositionService.saveCurrentPosition(topPostURI: topPost.uri)
                 }
             }
             .refreshable {
                 // Prevent multiple simultaneous refreshes
-                guard case .loaded(let currentPosts, let currentCursor) = state else { return }
+                guard case .loaded(let currentPosts, _) = state else { return }
 
                 // Track previous post count to detect new posts
                 previousPostsCount = currentPosts.count
 
                 do {
                     state = .loading
-                    state = try await datasource.loadPosts(with: state)
+                    // For refresh, always start fresh by calling with uninitialized state
+                    state = try await datasource.loadPosts(with: .uninitialized)
 
                     // Check for new posts and offer summary if 10+
                     if case .loaded(let newPosts, _) = state {
@@ -220,12 +221,12 @@ public struct PostListView<T: PostsListViewDatasource>: View {
                     // Pull-to-refresh should be resilient to network issues and not show errors
                     if (error as? CancellationError) != nil {
                         // Task was cancelled, restore previous loaded state
-                        state = .loaded(posts: currentPosts, cursor: currentCursor)
+                        state = .loaded(posts: currentPosts, cursor: nil)
                         return
                     }
                     // For other errors during pull-to-refresh, restore previous state
                     // Users expect pull-to-refresh to be resilient to temporary network issues
-                    state = .loaded(posts: currentPosts, cursor: currentCursor)
+                    state = .loaded(posts: currentPosts, cursor: nil)
                 }
             }
             .sheet(isPresented: $showingSummary) {
