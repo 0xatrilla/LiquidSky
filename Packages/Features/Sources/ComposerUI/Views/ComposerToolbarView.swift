@@ -13,6 +13,7 @@ struct ComposerToolbarView: ToolbarContent {
   @Binding var sendState: ComposerSendState
 
   @Environment(PostFilterService.self) private var postFilterService
+  @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
   @State private var selectedPhotos: [PhotosPickerItem] = []
   @State private var selectedVideos: [PhotosPickerItem] = []
@@ -21,7 +22,7 @@ struct ComposerToolbarView: ToolbarContent {
   @State private var aiPrompt: String = ""
   @State private var isAIGenerating = false
   @State private var aiError: String?
-  
+
   // Advanced AI features
   @State private var showingAIFeatures = false
   @State private var selectedAIFeature: AIFeature = .compose
@@ -32,116 +33,118 @@ struct ComposerToolbarView: ToolbarContent {
   @State private var translationError: String?
 
   var body: some ToolbarContent {
-    ToolbarItem(placement: .keyboard) {
-      PhotosPicker(selection: $selectedPhotos, matching: .images) {
-        Image(systemName: "photo")
-          .foregroundColor(.blue)
-      }
-      .onChange(of: selectedPhotos) { _, newValue in
-        // TODO: Handle selected photos
-        #if DEBUG
-          print("Selected photos: \(newValue.count)")
-        #endif
-      }
-    }
-
-    ToolbarItem(placement: .keyboard) {
-      PhotosPicker(selection: $selectedVideos, matching: .videos) {
-        Image(systemName: "film")
-          .foregroundColor(.blue)
-      }
-      .onChange(of: selectedVideos) { _, newValue in
-        // TODO: Handle selected videos
-        #if DEBUG
-          print("Selected videos: \(newValue.count)")
-        #endif
-      }
-    }
-
-    ToolbarItem(placement: .keyboard) {
-      Button {
-        if UIImagePickerController.isSourceTypeAvailable(.camera) {
-          showCamera = true
-        } else {
+    ToolbarItemGroup(placement: .keyboard) {
+      // Left side items with proper spacing
+      HStack(spacing: horizontalSizeClass == .compact ? 12 : 16) {
+        PhotosPicker(selection: $selectedPhotos, matching: .images) {
+          Image(systemName: "photo")
+            .foregroundColor(.blue)
+            .font(.title3)
+        }
+        .onChange(of: selectedPhotos) { _, newValue in
+          // TODO: Handle selected photos
           #if DEBUG
-            print("Camera not available on this device")
+            print("Selected photos: \(newValue.count)")
           #endif
         }
-      } label: {
-        Image(systemName: "camera")
-          .foregroundColor(.blue)
-      }
-      .sheet(isPresented: $showCamera) {
-        CameraView { image in
-          // TODO: Handle captured image
+
+        PhotosPicker(selection: $selectedVideos, matching: .videos) {
+          Image(systemName: "film")
+            .foregroundColor(.blue)
+            .font(.title3)
+        }
+        .onChange(of: selectedVideos) { _, newValue in
+          // TODO: Handle selected videos
           #if DEBUG
-            print("Captured image")
+            print("Selected videos: \(newValue.count)")
           #endif
         }
-      }
-    }
 
-    if #available(iOS 26.0, *) {
-      ToolbarSpacer(placement: .keyboard)
-    }
-
-    ToolbarItem(placement: .keyboard) {
-      Button {
-        insertText("@")
-      } label: {
-        Image(systemName: "at")
-          .foregroundColor(postFilterService.canMentionUser("") ? .blue : .gray)
-      }
-      .disabled(!postFilterService.canMentionUser(""))
-    }
-
-    ToolbarItem(placement: .keyboard) {
-      Button {
-        insertText("#")
-      } label: {
-        Image(systemName: "tag")
-          .foregroundColor(.blue)
-      }
-    }
-
-    // Advanced AI Features (only available on iOS 26+ with FoundationModels)
-    if aiComposeAvailable() {
-      ToolbarItem(placement: .keyboard) {
         Button {
-          showingAIFeatures = true
+          if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            showCamera = true
+          } else {
+            #if DEBUG
+              print("Camera not available on this device")
+            #endif
+          }
         } label: {
-          Image(systemName: "sparkles")
-            .symbolRenderingMode(.multicolor)
+          Image(systemName: "camera")
+            .foregroundColor(.blue)
+            .font(.title3)
         }
-        .sheet(isPresented: $showingAIFeatures) {
-          AdvancedAIFeaturesSheet(
-            selectedFeature: $selectedAIFeature,
-            tone: $tone,
-            includeEmojis: $includeEmojis,
-            translationTargetLanguage: $translationTargetLanguage,
-            isGenerating: $isAIGenerating,
-            isTranslating: $isTranslating,
-            errorMessage: $aiError,
-            translationError: $translationError,
-            onCancel: { showingAIFeatures = false },
-            onCompose: { Task { await composeWithAI() } },
-            onTranslate: { Task { await translateText() } },
-            onImprove: { Task { await improveText() } },
-            onSummarize: { Task { await summarizeText() } }
-          )
+        .sheet(isPresented: $showCamera) {
+          CameraView { image in
+            // TODO: Handle captured image
+            #if DEBUG
+              print("Captured image")
+            #endif
+          }
         }
       }
-    }
+      .padding(.leading, horizontalSizeClass == .compact ? 8 : 12)
 
-    ToolbarItem(placement: .keyboard) {
-      let text = String(text.characters)
-      Text("\(300 - text.count)")
-        .foregroundColor(text.count > 250 ? .red : .blue)
-        .font(.subheadline)
-        .contentTransition(.numericText(value: Double(text.count)))
-        .monospacedDigit()
-        .lineLimit(1)
-        .animation(.smooth, value: text.count)
+      Spacer()
+
+      // Right side items with proper spacing
+      HStack(spacing: horizontalSizeClass == .compact ? 12 : 16) {
+        Button {
+          insertText("@")
+        } label: {
+          Image(systemName: "at")
+            .foregroundColor(postFilterService.canMentionUser("") ? .blue : .gray)
+            .font(.title3)
+        }
+        .disabled(!postFilterService.canMentionUser(""))
+
+        Button {
+          insertText("#")
+        } label: {
+          Image(systemName: "tag")
+            .foregroundColor(.blue)
+            .font(.title3)
+        }
+
+        // Advanced AI Features (only available on iOS 26+ with FoundationModels)
+        if aiComposeAvailable() {
+          Button {
+            showingAIFeatures = true
+          } label: {
+            Image(systemName: "sparkles")
+              .symbolRenderingMode(.multicolor)
+              .font(.title3)
+          }
+          .sheet(isPresented: $showingAIFeatures) {
+            AdvancedAIFeaturesSheet(
+              selectedFeature: $selectedAIFeature,
+              tone: $tone,
+              includeEmojis: $includeEmojis,
+              translationTargetLanguage: $translationTargetLanguage,
+              isGenerating: $isAIGenerating,
+              isTranslating: $isTranslating,
+              errorMessage: $aiError,
+              translationError: $translationError,
+              onCancel: { showingAIFeatures = false },
+              onCompose: { Task { await composeWithAI() } },
+              onTranslate: { Task { await translateText() } },
+              onImprove: { Task { await improveText() } },
+              onSummarize: { Task { await summarizeText() } }
+            )
+          }
+        }
+
+        let text = String(text.characters)
+        Text("\(300 - text.count)")
+          .foregroundColor(text.count > 250 ? .red : .blue)
+          .font(.subheadline)
+          .fontWeight(.medium)
+          .contentTransition(.numericText(value: Double(text.count)))
+          .monospacedDigit()
+          .lineLimit(1)
+          .animation(.smooth, value: text.count)
+          .frame(minWidth: horizontalSizeClass == .compact ? 30 : 35)
+      }
+      .padding(.trailing, horizontalSizeClass == .compact ? 8 : 12)
     }
   }
 
@@ -211,7 +214,7 @@ struct ComposerToolbarView: ToolbarContent {
 
         let systemPrompt = buildComposeSystemPrompt()
         let session = LanguageModelSession { systemPrompt }
-        
+
         do {
           let response = try await session.respond(to: instructions)
           let generated = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -227,32 +230,32 @@ struct ComposerToolbarView: ToolbarContent {
       }
     #endif
   }
-  
+
   private func translateText() async {
     guard aiComposeAvailable() else {
       translationError = "Apple Intelligence not available for translation."
       return
     }
-    
+
     #if canImport(FoundationModels)
       if #available(iOS 26.0, *) {
         isTranslating = true
         defer { isTranslating = false }
-        
+
         let currentText = String(text.characters)
         guard !currentText.isEmpty else {
           translationError = "No text to translate."
           return
         }
-        
+
         let systemPrompt = """
         You are a professional translator. Translate the given text to \(translationTargetLanguage).
         Maintain the original tone and meaning.
         Return only the translated text, no explanations.
         """
-        
+
         let session = LanguageModelSession { systemPrompt }
-        
+
         do {
           let response = try await session.respond(to: currentText)
           let translated = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -268,33 +271,33 @@ struct ComposerToolbarView: ToolbarContent {
       }
     #endif
   }
-  
+
   private func improveText() async {
     guard aiComposeAvailable() else {
       aiError = "Apple Intelligence not available for text improvement."
       return
     }
-    
+
     #if canImport(FoundationModels)
       if #available(iOS 26.0, *) {
         isAIGenerating = true
         defer { isAIGenerating = false }
-        
+
         let currentText = String(text.characters)
         guard !currentText.isEmpty else {
           aiError = "No text to improve."
           return
         }
-        
+
         let systemPrompt = """
         Improve the following social media post for clarity, engagement, and impact.
         Keep it under 300 characters and maintain the original meaning.
         Make it more engaging and professional.
         Return only the improved text.
         """
-        
+
         let session = LanguageModelSession { systemPrompt }
-        
+
         do {
           let response = try await session.respond(to: currentText)
           let improved = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -310,33 +313,33 @@ struct ComposerToolbarView: ToolbarContent {
       }
     #endif
   }
-  
+
   private func summarizeText() async {
     guard aiComposeAvailable() else {
       aiError = "Apple Intelligence not available for summarization."
       return
     }
-    
+
     #if canImport(FoundationModels)
       if #available(iOS 26.0, *) {
         isAIGenerating = true
         defer { isAIGenerating = false }
-        
+
         let currentText = String(text.characters)
         guard !currentText.isEmpty else {
           aiError = "No text to summarize."
           return
         }
-        
+
         let systemPrompt = """
         Summarize the following text into a concise social media post.
         Keep it under 300 characters and maintain the key points.
         Make it engaging and clear.
         Return only the summarized text.
         """
-        
+
         let session = LanguageModelSession { systemPrompt }
-        
+
         do {
           let response = try await session.respond(to: currentText)
           let summarized = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -352,11 +355,11 @@ struct ComposerToolbarView: ToolbarContent {
       }
     #endif
   }
-  
+
   private func buildComposeSystemPrompt() -> String {
     let toneDescription = tone.description
     let emojiInstruction = includeEmojis ? "Use appropriate emojis sparingly." : "Do not use emojis."
-    
+
     return """
     You are an assistant that writes short, engaging social media posts for Bluesky.
     Constraints:
