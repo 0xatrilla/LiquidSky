@@ -340,7 +340,16 @@ public final class Auth: @unchecked Sendable {
                 print("Auth: Attempting to restore existing session...")
             #endif
 
-            // Determine target account: prefer active, else fall back to first stored
+            // Check if we have any accounts at all
+            if accountManager.accounts.isEmpty {
+                #if DEBUG
+                    print("Auth: No accounts available, cannot restore session")
+                #endif
+                // Ensure downstream logic knows there is no active session
+                self.configuration = nil
+                // Don't yield configuration here to prevent unnecessary state changes
+                return
+            }
             var targetAccountId: UUID?
             if let activeId = accountManager.activeAccountId {
                 targetAccountId = activeId
@@ -359,7 +368,7 @@ public final class Auth: @unchecked Sendable {
                 #endif
                 // Ensure downstream logic knows there is no active session
                 self.configuration = nil
-                configurationContinuation.yield(nil)
+                // Don't yield configuration here to prevent unnecessary state changes
                 return
             }
 
@@ -373,7 +382,7 @@ public final class Auth: @unchecked Sendable {
                     print("Auth: Active account not found in account list")
                 #endif
                 self.configuration = nil
-                configurationContinuation.yield(nil)
+                // Don't yield configuration here to prevent unnecessary state changes
                 return
             }
 

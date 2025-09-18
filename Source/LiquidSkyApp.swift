@@ -59,150 +59,166 @@ struct LiquidSkyApp: App {
         // Note: ImageQualityService configuration moved to avoid potential deadlocks
     }
 
+    // MARK: - View Builders
+
+    @ViewBuilder
+    private func loadingView() -> some View {
+        VStack(spacing: 24) {
+            // App icon or logo placeholder
+            ZStack {
+                Circle()
+                    .fill(.blue.opacity(0.1))
+                    .frame(width: 80, height: 80)
+
+                Image(systemName: "cloud.fill")
+                    .font(.system(size: 32))
+                    .foregroundStyle(.blue)
+            }
+
+            VStack(spacing: 8) {
+                Text("Horizon")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.primary)
+
+                ProgressView()
+                    .scaleEffect(0.8)
+
+                Text("Loading...")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.systemGroupedBackground))
+    }
+
+    @ViewBuilder
+    private func authenticatedView(client: BSkyClient, currentUser: CurrentUser) -> some View {
+        Group {
+            // Use iPad-optimized view on iPadOS 26+ with larger screens
+            if UIDevice.current.userInterfaceIdiom == .pad,
+                #available(iOS 26.0, *)
+            {
+                iPadAppView()
+            } else {
+                AppTabView()
+            }
+        }
+        .environment(client)
+        .environment(currentUser)
+        .environment(auth)
+        .environment(accountManager)
+        .environment(router)
+        .environment(postDataControllerProvider)
+        .environment(postFilterService)
+        .environment(imageQualityService)
+        .environment(settingsService)
+        .environment(ColorThemeManager.shared)
+        .environment(pushNotificationService)
+        // .environment(cloudKitSyncService)
+        .environment(inAppPurchaseService)
+        .environment(feedPositionService)
+        .id(auth.currentAccountId)  // CRITICAL: Forces complete view recreation on account switch
+        .withTheme()
+        .themeAware()
+        .modelContainer(for: RecentFeedItem.self)
+        .withSheetDestinations(
+            router: .constant(router), auth: auth, client: client,
+            currentUser: currentUser,
+            postDataControllerProvider: postDataControllerProvider,
+            settingsService: settingsService
+        )
+        .onAppear {
+            #if DEBUG
+                print("LiquidSkyApp: Showing authenticated state")
+            #endif
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(for: .openComposerNewPostFromShortcut)
+        ) {
+            _ in
+            Task { @MainActor in
+                router.presentedSheet = .composer(mode: .newPost)
+            }
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(for: .openNotificationsFromShortcut)
+        ) {
+            _ in
+            Task { @MainActor in
+                router.selectedTab = .notification
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .openSearchFromShortcut)) {
+            _ in
+            Task { @MainActor in
+                router.selectedTab = .compose
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .openProfileFromShortcut))
+        { _ in
+            Task { @MainActor in
+                router.selectedTab = .profile
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .openFeedFromShortcut)) {
+            _ in
+            Task { @MainActor in
+                router.selectedTab = .feed
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .notificationsUpdated)) {
+            notification in
+            if let userInfo = notification.userInfo,
+                let title = userInfo["title"] as? String,
+                let subtitle = userInfo["subtitle"] as? String
+            {
+                let defaults = UserDefaults(suiteName: "group.com.acxtrilla.LiquidSky")
+                defaults?.set(title, forKey: "widget.recent.notification.title")
+                defaults?.set(subtitle, forKey: "widget.recent.notification.subtitle")
+
+                // Reload widget timeline
+                if #available(iOS 14.0, *) {
+                    WidgetCenter.shared.reloadTimelines(
+                        ofKind: "RecentNotificationWidget")
+                }
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .notificationTapped)) {
+            notification in
+            // Handle push notification taps
+            handleNotificationTap(notification)
+        }
+    }
+
+    @ViewBuilder
+    private func unauthenticatedView() -> some View {
+        AuthView()
+            .environment(accountManager)
+            .environment(auth)
+            .environment(router)
+            .environment(postDataControllerProvider)
+            .environment(postFilterService)
+            .environment(imageQualityService)
+            .environment(settingsService)
+            .environment(ColorThemeManager.shared)
+            .environment(pushNotificationService)
+            // .environment(cloudKitSyncService)
+            .environment(inAppPurchaseService)
+            .onAppear {
+                #if DEBUG
+                    print("LiquidSkyApp: Showing unauthenticated state")
+                #endif
+            }
+    }
+
     var body: some Scene {
         WindowGroup {
             Group {
                 switch appState {
                 case .resuming:
-                    // Show loading screen instead of AuthView to prevent flickering
-                    VStack(spacing: 24) {
-                        // App icon or logo placeholder
-                        ZStack {
-                            Circle()
-                                .fill(.blue.opacity(0.1))
-                                .frame(width: 80, height: 80)
-
-                            Image(systemName: "cloud.fill")
-                                .font(.system(size: 32))
-                                .foregroundStyle(.blue)
-                        }
-
-                        VStack(spacing: 8) {
-                            Text("Horizon")
-                                .font(.title2)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(.primary)
-
-                            ProgressView()
-                                .scaleEffect(0.8)
-
-                            Text("Loading...")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color(.systemGroupedBackground))
-                    .environment(accountManager)
-                    .environment(auth)
-                    .environment(router)
-                    .environment(postDataControllerProvider)
-                    .environment(postFilterService)
-                    .environment(imageQualityService)
-                    .environment(settingsService)
-                    .environment(ColorThemeManager.shared)
-                    .environment(pushNotificationService)
-                    // .environment(cloudKitSyncService)
-                    .environment(inAppPurchaseService)
-                    .environment(feedPositionService)
-                case .authenticated(let client, let currentUser):
-                    Group {
-                        // Use iPad-optimized view on iPadOS 26+ with larger screens
-                        if UIDevice.current.userInterfaceIdiom == .pad,
-                            #available(iOS 26.0, *)
-                        {
-                            iPadAppView()
-                        } else {
-                            AppTabView()
-                        }
-                    }
-                    .environment(client)
-                    .environment(currentUser)
-                    .environment(auth)
-                    .environment(accountManager)
-                    .environment(router)
-                    .environment(postDataControllerProvider)
-                    .environment(postFilterService)
-                    .environment(imageQualityService)
-                    .environment(settingsService)
-                    .environment(ColorThemeManager.shared)
-                    .environment(pushNotificationService)
-                    // .environment(cloudKitSyncService)
-                    .environment(inAppPurchaseService)
-                    .environment(feedPositionService)
-                    .id(auth.currentAccountId)  // CRITICAL: Forces complete view recreation on account switch
-                    .withTheme()
-                    .themeAware()
-                    .modelContainer(for: RecentFeedItem.self)
-                    .withSheetDestinations(
-                        router: .constant(router), auth: auth, client: client,
-                        currentUser: currentUser,
-                        postDataControllerProvider: postDataControllerProvider,
-                        settingsService: settingsService
-                    )
-                    .onAppear {
-                        #if DEBUG
-                            print("LiquidSkyApp: Showing authenticated state")
-                        #endif
-                    }
-                    .onReceive(
-                        NotificationCenter.default.publisher(for: .openComposerNewPostFromShortcut)
-                    ) {
-                        _ in
-                        Task { @MainActor in
-                            router.presentedSheet = .composer(mode: .newPost)
-                        }
-                    }
-                    .onReceive(
-                        NotificationCenter.default.publisher(for: .openNotificationsFromShortcut)
-                    ) {
-                        _ in
-                        Task { @MainActor in
-                            router.selectedTab = .notification
-                        }
-                    }
-                    .onReceive(NotificationCenter.default.publisher(for: .openSearchFromShortcut)) {
-                        _ in
-                        Task { @MainActor in
-                            router.selectedTab = .compose
-                        }
-                    }
-                    .onReceive(NotificationCenter.default.publisher(for: .openProfileFromShortcut))
-                    { _ in
-                        Task { @MainActor in
-                            router.selectedTab = .profile
-                        }
-                    }
-                    .onReceive(NotificationCenter.default.publisher(for: .openFeedFromShortcut)) {
-                        _ in
-                        Task { @MainActor in
-                            router.selectedTab = .feed
-                        }
-                    }
-                    .onReceive(NotificationCenter.default.publisher(for: .notificationsUpdated)) {
-                        notification in
-                        if let userInfo = notification.userInfo,
-                            let title = userInfo["title"] as? String,
-                            let subtitle = userInfo["subtitle"] as? String
-                        {
-                            let defaults = UserDefaults(suiteName: "group.com.acxtrilla.LiquidSky")
-                            defaults?.set(title, forKey: "widget.recent.notification.title")
-                            defaults?.set(subtitle, forKey: "widget.recent.notification.subtitle")
-
-                            // Reload widget timeline
-                            if #available(iOS 14.0, *) {
-                                WidgetCenter.shared.reloadTimelines(
-                                    ofKind: "RecentNotificationWidget")
-                            }
-                        }
-                    }
-                    .onReceive(NotificationCenter.default.publisher(for: .notificationTapped)) {
-                        notification in
-                        // Handle push notification taps
-                        handleNotificationTap(notification)
-                    }
-                case .unauthenticated:
-                    AuthView()
+                    loadingView()
                         .environment(accountManager)
                         .environment(auth)
                         .environment(router)
@@ -214,11 +230,11 @@ struct LiquidSkyApp: App {
                         .environment(pushNotificationService)
                         // .environment(cloudKitSyncService)
                         .environment(inAppPurchaseService)
-                        .onAppear {
-                            #if DEBUG
-                                print("LiquidSkyApp: Showing unauthenticated state")
-                            #endif
-                        }
+                        .environment(feedPositionService)
+                case .authenticated(let client, let currentUser):
+                    authenticatedView(client: client, currentUser: currentUser)
+                case .unauthenticated:
+                    unauthenticatedView()
                 case .error(let error):
                     Text("Error: \(error.localizedDescription)")
                         .onAppear {
@@ -482,21 +498,36 @@ struct LiquidSkyApp: App {
                     print("LiquidSkyApp: Main task started")
                 #endif
 
-                // Wait for initial session restoration attempt with timeout
+                // Check if we have any accounts first - if not, go directly to auth
+                let hasAccounts = await MainActor.run { () -> Bool in
+                    return !accountManager.accounts.isEmpty
+                }
+
+                if !hasAccounts {
+                    #if DEBUG
+                        print("LiquidSkyApp: No accounts found, showing auth screen immediately")
+                    #endif
+                    await MainActor.run {
+                        appState = .unauthenticated
+                    }
+                    return
+                }
+
+                // Only attempt session restoration if we have accounts
                 #if DEBUG
-                    print("Waiting for initial session restoration...")
+                    print("LiquidSkyApp: Accounts found, attempting session restoration...")
                 #endif
 
-                // Add timeout to prevent long loading times
+                // Wait for initial session restoration attempt with timeout
                 await withTaskGroup(of: Void.self) { group in
                     group.addTask {
                         await auth.restoreSession()
                     }
 
                     group.addTask {
-                        try? await Task.sleep(nanoseconds: 3_000_000_000)  // 3 second timeout
+                        try? await Task.sleep(nanoseconds: 5_000_000_000)  // 5 second timeout
                         #if DEBUG
-                            print("Session restoration timeout reached")
+                            print("LiquidSkyApp: Session restoration timeout reached")
                         #endif
                     }
 
@@ -507,31 +538,15 @@ struct LiquidSkyApp: App {
                 // Check if we have an initial configuration after restoration attempt
                 if auth.configuration == nil {
                     #if DEBUG
-                        print("No initial configuration after restoration, showing auth screen")
+                        print("LiquidSkyApp: No configuration after restoration, showing auth screen")
                     #endif
                     await MainActor.run {
                         appState = .unauthenticated
-                        #if DEBUG
-                            print("Auth screen requested after failed restoration")
-                        #endif
                     }
                 } else {
                     #if DEBUG
-                        print(
-                            "Initial configuration found after restoration, proceeding with authentication"
-                        )
+                        print("LiquidSkyApp: Configuration found, proceeding with authentication")
                     #endif
-                }
-
-                // Safety net: if we are still in resuming state after the timeout, move on
-                let isStillResuming = await MainActor.run { () -> Bool in
-                    if case .resuming = appState { return true } else { return false }
-                }
-                if isStillResuming {
-                    #if DEBUG
-                        print("Safety fallback engaged: transitioning to unauthenticated state")
-                    #endif
-                    await MainActor.run { appState = .unauthenticated }
                 }
 
                 for await configuration in auth.configurationUpdates {
@@ -546,7 +561,7 @@ struct LiquidSkyApp: App {
                         await refreshEnvWith(configuration: configuration)
                     } else {
                         #if DEBUG
-                            print("No configuration available, showing auth screen")
+                            print("LiquidSkyApp: No configuration available, showing auth screen")
                         #endif
                         appState = .unauthenticated
                     }
@@ -584,7 +599,7 @@ struct LiquidSkyApp: App {
             #endif
 
             // Set user ID for CloudKit sync
-            if let profile = currentUser.profile {
+            if currentUser.profile != nil {
                 // cloudKitSyncService.setCurrentUserId(profile.profile.did)
             }
 
