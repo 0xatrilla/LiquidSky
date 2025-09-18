@@ -144,12 +144,16 @@ public struct ListMemberSearchView: View {
 
   private func performAction(_ action: ListMemberAction, for member: ListMember) async {
     // TODO: Implement individual member actions
+    #if DEBUG
     print("Would perform \(action) for \(member.handle)")
+    #endif
   }
 
   private func performBulkAction(_ action: ListMemberAction) async {
     // TODO: Implement bulk actions
+    #if DEBUG
     print("Would perform bulk \(action) for \(selectedMembers.count) members")
+    #endif
 
     // Clear selection after bulk action
     selectedMembers.removeAll()

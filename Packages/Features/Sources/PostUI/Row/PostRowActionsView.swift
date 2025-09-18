@@ -372,26 +372,6 @@ public struct PostRowActionsView: View {
         )
     }
 
-    private func mapToBlueskyReason(_ uiReason: String) -> String {
-        // Map our UI reasons to Bluesky's internal reporting reasons
-        switch uiReason {
-        case "Spam":
-            return "com.atproto.moderation.defs#reasonSpam"
-        case "Harassment or bullying":
-            return "com.atproto.moderation.defs#reasonHarassment"
-        case "False information":
-            return "com.atproto.moderation.defs#reasonMisleading"
-        case "Violence or threats":
-            return "com.atproto.moderation.defs#reasonViolence"
-        case "Inappropriate content":
-            return "com.atproto.moderation.defs#reasonSexual"
-        case "Other":
-            return "com.atproto.moderation.defs#reasonOther"
-        default:
-            return "com.atproto.moderation.defs#reasonOther"
-        }
-    }
-
     private func storeLocalReport(reason: String) async {
         // Store the report locally for future reference
         let report = LocalReport(
@@ -575,18 +555,4 @@ private struct LocalReport {
     let authorHandle: String
     let reason: String
     let timestamp: Date
-}
-
-private enum ReportError: Error, LocalizedError {
-    case clientNotAvailable
-    case blueskyReportingNotAvailable
-
-    var errorDescription: String? {
-        switch self {
-        case .clientNotAvailable:
-            return "Client not available for reporting"
-        case .blueskyReportingNotAvailable:
-            return "Bluesky reporting API not yet available"
-        }
-    }
 }

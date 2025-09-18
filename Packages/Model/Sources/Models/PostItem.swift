@@ -109,7 +109,7 @@ private func detectSensitiveContent(from post: AppBskyLexicon.Feed.PostViewDefin
       for child in mirror.children {
         if let labelArray = child.value as? [ComAtprotoLexicon.Label.LabelDefinition] {
           for label in labelArray {
-            if let value = label.value {
+            if let value = extractLabelString(label) {
               let lowercasedValue = value.lowercased()
               for sensitiveValue in sensitiveLabelValues {
                 if lowercasedValue.contains(sensitiveValue) {
@@ -132,7 +132,7 @@ private func detectSensitiveContent(from post: AppBskyLexicon.Feed.PostViewDefin
     for child in mirror.children {
       if let labelArray = child.value as? [ComAtprotoLexicon.Label.LabelDefinition] {
         for label in labelArray {
-          if let value = label.value {
+          if let value = extractLabelString(label) {
             let lowercasedValue = value.lowercased()
             for sensitiveValue in sensitiveLabelValues {
               if lowercasedValue.contains(sensitiveValue) {
@@ -146,6 +146,22 @@ private func detectSensitiveContent(from post: AppBskyLexicon.Feed.PostViewDefin
   }
   
   return (false, nil)
+}
+
+// Attempt to extract a string from LabelDefinition across SDK variations
+private func extractLabelString(_ label: ComAtprotoLexicon.Label.LabelDefinition) -> String? {
+  let mirror = Mirror(reflecting: label)
+  for child in mirror.children {
+    if let key = child.label {
+      switch key {
+      case "value", "val", "name", "uri", "id", "identifier":
+        if let s = child.value as? String { return s }
+      default:
+        continue
+      }
+    }
+  }
+  return nil
 }
 
 private func detectSensitiveContent(from viewRecord: AppBskyLexicon.Embed.RecordDefinition.ViewRecord) -> (isSensitive: Bool, contentWarning: String?) {
@@ -169,7 +185,7 @@ private func detectSensitiveContent(from viewRecord: AppBskyLexicon.Embed.Record
       for child in mirror.children {
         if let labelArray = child.value as? [ComAtprotoLexicon.Label.LabelDefinition] {
           for label in labelArray {
-            if let value = label.value {
+            if let value = extractLabelString(label) {
               let lowercasedValue = value.lowercased()
               for sensitiveValue in sensitiveLabelValues {
                 if lowercasedValue.contains(sensitiveValue) {
@@ -192,7 +208,7 @@ private func detectSensitiveContent(from viewRecord: AppBskyLexicon.Embed.Record
     for child in mirror.children {
       if let labelArray = child.value as? [ComAtprotoLexicon.Label.LabelDefinition] {
         for label in labelArray {
-          if let value = label.value {
+          if let value = extractLabelString(label) {
             let lowercasedValue = value.lowercased()
             for sensitiveValue in sensitiveLabelValues {
               if lowercasedValue.contains(sensitiveValue) {

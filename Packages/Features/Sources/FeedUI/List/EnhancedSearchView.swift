@@ -536,26 +536,10 @@ public struct EnhancedSearchView: View {
           }
         }
       } else {
-        // Follow user - use the same pattern as other working implementations
-        let followRecord = AppBskyLexicon.Graph.FollowDefinition(
-          subject: user.did,
-          createdAt: Date()
-        )
-        
-        // Get the current user's session
-        guard let session = try await client.protoClient.getUserSession() else {
-          #if DEBUG
-          print("EnhancedSearchView: No session found")
-          #endif
-          return
-        }
-        
-        let response = try await client.protoClient.createRecord(
-          repositoryDID: session.sessionDID,
-          collection: "app.bsky.graph.follow",
-          record: followRecord
-        )
-        
+        // Follow user using existing service logic to avoid SDK inconsistencies
+        let service = ListMemberActionsService(client: client)
+        _ = try await service.followUser(did: user.did)
+
         // Update the user in the suggested users list
         if let index = trendingContentService.suggestedUsers.firstIndex(where: { $0.did == user.did }) {
           let updatedUser = Profile(

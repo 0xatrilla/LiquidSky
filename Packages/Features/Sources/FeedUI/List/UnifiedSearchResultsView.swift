@@ -271,6 +271,8 @@ struct FeedSearchResultRow: View {
     isLiked.toggle()
 
     // Print debug info
+    #if DEBUG
     print("Would \(isLiked ? "like" : "unlike") feed: \(feed.uri)")
+    #endif
   }
 }

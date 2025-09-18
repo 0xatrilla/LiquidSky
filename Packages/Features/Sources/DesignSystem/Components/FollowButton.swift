@@ -97,26 +97,9 @@ public struct FollowButton: View {
           }
         }
       } else {
-        // Follow: Create a follow record
-        let followRecord = AppBskyLexicon.Graph.FollowDefinition(
-          subject: profile.did,
-          createdAt: Date()
-        )
-        
-        // Get the current user's session
-        guard let session = try await client.protoClient.getUserSession() else {
-          print("FollowButton: No session found")
-          return
-        }
-        
-        let response = try await client.protoClient.createRecord(
-          repositoryDID: session.sessionDID,
-          collection: "app.bsky.graph.follow",
-          record: followRecord
-        )
-        
-        // Store the follow URI for future unfollow operations
-        followingURI = response.recordURI
+        // Follow: Use the existing service to avoid SDK type issues
+        let service = ListMemberActionsService(client: client)
+        followingURI = try await service.followUser(did: profile.did)
 
         // Optimistically update the UI
         isFollowing = true
