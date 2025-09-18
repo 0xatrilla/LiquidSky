@@ -5,6 +5,7 @@ import SwiftUI
 public struct ComposerPostContextView: View {
     let post: PostItem
     @Environment(\.colorScheme) private var colorScheme
+    @State private var isExpanded = false
     
     public init(post: PostItem) {
         self.post = post
@@ -66,11 +67,27 @@ public struct ComposerPostContextView: View {
                 }
                 
                 // Post Text
-                Text(post.content)
-                    .font(.system(size: 14))
-                    .foregroundColor(.primary)
-                    .lineLimit(3)
-                    .multilineTextAlignment(.leading)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(post.content)
+                        .font(.system(size: 14))
+                        .foregroundColor(.primary)
+                        .lineLimit(isExpanded ? nil : 3)
+                        .multilineTextAlignment(.leading)
+                    
+                    // Show more/less button if content is long
+                    if shouldShowExpandButton {
+                        Button(action: {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                isExpanded.toggle()
+                            }
+                        }) {
+                            Text(isExpanded ? "Show less" : "Show more")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
                 
                 // Post Stats (if any)
                 if post.replyCount > 0 || post.repostCount > 0 || post.likeCount > 0 {
@@ -113,6 +130,12 @@ public struct ComposerPostContextView: View {
     }
     
     // MARK: - Helper Functions
+    
+    private var shouldShowExpandButton: Bool {
+        // Show expand button if content is longer than what would fit in 3 lines
+        let words = post.content.components(separatedBy: .whitespacesAndNewlines)
+        return words.count > 15 // Rough estimate for 3 lines
+    }
     
     private func formatRelativeTime(_ date: Date) -> String {
         let formatter = RelativeDateTimeFormatter()

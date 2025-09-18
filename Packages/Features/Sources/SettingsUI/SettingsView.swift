@@ -354,23 +354,6 @@ public struct SettingsView: View {
     VStack(spacing: 16) {
       SettingsSectionHeader(title: "AI Features", icon: "brain.head.profile", color: .purple)
 
-
-      SettingsToggleRow(
-        title: "Smart Reply Suggestions",
-        subtitle: "AI-generated reply suggestions for posts",
-        icon: "bubble.left.and.bubble.right.fill",
-        iconColor: .green,
-        isOn: $settingsService.smartReplySuggestionsEnabled
-      )
-
-      SettingsToggleRow(
-        title: "Semantic Search",
-        subtitle: "AI-powered search beyond keywords",
-        icon: "magnifyingglass.circle.fill",
-        iconColor: .orange,
-        isOn: $settingsService.semanticSearchEnabled
-      )
-
       SettingsToggleRow(
         title: "AI Composer Features",
         subtitle: "Advanced AI features in post composer",

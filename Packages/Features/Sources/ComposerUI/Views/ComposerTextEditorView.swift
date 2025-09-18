@@ -21,16 +21,6 @@ struct ComposerTextEditorView: View {
   var body: some View {
     ZStack(alignment: .topLeading) {
       VStack(spacing: 0) {
-        // Smart Replies Toolbar (only show for replies)
-        if post != nil {
-          SmartRepliesToolbar(
-            text: $text,
-            selection: $selection,
-            post: post,
-            onInsertSuggestion: insertSuggestion
-          )
-        }
-        
         ZStack(alignment: .topLeading) {
           TextEditor(text: $text, selection: $selection)
             .textInputFormattingControlVisibility(.hidden, for: .all)
@@ -140,19 +130,6 @@ struct ComposerTextEditorView: View {
     showAutocomplete = false
     autocompleteService?.clearSuggestions()
 
-    // Set focus back to text editor
-    isFocused = true
-  }
-  
-  // MARK: - Smart Replies
-  
-  private func insertSuggestion(_ suggestionText: String) {
-    // Insert the suggestion text at the end of the current text
-    let currentText = String(text.characters)
-    let newText = currentText.isEmpty ? suggestionText + " " : currentText + " " + suggestionText + " "
-    
-    text = AttributedString(newText)
-    
     // Set focus back to text editor
     isFocused = true
   }

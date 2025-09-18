@@ -63,16 +63,6 @@ public final class SettingsService {
   }
 
   // MARK: - AI Features
-  public var smartReplySuggestionsEnabled: Bool {
-    get { settings.smartReplySuggestionsEnabled }
-    set { settings.smartReplySuggestionsEnabled = newValue }
-  }
-
-  public var semanticSearchEnabled: Bool {
-    get { settings.semanticSearchEnabled }
-    set { settings.semanticSearchEnabled = newValue }
-  }
-
   public var aiComposerFeaturesEnabled: Bool {
     get { settings.aiComposerFeaturesEnabled }
     set { settings.aiComposerFeaturesEnabled = newValue }

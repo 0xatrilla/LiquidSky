@@ -155,16 +155,46 @@ public class SmartReplyService {
     // Add context-specific suggestions based on post content
     let content = post.content.lowercased()
     
+    // Question responses
     if content.contains("?") {
       customized.append(ReplySuggestion(text: "That's a great question!", tone: .supportive))
+      customized.append(ReplySuggestion(text: "I'd love to hear more about this", tone: .curious))
     }
     
-    if content.contains("congratulations") || content.contains("congrats") {
+    // Congratulations responses
+    if content.contains("congratulations") || content.contains("congrats") || content.contains("celebrat") {
       customized.append(ReplySuggestion(text: "Congratulations! 🎉", tone: .celebratory))
+      customized.append(ReplySuggestion(text: "That's amazing! Well done!", tone: .celebratory))
     }
     
+    // Thank you responses
     if content.contains("thank") || content.contains("thanks") {
       customized.append(ReplySuggestion(text: "You're welcome!", tone: .grateful))
+      customized.append(ReplySuggestion(text: "Happy to help!", tone: .grateful))
+    }
+    
+    // Frustration/anger responses
+    if content.contains("fuck") || content.contains("angry") || content.contains("frustrat") || content.contains("annoy") {
+      customized.append(ReplySuggestion(text: "I totally understand your frustration", tone: .supportive))
+      customized.append(ReplySuggestion(text: "That sounds really frustrating", tone: .supportive))
+    }
+    
+    // Excitement responses
+    if content.contains("!") && content.count > 20 {
+      customized.append(ReplySuggestion(text: "I'm excited about this too!", tone: .enthusiastic))
+      customized.append(ReplySuggestion(text: "This is so exciting!", tone: .enthusiastic))
+    }
+    
+    // Agreement responses
+    if content.contains("agree") || content.contains("exactly") || content.contains("this") {
+      customized.append(ReplySuggestion(text: "I completely agree!", tone: .supportive))
+      customized.append(ReplySuggestion(text: "You said it perfectly", tone: .supportive))
+    }
+    
+    // Tech/Bluesky specific responses
+    if content.contains("bluesky") || content.contains("bsky") || content.contains("social media") {
+      customized.append(ReplySuggestion(text: "Interesting perspective on Bluesky", tone: .thoughtful))
+      customized.append(ReplySuggestion(text: "I've been thinking about this too", tone: .thoughtful))
     }
     
     return Array(customized.prefix(maxSuggestions))

@@ -9,6 +9,7 @@ public enum ReplyTone: String, CaseIterable, Codable {
   case curious = "curious"
   case grateful = "grateful"
   case celebratory = "celebratory"
+  case enthusiastic = "enthusiastic"
   
   public var description: String {
     switch self {
@@ -20,6 +21,7 @@ public enum ReplyTone: String, CaseIterable, Codable {
     case .curious: return "Inquisitive and engaging"
     case .grateful: return "Appreciative and thankful"
     case .celebratory: return "Joyful and congratulatory"
+    case .enthusiastic: return "Excited and energetic"
     }
   }
 }

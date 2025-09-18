@@ -147,6 +147,8 @@ struct ReplySuggestionRow: View {
       return .orange
     case .curious, .grateful:
       return .purple
+    case .enthusiastic:
+      return .pink
     }
   }
 }
