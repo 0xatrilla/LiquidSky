@@ -50,6 +50,11 @@ public final class AppSettings {
     }
   }
 
+  // MARK: - AI Features
+  public var aiComposerFeaturesEnabled: Bool {
+    didSet { UserDefaults.standard.set(aiComposerFeaturesEnabled, forKey: "aiComposerFeaturesEnabled") }
+  }
+
   // MARK: - Media Settings
   public var imageQuality: ImageQuality {
     didSet { UserDefaults.standard.set(imageQuality.rawValue, forKey: "imageQuality") }
@@ -102,6 +107,8 @@ public final class AppSettings {
       UserDefaults.standard.object(forKey: "aiSummariesEnabled") as? Bool ?? false
     self.aiDeviceExperimentalEnabled =
       UserDefaults.standard.object(forKey: "aiDeviceExperimentalEnabled") as? Bool ?? false
+    self.aiComposerFeaturesEnabled =
+      UserDefaults.standard.object(forKey: "aiComposerFeaturesEnabled") as? Bool ?? true
     self.imageQuality =
       ImageQuality(rawValue: UserDefaults.standard.string(forKey: "imageQuality") ?? "high")
       ?? .high
@@ -148,7 +155,7 @@ public final class AppSettings {
 }
 
 // MARK: - Supporting Enums
-public enum AppIcon: String, CaseIterable {
+public enum AppIcon: String, CaseIterable, Sendable {
   case cloud = "AppIcon"
   case og = "AppIcon2"
   case blueprint = "AppIcon3"

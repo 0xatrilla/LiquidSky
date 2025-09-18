@@ -51,11 +51,6 @@ public struct EmbedDataExtractor {
         print("EmbedDataExtractor: No embed data found")
       #endif
       return nil
-    } catch {
-      #if DEBUG
-        print("EmbedDataExtractor: Error extracting embed data: \(error)")
-      #endif
-      return nil
     }
   }
 
@@ -367,11 +362,6 @@ public struct EmbedDataExtractor {
       #endif
 
       return nil
-    } catch {
-      #if DEBUG
-        print("EmbedDataExtractor: Error converting embed data: \(error)")
-      #endif
-      return nil
     }
   }
 
@@ -681,14 +671,14 @@ public struct EmbedDataExtractor {
               print("EmbedDataExtractor: Found DID: \(didString)")
             #endif
           }
-        case "handle", "actorHandle", "actorHandle":
+        case "handle", "actorHandle":
           if let handleString = child.value as? String {
             handle = handleString
             #if DEBUG
               print("EmbedDataExtractor: Found handle: \(handleString)")
             #endif
           }
-        case "displayName", "displayName", "actorDisplayName":
+        case "displayName", "actorDisplayName":
           if let displayNameString = child.value as? String {
             displayName = displayNameString
             #if DEBUG

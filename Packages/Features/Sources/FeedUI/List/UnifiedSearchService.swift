@@ -32,38 +32,32 @@ public class UnifiedSearchService: ObservableObject {
       isSearching = true
       searchError = nil
 
-      do {
-        let looksLikeHandle = query.hasPrefix("@") || query.contains(".")
-        var userResults: [Profile] = []
-        if looksLikeHandle {
-          userResults = await searchUsers(query: query)
-          if !userResults.isEmpty {
-            if !Task.isCancelled {
-              searchResults = SearchResults(posts: [], users: userResults, feeds: [])
-              isSearching = false
-            }
-            return
+      let looksLikeHandle = query.hasPrefix("@") || query.contains(".")
+      var userResults: [Profile] = []
+      if looksLikeHandle {
+        userResults = await searchUsers(query: query)
+        if !userResults.isEmpty {
+          if !Task.isCancelled {
+            searchResults = SearchResults(posts: [], users: userResults, feeds: [])
+            isSearching = false
           }
+          return
         }
+      }
 
-        // Simpler sequential flow to avoid main-actor isolation overhead
-        if !looksLikeHandle {
-          userResults = await searchUsers(query: query)
-        }
-        let postResults = await searchPosts(query: query)
-        let feedResults = await searchFeeds(query: query)
+      // Simpler sequential flow to avoid main-actor isolation overhead
+      if !looksLikeHandle {
+        userResults = await searchUsers(query: query)
+      }
+      let postResults = await searchPosts(query: query)
+      let feedResults = await searchFeeds(query: query)
 
-        if !Task.isCancelled {
-          searchResults = SearchResults(
-            posts: postResults,
-            users: userResults,
-            feeds: feedResults
-          )
-        }
-      } catch {
-        if !Task.isCancelled {
-          searchError = error
-        }
+      if !Task.isCancelled {
+        searchResults = SearchResults(
+          posts: postResults,
+          users: userResults,
+          feeds: feedResults
+        )
       }
 
       if !Task.isCancelled {
@@ -87,20 +81,14 @@ public class UnifiedSearchService: ObservableObject {
       isSearching = true
       searchError = nil
 
-      do {
-        let feedResults = await searchFeeds(query: query)
+      let feedResults = await searchFeeds(query: query)
 
-        if !Task.isCancelled {
-          searchResults = SearchResults(
-            posts: [],
-            users: [],
-            feeds: feedResults
-          )
-        }
-      } catch {
-        if !Task.isCancelled {
-          searchError = error
-        }
+      if !Task.isCancelled {
+        searchResults = SearchResults(
+          posts: [],
+          users: [],
+          feeds: feedResults
+        )
       }
 
       if !Task.isCancelled {

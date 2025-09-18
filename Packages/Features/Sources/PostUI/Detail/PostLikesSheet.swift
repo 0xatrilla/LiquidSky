@@ -197,11 +197,7 @@ private struct UserRowView: View {
       Spacer()
 
       // Follow button
-      Button("Follow") {
-        // TODO: Implement follow functionality
-      }
-      .buttonStyle(.borderedProminent)
-      .controlSize(.small)
+      FollowButton(profile: user, size: .small)
     }
   }
 }

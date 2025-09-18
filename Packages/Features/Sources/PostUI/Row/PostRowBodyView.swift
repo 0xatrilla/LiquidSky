@@ -26,15 +26,6 @@ public struct PostRowBodyView: View {
       onUsernameTap: onUsernameTap,
       onHashtagTap: onHashtagTap
     )
-    .onOpenURL { url in
-      guard url.scheme == "horizon" else { return }
-      let path = url.host() ?? ""
-      if path == "tag", let tag = url.path.split(separator: "/").dropFirst().first {
-        onHashtagTap?(String(tag))
-      } else if path == "user", let handle = url.path.split(separator: "/").dropFirst().first {
-        onUsernameTap?(String(handle))
-      }
-    }
   }
 
   private var compactMode: Bool {
@@ -57,7 +48,9 @@ struct ClickablePostText: View {
       .font(compactMode ? .caption : .body)
       .lineLimit(compactMode ? 3 : nil)
       .textSelection(.enabled)
-    // Don't add any explicit tap gestures here so the row tap remains active.
+      .onTapGesture { location in
+        handleTap(at: location, in: attributedString)
+      }
   }
 
   private func createAttributedString(from text: String) -> AttributedString {
@@ -73,11 +66,6 @@ struct ClickablePostText: View {
         attributedString[attributedRange].underlineStyle = .single
         // Add custom attribute to identify hashtags
         attributedString[attributedRange][HashtagAttribute.self] = String(match.output)
-        // Add tappable link using custom scheme to route via .onOpenURL
-        let tag = String(match.output.dropFirst())
-        if let link = URL(string: "horizon://tag/\(tag)") {
-          attributedString[attributedRange].link = link
-        }
       }
     }
 
@@ -91,10 +79,6 @@ struct ClickablePostText: View {
         attributedString[attributedRange].underlineStyle = .single
         // Add custom attribute to identify mentions
         attributedString[attributedRange][MentionAttribute.self] = String(match.output)
-        let handle = String(match.output.dropFirst())
-        if let link = URL(string: "horizon://user/\(handle)") {
-          attributedString[attributedRange].link = link
-        }
       }
     }
 
@@ -118,7 +102,10 @@ struct ClickablePostText: View {
   }
 
   private func handleTap(at location: CGPoint, in attributedString: AttributedString) {
-    // Check if the tap is on a hashtag, mention, or URL
+    // For now, we'll use a simple approach: check if there are any mentions, hashtags, or URLs
+    // and handle the first one found. This is a limitation of SwiftUI's current tap handling.
+    // In a future update, we could implement more precise tap detection using UITextView.
+    
     let hashtagPattern = #/#[a-zA-Z0-9_]+/#
     let mentionPattern = #/@[a-zA-Z0-9_.]+/#
     let urlPattern = #/https?://[^\s]+/#
@@ -129,11 +116,6 @@ struct ClickablePostText: View {
 
     // If no interactive elements, do nothing (let parent handle the tap)
     guard !hashtagMatches.isEmpty || !mentionMatches.isEmpty || !urlMatches.isEmpty else { return }
-
-    // For now, we'll use a simple heuristic: if there are interactive elements and the tap is
-    // in the text area, we'll assume it's on one. This is a limitation of
-    // SwiftUI's current tap handling, but it's better than the current broken behavior.
-    // In a future update, we could implement more precise tap detection using UITextView.
 
     // Priority: mentions > hashtags > URLs
     if let firstMention = mentionMatches.first {

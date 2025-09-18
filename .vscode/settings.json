@@ -1,11 +1,35 @@
 {
-    "[swift]": {
-      "editor.defaultFormatter": "sweetpad.sweetpad",
-      "editor.formatOnSave": true,
-      "editor.tabSize": 2
-    },
-    "git.autofetch": "all",
-    "git.enableSmartCommit": true,
-    "git.fetchOnPull": true,
-    "kiroAgent.configureMCP": "Disabled",
-  }
+  "files.exclude": {
+    "**/.bun": true,
+    "**/.npm": true,
+    "**/.yarn": true,
+    "**/.pnpm": true,
+    "**/.cache": true,
+    "**/node_modules": true,
+    "**/.DS_Store": true,
+    "**/._*": true,
+    "**/.git": false
+  },
+  "search.exclude": {
+    "**/.bun": true,
+    "**/.npm": true,
+    "**/.yarn": true,
+    "**/.pnpm": true,
+    "**/.cache": true,
+    "**/node_modules": true,
+    "**/.DS_Store": true,
+    "**/._*": true
+  },
+  "files.watcherExclude": {
+    "**/.bun/**": true,
+    "**/.npm/**": true,
+    "**/.yarn/**": true,
+    "**/.pnpm/**": true,
+    "**/.cache/**": true,
+    "**/node_modules/**": true,
+    "**/.DS_Store": true,
+    "**/._*": true
+  },
+  "git.ignoreLimitWarning": true,
+  "git.ignoreSubmodules": true
+}

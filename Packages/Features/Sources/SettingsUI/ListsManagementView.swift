@@ -154,7 +154,12 @@ public struct ListsManagementView: View {
             name: userLists[i].name,
             description: userLists[i].description,
             purpose: userLists[i].purpose,
-            memberCount: memberCount
+            uri: userLists[i].uri,
+            cid: userLists[i].cid,
+            createdAt: userLists[i].createdAt,
+            creator: userLists[i].creator,
+            memberCount: memberCount,
+            isSubscribed: userLists[i].isSubscribed
           )
         } catch {
           // Keep member count as 0 if fetch fails
@@ -186,11 +191,19 @@ public struct ListsManagementView: View {
   }
 
   private func deleteList(_ list: UserList) async {
-    // TODO: Implement actual list deletion using ATProtoKit
-    print("Would delete list: \(list.id)")
-
-    // For now, just remove from local array
-    lists.removeAll { $0.id == list.id }
+    do {
+      let listManagementService = ListManagementService(client: client)
+      try await listManagementService.deleteList(listURI: list.id)
+      
+      // Remove from local array on success
+      await MainActor.run {
+        lists.removeAll { $0.id == list.id }
+      }
+    } catch {
+      await MainActor.run {
+        self.error = error
+      }
+    }
   }
 
   private struct GetListsResponse: Decodable {
@@ -238,7 +251,12 @@ public struct ListsManagementView: View {
         name: name,
         description: description,
         purpose: purposeType,
-        memberCount: 0  // Will be updated when we fetch member count
+        uri: uri,
+        cid: "placeholder-cid",
+        createdAt: Date(),
+        creator: Profile(did: "placeholder-did", handle: "placeholder", displayName: nil, avatarImageURL: nil, description: nil, followersCount: 0, followingCount: 0, postsCount: 0, isFollowing: false, isFollowedBy: false, isBlocked: false, isBlocking: false, isMuted: false),
+        memberCount: 0,
+        isSubscribed: false
       )
     }
   }
@@ -247,6 +265,7 @@ public struct ListsManagementView: View {
     switch purpose {
     case .curation: return "star"
     case .moderation: return "hand.raised"
+    case .custom: return "list.bullet"
     case .mute: return "speaker.slash"
     case .block: return "person.slash"
     }
@@ -256,24 +275,10 @@ public struct ListsManagementView: View {
     switch purpose {
     case .curation: return .yellow
     case .moderation: return .orange
+    case .custom: return .blue
     case .mute: return .gray
     case .block: return .red
     }
   }
 }
 
-// Minimal local model to render lists; replace with Models types if present
-public struct UserList: Identifiable {
-  public enum Purpose { case curation, moderation, mute, block }
-  public let id: String
-  public let name: String
-  public let description: String?
-  public let purpose: Purpose
-  public let memberCount: Int
-
-  // Stub converter for when API becomes available
-  public static func fromAPI(_ any: Any) -> UserList {
-    UserList(
-      id: UUID().uuidString, name: "List", description: nil, purpose: .curation, memberCount: 0)
-  }
-}

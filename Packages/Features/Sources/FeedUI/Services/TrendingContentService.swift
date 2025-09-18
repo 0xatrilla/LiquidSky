@@ -6,10 +6,10 @@ import Models
 @MainActor
 @Observable
 public class TrendingContentService {
-  var trendingHashtags: [TrendingHashtag] = []
-  var suggestedUsers: [Profile] = []
-  var isLoading = false
-  var error: Error?
+  public var trendingHashtags: [TrendingHashtag] = []
+  public var suggestedUsers: [Profile] = []
+  public var isLoading = false
+  public var error: Error?
 
   public var client: BSkyClient
   private var fetchTask: Task<Void, Never>?
@@ -132,47 +132,84 @@ public class TrendingContentService {
 
   private func fetchSuggestedUsers() async throws -> [Profile] {
     do {
+      // Get current user's following list to exclude them from suggestions
+      let followingDIDs = try await getCurrentUserFollowing()
+      
       // Try multiple search strategies to get better suggested users
-      _ = [Profile]()
+      var allActors: [AppBskyLexicon.Actor.ProfileViewDefinition] = []
       
       // Strategy 1: Search for popular tech/developer accounts
       let techUsers = try await client.protoClient.searchActors(
         matching: "developer",
-        limit: 10
+        limit: 15
       )
       
       // Strategy 2: Search for popular content creators
       let creatorUsers = try await client.protoClient.searchActors(
         matching: "artist",
-        limit: 10
+        limit: 15
       )
       
       // Strategy 3: Search for popular tech companies/accounts
       let companyUsers = try await client.protoClient.searchActors(
         matching: "tech",
-        limit: 10
+        limit: 15
       )
       
-      // Combine and filter results
-      let allActors = techUsers.actors + creatorUsers.actors + companyUsers.actors
+      // Strategy 4: Search for popular accounts by followers
+      let popularUsers = try await client.protoClient.searchActors(
+        matching: "bluesky",
+        limit: 15
+      )
       
-      let suggestedUsers = allActors
-        .filter { actor in
-          // Filter out accounts with suspicious handles or very short names
-          !actor.actorHandle.contains("bot") && 
-          !actor.actorHandle.contains("spam") &&
-          !actor.actorHandle.contains("test") &&
-          actor.actorHandle.count > 3 &&
-          actor.displayName?.count ?? 0 > 2
-        }
-        .map { actor in
-          Profile(
+      // Combine all results
+      allActors = techUsers.actors + creatorUsers.actors + companyUsers.actors + popularUsers.actors
+      
+      // Filter out accounts with suspicious handles or very short names
+      let filteredActors = allActors.filter { actor in
+        !actor.actorHandle.contains("bot") && 
+        !actor.actorHandle.contains("spam") &&
+        !actor.actorHandle.contains("test") &&
+        actor.actorHandle.count > 3 &&
+        actor.displayName?.count ?? 0 > 2 &&
+        !followingDIDs.contains(actor.actorDID) // Exclude already followed accounts
+      }
+      
+      // Convert to Profile objects and fetch detailed information
+      var suggestedUsers: [Profile] = []
+      
+      // Fetch detailed profiles for each actor to get accurate follower counts
+      for actor in filteredActors.prefix(12) {
+        do {
+          let detailedProfile = try await client.protoClient.getProfile(for: actor.actorDID)
+          let profile = Profile(
+            did: detailedProfile.actorDID,
+            handle: detailedProfile.actorHandle,
+            displayName: detailedProfile.displayName,
+            avatarImageURL: detailedProfile.avatarImageURL,
+            description: detailedProfile.description,
+            followersCount: detailedProfile.followerCount ?? 0,
+            followingCount: detailedProfile.followCount ?? 0,
+            postsCount: detailedProfile.postCount ?? 0,
+            isFollowing: detailedProfile.viewer?.followingURI != nil,
+            isFollowedBy: detailedProfile.viewer?.followedByURI != nil,
+            isBlocked: detailedProfile.viewer?.isBlocked == true,
+            isBlocking: detailedProfile.viewer?.blockingURI != nil,
+            isMuted: detailedProfile.viewer?.isMuted == true
+          )
+          suggestedUsers.append(profile)
+        } catch {
+          #if DEBUG
+          print("TrendingContentService: Failed to fetch detailed profile for \(actor.actorHandle): \(error)")
+          #endif
+          // Fallback to basic profile if detailed fetch fails
+          let profile = Profile(
             did: actor.actorDID,
             handle: actor.actorHandle,
             displayName: actor.displayName,
             avatarImageURL: actor.avatarImageURL,
             description: actor.description,
-            followersCount: 0,  // Will be updated when full profile is fetched
+            followersCount: 0,  // Unknown if we can't fetch detailed profile
             followingCount: 0,
             postsCount: 0,
             isFollowing: actor.viewer?.followingURI != nil,
@@ -181,17 +218,41 @@ public class TrendingContentService {
             isBlocking: actor.viewer?.blockingURI != nil,
             isMuted: actor.viewer?.isMuted == true
           )
+          suggestedUsers.append(profile)
         }
-        .uniqued(by: \.did) // Remove duplicates based on DID
+      }
 
-      // Return a curated selection, prioritizing verified/established accounts
-      return Array(suggestedUsers.prefix(8))
+      // Return the suggested users with accurate follower counts
+      return suggestedUsers
 
     } catch {
       #if DEBUG
       print("TrendingContentService: Failed to fetch suggested users: \(error)")
       #endif
       throw error
+    }
+  }
+  
+  private func getCurrentUserFollowing() async throws -> Set<String> {
+    do {
+      // Get the current user's handle from the session
+      guard let session = try await client.protoClient.getUserSession() else {
+        #if DEBUG
+        print("TrendingContentService: No session found")
+        #endif
+        return Set()
+      }
+      
+      let following = try await client.protoClient.getFollows(
+        from: session.handle,
+        limit: 100
+      )
+      return Set(following.follows.map { $0.actorDID })
+    } catch {
+      #if DEBUG
+      print("TrendingContentService: Failed to get following list: \(error)")
+      #endif
+      return Set() // Return empty set if we can't get following list
     }
   }
 

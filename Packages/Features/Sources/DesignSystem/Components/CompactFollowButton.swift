@@ -1,6 +1,7 @@
-import SwiftUI
-import Models
+import ATProtoKit
 import Client
+import Models
+import SwiftUI
 
 public struct CompactFollowButton: View {
   let profile: Profile
@@ -79,16 +80,25 @@ public struct CompactFollowButton: View {
           }
         }
       } else {
-        // Follow: Create a follow record
-        // TODO: Implement actual follow creation using ATProtoKit
-        // The correct approach would be to use the client.protoClient.createRecord method
-        // with collection "app.bsky.graph.follow" and appropriate record data
+        // Follow: Create follow record using typed lexicon
+        let record = AppBskyLexicon.Graph.FollowRecord(
+          subjectDID: profile.did,
+          createdAt: Date()
+        )
+        
+        // Get the current user's session
+        guard let session = try await client.protoClient.getUserSession() else {
+          throw FollowError.unknownError
+        }
+        
+        let response = try await client.blueskyClient.createFollowRecord(
+          actorDID: profile.did,
+          createdAt: Date()
+        )
+        followingURI = response.recordURI
         
         // Optimistically update the UI
         isFollowing = true
-        
-        // For now, we'll simulate the API call
-        print("Would follow user: \(profile.did)")
       }
     } catch {
       // Revert optimistic updates on error
@@ -134,5 +144,5 @@ public struct CompactFollowButton: View {
     )
   }
   .padding()
-  .background(Color(.systemBackground))
+  .background(Color.clear)
 }

@@ -87,16 +87,27 @@ public struct PostRowView: View {
           .font(.caption)
           .foregroundStyle(.secondary)
       }
-      PostRowBodyView(
-        post: post,
-        onUsernameTap: { username in
-          Task { await searchAndNavigateToUser(username: username) }
-        },
-        onHashtagTap: { tag in
-          router[currentTab].append(.hashtag(tag))
-        }
-      )
-      PostRowEmbedView(post: post)
+      // Show content warning if post is sensitive and user hasn't enabled sensitive content
+      if post.isSensitive && !settingsService.showSensitiveContent {
+        SensitiveContentWarningView(
+          contentWarning: post.contentWarning,
+          onShowContent: {
+            // Toggle the setting to show sensitive content
+            settingsService.showSensitiveContent = true
+          }
+        )
+      } else {
+        PostRowBodyView(
+          post: post,
+          onUsernameTap: { username in
+            Task { await searchAndNavigateToUser(username: username) }
+          },
+          onHashtagTap: { tag in
+            router[currentTab].append(.hashtag(tag))
+          }
+        )
+        PostRowEmbedView(post: post)
+      }
       if !isQuote {
         PostRowActionsView(post: post)
 
@@ -250,6 +261,66 @@ public struct PostRowView: View {
     }
   }
 
+}
+
+// MARK: - Sensitive Content Warning View
+struct SensitiveContentWarningView: View {
+  let contentWarning: String?
+  let onShowContent: () -> Void
+  
+  var body: some View {
+    VStack(spacing: 12) {
+      HStack {
+        Image(systemName: "exclamationmark.triangle.fill")
+          .foregroundColor(.orange)
+          .font(.title2)
+        
+        VStack(alignment: .leading, spacing: 4) {
+          Text("Sensitive Content")
+            .font(.headline)
+            .foregroundColor(.primary)
+          
+          if let warning = contentWarning {
+            Text(warning)
+              .font(.subheadline)
+              .foregroundColor(.secondary)
+          } else {
+            Text("This post may contain sensitive content")
+              .font(.subheadline)
+              .foregroundColor(.secondary)
+          }
+        }
+        
+        Spacer()
+      }
+      
+      Button(action: onShowContent) {
+        HStack {
+          Image(systemName: "eye.fill")
+          Text("Show Content")
+        }
+        .font(.subheadline)
+        .fontWeight(.medium)
+        .foregroundColor(.white)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(
+          RoundedRectangle(cornerRadius: 8)
+            .fill(Color.orange)
+        )
+      }
+      .buttonStyle(.plain)
+    }
+    .padding()
+    .background(
+      RoundedRectangle(cornerRadius: 12)
+        .fill(Color.orange.opacity(0.1))
+        .overlay(
+          RoundedRectangle(cornerRadius: 12)
+            .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+        )
+    )
+  }
 }
 
 // #Preview {

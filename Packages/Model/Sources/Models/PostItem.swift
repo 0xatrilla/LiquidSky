@@ -35,6 +35,10 @@ public struct PostItem: Hashable, Identifiable, Sendable {
   // Embed data for media, links, and quoted posts
   public let embed: EmbedData?
 
+  // Content warnings and labels
+  public let isSensitive: Bool
+  public let contentWarning: String?
+
   public var hasReply: Bool = false
   public var isReplyTo: Bool = false
 
@@ -52,7 +56,9 @@ public struct PostItem: Hashable, Identifiable, Sendable {
     replyRef: AppBskyLexicon.Feed.PostRecord.ReplyReference?,
     inReplyToHandle: String? = nil,
     repostedBy: Profile? = nil,
-    embed: EmbedData? = nil
+    embed: EmbedData? = nil,
+    isSensitive: Bool = false,
+    contentWarning: String? = nil
   ) {
     self.uri = uri
     self.cid = cid
@@ -69,10 +75,153 @@ public struct PostItem: Hashable, Identifiable, Sendable {
     self.inReplyToHandle = inReplyToHandle
     self.repostedBy = repostedBy
     self.embed = embed
+    self.isSensitive = isSensitive
+    self.contentWarning = contentWarning
     self.isReposted = repostedBy != nil
     self.hasReply = replyCount > 0
     self.isReplyTo = replyRef != nil
   }
+}
+
+// MARK: - Sensitive Content Detection
+private func detectSensitiveContent(from post: AppBskyLexicon.Feed.PostViewDefinition) -> (isSensitive: Bool, contentWarning: String?) {
+  // Check for content warnings in the text first
+  if let record = post.record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self) {
+    let text = record.text.lowercased()
+    let sensitiveKeywords = ["nsfw", "sensitive", "adult", "explicit", "trigger warning", "tw:", "cw:", "nsfl", "disturbing"]
+    
+    for keyword in sensitiveKeywords {
+      if text.contains(keyword) {
+        return (true, "Content Warning")
+      }
+    }
+  }
+  
+  // Check for labels in the post record
+  if let record = post.record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self) {
+    // Try to access labels if they exist
+    if let labels = record.labels {
+      // Check if labels contain sensitive content indicators
+      let sensitiveLabelValues = ["nsfw", "sensitive", "adult", "explicit", "gore", "violence"]
+      
+      // Use reflection to access the labels array
+      let mirror = Mirror(reflecting: labels)
+      for child in mirror.children {
+        if let labelArray = child.value as? [ComAtprotoLexicon.Label.LabelDefinition] {
+          for label in labelArray {
+            if let value = extractLabelString(label) {
+              let lowercasedValue = value.lowercased()
+              for sensitiveValue in sensitiveLabelValues {
+                if lowercasedValue.contains(sensitiveValue) {
+                  return (true, "Content Warning")
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  // Check for labels in the post itself
+  if let labels = post.labels {
+    let sensitiveLabelValues = ["nsfw", "sensitive", "adult", "explicit", "gore", "violence"]
+    
+    // Use reflection to access the labels array
+    let mirror = Mirror(reflecting: labels)
+    for child in mirror.children {
+      if let labelArray = child.value as? [ComAtprotoLexicon.Label.LabelDefinition] {
+        for label in labelArray {
+          if let value = extractLabelString(label) {
+            let lowercasedValue = value.lowercased()
+            for sensitiveValue in sensitiveLabelValues {
+              if lowercasedValue.contains(sensitiveValue) {
+                return (true, "Content Warning")
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  return (false, nil)
+}
+
+// Attempt to extract a string from LabelDefinition across SDK variations
+private func extractLabelString(_ label: ComAtprotoLexicon.Label.LabelDefinition) -> String? {
+  let mirror = Mirror(reflecting: label)
+  for child in mirror.children {
+    if let key = child.label {
+      switch key {
+      case "value", "val", "name", "uri", "id", "identifier":
+        if let s = child.value as? String { return s }
+      default:
+        continue
+      }
+    }
+  }
+  return nil
+}
+
+private func detectSensitiveContent(from viewRecord: AppBskyLexicon.Embed.RecordDefinition.ViewRecord) -> (isSensitive: Bool, contentWarning: String?) {
+  // Check for content warnings in the text first
+  if let record = viewRecord.value.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self) {
+    let text = record.text.lowercased()
+    let sensitiveKeywords = ["nsfw", "sensitive", "adult", "explicit", "trigger warning", "tw:", "cw:", "nsfl", "disturbing"]
+    
+    for keyword in sensitiveKeywords {
+      if text.contains(keyword) {
+        return (true, "Content Warning")
+      }
+    }
+    
+    // Check for labels in the post record
+    if let labels = record.labels {
+      let sensitiveLabelValues = ["nsfw", "sensitive", "adult", "explicit", "gore", "violence"]
+      
+      // Use reflection to access the labels array
+      let mirror = Mirror(reflecting: labels)
+      for child in mirror.children {
+        if let labelArray = child.value as? [ComAtprotoLexicon.Label.LabelDefinition] {
+          for label in labelArray {
+            if let value = extractLabelString(label) {
+              let lowercasedValue = value.lowercased()
+              for sensitiveValue in sensitiveLabelValues {
+                if lowercasedValue.contains(sensitiveValue) {
+                  return (true, "Content Warning")
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  // Check for labels in the view record itself
+  if let labels = viewRecord.labels {
+    let sensitiveLabelValues = ["nsfw", "sensitive", "adult", "explicit", "gore", "violence"]
+    
+    // Use reflection to access the labels array
+    let mirror = Mirror(reflecting: labels)
+    for child in mirror.children {
+      if let labelArray = child.value as? [ComAtprotoLexicon.Label.LabelDefinition] {
+        for label in labelArray {
+          if let value = extractLabelString(label) {
+            let lowercasedValue = value.lowercased()
+            for sensitiveValue in sensitiveLabelValues {
+              if lowercasedValue.contains(sensitiveValue) {
+                return (true, "Content Warning")
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  return (false, nil)
 }
 
 extension AppBskyLexicon.Feed.FeedViewPostDefinition {
@@ -84,7 +233,7 @@ extension AppBskyLexicon.Feed.FeedViewPostDefinition {
       // Check if this is a repost
       // Try to extract repost information from ATProtoKit
       // Since we don't know the exact type, let's use reflection to find the structure
-      let mirror = Mirror(reflecting: reason)
+      let _ = Mirror(reflecting: reason)
 
       // Try to extract the repost author from the reason field
       // Based on ATProtoKit structure, the reason should contain author information
@@ -102,6 +251,7 @@ extension AppBskyLexicon.Feed.FeedViewPostDefinition {
     }
 
     let embedData = EmbedDataExtractor.extractEmbed(from: post)
+    let sensitiveContent = detectSensitiveContent(from: post)
     
     let postItem = PostItem(
       uri: post.postItem.uri,
@@ -118,7 +268,9 @@ extension AppBskyLexicon.Feed.FeedViewPostDefinition {
       inReplyToHandle: extractReplyTargetHandle(
         from: post.record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self)?.reply),
       repostedBy: repostedByProfile,
-      embed: embedData
+      embed: embedData,
+      isSensitive: sensitiveContent.isSensitive,
+      contentWarning: sensitiveContent.contentWarning
     )
 
     // Debug reply detection
@@ -154,6 +306,7 @@ private func extractReplyTargetHandle(from reply: AppBskyLexicon.Feed.PostRecord
 extension AppBskyLexicon.Feed.PostViewDefinition {
   public var postItem: PostItem {
     let embedData = EmbedDataExtractor.extractEmbed(from: self)
+    let sensitiveContent = detectSensitiveContent(from: self)
     #if DEBUG
     print("PostViewDefinition: Creating PostItem for \(uri)")
     print("PostViewDefinition: Embed data extracted: \(String(describing: embedData))")
@@ -171,7 +324,9 @@ extension AppBskyLexicon.Feed.PostViewDefinition {
       likeURI: viewer?.likeURI,
       repostURI: viewer?.repostURI,
       replyRef: record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self)?.reply,
-      embed: embedData
+      embed: embedData,
+      isSensitive: sensitiveContent.isSensitive,
+      contentWarning: sensitiveContent.contentWarning
     )
   }
 }
@@ -183,6 +338,7 @@ extension AppBskyLexicon.Feed.ThreadViewPostDefinition {
 extension AppBskyLexicon.Embed.RecordDefinition.ViewRecord {
   public var postItem: PostItem {
     let embedData = EmbedDataExtractor.extractEmbed(from: self)
+    let sensitiveContent = detectSensitiveContent(from: self)
     #if DEBUG
     print("ViewRecord: Creating PostItem for \(uri)")
     print("ViewRecord: Embed data extracted: \(String(describing: embedData))")
@@ -200,7 +356,9 @@ extension AppBskyLexicon.Embed.RecordDefinition.ViewRecord {
       likeURI: nil,
       repostURI: nil,
       replyRef: value.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self)?.reply,
-      embed: embedData
+      embed: embedData,
+      isSensitive: sensitiveContent.isSensitive,
+      contentWarning: sensitiveContent.contentWarning
     )
   }
 }
@@ -226,7 +384,9 @@ extension PostItem {
         likeURI: nil,
         repostURI: nil,
         replyRef: nil,
-        embed: nil)
+        embed: nil,
+        isSensitive: false,
+        contentWarning: nil)
   }
 
 }
@@ -343,7 +503,7 @@ private func extractProfileFromValue(_ value: Any) -> Profile? {
             print("PostsListView: Found DID: \(stringValue)")
           #endif
         }
-      case "handle", "actorHandle", "actorHandle":
+      case "handle", "actorHandle":
         if let stringValue = child.value as? String {
           handle = stringValue
           #if DEBUG

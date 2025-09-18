@@ -71,28 +71,49 @@ public struct EnhancedGroupedNotificationRow: View {
       // Clean action text
       HStack {
         Text(actionTextBuilder(group.notifications.count))
-          .font(.body)
+          .font(.callout)
+          .fontWeight(.semibold)
           .foregroundStyle(.primary)
 
         Spacer()
 
         if let firstNotification = group.notifications.first {
           Text(firstNotification.indexedAt.formatted(.relative(presentation: .named)))
-            .font(.subheadline)
+            .font(.caption)
             .foregroundStyle(.secondary)
         }
       }
 
       // Post content if available
       if let postItem = group.postItem, !postItem.content.isEmpty {
-        Text(postItem.content)
-          .font(.body)
-          .foregroundStyle(.secondary)
-          .lineLimit(2)
+        if postItem.isSensitive {
+          // Show sensitive content warning instead of content
+          HStack {
+            Image(systemName: "exclamationmark.triangle.fill")
+              .foregroundColor(.orange)
+              .font(.caption)
+            
+            Text("Sensitive content")
+              .font(.caption)
+              .foregroundStyle(.secondary)
+              .italic()
+            
+            Spacer()
+          }
           .padding(.top, 4)
           .onTapGesture {
             navigateToPost()
           }
+        } else {
+          Text(postItem.content)
+            .font(.body)
+            .foregroundStyle(.secondary)
+            .lineLimit(2)
+            .padding(.top, 4)
+            .onTapGesture {
+              navigateToPost()
+            }
+        }
       }
     }
     .padding(.horizontal, 16)

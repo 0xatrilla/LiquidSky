@@ -1,4 +1,5 @@
 import Client
+import Models
 import SwiftUI
 
 @available(iOS 26.0, *)
@@ -8,6 +9,7 @@ struct ComposerTextEditorView: View {
   @Environment(BSkyClient.self) private var client
 
   let sendState: ComposerSendState
+  let post: PostItem? // Add post parameter for smart replies
   @FocusState private var isFocused: Bool
 
   @State private var isPlaceholder = true
@@ -65,6 +67,11 @@ struct ComposerTextEditorView: View {
           .padding(.horizontal)
           .padding(.bottom)
           .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        
+        // Original Post Context (only show for replies)
+        if let post = post {
+          ComposerPostContextView(post: post)
         }
       }
     }

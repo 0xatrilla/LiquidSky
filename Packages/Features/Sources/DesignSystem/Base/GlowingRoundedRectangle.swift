@@ -12,13 +12,13 @@ public struct GlowingRoundedRectangle: ViewModifier {
       RoundedRectangle(cornerRadius: cornerRadius)
         .stroke(
           LinearGradient(
-            colors: [.shadowPrimary.opacity(0.5), .blueskyBackground.opacity(0.5)],
+            colors: [.shadowPrimary.opacity(0.5), .blueskyPrimary.opacity(0.5)],
             startPoint: .topLeading,
             endPoint: .bottomTrailing),
           lineWidth: 1)
     }
     .clipShape(.rect(cornerRadius: cornerRadius))
-    .shadow(color: .blueskyBackground.opacity(0.3), radius: 2)
+    .shadow(color: .blueskyPrimary.opacity(0.3), radius: 2)
   }
 }
 

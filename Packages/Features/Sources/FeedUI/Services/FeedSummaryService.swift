@@ -15,9 +15,42 @@ public class FeedSummaryService {
   // Apple Intelligence session will be created lazily at use time to avoid init-time crashes on unsupported devices
   // Device support enabled: rely on iOS availability and safe fallbacks
 
+  // Performance optimizations
+  private var summaryCache: [String: (summary: String, timestamp: Date)] = [:]
+  private let cacheExpirationInterval: TimeInterval = 300 // 5 minutes
+  private let maxPostsForSummary = 50 // Limit posts to process for faster summarization
+  private let maxContentLength = 200 // Reduced from 400 for faster processing
+
   private init() {}
+  
+  // MARK: - Cache Management
+  
+  public func clearCache() {
+    summaryCache.removeAll()
+  }
+  
+  public func clearExpiredCache() {
+    let now = Date()
+    summaryCache = summaryCache.filter { _, value in
+      now.timeIntervalSince(value.timestamp) < cacheExpirationInterval
+    }
+  }
 
   public func summarizeFeedPosts(_ posts: [Any], feedName: String) async -> String {
+    let monitor = FeedSummaryPerformanceMonitor.shared
+    monitor.startTiming(for: "total_summarization")
+    
+    // Check cache first for performance
+    let cacheKey = "\(feedName)_\(posts.count)"
+    if let cached = summaryCache[cacheKey],
+       Date().timeIntervalSince(cached.timestamp) < cacheExpirationInterval {
+      #if DEBUG
+      print("AI Summary: Using cached summary for \(feedName)")
+      #endif
+      _ = monitor.endTiming(for: "total_summarization")
+      return cached.summary
+    }
+
     // Filter posts from last 12 hours using reflection
     let twelveHoursAgo = Date().addingTimeInterval(-12 * 60 * 60)
     let recentPosts = posts.filter { post in
@@ -26,8 +59,12 @@ public class FeedSummaryService {
       }
       return false
     }
+    
+    // Limit posts for faster processing
+    let limitedPosts = Array(recentPosts.prefix(maxPostsForSummary))
+    
     // Prefer newest posts first for summarization
-    let sortedRecentPosts = recentPosts.sorted {
+    let sortedRecentPosts = limitedPosts.sorted {
       (getIndexedAt(from: $0) ?? .distantPast) > (getIndexedAt(from: $1) ?? .distantPast)
     }
 
@@ -56,8 +93,13 @@ public class FeedSummaryService {
               "AI Summary: LanguageModelSession created successfully. Preparing to request response..."
             )
           #endif
-          return await generateAISummary(
+          let summary = await generateAISummary(
             posts: sortedRecentPosts, feedName: feedName, session: session)
+          
+          // Cache the result
+          summaryCache[cacheKey] = (summary: summary, timestamp: Date())
+          _ = monitor.endTiming(for: "total_summarization")
+          return summary
         } else {
           #if DEBUG
             print("AI Summary: Failed to create LanguageModelSession (nil returned). Falling back.")
@@ -80,7 +122,12 @@ public class FeedSummaryService {
         #endif
       }
     #endif
-    return generateBasicSummary(posts: recentPosts, feedName: feedName)
+    let summary = generateBasicSummary(posts: sortedRecentPosts, feedName: feedName)
+    
+    // Cache the basic summary result too
+    summaryCache[cacheKey] = (summary: summary, timestamp: Date())
+    _ = monitor.endTiming(for: "total_summarization")
+    return summary
   }
 
   private func getIndexedAt(from post: Any) -> Date? {
@@ -161,7 +208,7 @@ public class FeedSummaryService {
     private func generateAISummary(posts: [Any], feedName: String, session: LanguageModelSession)
       async -> String
     {
-      // Prepare post content for AI analysis
+      // Prepare post content for AI analysis with optimized processing
       let entries: [String] = posts.compactMap { post -> String? in
         guard let content = getPostContent(from: post),
           let handle = getAuthorHandle(from: post)
@@ -169,11 +216,11 @@ public class FeedSummaryService {
         let displayName = getAuthorDisplayName(from: post) ?? handle
         let timeAgo = getIndexedAt(from: post).map { formatRelativeTime($0) } ?? "unknown time"
         return
-          "@\(handle) (\(displayName)) - \(timeAgo):\n\(truncateContent(content, maxLength: 400))\n"
+          "@\(handle) (\(displayName)) - \(timeAgo):\n\(truncateContent(content, maxLength: maxContentLength))\n"
       }
 
-      // Heuristic character budgets to avoid 4096-token window (approx ~3 chars/token). Leave headroom.
-      let maxPromptChars = 9000
+      // Reduced character budget for faster processing
+      let maxPromptChars = 6000
 
       // Try a direct single-pass summary with trimmed content
       let directSummary = await attemptDirectSummary(
@@ -257,7 +304,7 @@ public class FeedSummaryService {
       entries: [String], feedName: String, session: LanguageModelSession
     ) async -> String? {
       // Chunk entries into bite-sized groups and summarize each, then summarize the summaries
-      let maxChunkChars = 6000
+      let maxChunkChars = 4000 // Reduced for faster processing
       var chunks: [[String]] = []
       var current: [String] = []
       var running = 0
@@ -273,25 +320,29 @@ public class FeedSummaryService {
         }
       }
       if !current.isEmpty { chunks.append(current) }
+      
+      // Limit chunks for faster processing
+      let maxChunks = 3
+      let limitedChunks = Array(chunks.prefix(maxChunks))
 
       var partials: [String] = []
-      partials.reserveCapacity(chunks.count)
+      partials.reserveCapacity(limitedChunks.count)
 
-      for (idx, chunk) in chunks.enumerated() {
+      for (idx, chunk) in limitedChunks.enumerated() {
         let body = chunk.joined(separator: "\n---\n")
         let prompt = """
-          You are summarizing part \(idx + 1) of \(chunks.count) from the "\(feedName)" feed.
+          You are summarizing part \(idx + 1) of \(limitedChunks.count) from the "\(feedName)" feed.
 
           Posts in this part (\(chunk.count)):
           \(body)
 
-          Produce a concise paragraph summary (2-3 sentences) of the key themes, notable discussions, and sentiment from this section.
-          Focus on the most important and interesting content. No bullet points - write in flowing paragraph form.
+          Produce a concise paragraph summary (1-2 sentences) of the key themes and notable discussions from this section.
+          Focus on the most important content. No bullet points - write in flowing paragraph form.
           """
         do {
           #if DEBUG
             print(
-              "AI Summary: Summarizing chunk \(idx + 1)/\(chunks.count) (\(prompt.count) chars)…")
+              "AI Summary: Summarizing chunk \(idx + 1)/\(limitedChunks.count) (\(prompt.count) chars)…")
           #endif
           let response = try await session.respond(to: prompt)
           partials.append(response.content)
@@ -352,8 +403,8 @@ public class FeedSummaryService {
     // Create detailed content summary by author
     let sortedAuthors = postsByAuthor.sorted { $0.value.count > $1.value.count }
 
-    // Generate paragraph-style summary
-    let topContributors = sortedAuthors.prefix(5)
+    // Generate paragraph-style summary with limited processing
+    let topContributors = sortedAuthors.prefix(3) // Reduced from 5 for faster processing
     let contributorNames = topContributors.map { author, posts in
       let displayName = getAuthorDisplayName(from: posts.first) ?? author
       return displayName != author ? "\(displayName) (@\(author))" : "@\(author)"
@@ -364,12 +415,12 @@ public class FeedSummaryService {
         "The most active contributors include \(contributorNames.joined(separator: ", ")). "
     }
 
-    // Add content themes
+    // Add content themes with limited processing
     var contentThemes: [String] = []
     for (_, authorPosts) in topContributors {
-      for post in authorPosts.prefix(2) {
+      for post in authorPosts.prefix(1) { // Reduced from 2 for faster processing
         if let content = getPostContent(from: post) {
-          let truncatedContent = truncateContent(content, maxLength: 200)
+          let truncatedContent = truncateContent(content, maxLength: 100) // Reduced from 200
           contentThemes.append(truncatedContent)
         }
       }
@@ -377,15 +428,15 @@ public class FeedSummaryService {
 
     if !contentThemes.isEmpty {
       summary +=
-        "Key discussions included topics around \(contentThemes.prefix(3).joined(separator: ", ")). "
+        "Key discussions included topics around \(contentThemes.prefix(2).joined(separator: ", ")). " // Reduced from 3
     }
 
     summary +=
       "The community has been engaged with various topics, showing active participation and thoughtful discussions throughout the day."
 
-    if sortedAuthors.count > 5 {
+    if sortedAuthors.count > 3 { // Reduced from 5
       summary +=
-        " Additionally, \(sortedAuthors.count - 5) other contributors also shared their thoughts and updates."
+        " Additionally, \(sortedAuthors.count - 3) other contributors also shared their thoughts and updates."
     }
 
     let aiAvailability: String = {

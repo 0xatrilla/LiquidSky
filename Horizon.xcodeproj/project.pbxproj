@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1D9964982E74DE27000D6127 /* AcknowList in Frameworks */ = {isa = PBXBuildFile; productRef = 1D9964972E74DE27000D6127 /* AcknowList */; };
+		1D99649B2E74DE34000D6127 /* KeychainSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 1D99649A2E74DE34000D6127 /* KeychainSwift */; };
 		9F1552E62CEF35B200DD9F6E /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 9F1552E52CEF35B200DD9F6E /* Auth */; };
 		9F1552E82CEF35B200DD9F6E /* Models in Frameworks */ = {isa = PBXBuildFile; productRef = 9F1552E72CEF35B200DD9F6E /* Models */; };
 		9F1552ED2CEF35C000DD9F6E /* AuthUI in Frameworks */ = {isa = PBXBuildFile; productRef = 9F1552EC2CEF35C000DD9F6E /* AuthUI */; };
@@ -77,6 +79,27 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1D7685462E76250E007F61EB /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Pods.xcodeproj; sourceTree = "<group>"; };
+		1D7685482E76250E007F61EB /* AcknowExampleCocoaPods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AcknowExampleCocoaPods.xcodeproj; sourceTree = "<group>"; };
+		1D7685622E76250E007F61EB /* AcknowExample.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AcknowExample.xcodeproj; sourceTree = "<group>"; };
+		1D7685702E76250E007F61EB /* AcknowExampleSPM.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AcknowExampleSPM.xcodeproj; sourceTree = "<group>"; };
+		1D7685AD2E76250E007F61EB /* AcknowList.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AcknowList.xcodeproj; sourceTree = "<group>"; };
+		1D7688A72E76250E007F61EB /* KeychainSwift.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = KeychainSwift.xcodeproj; sourceTree = "<group>"; };
+		1D7689842E76250E007F61EB /* Nuke.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Nuke.xcodeproj; sourceTree = "<group>"; };
+		1D7689D52E76250E007F61EB /* SwiftRefactorExtension.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SwiftRefactorExtension.xcodeproj; sourceTree = "<group>"; };
+		1D768C302E76250E007F61EB /* watchOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = watchOS.xcodeproj; sourceTree = "<group>"; };
+		1D768D5A2E76250E007F61EB /* ViewInspector.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = ViewInspector.xcodeproj; sourceTree = "<group>"; };
+		1D76B9372E76250E007F61EB /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Pods.xcodeproj; sourceTree = "<group>"; };
+		1D76B9392E76250E007F61EB /* AcknowExampleCocoaPods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AcknowExampleCocoaPods.xcodeproj; sourceTree = "<group>"; };
+		1D76B9532E76250E007F61EB /* AcknowExample.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AcknowExample.xcodeproj; sourceTree = "<group>"; };
+		1D76B9612E76250E007F61EB /* AcknowExampleSPM.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AcknowExampleSPM.xcodeproj; sourceTree = "<group>"; };
+		1D76B99E2E76250E007F61EB /* AcknowList.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AcknowList.xcodeproj; sourceTree = "<group>"; };
+		1D76BC982E76250E007F61EB /* KeychainSwift.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = KeychainSwift.xcodeproj; sourceTree = "<group>"; };
+		1D76BD752E76250E007F61EB /* Nuke.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Nuke.xcodeproj; sourceTree = "<group>"; };
+		1D76BDC62E76250E007F61EB /* SwiftRefactorExtension.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SwiftRefactorExtension.xcodeproj; sourceTree = "<group>"; };
+		1D76C0212E76250E007F61EB /* watchOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = watchOS.xcodeproj; sourceTree = "<group>"; };
+		1D76C14B2E76250E007F61EB /* ViewInspector.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = ViewInspector.xcodeproj; sourceTree = "<group>"; };
+		1D76C6F82E76250E007F61EB /* Horizon.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Horizon.xcodeproj; sourceTree = "<group>"; };
 		9F2142232CE9DAA1004167D7 /* LiquidSky.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LiquidSky.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F5F5E102CEE46B200A4712C /* LiquidSky-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "LiquidSky-Info.plist"; sourceTree = "<group>"; };
 		9FAEE3A72CF0994400F86CDC /* Features */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Features; path = Packages/Features; sourceTree = "<group>"; };
@@ -92,19 +115,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		9F2142252CE9DAA1004167D7 /* App */ = {
+		9F2142252CE9DAA1004167D7 /* Source */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = App;
+			path = Source;
 			sourceTree = "<group>";
 		};
 		DB21B0F82E53F69B00B27D22 /* LiquidSkyWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = LiquidSkyWidgets;
-			sourceTree = "<group>";
-		};
-		DB3E01F22E629D21000A1DFA /* fastlanescreenshots */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = fastlanescreenshots;
 			sourceTree = "<group>";
 		};
 		DB722DB42E60FADA00644142 /* LiquidSkyWidgets */ = {
@@ -122,8 +140,10 @@
 				9FA556A32CF49E55008A62B4 /* FeedUI in Frameworks */,
 				9F1552F12CEF35C000DD9F6E /* FeedUI in Frameworks */,
 				9FAEE3BA2CF09BB400F86CDC /* SettingsUI in Frameworks */,
+				1D99649B2E74DE34000D6127 /* KeychainSwift in Frameworks */,
 				DB3EFFD82E6276C6000A1DFA /* StoreKit.framework in Frameworks */,
 				9FB136012DEEB30A003D7ABE /* ComposerUI in Frameworks */,
+				1D9964982E74DE27000D6127 /* AcknowList in Frameworks */,
 				9F1552F32CEF35C000DD9F6E /* PostUI in Frameworks */,
 				9FA3256B2E05439D007BAC14 /* Client in Frameworks */,
 				9F58939F2CEDF04200798943 /* Models in Frameworks */,
@@ -165,18 +185,162 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1D76C71C2E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C71E2E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7202E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7222E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7242E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7262E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7282E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C72A2E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C72C2E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C72E2E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7302E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7322E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7342E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7362E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7382E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C73A2E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C73C2E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C73E2E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7402E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7422E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D76C7442E76250E007F61EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		9F21421A2CE9DAA1004167D7 = {
 			isa = PBXGroup;
 			children = (
 				DB722B912E608AB900644142 /* Configuration.storekit */,
 				E9FE37002DF0661A00EB0418 /* FeaturesTests.xctestplan */,
 				9F5F5E102CEE46B200A4712C /* LiquidSky-Info.plist */,
-				9F2142252CE9DAA1004167D7 /* App */,
+				9F2142252CE9DAA1004167D7 /* Source */,
 				9FAEE3A82CF0994C00F86CDC /* Model */,
 				9FAEE3A72CF0994400F86CDC /* Features */,
 				DB21B0F82E53F69B00B27D22 /* LiquidSkyWidgets */,
 				DB722DB42E60FADA00644142 /* LiquidSkyWidgets */,
-				DB3E01F22E629D21000A1DFA /* fastlanescreenshots */,
 				9FAEE3B82CF09BB400F86CDC /* Frameworks */,
 				9F2142242CE9DAA1004167D7 /* Products */,
 			);
@@ -221,7 +385,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				9F2142252CE9DAA1004167D7 /* App */,
+				9F2142252CE9DAA1004167D7 /* Source */,
 			);
 			name = LiquidSky;
 			packageProductDependencies = (
@@ -243,6 +407,8 @@
 				9F21FACA2D00411D003B9250 /* ProfileUI */,
 				9FB136002DEEB30A003D7ABE /* ComposerUI */,
 				9FA3256A2E05439D007BAC14 /* Client */,
+				1D9964972E74DE27000D6127 /* AcknowList */,
+				1D99649A2E74DE34000D6127 /* KeychainSwift */,
 			);
 			productName = LiquidSky;
 			productReference = 9F2142232CE9DAA1004167D7 /* LiquidSky.app */;
@@ -301,9 +467,6 @@
 			dependencies = (
 				DB3E01F82E629D21000A1DFA /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				DB3E01F22E629D21000A1DFA /* fastlanescreenshots */,
-			);
 			name = fastlanescreenshots;
 			packageProductDependencies = (
 			);
@@ -344,16 +507,118 @@
 			knownRegions = (
 				en,
 				Base,
+				fr,
+				de,
+				"zh-Hans",
+				ja,
+				es,
+				da,
+				it,
+				sv,
+				"zh-Hant",
+				"pt-BR",
+				nl,
+				"pt-PT",
+				"en-AU",
+				ru,
 			);
 			mainGroup = 9F21421A2CE9DAA1004167D7;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				DB3EF7FE2E611961000A1DFA /* XCLocalSwiftPackageReference "Packages/Features" */,
 				DB3EF8092E61197D000A1DFA /* XCLocalSwiftPackageReference "Packages/Model" */,
+				1D9964962E74DE27000D6127 /* XCRemoteSwiftPackageReference "AcknowList" */,
+				1D9964992E74DE34000D6127 /* XCRemoteSwiftPackageReference "keychain-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9F2142242CE9DAA1004167D7 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 1D76C7262E76250E007F61EB /* Products */;
+					ProjectRef = 1D7685622E76250E007F61EB /* AcknowExample.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7322E76250E007F61EB /* Products */;
+					ProjectRef = 1D76B9532E76250E007F61EB /* AcknowExample.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C71C2E76250E007F61EB /* Products */;
+					ProjectRef = 1D7685482E76250E007F61EB /* AcknowExampleCocoaPods.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C73C2E76250E007F61EB /* Products */;
+					ProjectRef = 1D76B9392E76250E007F61EB /* AcknowExampleCocoaPods.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C72A2E76250E007F61EB /* Products */;
+					ProjectRef = 1D76B9612E76250E007F61EB /* AcknowExampleSPM.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7222E76250E007F61EB /* Products */;
+					ProjectRef = 1D7685702E76250E007F61EB /* AcknowExampleSPM.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C72C2E76250E007F61EB /* Products */;
+					ProjectRef = 1D7685AD2E76250E007F61EB /* AcknowList.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7242E76250E007F61EB /* Products */;
+					ProjectRef = 1D76B99E2E76250E007F61EB /* AcknowList.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7422E76250E007F61EB /* Products */;
+					ProjectRef = 1D76C6F82E76250E007F61EB /* Horizon.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7402E76250E007F61EB /* Products */;
+					ProjectRef = 1D7688A72E76250E007F61EB /* KeychainSwift.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C71E2E76250E007F61EB /* Products */;
+					ProjectRef = 1D76BC982E76250E007F61EB /* KeychainSwift.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7202E76250E007F61EB /* Products */;
+					ProjectRef = 1D76BD752E76250E007F61EB /* Nuke.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C72E2E76250E007F61EB /* Products */;
+					ProjectRef = 1D7689842E76250E007F61EB /* Nuke.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7302E76250E007F61EB /* Products */;
+					ProjectRef = 1D7685462E76250E007F61EB /* Pods.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7282E76250E007F61EB /* Products */;
+					ProjectRef = 1D76B9372E76250E007F61EB /* Pods.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7382E76250E007F61EB /* Products */;
+					ProjectRef = 1D7689D52E76250E007F61EB /* SwiftRefactorExtension.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7442E76250E007F61EB /* Products */;
+					ProjectRef = 1D76BDC62E76250E007F61EB /* SwiftRefactorExtension.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7362E76250E007F61EB /* Products */;
+					ProjectRef = 1D76C14B2E76250E007F61EB /* ViewInspector.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C73A2E76250E007F61EB /* Products */;
+					ProjectRef = 1D768D5A2E76250E007F61EB /* ViewInspector.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C73E2E76250E007F61EB /* Products */;
+					ProjectRef = 1D768C302E76250E007F61EB /* watchOS.xcodeproj */;
+				},
+				{
+					ProductGroup = 1D76C7342E76250E007F61EB /* Products */;
+					ProjectRef = 1D76C0212E76250E007F61EB /* watchOS.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				9F2142222CE9DAA1004167D7 /* LiquidSky */,
@@ -576,12 +841,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = App/LiquidSky.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Source/LiquidSky.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 41;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"App/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Source/Preview Content\"";
 				DEVELOPMENT_TEAM = LAXTJRK98P;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -611,8 +876,13 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/./.build/index-build/prebuilts/swift-syntax/600.0.1/swiftlang-6.2.0.19.9-MacroSupport-macos_aarch64/lib",
+					"$(PROJECT_DIR)/./.build/prebuilts/swift-syntax/600.0.1/swiftlang-6.2.0.19.9-MacroSupport-macos_aarch64/lib",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.acxtrilla.horizon;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -620,7 +890,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				XROS_DEPLOYMENT_TARGET = 2.1;
 			};
 			name = Debug;
@@ -631,12 +901,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = App/LiquidSky.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Source/LiquidSky.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 41;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"App/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Source/Preview Content\"";
 				DEVELOPMENT_TEAM = LAXTJRK98P;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -666,8 +936,13 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/./.build/index-build/prebuilts/swift-syntax/600.0.1/swiftlang-6.2.0.19.9-MacroSupport-macos_aarch64/lib",
+					"$(PROJECT_DIR)/./.build/prebuilts/swift-syntax/600.0.1/swiftlang-6.2.0.19.9-MacroSupport-macos_aarch64/lib",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.acxtrilla.horizon;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -675,7 +950,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				XROS_DEPLOYMENT_TARGET = 2.1;
 			};
 			name = Release;
@@ -876,7 +1151,36 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		1D9964962E74DE27000D6127 /* XCRemoteSwiftPackageReference "AcknowList" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/vtourraine/AcknowList";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.3.0;
+			};
+		};
+		1D9964992E74DE34000D6127 /* XCRemoteSwiftPackageReference "keychain-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/evgenyneu/keychain-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 24.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
+		1D9964972E74DE27000D6127 /* AcknowList */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1D9964962E74DE27000D6127 /* XCRemoteSwiftPackageReference "AcknowList" */;
+			productName = AcknowList;
+		};
+		1D99649A2E74DE34000D6127 /* KeychainSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1D9964992E74DE34000D6127 /* XCRemoteSwiftPackageReference "keychain-swift" */;
+			productName = KeychainSwift;
+		};
 		9F1552E52CEF35B200DD9F6E /* Auth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DB3EF8092E61197D000A1DFA /* XCLocalSwiftPackageReference "Packages/Model" */;

@@ -89,7 +89,7 @@ public struct ComposerAutocompleteView: View {
       }
 
       // Error state (compact)
-      if let error = autocompleteService.searchError {
+      if autocompleteService.searchError != nil {
         HStack(spacing: 8) {
           Image(systemName: "exclamationmark.triangle")
             .font(.caption)

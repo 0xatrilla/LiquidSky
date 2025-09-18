@@ -426,7 +426,7 @@ public struct InlineVideoPlayerView: View {
 
     // Add time observer for progress updates
     let interval = CMTime(seconds: 0.1, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-    let timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) {
+    let _ = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) {
       time in
       Task { @MainActor in
         updateProgress()
@@ -445,22 +445,27 @@ public struct InlineVideoPlayerView: View {
     }
 
     // Get video duration
-    playerItem.asset.loadValuesAsynchronously(forKeys: ["duration"]) {
-      DispatchQueue.main.async {
-        self.duration = playerItem.asset.duration.seconds
+    Task {
+      do {
+        let duration = try await playerItem.asset.load(.duration)
+        await MainActor.run {
+          self.duration = duration.seconds
 
-        // Check if we should autoplay based on feed manager
-        let videoId = self.media.videoCID ?? self.media.url.absoluteString
-        if self.videoFeedManager.shouldAutoplayVideo(videoId) {
-          self.player?.play()
-          self.isPlaying = true
+          // Check if we should autoplay based on feed manager
+          let videoId = self.media.videoCID ?? self.media.url.absoluteString
+          if self.videoFeedManager.shouldAutoplayVideo(videoId) {
+            self.player?.play()
+            self.isPlaying = true
+          }
         }
+      } catch {
+        // Handle error silently
       }
     }
   }
 
   private func cleanupVideo() {
-    if let player = player {
+    if let _ = player {
       let videoId = media.videoCID ?? media.url.absoluteString
       videoFeedManager.unregisterActivePlayer(for: videoId)
     }
