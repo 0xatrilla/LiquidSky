@@ -855,28 +855,8 @@ private struct SuggestedUserRow: View {
 
       Spacer()
 
-      // Follow button with liquid glass effect
-      Button(action: {
-        // TODO: Implement follow functionality
-      }) {
-        Text(user.isFollowing ? "Following" : "Follow")
-          .font(.caption)
-          .fontWeight(.medium)
-          .padding(.horizontal, 12)
-          .padding(.vertical, 6)
-          .background(
-            RoundedRectangle(cornerRadius: 12)
-              .fill(user.isFollowing ? Color.green.opacity(0.1) : Color.blue.opacity(0.1))
-              .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                  .stroke(
-                    user.isFollowing ? Color.green.opacity(0.3) : Color.blue.opacity(0.3),
-                    lineWidth: 0.5)
-              )
-          )
-          .foregroundStyle(user.isFollowing ? .green : .blue)
-      }
-      .buttonStyle(.plain)
+      // Follow button
+      FollowButton(profile: user, size: .small)
     }
     .padding(.vertical, 12)
     .padding(.horizontal, 16)
@@ -957,26 +937,8 @@ private struct UserSearchResultRow: View {
 
       Spacer()
 
-      // Follow button with liquid glass effect
-      Button(action: {
-        // TODO: Implement follow functionality
-      }) {
-        Text("Follow")
-          .font(.caption)
-          .fontWeight(.medium)
-          .padding(.horizontal, 12)
-          .padding(.vertical, 6)
-          .background(
-            RoundedRectangle(cornerRadius: 12)
-              .fill(Color.blue.opacity(0.1))
-              .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                  .stroke(Color.blue.opacity(0.3), lineWidth: 0.5)
-              )
-          )
-          .foregroundStyle(.blue)
-      }
-      .buttonStyle(.plain)
+      // Follow button
+      FollowButton(profile: user, size: .small)
     }
     .padding(.vertical, 12)
     .padding(.horizontal, 16)

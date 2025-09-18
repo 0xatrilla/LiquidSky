@@ -510,31 +510,69 @@ public struct EnhancedSearchView: View {
   private func toggleFollow(user: Profile) async {
     do {
       if user.isFollowing {
-        // Unfollow user
-        try await client.protoClient.deleteRecord(uri: user.followingURI ?? "")
-        // Update the user in the suggested users list
-        if let index = trendingContentService.suggestedUsers.firstIndex(where: { $0.did == user.did }) {
-          var updatedUser = user
-          updatedUser.isFollowing = false
-          updatedUser.followingURI = nil
-          trendingContentService.suggestedUsers[index] = updatedUser
+        // Unfollow user - get the follow URI first
+        let profileData = try await client.protoClient.getProfile(for: user.did)
+        if let followingURI = profileData.viewer?.followingURI {
+          try await client.blueskyClient.deleteRecord(.recordURI(atURI: followingURI))
+          
+          // Update the user in the suggested users list
+          if let index = trendingContentService.suggestedUsers.firstIndex(where: { $0.did == user.did }) {
+            let updatedUser = Profile(
+              did: user.did,
+              handle: user.handle,
+              displayName: user.displayName,
+              avatarImageURL: user.avatarImageURL,
+              description: user.description,
+              followersCount: user.followersCount,
+              followingCount: user.followingCount,
+              postsCount: user.postsCount,
+              isFollowing: false,
+              isFollowedBy: user.isFollowedBy,
+              isBlocked: user.isBlocked,
+              isBlocking: user.isBlocking,
+              isMuted: user.isMuted
+            )
+            trendingContentService.suggestedUsers[index] = updatedUser
+          }
         }
       } else {
-        // Follow user
+        // Follow user - use the same pattern as other working implementations
         let followRecord = AppBskyLexicon.Graph.FollowDefinition(
           subject: user.did,
           createdAt: Date()
         )
+        
+        // Get the current user's session
+        guard let session = try await client.protoClient.getUserSession() else {
+          #if DEBUG
+          print("EnhancedSearchView: No session found")
+          #endif
+          return
+        }
+        
         let response = try await client.protoClient.createRecord(
-          repo: client.configuration.handle,
+          repositoryDID: session.sessionDID,
           collection: "app.bsky.graph.follow",
           record: followRecord
         )
+        
         // Update the user in the suggested users list
         if let index = trendingContentService.suggestedUsers.firstIndex(where: { $0.did == user.did }) {
-          var updatedUser = user
-          updatedUser.isFollowing = true
-          updatedUser.followingURI = response.uri
+          let updatedUser = Profile(
+            did: user.did,
+            handle: user.handle,
+            displayName: user.displayName,
+            avatarImageURL: user.avatarImageURL,
+            description: user.description,
+            followersCount: user.followersCount,
+            followingCount: user.followingCount,
+            postsCount: user.postsCount,
+            isFollowing: true,
+            isFollowedBy: user.isFollowedBy,
+            isBlocked: user.isBlocked,
+            isBlocking: user.isBlocking,
+            isMuted: user.isMuted
+          )
           trendingContentService.suggestedUsers[index] = updatedUser
         }
       }

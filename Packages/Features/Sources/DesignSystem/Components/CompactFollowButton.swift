@@ -80,15 +80,28 @@ public struct CompactFollowButton: View {
         }
       } else {
         // Follow: Create a follow record
-        // TODO: Implement actual follow creation using ATProtoKit
-        // The correct approach would be to use the client.protoClient.createRecord method
-        // with collection "app.bsky.graph.follow" and appropriate record data
+        let followRecord = AppBskyLexicon.Graph.FollowDefinition(
+          subject: profile.did,
+          createdAt: Date()
+        )
+        
+        // Get the current user's session
+        guard let session = try await client.protoClient.getUserSession() else {
+          print("CompactFollowButton: No session found")
+          return
+        }
+        
+        let response = try await client.protoClient.createRecord(
+          repositoryDID: session.sessionDID,
+          collection: "app.bsky.graph.follow",
+          record: followRecord
+        )
+        
+        // Store the follow URI for future unfollow operations
+        followingURI = response.recordURI
         
         // Optimistically update the UI
         isFollowing = true
-        
-        // For now, we'll simulate the API call
-        print("Would follow user: \(profile.did)")
       }
     } catch {
       // Revert optimistic updates on error

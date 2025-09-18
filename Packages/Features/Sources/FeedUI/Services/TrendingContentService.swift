@@ -136,7 +136,7 @@ public class TrendingContentService {
       let followingDIDs = try await getCurrentUserFollowing()
       
       // Try multiple search strategies to get better suggested users
-      var allActors: [AppBskyLexicon.Actor.ProfileViewBasic] = []
+      var allActors: [AppBskyLexicon.Actor.ProfileViewDefinition] = []
       
       // Strategy 1: Search for popular tech/developer accounts
       let techUsers = try await client.protoClient.searchActors(
@@ -165,34 +165,34 @@ public class TrendingContentService {
       // Combine all results
       allActors = techUsers.actors + creatorUsers.actors + companyUsers.actors + popularUsers.actors
       
-      let suggestedUsers = allActors
-        .filter { actor in
-          // Filter out accounts with suspicious handles or very short names
-          !actor.actorHandle.contains("bot") && 
-          !actor.actorHandle.contains("spam") &&
-          !actor.actorHandle.contains("test") &&
-          actor.actorHandle.count > 3 &&
-          actor.displayName?.count ?? 0 > 2 &&
-          !followingDIDs.contains(actor.actorDID) // Exclude already followed accounts
-        }
-        .map { actor in
-          Profile(
-            did: actor.actorDID,
-            handle: actor.actorHandle,
-            displayName: actor.displayName,
-            avatarImageURL: actor.avatarImageURL,
-            description: actor.description,
-            followersCount: 0,  // Will be updated when full profile is fetched
-            followingCount: 0,
-            postsCount: 0,
-            isFollowing: actor.viewer?.followingURI != nil,
-            isFollowedBy: actor.viewer?.followedByURI != nil,
-            isBlocked: actor.viewer?.isBlocked == true,
-            isBlocking: actor.blockingURI != nil,
-            isMuted: actor.viewer?.isMuted == true
-          )
-        }
-        .uniqued(by: \.did) // Remove duplicates based on DID
+      // Filter out accounts with suspicious handles or very short names
+      let filteredActors = allActors.filter { actor in
+        !actor.actorHandle.contains("bot") && 
+        !actor.actorHandle.contains("spam") &&
+        !actor.actorHandle.contains("test") &&
+        actor.actorHandle.count > 3 &&
+        actor.displayName?.count ?? 0 > 2 &&
+        !followingDIDs.contains(actor.actorDID) // Exclude already followed accounts
+      }
+      
+      // Convert to Profile objects
+      let suggestedUsers = filteredActors.map { actor in
+        Profile(
+          did: actor.actorDID,
+          handle: actor.actorHandle,
+          displayName: actor.displayName,
+          avatarImageURL: actor.avatarImageURL,
+          description: actor.description,
+          followersCount: 0,  // Will be updated when full profile is fetched
+          followingCount: 0,
+          postsCount: 0,
+          isFollowing: actor.viewer?.followingURI != nil,
+          isFollowedBy: actor.viewer?.followedByURI != nil,
+          isBlocked: actor.viewer?.isBlocked == true,
+          isBlocking: actor.viewer?.blockingURI != nil,
+          isMuted: actor.viewer?.isMuted == true
+        )
+      }.uniqued(by: \.did) // Remove duplicates based on DID
 
       // Return a curated selection, prioritizing verified/established accounts
       return Array(suggestedUsers.prefix(12))
@@ -207,11 +207,19 @@ public class TrendingContentService {
   
   private func getCurrentUserFollowing() async throws -> Set<String> {
     do {
+      // Get the current user's handle from the session
+      guard let session = try await client.protoClient.getUserSession() else {
+        #if DEBUG
+        print("TrendingContentService: No session found")
+        #endif
+        return Set()
+      }
+      
       let following = try await client.protoClient.getFollows(
-        actor: client.configuration.handle,
+        from: session.handle,
         limit: 100
       )
-      return Set(following.follows.map { $0.did })
+      return Set(following.follows.map { $0.actorDID })
     } catch {
       #if DEBUG
       print("TrendingContentService: Failed to get following list: \(error)")

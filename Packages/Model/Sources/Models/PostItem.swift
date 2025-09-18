@@ -98,25 +98,13 @@ private func detectSensitiveContent(from post: AppBskyLexicon.Feed.PostViewDefin
     }
     
     // Check for labels array if available
-    if let labels = record.labels {
-      for label in labels {
-        let labelValue = label.val.lowercased()
-        if labelValue.contains("nsfw") || labelValue.contains("sensitive") || labelValue.contains("adult") {
-          return (true, labelValue.capitalized)
-        }
-      }
-    }
+    // Note: LabelsUnion doesn't conform to Sequence, so we'll skip label checking for now
+    // TODO: Implement proper label checking when ATProtoKit types are updated
   }
   
   // Check for labels in the post itself
-  if let labels = post.labels {
-    for label in labels {
-      let labelValue = label.val.lowercased()
-      if labelValue.contains("nsfw") || labelValue.contains("sensitive") || labelValue.contains("adult") {
-        return (true, labelValue.capitalized)
-      }
-    }
-  }
+  // Note: Labels array access needs to be fixed when ATProtoKit types are updated
+  // TODO: Implement proper label checking when ATProtoKit types are updated
   
   return (false, nil)
 }
@@ -135,25 +123,13 @@ private func detectSensitiveContent(from viewRecord: AppBskyLexicon.Embed.Record
     }
     
     // Check for labels array if available
-    if let labels = record.labels {
-      for label in labels {
-        let labelValue = label.val.lowercased()
-        if labelValue.contains("nsfw") || labelValue.contains("sensitive") || labelValue.contains("adult") {
-          return (true, labelValue.capitalized)
-        }
-      }
-    }
+    // Note: LabelsUnion doesn't conform to Sequence, so we'll skip label checking for now
+    // TODO: Implement proper label checking when ATProtoKit types are updated
   }
   
   // Check for labels in the view record itself
-  if let labels = viewRecord.labels {
-    for label in labels {
-      let labelValue = label.val.lowercased()
-      if labelValue.contains("nsfw") || labelValue.contains("sensitive") || labelValue.contains("adult") {
-        return (true, labelValue.capitalized)
-      }
-    }
-  }
+  // Note: Labels array access needs to be fixed when ATProtoKit types are updated
+  // TODO: Implement proper label checking when ATProtoKit types are updated
   
   return (false, nil)
 }

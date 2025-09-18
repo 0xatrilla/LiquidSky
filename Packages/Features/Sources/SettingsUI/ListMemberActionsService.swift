@@ -11,21 +11,27 @@ public class ListMemberActionsService: ObservableObject {
   }
 
   public func followUser(did: String) async throws -> String {
-    // TODO: Implement actual follow using ATProtoKit
-    // The follow API needs to be implemented in ATProtoKit
-    print("Would follow user: \(did)")
-
-    // Simulate success for now
-    try await Task.sleep(nanoseconds: 500_000_000)  // 0.5 second delay
-    return "placeholder://follow/\(did)"
+    let followRecord = AppBskyLexicon.Graph.FollowDefinition(
+      subject: did,
+      createdAt: Date()
+    )
+    
+    // Get the current user's session
+    guard let session = try await client.protoClient.getUserSession() else {
+      throw ListMemberActionError.unknownError
+    }
+    
+    let response = try await client.protoClient.createRecord(
+      repositoryDID: session.sessionDID,
+      collection: "app.bsky.graph.follow",
+      record: followRecord
+    )
+    
+    return response.recordURI
   }
 
   public func unfollowUser(followUri: String) async throws {
-    // TODO: Implement actual unfollow using ATProtoKit
-    print("Would unfollow user, record URI: \(followUri)")
-
-    // Simulate success for now
-    try await Task.sleep(nanoseconds: 500_000_000)  // 0.5 second delay
+    try await client.blueskyClient.deleteRecord(.recordURI(atURI: followUri))
   }
 
   public func muteUser(did: String) async throws -> String {
