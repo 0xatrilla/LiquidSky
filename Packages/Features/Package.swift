@@ -108,6 +108,7 @@ let package = Package(
         .target(
             name: "DesignSystem",
             dependencies: [
+                .product(name: "Client", package: "Model"),
                 .product(name: "Destinations", package: "Model"),
                 .product(name: "Models", package: "Model"),
                 "AppRouter",

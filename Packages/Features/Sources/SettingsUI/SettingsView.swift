@@ -31,6 +31,8 @@ public struct SettingsView: View {
   // @State private var showingMessages = false
   @State private var showingTabCustomization = false
   @State private var showingDeleteAccountAlert = false
+  @State private var showingWellbeingDashboard = false
+  @State private var showingAnalyticsDashboard = false
 
   public init() {}
 
@@ -62,6 +64,9 @@ public struct SettingsView: View {
 
         // Content Section
         contentSection
+
+        // AI Features Section
+        aiFeaturesSection
 
         // Privacy Section
         privacySection
@@ -144,6 +149,12 @@ public struct SettingsView: View {
     }
     .sheet(isPresented: $showingNotificationsCenter) {
       NotificationsCenterView()
+    }
+    .sheet(isPresented: $showingWellbeingDashboard) {
+      WellbeingDashboardView()
+    }
+    .sheet(isPresented: $showingAnalyticsDashboard) {
+      AnalyticsDashboardView()
     }
 
   }
@@ -342,6 +353,53 @@ public struct SettingsView: View {
         icon: "eye.fill",
         iconColor: .orange,
         isOn: $settingsService.showSensitiveContent
+      )
+    }
+  }
+
+  // MARK: - AI Features Section
+  private var aiFeaturesSection: some View {
+    VStack(spacing: 16) {
+      SettingsSectionHeader(title: "AI Features", icon: "brain.head.profile", color: .purple)
+
+      SettingsNavigationRow(
+        title: "Digital Wellbeing",
+        subtitle: "AI-powered wellness insights and recommendations",
+        icon: "heart.fill",
+        iconColor: .pink,
+        action: { showingWellbeingDashboard = true }
+      )
+
+      SettingsNavigationRow(
+        title: "Personal Analytics",
+        subtitle: "AI-driven insights about your social media patterns",
+        icon: "chart.bar.fill",
+        iconColor: .blue,
+        action: { showingAnalyticsDashboard = true }
+      )
+
+      SettingsToggleRow(
+        title: "Smart Reply Suggestions",
+        subtitle: "AI-generated reply suggestions for posts",
+        icon: "bubble.left.and.bubble.right.fill",
+        iconColor: .green,
+        isOn: $settingsService.smartReplySuggestionsEnabled
+      )
+
+      SettingsToggleRow(
+        title: "Semantic Search",
+        subtitle: "AI-powered search beyond keywords",
+        icon: "magnifyingglass.circle.fill",
+        iconColor: .orange,
+        isOn: $settingsService.semanticSearchEnabled
+      )
+
+      SettingsToggleRow(
+        title: "AI Composer Features",
+        subtitle: "Advanced AI features in post composer",
+        icon: "sparkles",
+        iconColor: .purple,
+        isOn: $settingsService.aiComposerFeaturesEnabled
       )
     }
   }

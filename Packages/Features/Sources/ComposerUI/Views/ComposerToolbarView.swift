@@ -21,6 +21,15 @@ struct ComposerToolbarView: ToolbarContent {
   @State private var aiPrompt: String = ""
   @State private var isAIGenerating = false
   @State private var aiError: String?
+  
+  // Advanced AI features
+  @State private var showingAIFeatures = false
+  @State private var selectedAIFeature: AIFeature = .compose
+  @State private var tone: ReplyTone = .friendly
+  @State private var includeEmojis = true
+  @State private var translationTargetLanguage: String = "en"
+  @State private var isTranslating = false
+  @State private var translationError: String?
 
   var body: some ToolbarContent {
     ToolbarItem(placement: .keyboard) {
@@ -95,22 +104,30 @@ struct ComposerToolbarView: ToolbarContent {
       }
     }
 
-    // AI Compose (only available on iOS 26+ with FoundationModels and user-gated)
+    // Advanced AI Features (only available on iOS 26+ with FoundationModels)
     if aiComposeAvailable() {
       ToolbarItem(placement: .keyboard) {
         Button {
-          showingAIPrompt = true
+          showingAIFeatures = true
         } label: {
           Image(systemName: "sparkles")
             .symbolRenderingMode(.multicolor)
         }
-        .sheet(isPresented: $showingAIPrompt) {
-          AIPromptSheet(
-            prompt: $aiPrompt,
+        .sheet(isPresented: $showingAIFeatures) {
+          AdvancedAIFeaturesSheet(
+            selectedFeature: $selectedAIFeature,
+            tone: $tone,
+            includeEmojis: $includeEmojis,
+            translationTargetLanguage: $translationTargetLanguage,
             isGenerating: $isAIGenerating,
+            isTranslating: $isTranslating,
             errorMessage: $aiError,
-            onCancel: { showingAIPrompt = false },
-            onGenerate: { Task { await composeWithAI() } }
+            translationError: $translationError,
+            onCancel: { showingAIFeatures = false },
+            onCompose: { Task { await composeWithAI() } },
+            onTranslate: { Task { await translateText() } },
+            onImprove: { Task { await improveText() } },
+            onSummarize: { Task { await summarizeText() } }
           )
         }
       }
@@ -180,8 +197,7 @@ struct ComposerToolbarView: ToolbarContent {
 
   private func composeWithAI() async {
     guard aiComposeAvailable() else {
-      aiError =
-        "Apple Intelligence not available. Enable AI in Settings or use a supported device (iOS 26.0+)."
+      aiError = "Apple Intelligence not available. Enable AI in Settings or use a supported device (iOS 26.0+)."
       return
     }
 
@@ -191,24 +207,12 @@ struct ComposerToolbarView: ToolbarContent {
         defer { isAIGenerating = false }
 
         let userPrompt = aiPrompt.trimmingCharacters(in: .whitespacesAndNewlines)
-        let instructions =
-          userPrompt.isEmpty
-          ? "Write a brief, engaging social post about today's highlights." : userPrompt
+        let instructions = userPrompt.isEmpty ? "Write a brief, engaging social post about today's highlights." : userPrompt
 
-        let systemPrompt = """
-          You are an assistant that writes short, engaging social media posts for Bluesky.
-          Constraints:
-          - Keep under 300 characters
-          - Clear, friendly tone; avoid hashtags unless requested
-          - No emojis unless explicitly asked
-          - Output plain text only suitable to paste directly as a post
-          """
-
+        let systemPrompt = buildComposeSystemPrompt()
         let session = LanguageModelSession { systemPrompt }
+        
         do {
-          #if DEBUG
-            print("AI Compose: Requesting response for prompt: \(instructions)")
-          #endif
           let response = try await session.respond(to: instructions)
           let generated = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
           await MainActor.run {
@@ -216,15 +220,152 @@ struct ComposerToolbarView: ToolbarContent {
             dismissAIPrompt()
           }
         } catch {
-          #if DEBUG
-            print("AI Compose: Error: \(error)")
-          #endif
           await MainActor.run {
             aiError = "Failed to generate text. Please try again."
           }
         }
       }
     #endif
+  }
+  
+  private func translateText() async {
+    guard aiComposeAvailable() else {
+      translationError = "Apple Intelligence not available for translation."
+      return
+    }
+    
+    #if canImport(FoundationModels)
+      if #available(iOS 26.0, *) {
+        isTranslating = true
+        defer { isTranslating = false }
+        
+        let currentText = String(text.characters)
+        guard !currentText.isEmpty else {
+          translationError = "No text to translate."
+          return
+        }
+        
+        let systemPrompt = """
+        You are a professional translator. Translate the given text to \(translationTargetLanguage).
+        Maintain the original tone and meaning.
+        Return only the translated text, no explanations.
+        """
+        
+        let session = LanguageModelSession { systemPrompt }
+        
+        do {
+          let response = try await session.respond(to: currentText)
+          let translated = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
+          await MainActor.run {
+            text = AttributedString(translated)
+            translationError = nil
+          }
+        } catch {
+          await MainActor.run {
+            translationError = "Translation failed. Please try again."
+          }
+        }
+      }
+    #endif
+  }
+  
+  private func improveText() async {
+    guard aiComposeAvailable() else {
+      aiError = "Apple Intelligence not available for text improvement."
+      return
+    }
+    
+    #if canImport(FoundationModels)
+      if #available(iOS 26.0, *) {
+        isAIGenerating = true
+        defer { isAIGenerating = false }
+        
+        let currentText = String(text.characters)
+        guard !currentText.isEmpty else {
+          aiError = "No text to improve."
+          return
+        }
+        
+        let systemPrompt = """
+        Improve the following social media post for clarity, engagement, and impact.
+        Keep it under 300 characters and maintain the original meaning.
+        Make it more engaging and professional.
+        Return only the improved text.
+        """
+        
+        let session = LanguageModelSession { systemPrompt }
+        
+        do {
+          let response = try await session.respond(to: currentText)
+          let improved = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
+          await MainActor.run {
+            text = AttributedString(improved)
+            aiError = nil
+          }
+        } catch {
+          await MainActor.run {
+            aiError = "Text improvement failed. Please try again."
+          }
+        }
+      }
+    #endif
+  }
+  
+  private func summarizeText() async {
+    guard aiComposeAvailable() else {
+      aiError = "Apple Intelligence not available for summarization."
+      return
+    }
+    
+    #if canImport(FoundationModels)
+      if #available(iOS 26.0, *) {
+        isAIGenerating = true
+        defer { isAIGenerating = false }
+        
+        let currentText = String(text.characters)
+        guard !currentText.isEmpty else {
+          aiError = "No text to summarize."
+          return
+        }
+        
+        let systemPrompt = """
+        Summarize the following text into a concise social media post.
+        Keep it under 300 characters and maintain the key points.
+        Make it engaging and clear.
+        Return only the summarized text.
+        """
+        
+        let session = LanguageModelSession { systemPrompt }
+        
+        do {
+          let response = try await session.respond(to: currentText)
+          let summarized = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
+          await MainActor.run {
+            text = AttributedString(summarized)
+            aiError = nil
+          }
+        } catch {
+          await MainActor.run {
+            aiError = "Summarization failed. Please try again."
+          }
+        }
+      }
+    #endif
+  }
+  
+  private func buildComposeSystemPrompt() -> String {
+    let toneDescription = tone.description
+    let emojiInstruction = includeEmojis ? "Use appropriate emojis sparingly." : "Do not use emojis."
+    
+    return """
+    You are an assistant that writes short, engaging social media posts for Bluesky.
+    Constraints:
+    - Keep under 300 characters
+    - Tone: \(toneDescription)
+    - \(emojiInstruction)
+    - Clear, engaging content
+    - Output plain text only suitable to paste directly as a post
+    """
   }
 }
 

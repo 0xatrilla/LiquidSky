@@ -12,10 +12,10 @@ public class ListMemberActionsService: ObservableObject {
   }
 
   public func followUser(did: String) async throws -> String {
-    let followRecord = AppBskyLexicon.Graph.FollowDefinition(
-      subject: did,
-      createdAt: Date()
-    )
+    let followRecord: [String: Any] = [
+      "subject": did,
+      "createdAt": ISO8601DateFormatter().string(from: Date())
+    ]
     
     // Get the current user's session
     guard let session = try await client.protoClient.getUserSession() else {

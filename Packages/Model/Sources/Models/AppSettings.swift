@@ -50,6 +50,19 @@ public final class AppSettings {
     }
   }
 
+  // MARK: - AI Features
+  public var smartReplySuggestionsEnabled: Bool {
+    didSet { UserDefaults.standard.set(smartReplySuggestionsEnabled, forKey: "smartReplySuggestionsEnabled") }
+  }
+
+  public var semanticSearchEnabled: Bool {
+    didSet { UserDefaults.standard.set(semanticSearchEnabled, forKey: "semanticSearchEnabled") }
+  }
+
+  public var aiComposerFeaturesEnabled: Bool {
+    didSet { UserDefaults.standard.set(aiComposerFeaturesEnabled, forKey: "aiComposerFeaturesEnabled") }
+  }
+
   // MARK: - Media Settings
   public var imageQuality: ImageQuality {
     didSet { UserDefaults.standard.set(imageQuality.rawValue, forKey: "imageQuality") }
@@ -102,6 +115,12 @@ public final class AppSettings {
       UserDefaults.standard.object(forKey: "aiSummariesEnabled") as? Bool ?? false
     self.aiDeviceExperimentalEnabled =
       UserDefaults.standard.object(forKey: "aiDeviceExperimentalEnabled") as? Bool ?? false
+    self.smartReplySuggestionsEnabled =
+      UserDefaults.standard.object(forKey: "smartReplySuggestionsEnabled") as? Bool ?? true
+    self.semanticSearchEnabled =
+      UserDefaults.standard.object(forKey: "semanticSearchEnabled") as? Bool ?? true
+    self.aiComposerFeaturesEnabled =
+      UserDefaults.standard.object(forKey: "aiComposerFeaturesEnabled") as? Bool ?? true
     self.imageQuality =
       ImageQuality(rawValue: UserDefaults.standard.string(forKey: "imageQuality") ?? "high")
       ?? .high
