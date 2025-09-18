@@ -25,11 +25,6 @@ public struct PostRowActionsView: View {
     @State private var isBookmarking = false
     @State private var bookmarkService: BookmarkService?
     
-    // Smart Reply Suggestions
-    @State private var showingReplySuggestions = false
-    @State private var replySuggestions: [ReplySuggestion] = []
-    @State private var isLoadingSuggestions = false
-    @State private var suggestionsError: String?
 
     public init(post: PostItem) {
         self.post = post
@@ -41,40 +36,17 @@ public struct PostRowActionsView: View {
 
     public var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 16) {
-            // Reply Button with Smart Suggestions
+            // Reply Button
             if postFilterService.canReplyToPost(post) {
-                Menu {
-                    Button(action: {
-                        router.presentedSheet = .composer(mode: .reply(post))
-                    }) {
-                        Label("Write Reply", systemImage: "bubble")
-                    }
-                    
-                    Button(action: {
-                        Task { await loadReplySuggestions() }
-                    }) {
-                        Label("Smart Suggestions", systemImage: "sparkles")
-                    }
-                    .disabled(isLoadingSuggestions)
-                } label: {
+                Button(action: {
+                    router.presentedSheet = .composer(mode: .reply(post))
+                }) {
                     Label("\(post.replyCount)", systemImage: "bubble")
                         .frame(minWidth: 44, minHeight: 44)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .foregroundColor(.themePrimary)
-                .sheet(isPresented: $showingReplySuggestions) {
-                    ReplySuggestionsSheet(
-                        suggestions: replySuggestions,
-                        isLoading: isLoadingSuggestions,
-                        error: suggestionsError,
-                        onSelectSuggestion: { suggestion in
-                            router.presentedSheet = .composer(mode: .reply(post))
-                            showingReplySuggestions = false
-                        },
-                        onDismiss: { showingReplySuggestions = false }
-                    )
-                }
             }
 
             // Repost Button
@@ -570,34 +542,6 @@ public struct PostRowActionsView: View {
         } catch {
             await MainActor.run {
                 self.showToast(message: "Failed to delete post: \(error.localizedDescription)")
-            }
-        }
-    }
-    
-    private func loadReplySuggestions() async {
-        isLoadingSuggestions = true
-        suggestionsError = nil
-        
-        do {
-            let context = ReplyContext(
-                type: .thread,
-                description: "Reply to post by @\(post.author.handle)"
-            )
-            
-            let suggestions = await SmartReplyService.shared.generateReplySuggestions(
-                for: post,
-                context: context
-            )
-            
-            await MainActor.run {
-                replySuggestions = suggestions
-                showingReplySuggestions = true
-                isLoadingSuggestions = false
-            }
-        } catch {
-            await MainActor.run {
-                suggestionsError = "Failed to generate suggestions. Please try again."
-                isLoadingSuggestions = false
             }
         }
     }

@@ -37,6 +37,15 @@ public struct ModernComposerInnerView: View {
       return postFilterService.canReplyToPost(post)
     }
   }
+  
+  private var replyPost: PostItem? {
+    switch mode {
+    case .newPost:
+      return nil
+    case .reply(let post):
+      return post
+    }
+  }
 
   public init(mode: ComposerMode) {
     self.mode = mode
@@ -44,9 +53,14 @@ public struct ModernComposerInnerView: View {
 
   public var body: some View {
     NavigationStack {
-      ComposerTextEditorView(text: $text, selection: $selection, sendState: sendState)
+      ComposerTextEditorView(
+        text: $text, 
+        selection: $selection, 
+        sendState: sendState,
+        post: replyPost
+      )
         .navigationTitle(title)
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarTitleDisplayMode(NavigationBarItem.TitleDisplayMode.inline)
         .toolbar {
           ComposerToolbarView(
             text: $text,

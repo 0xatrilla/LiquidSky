@@ -348,9 +348,21 @@ struct AppTabView: View {
         isGeneratingSummary = true
 
         do {
-            // Use the existing FeedSummaryService to generate a summary
-            let summary = await FeedSummaryService.shared.summarizeFeedPosts(
-                [], feedName: "your feeds")
+            let summary: String
+            if let feed = currentFeed {
+                // Fetch posts from custom feed
+                let feedResponse = try await client.protoClient.getFeed(by: feed.uri, cursor: nil)
+                let processedPosts = await processFeed(
+                    feedResponse.feed, client: client.protoClient)
+                summary = await FeedSummaryService.shared.summarizeFeedPosts(
+                    processedPosts, feedName: feed.displayName)
+            } else {
+                // Fetch posts from following timeline
+                let feed = try await client.protoClient.getTimeline()
+                let processedPosts = await processFeed(feed.feed, client: client.protoClient)
+                summary = await FeedSummaryService.shared.summarizeFeedPosts(
+                    processedPosts, feedName: "Following")
+            }
             summaryText = summary
             showingSummary = true
         } catch {
