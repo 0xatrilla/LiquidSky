@@ -27,14 +27,10 @@ enum SearchFilter: CaseIterable {
 public struct EnhancedSearchView: View {
   @State private var searchService: UnifiedSearchService
   @State private var trendingContentService: TrendingContentService
-  @State private var semanticSearchService: SemanticSearchService
   @State private var searchText = ""
   @State private var selectedFilter: SearchFilter = .all
   @State private var searchHistory: [String] = []
   @State private var debounceTask: Task<Void, Never>?
-  @State private var searchIntent: SearchIntent?
-  @State private var semanticResults: [SemanticSearchResult] = []
-  @State private var isSemanticSearchEnabled = true
   @Environment(AppRouter.self) var router
   @Environment(BSkyClient.self) var client
   @Environment(\.currentTab) var currentTab
@@ -42,7 +38,6 @@ public struct EnhancedSearchView: View {
   public init(client: BSkyClient) {
     self._searchService = State(initialValue: UnifiedSearchService(client: client))
     self._trendingContentService = State(initialValue: TrendingContentService(client: client))
-    self._semanticSearchService = State(initialValue: SemanticSearchService.shared)
   }
 
   public var body: some View {
@@ -370,77 +365,14 @@ public struct EnhancedSearchView: View {
         loadingView
       } else if let error = searchService.searchError {
         errorView(error: error)
-      } else if !searchService.searchResults.hasResults && semanticResults.isEmpty {
+      } else if !searchService.searchResults.hasResults {
         noResultsView
       } else {
-        VStack(spacing: 0) {
-          // Semantic Search Results
-          if isSemanticSearchEnabled && !semanticResults.isEmpty {
-            semanticSearchResultsView
-          }
-          
-          // Traditional Search Results
-          if searchService.searchResults.hasResults {
-            UnifiedSearchResultsView(searchService: searchService)
-          }
-        }
+        UnifiedSearchResultsView(searchService: searchService)
       }
     }
   }
   
-  // MARK: - Semantic Search Results View
-  private var semanticSearchResultsView: some View {
-    VStack(alignment: .leading, spacing: 12) {
-      HStack {
-        Image(systemName: "sparkles")
-          .foregroundColor(.blue)
-        Text("AI-Powered Results")
-          .font(.headline)
-          .fontWeight(.semibold)
-        
-        Spacer()
-        
-        Button("Hide") {
-          isSemanticSearchEnabled = false
-        }
-        .font(.caption)
-        .foregroundColor(.secondary)
-      }
-      .padding(.horizontal)
-      .padding(.top)
-      
-      if let intent = searchIntent {
-        HStack {
-          Text("Looking for: \(intent.intent.rawValue.capitalized)")
-            .font(.caption)
-            .foregroundColor(.secondary)
-          
-          if intent.isQuestion {
-            Text("• Question")
-              .font(.caption)
-              .foregroundColor(.blue)
-          }
-          
-          Spacer()
-        }
-        .padding(.horizontal)
-      }
-      
-      ScrollView(.horizontal, showsIndicators: false) {
-        HStack(spacing: 12) {
-          ForEach(semanticResults.prefix(5)) { result in
-            SemanticSearchResultCard(result: result) {
-              handleSemanticResultTap(result)
-            }
-          }
-        }
-        .padding(.horizontal)
-      }
-    }
-    .background(Color(.systemGray6))
-    .cornerRadius(12)
-    .padding(.horizontal)
-  }
 
   // MARK: - Loading View
   private var loadingView: some View {
@@ -536,44 +468,6 @@ public struct EnhancedSearchView: View {
 
     // Perform traditional search
     await searchService.search(query: searchText)
-    
-    // Perform semantic search if enabled
-    if isSemanticSearchEnabled {
-      await performSemanticSearch()
-    }
-  }
-  
-  private func performSemanticSearch() async {
-    // Get available posts and users for semantic search
-    let posts = searchService.searchResults.posts
-    let users = searchService.searchResults.users
-    
-    // Analyze search intent
-    searchIntent = await semanticSearchService.extractSearchIntent(from: searchText)
-    
-    // Perform semantic search
-    semanticResults = await semanticSearchService.performSemanticSearch(
-      query: searchText,
-      posts: posts,
-      users: users
-    )
-  }
-  
-  private func handleSemanticResultTap(_ result: SemanticSearchResult) {
-    switch result.type {
-    case .post:
-      if let post = result.post {
-        router[currentTab].append(.post(post))
-      }
-    case .user:
-      if let user = result.user {
-        router[currentTab].append(.profile(user))
-      }
-    case .topic:
-      // Handle topic search
-      searchText = result.matchedContent
-      Task { await performSearch() }
-    }
   }
 
   private func addToSearchHistory(_ query: String) {

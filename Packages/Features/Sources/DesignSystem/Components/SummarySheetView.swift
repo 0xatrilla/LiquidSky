@@ -6,16 +6,18 @@ public struct SummarySheetView: View {
   let summary: String
   let itemCount: Int
   let onDismiss: () -> Void
+  let onViewAll: (() -> Void)?
 
   @Environment(\.colorScheme) private var colorScheme
   @State private var isVisible = false
   @State private var attributedSummary: AttributedString?
 
-  public init(title: String, summary: String, itemCount: Int, onDismiss: @escaping () -> Void) {
+  public init(title: String, summary: String, itemCount: Int, onDismiss: @escaping () -> Void, onViewAll: (() -> Void)? = nil) {
     self.title = title
     self.summary = summary
     self.itemCount = itemCount
     self.onDismiss = onDismiss
+    self.onViewAll = onViewAll
   }
 
   public var body: some View {
@@ -131,7 +133,7 @@ public struct SummarySheetView: View {
 
               Button("View All") {
                 dismiss()
-                // TODO: Scroll to top of feed/notifications
+                onViewAll?()
               }
               .buttonStyle(.borderedProminent)
               .frame(maxWidth: .infinity)
@@ -204,7 +206,8 @@ public struct SummarySheetView: View {
     summary:
       "The developer community has been buzzing with excitement over the latest iOS updates and SwiftUI innovations. Several prominent developers shared their experiences with the new declarative UI patterns, highlighting significant performance improvements and cleaner code architecture. The discussions revealed a growing trend toward more modular app design, with many developers experimenting with SwiftUI's advanced features like custom view modifiers and state management techniques.\n\nCommunity sentiment remains overwhelmingly positive, with developers actively sharing resources, code snippets, and best practices. Notable conversations included deep-dives into accessibility improvements, with several developers showcasing how they've made their apps more inclusive. The feed also featured some interesting project showcases, including a new productivity app that leverages Apple's latest frameworks and a creative coding experiment that demonstrates the power of SwiftUI's animation system.",
     itemCount: 15,
-    onDismiss: {}
+    onDismiss: {},
+    onViewAll: {}
   )
   .preferredColorScheme(.dark)
 }

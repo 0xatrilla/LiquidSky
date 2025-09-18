@@ -413,7 +413,7 @@ public struct SettingsView: View {
 
       SettingsNavigationRow(
         title: "About Horizon",
-        subtitle: "Version 1.0.0 • Build 1",
+        subtitle: "Version 1.1",
         icon: "info.circle.fill",
         iconColor: .gray
       ) {
@@ -520,7 +520,7 @@ private struct AboutView: View {
             .fontWeight(.bold)
 
           // Version
-          Text("Version 1.0.0")
+          Text("Version 1.1")
             .font(.title3)
             .foregroundColor(.secondary)
 
@@ -553,7 +553,7 @@ private struct AboutView: View {
 
           // Social Links
           VStack(spacing: 20) {
-            Text("Connect with us")
+            Text("Connect with me!")
               .font(.headline)
               .foregroundColor(.secondary)
 

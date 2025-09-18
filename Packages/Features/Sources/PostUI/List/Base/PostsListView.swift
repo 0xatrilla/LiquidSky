@@ -162,6 +162,8 @@ public struct PostListView<T: PostsListViewDatasource>: View {
     @State private var isRetrying = false
     @State private var visiblePosts: [PostItem] = []
     @State private var isScrolling = false
+    @State private var scrollToTopID: String?
+    @State private var shouldScrollToTop = false
 
     @StateObject private var simpleSummaryService = SimpleSummaryService()
     private let feedPositionService = FeedPositionService.shared
@@ -233,7 +235,11 @@ public struct PostListView<T: PostsListViewDatasource>: View {
                         title: "Feed Summary",
                         summary: summaryText,
                         itemCount: newPostsCount,
-                        onDismiss: { showingSummary = false }
+                        onDismiss: { showingSummary = false },
+                        onViewAll: {
+                            // Scroll to top of the feed
+                            shouldScrollToTop = true
+                        }
                     )
                 }
             }
@@ -267,10 +273,16 @@ public struct PostListView<T: PostsListViewDatasource>: View {
                                 // Render single post normally with row-managed navigation
                                 PostRowView(post: postGroup.posts.first!)
                                     .environment(\.handleOwnNavigation, true)
+                                    .id(postGroup.posts.first!.uri) // Add ID for scrolling
                                     .onAppear {
                                         // Track visible posts for scroll position
                                         if !visiblePosts.contains(postGroup.posts.first!) {
                                             visiblePosts.append(postGroup.posts.first!)
+                                        }
+                                        
+                                        // Set scroll ID for first post
+                                        if postGroups.first?.id == postGroup.id {
+                                            scrollToTopID = postGroup.posts.first!.uri
                                         }
                                     }
                                     .onDisappear {
@@ -337,6 +349,14 @@ public struct PostListView<T: PostsListViewDatasource>: View {
             }
             .onAppear {
                 // Header will scroll naturally with content
+            }
+            .onChange(of: shouldScrollToTop) { _, newValue in
+                if newValue, let scrollID = scrollToTopID {
+                    withAnimation(.easeInOut(duration: 0.5)) {
+                        proxy.scrollTo(scrollID, anchor: .top)
+                    }
+                    shouldScrollToTop = false
+                }
             }
         }
     }

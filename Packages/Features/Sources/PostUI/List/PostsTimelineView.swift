@@ -67,7 +67,11 @@ public struct PostsTimelineView: View {
                     title: "Following Summary",
                     summary: summaryText,
                     itemCount: 0,
-                    onDismiss: { showingSummary = false }
+                    onDismiss: { showingSummary = false },
+                    onViewAll: {
+                        // Scroll to top of the timeline
+                        // This will be handled by the timeline view itself
+                    }
                 )
             }
     }

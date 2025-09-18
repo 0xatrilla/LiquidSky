@@ -80,7 +80,11 @@ public struct NotificationsListView: View {
                     title: "Notifications Summary",
                     summary: summaryText,
                     itemCount: newNotificationsCount,
-                    onDismiss: { showingSummary = false }
+                    onDismiss: { showingSummary = false },
+                    onViewAll: {
+                        // Scroll to top of notifications list
+                        // This will be handled by the notifications view itself
+                    }
                 )
             }
         }

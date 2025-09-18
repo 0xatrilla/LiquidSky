@@ -34,7 +34,11 @@ public struct SwitchableFeedView: View {
                 title: feed?.displayName ?? "Following Summary",
                 summary: summaryText,
                 itemCount: 0,
-                onDismiss: { showingSummary = false }
+                onDismiss: { showingSummary = false },
+                onViewAll: {
+                    // Scroll to top of the feed
+                    // This will be handled by the feed view itself
+                }
             )
         }
     }

@@ -135,18 +135,14 @@ struct EnhancedSearchView: View {
     } else if searchResults.isEmpty && !searchText.isEmpty {
       searchEmptyView
     } else {
-      GeometryReader { geometry in
-        ScrollView {
-          LazyVGrid(columns: gridColumns(for: geometry.size), spacing: 16) {
-            ForEach(filteredResults) { result in
-              SearchResultCard(result: result)
-                .glassEffectID(result.id, in: searchNamespace)
-            }
-          }
-          .padding(.horizontal, 16)
-          .padding(.vertical, 8)
+      List {
+        ForEach(filteredResults) { result in
+          SearchResultCard(result: result)
+            .glassEffectID(result.id, in: searchNamespace)
+            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
         }
       }
+      .listStyle(.insetGrouped)
     }
   }
 
@@ -184,17 +180,7 @@ struct EnhancedSearchView: View {
     }
   }
 
-  // MARK: - Grid Configuration
-
-  private func gridColumns(for size: CGSize) -> [GridItem] {
-    let columnCount = contentManager.searchState.columnCount
-    let spacing: CGFloat = 16
-    let totalSpacing = spacing * CGFloat(columnCount - 1)
-    let availableWidth = size.width - 32 - totalSpacing
-    let columnWidth = availableWidth / CGFloat(columnCount)
-
-    return Array(repeating: GridItem(.fixed(columnWidth), spacing: spacing), count: columnCount)
-  }
+  // MARK: - Grid Configuration (removed - now using List)
 
   // MARK: - Computed Properties
 
@@ -373,54 +359,39 @@ struct SearchFilterChip: View {
 @available(iOS 18.0, *)
 struct SearchResultCard: View {
   let result: SearchResultData
-  @State private var isHovering = false
-  @State private var isPencilHovering = false
-  @State private var hoverIntensity: CGFloat = 0
-
-  private let cardId = UUID().uuidString
 
   var body: some View {
-    GestureAwareGlassCard(
-      cornerRadius: 16,
-      isInteractive: true
-    ) {
-      VStack(alignment: .leading, spacing: 12) {
-        // Header
-        HStack(spacing: 12) {
-          // Type icon
-          Image(systemName: result.type.icon)
-            .font(.subheadline)
-            .foregroundStyle(result.type.color)
-            .frame(width: 20, height: 20)
-            .background(
-              Circle()
-                .fill(result.type.color.opacity(0.1))
-            )
-            .background {
-              if #available(iOS 26.0, *) {
-                Circle()
-                  .glassEffect(.regular.tint(result.type.color))
-              }
-            }
+    VStack(alignment: .leading, spacing: 12) {
+      // Header
+      HStack(spacing: 12) {
+        // Type icon
+        Image(systemName: result.type.icon)
+          .font(.subheadline)
+          .foregroundStyle(result.type.color)
+          .frame(width: 20, height: 20)
+          .background(
+            Circle()
+              .fill(result.type.color.opacity(0.1))
+          )
 
-          // Author info
-          VStack(alignment: .leading, spacing: 2) {
-            Text(result.authorName)
-              .font(.subheadline.weight(.semibold))
-              .foregroundStyle(.primary)
+        // Author info
+        VStack(alignment: .leading, spacing: 2) {
+          Text(result.authorName)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.primary)
 
-            Text(result.authorHandle)
-              .font(.caption)
-              .foregroundStyle(.secondary)
-          }
-
-          Spacer()
-
-          // Timestamp
-          Text(result.timestamp, style: .relative)
+          Text(result.authorHandle)
             .font(.caption)
-            .foregroundStyle(.tertiary)
+            .foregroundStyle(.secondary)
         }
+
+        Spacer()
+
+        // Timestamp
+        Text(result.timestamp, style: .relative)
+          .font(.caption)
+          .foregroundStyle(.tertiary)
+      }
 
         // Content
         VStack(alignment: .leading, spacing: 8) {
@@ -534,72 +505,11 @@ struct SearchResultCard: View {
         }
       }
       .padding(16)
-    }
-    .scaleEffect(scaleEffect)
-    .brightness(hoverIntensity * 0.05)
-    .applePencilHover(id: cardId) { hovering, location, intensity in
-      withAnimation(.smooth(duration: 0.2)) {
-        isPencilHovering = hovering
-        hoverIntensity = intensity
-      }
-    }
-    .onHover { hovering in
-      withAnimation(.smooth(duration: 0.2)) {
-        isHovering = hovering && !isPencilHovering
-      }
-    }
-    .contextMenu {
-      searchResultContextMenu
+      .background(Color(.systemBackground))
+      .cornerRadius(12)
+      .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
     }
   }
-
-  // MARK: - Components
-
-  @ViewBuilder
-  private var searchResultContextMenu: some View {
-    if result.type == .post {
-      Button("View Post") {
-        // Handle view post
-      }
-
-      Button("Share") {
-        // Handle share
-      }
-
-      Divider()
-
-      Button("Save") {
-        // Handle save
-      }
-    } else if result.type == .user {
-      Button("View Profile") {
-        // Handle view profile
-      }
-
-      Button("Message") {
-        // Handle message
-      }
-
-      Divider()
-
-      Button("Mute") {
-        // Handle mute
-      }
-    }
-  }
-
-  // MARK: - Computed Properties
-
-  private var scaleEffect: CGFloat {
-    if isPencilHovering {
-      return 1.02
-    } else if isHovering {
-      return 1.01
-    } else {
-      return 1.0
-    }
-  }
-}
 
 // MARK: - Metric View
 

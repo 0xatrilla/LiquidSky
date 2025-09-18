@@ -122,7 +122,11 @@ struct iPadAppView: View {
                 title: "Feed Summary",
                 summary: summaryText,
                 itemCount: 0,
-                onDismiss: { showingSummary = false }
+                onDismiss: { showingSummary = false },
+                onViewAll: {
+                    // Scroll to top of the current feed
+                    // This will be handled by the feed view itself
+                }
             )
             .presentationDetents([.medium, .large])  // iPad-optimized sheet presentation
         }
