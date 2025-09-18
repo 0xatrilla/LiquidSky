@@ -633,6 +633,7 @@ private struct AddToListSheet: View {
         switch purpose {
         case .curation: return "star"
         case .moderation: return "hand.raised"
+        case .custom: return "list.bullet"
         case .mute: return "speaker.slash"
         case .block: return "person.slash"
         }
@@ -642,6 +643,7 @@ private struct AddToListSheet: View {
         switch purpose {
         case .curation: return .yellow
         case .moderation: return .orange
+        case .custom: return .blue
         case .mute: return .gray
         case .block: return .red
         }

@@ -844,7 +844,7 @@
 				CODE_SIGN_ENTITLEMENTS = Source/LiquidSky.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 41;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Source/Preview Content\"";
 				DEVELOPMENT_TEAM = LAXTJRK98P;
@@ -882,7 +882,7 @@
 					"$(PROJECT_DIR)/./.build/prebuilts/swift-syntax/600.0.1/swiftlang-6.2.0.19.9-MacroSupport-macos_aarch64/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.acxtrilla.horizon;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -904,7 +904,7 @@
 				CODE_SIGN_ENTITLEMENTS = Source/LiquidSky.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 41;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Source/Preview Content\"";
 				DEVELOPMENT_TEAM = LAXTJRK98P;
@@ -942,7 +942,7 @@
 					"$(PROJECT_DIR)/./.build/prebuilts/swift-syntax/600.0.1/swiftlang-6.2.0.19.9-MacroSupport-macos_aarch64/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.acxtrilla.horizon;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;

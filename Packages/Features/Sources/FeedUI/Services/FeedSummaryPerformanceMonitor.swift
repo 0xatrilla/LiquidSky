@@ -18,15 +18,19 @@ public class FeedSummaryPerformanceMonitor: ObservableObject {
   }
   
   public func endTiming(for operation: String) -> TimeInterval? {
-    guard var metric = performanceMetrics[operation] else { return nil }
+    guard let metric = performanceMetrics[operation] else { return nil }
     
     let endTime = Date()
     let duration = endTime.timeIntervalSince(metric.startTime)
     
-    metric.endTime = endTime
-    metric.duration = duration
+    let updatedMetric = PerformanceMetric(
+      operation: metric.operation,
+      startTime: metric.startTime,
+      endTime: endTime,
+      duration: duration
+    )
     
-    performanceMetrics[operation] = metric
+    performanceMetrics[operation] = updatedMetric
     
     #if DEBUG
     print("⏱️ Feed Summary Performance - \(operation): \(String(format: "%.2f", duration))s")

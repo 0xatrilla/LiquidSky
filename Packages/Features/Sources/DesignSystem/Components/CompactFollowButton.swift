@@ -1,6 +1,7 @@
-import SwiftUI
-import Models
+import ATProtoKit
 import Client
+import Models
+import SwiftUI
 
 public struct CompactFollowButton: View {
   let profile: Profile
@@ -79,9 +80,22 @@ public struct CompactFollowButton: View {
           }
         }
       } else {
-        // Follow: Use the existing service to avoid SDK type issues
-        let service = ListMemberActionsService(client: client)
-        followingURI = try await service.followUser(did: profile.did)
+        // Follow: Create follow record using typed lexicon
+        let record = AppBskyLexicon.Graph.FollowRecord(
+          subjectDID: profile.did,
+          createdAt: Date()
+        )
+        
+        // Get the current user's session
+        guard let session = try await client.protoClient.getUserSession() else {
+          throw FollowError.unknownError
+        }
+        
+        let response = try await client.blueskyClient.createFollowRecord(
+          actorDID: profile.did,
+          createdAt: Date()
+        )
+        followingURI = response.recordURI
         
         // Optimistically update the UI
         isFollowing = true
@@ -130,5 +144,5 @@ public struct CompactFollowButton: View {
     )
   }
   .padding()
-  .background(Color(UIColor.systemBackground))
+  .background(Color.clear)
 }

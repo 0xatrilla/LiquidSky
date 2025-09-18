@@ -69,7 +69,7 @@ public struct PostRowActionsView: View {
                         isLoading: isLoadingSuggestions,
                         error: suggestionsError,
                         onSelectSuggestion: { suggestion in
-                            router.presentedSheet = .composer(mode: .reply(post, suggestion.text))
+                            router.presentedSheet = .composer(mode: .reply(post))
                             showingReplySuggestions = false
                         },
                         onDismiss: { showingReplySuggestions = false }
@@ -483,7 +483,7 @@ public struct PostRowActionsView: View {
             try await client.protoClient.muteActor(post.author.did)
             
             // Also update local muting service
-            MutedUsersService.shared.muteUser(did: post.author.did, handle: post.author.handle)
+            BlockedUsersService.shared.muteUser(did: post.author.did, handle: post.author.handle)
 
             await MainActor.run {
                 self.showToast(message: "User @\(post.author.handle) muted successfully")
@@ -497,7 +497,7 @@ public struct PostRowActionsView: View {
             // Fall back to local muting if Bluesky API fails
             print("Bluesky muting API failed: \(error). Using local fallback.")
 
-            MutedUsersService.shared.muteUser(did: post.author.did, handle: post.author.handle)
+            BlockedUsersService.shared.muteUser(did: post.author.did, handle: post.author.handle)
 
             await MainActor.run {
                 self.showToast(

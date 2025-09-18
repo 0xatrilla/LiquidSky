@@ -1,5 +1,4 @@
 import AppRouter
-import BookmarksUI
 import Destinations
 import FeedUI
 import Models

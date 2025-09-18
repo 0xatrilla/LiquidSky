@@ -97,9 +97,23 @@ public struct FollowButton: View {
           }
         }
       } else {
-        // Follow: Use the existing service to avoid SDK type issues
-        let service = ListMemberActionsService(client: client)
-        followingURI = try await service.followUser(did: profile.did)
+        // Follow: Implement directly to avoid service dependency issues
+        let followData: [String: Any] = [
+          "subject": profile.did,
+          "createdAt": ISO8601DateFormatter().string(from: Date())
+        ]
+        
+        // Get the current user's session
+        guard let session = try await client.protoClient.getUserSession() else {
+          throw FollowError.unknownError
+        }
+        
+        // Use blueskyClient for follow creation
+        let response = try await client.blueskyClient.createFollowRecord(
+          actorDID: profile.did,
+          createdAt: Date()
+        )
+        followingURI = response.recordURI
 
         // Optimistically update the UI
         isFollowing = true
@@ -193,6 +207,19 @@ public enum FollowButtonSize {
     case .small: return 0.6
     case .medium: return 0.8
     case .large: return 1.0
+    }
+  }
+}
+
+// MARK: - Follow Error
+
+public enum FollowError: LocalizedError {
+  case unknownError
+  
+  public var errorDescription: String? {
+    switch self {
+    case .unknownError:
+      return "An unknown error occurred"
     }
   }
 }

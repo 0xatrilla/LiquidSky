@@ -546,26 +546,7 @@ public struct EnhancedSearchView: View {
   private func performSemanticSearch() async {
     // Get available posts and users for semantic search
     let posts = searchService.searchResults.posts
-    let users = searchService.searchResults.users.compactMap { user in
-      // Convert AppBskyLexicon.Actor.ProfileViewDefinition to Profile
-      Profile(
-        did: user.did,
-        handle: user.handle,
-        displayName: user.displayName,
-        description: user.description,
-        avatar: user.avatar,
-        banner: user.banner,
-        followersCount: user.followersCount ?? 0,
-        followsCount: user.followsCount ?? 0,
-        postsCount: user.postsCount ?? 0,
-        isFollowing: user.viewer?.following != nil,
-        isFollowedBy: user.viewer?.followedBy != nil,
-        isBlocking: user.viewer?.blocking != nil,
-        isBlockedBy: user.viewer?.blockedBy != nil,
-        isMuting: user.viewer?.muting != nil,
-        isMutedBy: user.viewer?.mutedBy != nil
-      )
-    }
+    let users = searchService.searchResults.users
     
     // Analyze search intent
     searchIntent = await semanticSearchService.extractSearchIntent(from: searchText)

@@ -135,7 +135,7 @@ public struct BookmarksListView: View {
         error = nil
         
         do {
-            bookmarkedPosts = try await bookmarkService.getBookmarkedPosts()
+            bookmarkedPosts = try await bookmarkService.getBookmarks()
         } catch {
             self.error = error
             #if DEBUG
@@ -147,10 +147,86 @@ public struct BookmarksListView: View {
     }
 }
 
+// MARK: - Post Row View
+private struct PostRowView: View {
+    let post: PostItem
+    let showEngagementDetails: Bool
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Author info
+            HStack {
+                AsyncImage(url: post.author.avatarImageURL) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 32, height: 32)
+                            .clipShape(Circle())
+                    default:
+                        Circle()
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(width: 32, height: 32)
+                    }
+                }
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(post.author.displayName ?? post.author.handle)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                    
+                    Text("@\(post.author.handle)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                Text(post.indexedAt, style: .relative)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            // Post content
+            Text(post.content)
+                .font(.body)
+            
+            // Engagement details
+            if showEngagementDetails {
+                HStack(spacing: 20) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "heart")
+                        Text("\(post.likeCount)")
+                    }
+                    .foregroundColor(.secondary)
+                    
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.2.squarepath")
+                        Text("\(post.repostCount)")
+                    }
+                    .foregroundColor(.secondary)
+                    
+                    HStack(spacing: 4) {
+                        Image(systemName: "bubble.left")
+                        Text("\(post.replyCount)")
+                    }
+                    .foregroundColor(.secondary)
+                    
+                    Spacer()
+                }
+                .font(.caption)
+                .padding(.top, 8)
+            }
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 16)
+    }
+}
+
 #Preview {
     NavigationStack {
         BookmarksListView()
-            .environment(BSkyClient(configuration: ATProtocolConfiguration(handle: "test.bsky.social", accessJWT: "test")))
             .environment(AppRouter(initialTab: .bookmarks))
     }
 }

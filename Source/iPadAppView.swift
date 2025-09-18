@@ -98,6 +98,8 @@ struct iPadAppView: View {
                     settingsNavigationStack
                 case .compose:
                     composeNavigationStack
+                case .bookmarks:
+                    bookmarksNavigationStack
                 }
             }
             .environment(\.detailColumnManager, detailColumnManager)
@@ -275,6 +277,27 @@ struct iPadAppView: View {
                 }
                 .withAppDestinations()
                 .environment(\.currentTab, .compose)
+                .padding(.horizontal, 16)  // iPad-optimized horizontal padding
+        }
+    }
+
+    private var bookmarksNavigationStack: some View {
+        NavigationStack(
+            path: Binding(
+                get: { router[.bookmarks] },
+                set: { router[.bookmarks] = $0 }
+            )
+        ) {
+            BookmarksListView()
+                .navigationTitle("Bookmarks")
+                .navigationBarTitleDisplayMode(.large)
+                .toolbar {
+                    ToolbarItemGroup(placement: .topBarTrailing) {
+                        composeButton
+                    }
+                }
+                .withAppDestinations()
+                .environment(\.currentTab, .bookmarks)
                 .padding(.horizontal, 16)  // iPad-optimized horizontal padding
         }
     }

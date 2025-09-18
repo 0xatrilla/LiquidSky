@@ -73,52 +73,8 @@ public func processFeed(
             // Note: The reply field indicates that a reply exists, but doesn't contain the reply post data
             // The main posts already have the reply information they need (isReplyTo, replyRef, etc.)
 
-            // Process repost - extract repost information
-            if let reason = post.reason {
-                // Check if this is a repost by examining the reason
-                if case .repost(let repost) = reason {
-                    // Create a profile for the reposter
-                    let reposterProfile = Profile(
-                        did: repost.by.did,
-                        handle: repost.by.handle,
-                        displayName: repost.by.displayName,
-                        avatarImageURL: repost.by.avatarImageURL,
-                        description: repost.by.description,
-                        followersCount: repost.by.followersCount ?? 0,
-                        followingCount: repost.by.followingCount ?? 0,
-                        postsCount: repost.by.postsCount ?? 0,
-                        isFollowing: repost.by.viewer?.followingURI != nil,
-                        isFollowedBy: repost.by.viewer?.followedByURI != nil,
-                        isBlocked: repost.by.viewer?.blockingURI != nil,
-                        isBlocking: repost.by.viewer?.blockedByURI != nil,
-                        isMuted: repost.by.viewer?.mutingURI != nil
-                    )
-                    
-                    // Mark this post as reposted
-                    processedPosts.append(PostItem(
-                        uri: post.post.uri,
-                        cid: post.post.cid,
-                        indexedAt: post.post.indexedAt,
-                        author: post.post.author.profile,
-                        content: post.post.record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self)?.text ?? "",
-                        replyCount: post.post.replyCount ?? 0,
-                        repostCount: post.post.repostCount ?? 0,
-                        likeCount: post.post.likeCount ?? 0,
-                        likeURI: post.post.viewer?.likeURI,
-                        repostURI: post.post.viewer?.repostURI,
-                        replyRef: post.post.record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self)?.reply,
-                        repostedBy: reposterProfile,
-                        embed: EmbedDataExtractor.extractEmbedData(from: post.post.embed),
-                        isSensitive: detectSensitiveContent(from: post.post).isSensitive,
-                        contentWarning: detectSensitiveContent(from: post.post).contentWarning
-                    ))
-                } else {
-                    // Handle other types of reasons if needed
-                    processedPosts.append(post.postItem)
-                }
-            } else {
-                processedPosts.append(post.postItem)
-            }
+            // Process the post - the PostItem is already created in post.postItem
+            postItems.append(post.postItem)
         }
     }
 

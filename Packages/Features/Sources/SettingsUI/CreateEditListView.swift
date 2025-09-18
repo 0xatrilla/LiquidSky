@@ -105,6 +105,8 @@ public struct CreateEditListView: View {
       return "A list for curating interesting accounts to follow"
     case .moderation:
       return "A list for moderation purposes (muting/blocking)"
+    case .custom:
+      return "A custom list for your specific needs"
     case .mute:
       return "A list for muting accounts"
     case .block:
@@ -137,21 +139,33 @@ public struct CreateEditListView: View {
 
   private func createList() async throws {
     let listManagementService = ListManagementService(client: client)
-    let _ = try await listManagementService.createList(
-      name: listName,
-      description: listDescription.isEmpty ? nil : listDescription,
-      purpose: selectedPurpose
-    )
+    let purpose = selectedPurpose
+    let name = listName
+    let description = listDescription.isEmpty ? nil : listDescription
+    
+    try await Task { @MainActor in
+      let _ = try await listManagementService.createList(
+        name: name,
+        description: description,
+        purpose: purpose
+      )
+    }.value
   }
 
   private func updateList(_ list: UserList) async throws {
     let listManagementService = ListManagementService(client: client)
-    try await listManagementService.updateList(
-      listURI: list.id,
-      name: listName,
-      description: listDescription.isEmpty ? nil : listDescription,
-      purpose: selectedPurpose
-    )
+    let purpose = selectedPurpose
+    let name = listName
+    let description = listDescription.isEmpty ? nil : listDescription
+    
+    try await Task { @MainActor in
+      try await listManagementService.updateList(
+        listURI: list.id,
+        name: name,
+        description: description,
+        purpose: purpose
+      )
+    }.value
   }
 }
 

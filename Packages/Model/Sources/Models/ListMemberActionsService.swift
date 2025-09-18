@@ -1,6 +1,5 @@
 import Client
 import Foundation
-import Models
 import ATProtoKit
 
 @MainActor
@@ -12,20 +11,9 @@ public class ListMemberActionsService: ObservableObject {
   }
 
   public func followUser(did: String) async throws -> String {
-    let followRecord: [String: Any] = [
-      "subject": did,
-      "createdAt": ISO8601DateFormatter().string(from: Date())
-    ]
-    
-    // Get the current user's session
-    guard let session = try await client.protoClient.getUserSession() else {
-      throw ListMemberActionError.unknownError
-    }
-    
-    let response = try await client.protoClient.createRecord(
-      repositoryDID: session.sessionDID,
-      collection: "app.bsky.graph.follow",
-      record: followRecord
+    let response = try await client.blueskyClient.createFollowRecord(
+      actorDID: did,
+      createdAt: Date()
     )
     
     return response.recordURI

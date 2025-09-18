@@ -1,5 +1,4 @@
 import Foundation
-import Models
 
 #if canImport(FoundationModels)
   import FoundationModels
@@ -102,9 +101,7 @@ public class SmartReplyService {
   private func buildUserPrompt(for post: PostItem, context: ReplyContext?) -> String {
     var prompt = "Original post: \"\(post.content)\""
     
-    if let author = post.author {
-      prompt += "\nAuthor: @\(author.handle)"
-    }
+    prompt += "\nAuthor: @\(post.author.handle)"
     
     if let context = context {
       prompt += "\nContext: \(context.description)"
@@ -174,58 +171,3 @@ public class SmartReplyService {
   }
 }
 
-// MARK: - Supporting Types
-
-public struct ReplySuggestion: Codable, Identifiable {
-  public let id = UUID()
-  public let text: String
-  public let tone: ReplyTone
-  
-  public init(text: String, tone: ReplyTone) {
-    self.text = text
-    self.tone = tone
-  }
-}
-
-public enum ReplyTone: String, CaseIterable, Codable {
-  case friendly = "friendly"
-  case supportive = "supportive"
-  case professional = "professional"
-  case casual = "casual"
-  case thoughtful = "thoughtful"
-  case curious = "curious"
-  case grateful = "grateful"
-  case celebratory = "celebratory"
-  
-  public var description: String {
-    switch self {
-    case .friendly: return "Warm and approachable"
-    case .supportive: return "Encouraging and positive"
-    case .professional: return "Formal and business-like"
-    case .casual: return "Relaxed and informal"
-    case .thoughtful: return "Reflective and considerate"
-    case .curious: return "Inquisitive and engaging"
-    case .grateful: return "Appreciative and thankful"
-    case .celebratory: return "Joyful and congratulatory"
-    }
-  }
-}
-
-public struct ReplyContext {
-  public let type: ContextType
-  public let description: String
-  
-  public init(type: ContextType, description: String) {
-    self.type = type
-    self.description = description
-  }
-  
-  public enum ContextType {
-    case thread
-    case debate
-    case celebration
-    case question
-    case announcement
-    case personal
-  }
-}

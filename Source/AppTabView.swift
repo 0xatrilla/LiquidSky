@@ -2,7 +2,6 @@ import AppRouter
 import AuthUI
 // TODO: Re-enable ChatUI import when chat functionality is ready
 // import ChatUI
-import BookmarksUI
 import Client
 import ComposerUI
 import DesignSystem
