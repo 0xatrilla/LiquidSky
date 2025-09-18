@@ -956,6 +956,8 @@ private struct UserSearchResultRow: View {
 
 private struct PostSearchResultRow: View {
   let post: PostItem
+  @Environment(BSkyClient.self) private var client
+  @State private var dataController: PostContext?
 
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {
@@ -1025,7 +1027,7 @@ private struct PostSearchResultRow: View {
           Image(systemName: "heart")
             .font(.caption2)
             .foregroundStyle(.secondary)
-          Text("\(post.likeCount)")
+          Text("\(dataController?.likeCount ?? post.likeCount)")
             .font(.caption2)
             .fontWeight(.medium)
             .foregroundStyle(.secondary)
@@ -1035,25 +1037,32 @@ private struct PostSearchResultRow: View {
 
         // Like button with liquid glass effect
         Button(action: {
-          // TODO: Implement like functionality
+          Task {
+            await dataController?.toggleLike()
+          }
         }) {
-          Image(systemName: post.likeURI != nil ? "heart.fill" : "heart")
+          Image(systemName: (dataController?.isLiked ?? false) ? "heart.fill" : "heart")
             .font(.caption)
-            .foregroundStyle(post.likeURI != nil ? .red : .secondary)
+            .foregroundStyle((dataController?.isLiked ?? false) ? .red : .secondary)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(
               RoundedRectangle(cornerRadius: 8)
-                .fill(post.likeURI != nil ? Color.red.opacity(0.1) : Color.gray.opacity(0.1))
+                .fill((dataController?.isLiked ?? false) ? Color.red.opacity(0.1) : Color.gray.opacity(0.1))
                 .overlay(
                   RoundedRectangle(cornerRadius: 8)
                     .stroke(
-                      post.likeURI != nil ? Color.red.opacity(0.3) : Color.gray.opacity(0.3),
+                      (dataController?.isLiked ?? false) ? Color.red.opacity(0.3) : Color.gray.opacity(0.3),
                       lineWidth: 0.5)
                 )
             )
         }
         .buttonStyle(.plain)
+        .onAppear {
+          if dataController == nil {
+            dataController = PostContext(post: post, client: client)
+          }
+        }
       }
     }
     .padding(.vertical, 12)

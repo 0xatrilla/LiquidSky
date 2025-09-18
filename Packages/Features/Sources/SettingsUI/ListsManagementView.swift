@@ -186,11 +186,19 @@ public struct ListsManagementView: View {
   }
 
   private func deleteList(_ list: UserList) async {
-    // TODO: Implement actual list deletion using ATProtoKit
-    print("Would delete list: \(list.id)")
-
-    // For now, just remove from local array
-    lists.removeAll { $0.id == list.id }
+    do {
+      let listManagementService = ListManagementService(client: client)
+      try await listManagementService.deleteList(listURI: list.id)
+      
+      // Remove from local array on success
+      await MainActor.run {
+        lists.removeAll { $0.id == list.id }
+      }
+    } catch {
+      await MainActor.run {
+        self.error = error
+      }
+    }
   }
 
   private struct GetListsResponse: Decodable {

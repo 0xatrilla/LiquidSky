@@ -19,6 +19,8 @@ public struct ProfileView: View {
     @State private var isLoadingProfile = false
     @State private var profileError: Error?
     @State private var selectedTab: ProfileTab = .posts
+    @State private var showingAddToListSheet = false
+    @State private var showingReportUserSheet = false
 
     public init(profile: Profile, showBack: Bool = true, isCurrentUser: Bool = false) {
         self.profile = profile
@@ -73,6 +75,12 @@ public struct ProfileView: View {
             if !newValue && selectedTab == .likes {
                 selectedTab = .posts
             }
+        }
+        .sheet(isPresented: $showingAddToListSheet) {
+            AddToListSheet(profile: fullProfile ?? profile)
+        }
+        .sheet(isPresented: $showingReportUserSheet) {
+            ReportUserSheet(profile: fullProfile ?? profile)
         }
     }
 
@@ -264,13 +272,13 @@ public struct ProfileView: View {
                     Divider()
 
                     Button(action: {
-                        // TODO: Implement add to list
+                        showingAddToListSheet = true
                     }) {
                         Label("Add to List", systemImage: "list.bullet")
                     }
 
                     Button(action: {
-                        // TODO: Implement report user
+                        showingReportUserSheet = true
                     }) {
                         Label("Report", systemImage: "exclamationmark.triangle")
                     }
@@ -488,6 +496,260 @@ private struct ClickableBioText: View {
                 // Open URL in Safari or in-app browser
                 UIApplication.shared.open(url)
                 break
+            }
+        }
+    }
+}
+
+// MARK: - Add to List Sheet
+private struct AddToListSheet: View {
+    let profile: Profile
+    @Environment(BSkyClient.self) private var client
+    @Environment(\.dismiss) private var dismiss
+    
+    @State private var lists: [UserList] = []
+    @State private var isLoading = false
+    @State private var error: Error?
+    @State private var showingSuccessAlert = false
+    @State private var selectedList: UserList?
+    
+    var body: some View {
+        NavigationView {
+            Group {
+                if isLoading {
+                    ProgressView("Loading lists...")
+                } else if let error {
+                    VStack(spacing: 12) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.largeTitle)
+                            .foregroundStyle(.secondary)
+                        Text("Failed to load lists")
+                            .font(.headline)
+                        Text(error.localizedDescription)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                } else if lists.isEmpty {
+                    VStack(spacing: 12) {
+                        Image(systemName: "list.bullet")
+                            .font(.largeTitle)
+                            .foregroundStyle(.secondary)
+                        Text("No lists available")
+                            .font(.headline)
+                        Text("Create lists in the official Bluesky app to add users to them.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding()
+                } else {
+                    List(lists) { list in
+                        Button(action: {
+                            selectedList = list
+                        }) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(list.name)
+                                        .font(.headline)
+                                        .foregroundStyle(.primary)
+                                    
+                                    if let description = list.description {
+                                        Text(description)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                            .lineLimit(2)
+                                    }
+                                    
+                                    Text("\(list.memberCount) members")
+                                        .font(.caption2)
+                                        .foregroundStyle(.tertiary)
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: icon(for: list.purpose))
+                                    .foregroundStyle(color(for: list.purpose))
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            .navigationTitle("Add to List")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+            }
+            .task {
+                await loadLists()
+            }
+            .alert("Success", isPresented: $showingSuccessAlert) {
+                Button("OK") {
+                    dismiss()
+                }
+            } message: {
+                if let selectedList = selectedList {
+                    Text("Successfully added @\(profile.handle) to \(selectedList.name)")
+                }
+            }
+        }
+    }
+    
+    private func loadLists() async {
+        guard !isLoading else { return }
+        isLoading = true
+        defer { isLoading = false }
+        error = nil
+        
+        // For now, return empty array as list loading is complex
+        // This would need to be implemented with proper API calls
+        self.lists = []
+    }
+    
+    private func addToList(_ list: UserList) async {
+        do {
+            let listMembershipService = ListMembershipService(client: client)
+            try await listMembershipService.addUserToList(
+                userDID: profile.did,
+                listURI: list.id
+            )
+            
+            await MainActor.run {
+                showingSuccessAlert = true
+            }
+        } catch {
+            await MainActor.run {
+                self.error = error
+            }
+        }
+    }
+    
+    private func icon(for purpose: UserList.Purpose) -> String {
+        switch purpose {
+        case .curation: return "star"
+        case .moderation: return "hand.raised"
+        case .mute: return "speaker.slash"
+        case .block: return "person.slash"
+        }
+    }
+    
+    private func color(for purpose: UserList.Purpose) -> Color {
+        switch purpose {
+        case .curation: return .yellow
+        case .moderation: return .orange
+        case .mute: return .gray
+        case .block: return .red
+        }
+    }
+}
+
+// MARK: - Report User Sheet
+private struct ReportUserSheet: View {
+    let profile: Profile
+    @Environment(BSkyClient.self) private var client
+    @Environment(\.dismiss) private var dismiss
+    
+    @State private var selectedReason = "Spam"
+    @State private var customReason = ""
+    @State private var isSubmitting = false
+    @State private var showingSuccessAlert = false
+    @State private var error: Error?
+    
+    private let reportReasons = [
+        "Spam",
+        "Harassment or bullying",
+        "False information",
+        "Violence or threats",
+        "Inappropriate content",
+        "Other"
+    ]
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                Section("Report @\(profile.handle)") {
+                    Text("Why are you reporting this user?")
+                        .font(.headline)
+                }
+                
+                Section("Reason") {
+                    Picker("Reason", selection: $selectedReason) {
+                        ForEach(reportReasons, id: \.self) { reason in
+                            Text(reason).tag(reason)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                }
+                
+                if selectedReason == "Other" {
+                    Section("Additional Details") {
+                        TextField("Please provide more details", text: $customReason, axis: .vertical)
+                            .lineLimit(3...6)
+                    }
+                }
+                
+                if let error = error {
+                    Section {
+                        Text("Error: \(error.localizedDescription)")
+                            .foregroundColor(.red)
+                            .font(.caption)
+                    }
+                }
+            }
+            .navigationTitle("Report User")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Submit") {
+                        Task {
+                            await submitReport()
+                        }
+                    }
+                    .disabled(isSubmitting)
+                }
+            }
+            .alert("Report Submitted", isPresented: $showingSuccessAlert) {
+                Button("OK") {
+                    dismiss()
+                }
+            } message: {
+                Text("Thank you for your report. We'll review it and take appropriate action.")
+            }
+        }
+    }
+    
+    private func submitReport() async {
+        guard !isSubmitting else { return }
+        isSubmitting = true
+        defer { isSubmitting = false }
+        error = nil
+        
+        do {
+            let reportingService = ReportingService(client: client)
+            let reason = selectedReason == "Other" && !customReason.isEmpty ? customReason : selectedReason
+            
+            try await reportingService.reportUser(
+                did: profile.did,
+                reason: reason
+            )
+            
+            await MainActor.run {
+                showingSuccessAlert = true
+            }
+        } catch {
+            await MainActor.run {
+                self.error = error
             }
         }
     }

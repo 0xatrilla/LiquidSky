@@ -361,21 +361,15 @@ public struct PostRowActionsView: View {
 
     private func submitBlueskyReport(reason: String) async throws {
         // Get the client from the PostContext
-        let _ = dataController.getClient()
-
-        // Map our UI reasons to Bluesky's internal reporting reasons
-        let _ = mapToBlueskyReason(reason)
-
-        // TODO: Implement actual Bluesky reporting when ATProtoKit supports it
-        // For now, we'll simulate the API call and always fall back to local storage
-
-        // Simulate network delay to make it feel like a real API call
-        try await Task.sleep(nanoseconds: 500_000_000)  // 0.5 seconds
-
-        // This will always throw an error for now, causing fallback to local storage
-        // When ATProtoKit adds reporting support, we can replace this with:
-        // try await client.blueskyClient.createReportRecord(...)
-        throw ReportError.blueskyReportingNotAvailable
+        let client = dataController.getClient()
+        
+        // Create reporting service and submit the report
+        let reportingService = ReportingService(client: client)
+        try await reportingService.reportPost(
+            uri: post.uri,
+            cid: post.cid,
+            reason: reason
+        )
     }
 
     private func mapToBlueskyReason(_ uiReason: String) -> String {
@@ -439,31 +433,33 @@ public struct PostRowActionsView: View {
     private func performBlockUser() async {
         do {
             // Get the client from the PostContext
-            let _ = dataController.getClient()
+            let client = dataController.getClient()
 
-            // TODO: Implement actual Bluesky blocking when ATProtoKit supports it
-            // For now, we'll simulate the API call and always fall back to local storage
+            // Use the actual Bluesky blocking API
+            let blockURI = try await client.blueskyClient.createBlockRecord(
+                ofType: .actorBlock(actorDID: post.author.did)
+            )
+            
+            // Also update local blocking service
+            BlockedUsersService.shared.blockUser(did: post.author.did, handle: post.author.handle)
 
-            // Simulate network delay to make it feel like a real API call
-            try await Task.sleep(nanoseconds: 300_000_000)  // 0.3 seconds
-
-            // This will always throw an error for now, causing fallback to local storage
-            // When ATProtoKit adds blocking support, we can replace this with:
-            // try await client.blueskyClient.createBlockRecord(...)
-            throw NSError(
-                domain: "BlueskyAPI", code: 1,
-                userInfo: [NSLocalizedDescriptionKey: "Blocking API not yet available"])
+            await MainActor.run {
+                self.showToast(message: "User @\(post.author.handle) blocked successfully")
+            }
+            
+            #if DEBUG
+            print("Successfully blocked user \(post.author.handle) with URI: \(blockURI.recordURI)")
+            #endif
 
         } catch {
-            // Fall back to local blocking
-            print("Bluesky blocking API not available: \(error). Using local fallback.")
+            // Fall back to local blocking if Bluesky API fails
+            print("Bluesky blocking API failed: \(error). Using local fallback.")
 
             BlockedUsersService.shared.blockUser(did: post.author.did, handle: post.author.handle)
 
             await MainActor.run {
                 self.showToast(
-                    message:
-                        "User @\(post.author.handle) blocked locally (will sync when API is available)"
+                    message: "User @\(post.author.handle) blocked locally (will sync when API is available)"
                 )
             }
         }
@@ -472,31 +468,31 @@ public struct PostRowActionsView: View {
     private func performMuteUser() async {
         do {
             // Get the client from the PostContext
-            let _ = dataController.getClient()
+            let client = dataController.getClient()
 
-            // TODO: Implement actual Bluesky muting when ATProtoKit supports it
-            // For now, we'll simulate the API call and always fall back to local storage
+            // Use the actual Bluesky muting API
+            try await client.protoClient.muteActor(post.author.did)
+            
+            // Also update local muting service
+            MutedUsersService.shared.muteUser(did: post.author.did, handle: post.author.handle)
 
-            // Simulate network delay to make it feel like a real API call
-            try await Task.sleep(nanoseconds: 300_000_000)  // 0.3 seconds
-
-            // This will always throw an error for now, causing fallback to local storage
-            // When ATProtoKit adds muting support, we can replace this with:
-            // try await client.blueskyClient.createMuteRecord(...)
-            throw NSError(
-                domain: "BlueskyAPI", code: 2,
-                userInfo: [NSLocalizedDescriptionKey: "Muting API not yet available"])
+            await MainActor.run {
+                self.showToast(message: "User @\(post.author.handle) muted successfully")
+            }
+            
+            #if DEBUG
+            print("Successfully muted user \(post.author.handle)")
+            #endif
 
         } catch {
-            // Fall back to local muting
-            print("Bluesky muting API not available: \(error). Using local fallback.")
+            // Fall back to local muting if Bluesky API fails
+            print("Bluesky muting API failed: \(error). Using local fallback.")
 
-            BlockedUsersService.shared.muteUser(did: post.author.did, handle: post.author.handle)
+            MutedUsersService.shared.muteUser(did: post.author.did, handle: post.author.handle)
 
             await MainActor.run {
                 self.showToast(
-                    message:
-                        "User @\(post.author.handle) muted locally (will sync when API is available)"
+                    message: "User @\(post.author.handle) muted locally (will sync when API is available)"
                 )
             }
         }

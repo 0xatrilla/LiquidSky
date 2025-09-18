@@ -85,36 +85,74 @@ public struct PostItem: Hashable, Identifiable, Sendable {
 
 // MARK: - Sensitive Content Detection
 private func detectSensitiveContent(from post: AppBskyLexicon.Feed.PostViewDefinition) -> (isSensitive: Bool, contentWarning: String?) {
-  // Check for labels in the post record
+  // Check for content warnings in the text first
   if let record = post.record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self) {
-    // Check for content warnings in the text
     let text = record.text.lowercased()
-    let sensitiveKeywords = ["nsfw", "sensitive", "adult", "explicit", "trigger warning", "tw:", "cw:"]
+    let sensitiveKeywords = ["nsfw", "sensitive", "adult", "explicit", "trigger warning", "tw:", "cw:", "nsfl", "disturbing"]
     
     for keyword in sensitiveKeywords {
       if text.contains(keyword) {
         return (true, "Content Warning")
       }
     }
-    
-    // Check for labels array if available
-    // Note: LabelsUnion doesn't conform to Sequence, so we'll skip label checking for now
-    // TODO: Implement proper label checking when ATProtoKit types are updated
+  }
+  
+  // Check for labels in the post record
+  if let record = post.record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self) {
+    // Try to access labels if they exist
+    if let labels = record.labels {
+      // Check if labels contain sensitive content indicators
+      let sensitiveLabelValues = ["nsfw", "sensitive", "adult", "explicit", "gore", "violence"]
+      
+      // Use reflection to access the labels array
+      let mirror = Mirror(reflecting: labels)
+      for child in mirror.children {
+        if let labelArray = child.value as? [ComAtprotoLexicon.Label.LabelDefinition] {
+          for label in labelArray {
+            if let value = label.value {
+              let lowercasedValue = value.lowercased()
+              for sensitiveValue in sensitiveLabelValues {
+                if lowercasedValue.contains(sensitiveValue) {
+                  return (true, "Content Warning")
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
   
   // Check for labels in the post itself
-  // Note: Labels array access needs to be fixed when ATProtoKit types are updated
-  // TODO: Implement proper label checking when ATProtoKit types are updated
+  if let labels = post.labels {
+    let sensitiveLabelValues = ["nsfw", "sensitive", "adult", "explicit", "gore", "violence"]
+    
+    // Use reflection to access the labels array
+    let mirror = Mirror(reflecting: labels)
+    for child in mirror.children {
+      if let labelArray = child.value as? [ComAtprotoLexicon.Label.LabelDefinition] {
+        for label in labelArray {
+          if let value = label.value {
+            let lowercasedValue = value.lowercased()
+            for sensitiveValue in sensitiveLabelValues {
+              if lowercasedValue.contains(sensitiveValue) {
+                return (true, "Content Warning")
+              }
+            }
+          }
+        }
+      }
+    }
+  }
   
   return (false, nil)
 }
 
 private func detectSensitiveContent(from viewRecord: AppBskyLexicon.Embed.RecordDefinition.ViewRecord) -> (isSensitive: Bool, contentWarning: String?) {
-  // Check for labels in the post record
+  // Check for content warnings in the text first
   if let record = viewRecord.value.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self) {
-    // Check for content warnings in the text
     let text = record.text.lowercased()
-    let sensitiveKeywords = ["nsfw", "sensitive", "adult", "explicit", "trigger warning", "tw:", "cw:"]
+    let sensitiveKeywords = ["nsfw", "sensitive", "adult", "explicit", "trigger warning", "tw:", "cw:", "nsfl", "disturbing"]
     
     for keyword in sensitiveKeywords {
       if text.contains(keyword) {
@@ -122,14 +160,50 @@ private func detectSensitiveContent(from viewRecord: AppBskyLexicon.Embed.Record
       }
     }
     
-    // Check for labels array if available
-    // Note: LabelsUnion doesn't conform to Sequence, so we'll skip label checking for now
-    // TODO: Implement proper label checking when ATProtoKit types are updated
+    // Check for labels in the post record
+    if let labels = record.labels {
+      let sensitiveLabelValues = ["nsfw", "sensitive", "adult", "explicit", "gore", "violence"]
+      
+      // Use reflection to access the labels array
+      let mirror = Mirror(reflecting: labels)
+      for child in mirror.children {
+        if let labelArray = child.value as? [ComAtprotoLexicon.Label.LabelDefinition] {
+          for label in labelArray {
+            if let value = label.value {
+              let lowercasedValue = value.lowercased()
+              for sensitiveValue in sensitiveLabelValues {
+                if lowercasedValue.contains(sensitiveValue) {
+                  return (true, "Content Warning")
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
   
   // Check for labels in the view record itself
-  // Note: Labels array access needs to be fixed when ATProtoKit types are updated
-  // TODO: Implement proper label checking when ATProtoKit types are updated
+  if let labels = viewRecord.labels {
+    let sensitiveLabelValues = ["nsfw", "sensitive", "adult", "explicit", "gore", "violence"]
+    
+    // Use reflection to access the labels array
+    let mirror = Mirror(reflecting: labels)
+    for child in mirror.children {
+      if let labelArray = child.value as? [ComAtprotoLexicon.Label.LabelDefinition] {
+        for label in labelArray {
+          if let value = label.value {
+            let lowercasedValue = value.lowercased()
+            for sensitiveValue in sensitiveLabelValues {
+              if lowercasedValue.contains(sensitiveValue) {
+                return (true, "Content Warning")
+              }
+            }
+          }
+        }
+      }
+    }
+  }
   
   return (false, nil)
 }

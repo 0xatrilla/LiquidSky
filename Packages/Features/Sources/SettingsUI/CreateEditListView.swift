@@ -136,21 +136,22 @@ public struct CreateEditListView: View {
   }
 
   private func createList() async throws {
-    // TODO: Implement actual list creation using ATProtoKit
-    // For now, simulate the API call
-    print("Would create list: \(listName) with purpose: \(selectedPurpose)")
-
-    // Simulate network delay
-    try await Task.sleep(nanoseconds: 1_000_000_000)  // 1 second delay
+    let listManagementService = ListManagementService(client: client)
+    let _ = try await listManagementService.createList(
+      name: listName,
+      description: listDescription.isEmpty ? nil : listDescription,
+      purpose: selectedPurpose
+    )
   }
 
   private func updateList(_ list: UserList) async throws {
-    // TODO: Implement actual list update using ATProtoKit
-    // For now, simulate the API call
-    print("Would update list: \(list.id) with name: \(listName)")
-
-    // Simulate network delay
-    try await Task.sleep(nanoseconds: 1_000_000_000)  // 1 second delay
+    let listManagementService = ListManagementService(client: client)
+    try await listManagementService.updateList(
+      listURI: list.id,
+      name: listName,
+      description: listDescription.isEmpty ? nil : listDescription,
+      purpose: selectedPurpose
+    )
   }
 }
 
