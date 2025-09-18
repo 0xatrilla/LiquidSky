@@ -6,10 +6,10 @@ import Models
 @MainActor
 @Observable
 public class TrendingContentService {
-  var trendingHashtags: [TrendingHashtag] = []
-  var suggestedUsers: [Profile] = []
-  var isLoading = false
-  var error: Error?
+  public var trendingHashtags: [TrendingHashtag] = []
+  public var suggestedUsers: [Profile] = []
+  public var isLoading = false
+  public var error: Error?
 
   public var client: BSkyClient
   private var fetchTask: Task<Void, Never>?

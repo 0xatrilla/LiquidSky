@@ -16,6 +16,10 @@ extension Notification.Name {
   static let refresh = Notification.Name("refresh")
   static let toggleSidebar = Notification.Name("toggleSidebar")
   static let newPost = Notification.Name("newPost")
+  
+  // User interaction notifications
+  static let userDidFollow = Notification.Name("userDidFollow")
+  static let userDidUnfollow = Notification.Name("userDidUnfollow")
 
   // App-specific notifications (defined in their respective files)
   // generateSummary - defined in SidebarNavigationView.swift

@@ -38,6 +38,8 @@ struct EnhancedProfileDetailView: View {
     GlassEffectContainer(spacing: 16.0) {
       if detailManager.profileDetailState.isLoading {
         profileLoadingView
+      } else if let error = detailManager.profileDetailState.error {
+        profileErrorView(error)
       } else if let profile = detailManager.profileDetailState.profile {
         ScrollView {
           LazyVStack(spacing: 20) {
@@ -462,6 +464,42 @@ struct EnhancedProfileDetailView: View {
       systemImage: "person.slash",
       description: Text("This profile may have been deleted or is no longer available")
     )
+    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+  }
+
+  @ViewBuilder
+  private func profileErrorView(_ error: Error) -> some View {
+    VStack(spacing: 20) {
+      Image(systemName: "exclamationmark.triangle")
+        .font(.system(size: 50))
+        .foregroundStyle(.red)
+
+      Text("Error Loading Feed")
+        .font(.title2.weight(.semibold))
+        .foregroundStyle(.primary)
+
+      Text(error.localizedDescription)
+        .font(.body)
+        .foregroundStyle(.secondary)
+        .multilineTextAlignment(.center)
+        .padding(.horizontal, 20)
+
+      Button("Try Again") {
+        Task {
+          // Retry loading the profile
+          let detailItem = DetailItem(profile: Profile(
+            did: profileId,
+            handle: "placeholder",
+            displayName: "Loading...",
+            avatarImageURL: nil
+          ))
+          await detailManager.loadDetailContent(for: detailItem)
+        }
+      }
+      .buttonStyle(.borderedProminent)
+      .controlSize(.large)
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
   }
 

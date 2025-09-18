@@ -27,7 +27,7 @@ struct iPadAppView: View {
     @State private var summaryText = ""
     @State private var isGeneratingSummary = false
     @State private var badgeStore = NotificationBadgeStore.shared
-    @State private var detailColumnManager = DetailColumnManager()
+    @State private var detailColumnManager: DetailColumnManager?
     @State private var showingDiscoverSheet = false
     @State private var currentFeed: FeedItem?
 
@@ -43,8 +43,9 @@ struct iPadAppView: View {
     // Detail content view based on current selection
     @ViewBuilder
     private var detailContentView: some View {
-        if detailColumnManager.isShowingDetail,
-            let destination = detailColumnManager.currentDestination
+        if let detailColumnManager = detailColumnManager,
+           detailColumnManager.isShowingDetail,
+           let destination = detailColumnManager.currentDestination
         {
             // Show the selected detail content
             NavigationLink(value: destination) {
@@ -102,7 +103,7 @@ struct iPadAppView: View {
                     bookmarksNavigationStack
                 }
             }
-            .environment(\.detailColumnManager, detailColumnManager)
+            .environment(\.detailColumnManager, detailColumnManager ?? DetailColumnManager(client: client))
             .withDetailNavigation()
             .withDetailPaneRedirect()
             .navigationSplitViewColumnWidth(min: 400, ideal: 500, max: 700)
@@ -112,11 +113,16 @@ struct iPadAppView: View {
                 detailContentView
                     .withAppDestinations()
             }
-            .environment(\.detailColumnManager, detailColumnManager)
+            .environment(\.detailColumnManager, detailColumnManager ?? DetailColumnManager(client: client))
             .withDetailNavigation()
             .navigationSplitViewColumnWidth(min: 500, ideal: 600, max: 800)
         }
         .navigationSplitViewStyle(.balanced)
+        .onAppear {
+            if detailColumnManager == nil {
+                detailColumnManager = DetailColumnManager(client: client)
+            }
+        }
         .sheet(isPresented: $showingSummary) {
             SummarySheetView(
                 title: "Feed Summary",

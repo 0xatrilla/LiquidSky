@@ -3,18 +3,28 @@ import Foundation
 import SwiftUI
 import ATProtoKit
 import Models
+import Destinations
+import AppRouter
+import FeedUI
 
 @available(iOS 18.0, *)
 struct EnhancedSearchView: View {
   let client: BSkyClient
   @Environment(\.contentColumnManager) var contentManager
   @Environment(\.glassEffectManager) var glassEffectManager
+  @Environment(AppRouter.self) private var router
   @State private var searchText = ""
   @State private var searchResults: [SearchResultData] = []
   @State private var isSearching = false
   @State private var trendingTopics: [TrendingTopic] = []
   @State private var suggestedUsers: [SuggestedUser] = []
+  @State private var trendingContentService: TrendingContentService
   @Namespace private var searchNamespace
+
+  init(client: BSkyClient) {
+    self.client = client
+    self._trendingContentService = State(initialValue: TrendingContentService(client: client))
+  }
 
   var body: some View {
     GlassEffectContainer(spacing: 16.0) {
@@ -24,6 +34,7 @@ struct EnhancedSearchView: View {
     .onAppear {
       loadTrendingContent()
       startDynamicUpdates()
+      setupNotificationObservers()
     }
     .searchable(text: $searchText, prompt: "Search posts, users, and more...")
     .onChange(of: searchText) { _, newValue in
@@ -137,7 +148,7 @@ struct EnhancedSearchView: View {
         GridItem(.flexible(), spacing: 8)
       ], spacing: 8) {
         ForEach(trendingTopics, id: \.self) { topic in
-          TrendingTopicCard(topic: topic)
+          TrendingTopicCard(topic: topic, router: router)
         }
       }
     }
@@ -153,16 +164,47 @@ struct EnhancedSearchView: View {
         
         Spacer()
         
-        Button("See All") {
-          // TODO: Navigate to full suggested users
+        HStack(spacing: 12) {
+          Button(action: {
+            Task {
+              await loadTrendingContent()
+            }
+          }) {
+            Image(systemName: "arrow.clockwise")
+              .font(.caption)
+              .foregroundColor(.blue)
+          }
+          .disabled(trendingContentService.isLoading)
+          
+          Button("See All") {
+            // TODO: Navigate to full suggested users
+          }
+          .font(.caption)
+          .foregroundColor(.blue)
         }
-        .font(.caption)
-        .foregroundColor(.blue)
       }
       
-      LazyVStack(spacing: 8) {
-        ForEach(suggestedUsers, id: \.handle) { user in
-          SuggestedUserCard(user: user)
+      if trendingContentService.isLoading {
+        HStack {
+          ProgressView()
+            .scaleEffect(0.8)
+          Text("Loading suggested users...")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+      } else if suggestedUsers.isEmpty {
+        Text("No suggested users available")
+          .font(.caption)
+          .foregroundStyle(.secondary)
+          .frame(maxWidth: .infinity)
+          .padding()
+      } else {
+        LazyVStack(spacing: 8) {
+          ForEach(suggestedUsers, id: \.handle) { user in
+            SuggestedUserCard(user: user, router: router)
+          }
         }
       }
     }
@@ -199,9 +241,26 @@ struct EnhancedSearchView: View {
   }
 
   private func loadTrendingContent() {
-    withAnimation(.smooth(duration: 0.3)) {
-      trendingTopics = generateTrendingTopics()
-      suggestedUsers = generateSuggestedUsers()
+    Task {
+      await trendingContentService.fetchTrendingContent()
+      
+      // Convert Profile objects to SuggestedUser objects
+      await MainActor.run {
+        withAnimation(.smooth(duration: 0.3)) {
+          suggestedUsers = trendingContentService.suggestedUsers.map { profile in
+            SuggestedUser(
+              did: profile.did,
+              handle: profile.handle,
+              displayName: profile.displayName ?? profile.handle,
+              avatar: profile.avatarImageURL?.absoluteString,
+              followersCount: profile.followersCount,
+              isFollowing: profile.isFollowing,
+              reason: generateSuggestionReason(for: profile)
+            )
+          }
+          trendingTopics = generateTrendingTopics() // Keep trending topics as mock for now
+        }
+      }
     }
   }
 
@@ -311,27 +370,18 @@ struct EnhancedSearchView: View {
     }
   }
 
-  private func generateSuggestedUsers() -> [SuggestedUser] {
-    let users = [
-      ("john.doe", "John Doe", "https://picsum.photos/40/40?random=1", 15420, false, "Similar interests"),
-      ("jane.smith", "Jane Smith", "https://picsum.photos/40/40?random=2", 8930, false, "Popular in your area"),
-      ("alex.dev", "Alex Developer", "https://picsum.photos/40/40?random=3", 23450, true, "You follow similar people"),
-      ("sarah.design", "Sarah Designer", "https://picsum.photos/40/40?random=4", 6780, false, "Trending designer"),
-      ("mike.photo", "Mike Photographer", "https://picsum.photos/40/40?random=5", 12340, false, "Active in photography"),
-      ("lisa.tech", "Lisa Tech", "https://picsum.photos/40/40?random=6", 18920, false, "Tech influencer"),
-      ("tom.ios", "Tom iOS Dev", "https://picsum.photos/40/40?random=7", 9870, true, "iOS developer"),
-      ("anna.ux", "Anna UX", "https://picsum.photos/40/40?random=8", 14560, false, "UX expert")
-    ]
-    
-    return users.map { handle, displayName, avatar, followers, isFollowing, reason in
-      SuggestedUser(
-        handle: handle,
-        displayName: displayName,
-        avatar: avatar,
-        followersCount: followers,
-        isFollowing: isFollowing,
-        reason: reason
-      )
+  private func generateSuggestionReason(for profile: Profile) -> String {
+    // Generate contextual reasons based on profile characteristics
+    if profile.followersCount > 10000 {
+      return "Popular account"
+    } else if profile.handle.contains("dev") || profile.handle.contains("tech") {
+      return "Tech community"
+    } else if profile.handle.contains("art") || profile.handle.contains("design") {
+      return "Creative community"
+    } else if profile.followersCount > 1000 {
+      return "Active user"
+    } else {
+      return "Similar interests"
     }
   }
 
@@ -345,12 +395,33 @@ struct EnhancedSearchView: View {
       }
     }
     
-    // Update suggested users every 60 seconds
-    Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
+    // Update suggested users every 2 minutes to get fresh suggestions
+    Timer.scheduledTimer(withTimeInterval: 120, repeats: true) { _ in
       Task { @MainActor in
-        withAnimation(.smooth(duration: 0.5)) {
-          suggestedUsers = generateSuggestedUsers()
-        }
+        await loadTrendingContent()
+      }
+    }
+  }
+  
+  private func setupNotificationObservers() {
+    // Refresh suggestions when user follows/unfollows someone
+    NotificationCenter.default.addObserver(
+      forName: .userDidFollow,
+      object: nil,
+      queue: .main
+    ) { _ in
+      Task {
+        await loadTrendingContent()
+      }
+    }
+    
+    NotificationCenter.default.addObserver(
+      forName: .userDidUnfollow,
+      object: nil,
+      queue: .main
+    ) { _ in
+      Task {
+        await loadTrendingContent()
       }
     }
   }
@@ -792,6 +863,7 @@ struct TrendingTopic: Identifiable, Hashable {
 @available(iOS 18.0, *)
 struct SuggestedUser: Identifiable, Hashable {
   let id = UUID()
+  let did: String
   let handle: String
   let displayName: String
   let avatar: String?
@@ -813,7 +885,7 @@ struct SuggestedUser: Identifiable, Hashable {
 @available(iOS 18.0, *)
 struct TrendingTopicCard: View {
   let topic: TrendingTopic
-  @Environment(\.router) var router
+  let router: Router<AppTab, RouterDestination, SheetDestination>
   
   var body: some View {
     VStack(alignment: .leading, spacing: 4) {
@@ -858,6 +930,7 @@ struct TrendingTopicCard: View {
 @available(iOS 18.0, *)
 struct SuggestedUserCard: View {
   let user: SuggestedUser
+  let router: Router<AppTab, RouterDestination, SheetDestination>
   
   var body: some View {
     HStack(spacing: 12) {
@@ -915,7 +988,23 @@ struct SuggestedUserCard: View {
         .fill(Color(.systemGray6))
     )
     .onTapGesture {
-      // TODO: Navigate to user profile
+      // Navigate to user profile using the real DID from search results
+      let profile = Profile(
+        did: user.did, // Use the real DID from search results
+        handle: user.handle,
+        displayName: user.displayName,
+        avatarImageURL: user.avatar.flatMap { URL(string: $0) },
+        description: nil,
+        followersCount: user.followersCount,
+        followingCount: 0,
+        postsCount: 0,
+        isFollowing: user.isFollowing,
+        isFollowedBy: false,
+        isBlocked: false,
+        isBlocking: false,
+        isMuted: false
+      )
+      router[.compose].append(.profile(profile))
     }
   }
 }

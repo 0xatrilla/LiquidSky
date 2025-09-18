@@ -1,12 +1,18 @@
 import SwiftUI
 import Destinations
 import Models
+import ATProtoKit
+import Client
+import PostUI
 
 @available(iOS 18.0, *)
 @Observable
 class DetailColumnManager {
   var currentDestination: RouterDestination?
   var isShowingDetail = false
+  
+  // Client for API calls
+  private let client: BSkyClient
   
   // Media detail state
   var mediaDetailState = MediaDetailState()
@@ -19,6 +25,10 @@ class DetailColumnManager {
   
   // Detail item state
   var detailItem: DetailItem?
+  
+  init(client: BSkyClient) {
+    self.client = client
+  }
 }
 
 @available(iOS 18.0, *)
@@ -213,10 +223,110 @@ extension DetailColumnManager {
   }
   
   func loadDetailContent(for detailItem: DetailItem) async {
-    // This would load the actual content
-    // For now, we'll just set the detail item
     self.detailItem = detailItem
     isShowingDetail = true
+    
+    switch detailItem {
+    case .profile(let profile):
+      await loadProfileDetail(profile)
+    case .post(let post):
+      await loadPostDetail(post)
+    case .media(let media):
+      await loadMediaDetail(media)
+    }
+  }
+  
+  private func loadProfileDetail(_ profile: Profile) async {
+    profileDetailState.isLoading = true
+    profileDetailState.error = nil
+    
+    do {
+      // First, try to get the real profile data using the handle
+      let realProfile = try await fetchProfileByHandle(profile.handle)
+      
+      // Convert to ProfileDetailData
+      let profileDetailData = ProfileDetailData(
+        id: realProfile.actorDID,
+        handle: realProfile.actorHandle,
+        displayName: realProfile.displayName,
+        description: realProfile.description,
+        bio: realProfile.description,
+        avatarImageURL: realProfile.avatarImageURL,
+        avatarUrl: realProfile.avatarImageURL,
+        bannerImageURL: realProfile.bannerImageURL,
+        bannerUrl: realProfile.bannerImageURL,
+        followersCount: realProfile.followerCount ?? 0,
+        followingCount: realProfile.followCount ?? 0,
+        postsCount: realProfile.postCount ?? 0,
+        isFollowing: realProfile.viewer?.followingURI != nil,
+        isFollowedBy: realProfile.viewer?.followedByURI != nil,
+        isBlocked: realProfile.viewer?.isBlocked == true,
+        isBlocking: realProfile.viewer?.blockingURI != nil,
+        isMuted: realProfile.viewer?.isMuted == true,
+        joinDate: nil, // This would need to be fetched separately
+        posts: [] // Will be loaded separately
+      )
+      
+      profileDetailState.profile = profileDetailData
+      
+      // Load posts for this profile
+      await loadProfilePosts(realProfile.actorDID)
+      
+    } catch {
+      print("DetailColumnManager: Error loading profile: \(error)")
+      profileDetailState.error = error
+    }
+    
+    profileDetailState.isLoading = false
+  }
+  
+  private func loadPostDetail(_ post: PostItem) async {
+    postDetailState.isLoading = true
+    postDetailState.error = nil
+    
+    // TODO: Implement post detail loading
+    postDetailState.isLoading = false
+  }
+  
+  private func loadMediaDetail(_ media: MediaDetailData) async {
+    mediaDetailState.isLoading = true
+    mediaDetailState.error = nil
+    
+    // TODO: Implement media detail loading
+    mediaDetailState.isLoading = false
+  }
+  
+  private func fetchProfileByHandle(_ handle: String) async throws -> AppBskyLexicon.Actor.ProfileViewDetailedDefinition {
+    do {
+      // First, search for the actor by handle to get their DID
+      let searchResults = try await client.protoClient.searchActors(matching: handle, limit: 1)
+      
+      guard let firstActor = searchResults.actors.first else {
+        throw NSError(domain: "ProfileError", code: 404, userInfo: [NSLocalizedDescriptionKey: "User not found"])
+      }
+      
+      // Now fetch the detailed profile using the DID
+      let detailedProfile = try await client.protoClient.getProfile(for: firstActor.actorDID)
+      return detailedProfile
+    } catch {
+      print("DetailColumnManager: Error fetching profile for handle \(handle): \(error)")
+      throw error
+    }
+  }
+  
+  private func loadProfilePosts(_ did: String) async {
+    do {
+      // Fetch the author feed for this profile using the same pattern as PostsProfileView
+      let feed = try await client.protoClient.getAuthorFeed(by: did, postFilter: .postsWithReplies)
+      
+      // Convert feed items to PostItem objects using the same processFeed function
+      let posts = await processFeed(feed.feed, client: client.protoClient)
+      profileDetailState.posts = posts
+      
+    } catch {
+      print("DetailColumnManager: Error loading profile posts: \(error)")
+      profileDetailState.error = error
+    }
   }
   
   func pushDetail(_ detailItem: DetailItem) {
@@ -229,7 +339,10 @@ extension DetailColumnManager {
 
 @available(iOS 18.0, *)
 struct DetailColumnManagerKey: EnvironmentKey {
-  static let defaultValue = DetailColumnManager()
+  static let defaultValue: DetailColumnManager = {
+    // This will be overridden by the app with a real client
+    fatalError("DetailColumnManager must be provided with a real BSkyClient")
+  }()
 }
 
 @available(iOS 18.0, *)
