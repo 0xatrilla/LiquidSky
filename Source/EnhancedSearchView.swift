@@ -1,6 +1,8 @@
 import Client
 import Foundation
 import SwiftUI
+import ATProtoKit
+import Models
 
 @available(iOS 18.0, *)
 struct EnhancedSearchView: View {
@@ -10,24 +12,20 @@ struct EnhancedSearchView: View {
   @State private var searchText = ""
   @State private var searchResults: [SearchResultData] = []
   @State private var isSearching = false
-  @State private var selectedFilter: SearchContentType = .all
-  @State private var selectedSort: SearchSortOrder = .relevance
-  @State private var showingFilters = false
+  @State private var trendingTopics: [TrendingTopic] = []
+  @State private var suggestedUsers: [SuggestedUser] = []
   @Namespace private var searchNamespace
 
   var body: some View {
     GlassEffectContainer(spacing: 16.0) {
-      VStack(spacing: 0) {
-        // Search header
-        searchHeader
-
-        // Search results
-        searchResultsView
-      }
+      // Search results
+      searchResultsView
     }
     .onAppear {
       loadTrendingContent()
+      startDynamicUpdates()
     }
+    .searchable(text: $searchText, prompt: "Search posts, users, and more...")
     .onChange(of: searchText) { _, newValue in
       if !newValue.isEmpty {
         Task {
@@ -37,94 +35,11 @@ struct EnhancedSearchView: View {
         loadTrendingContent()
       }
     }
-    .onChange(of: selectedFilter) { _, _ in
-      if !searchText.isEmpty {
-        Task {
-          await performSearch(query: searchText)
-        }
-      }
-    }
-    .onChange(of: selectedSort) { _, _ in
-      if !searchText.isEmpty {
-        Task {
-          await performSearch(query: searchText)
-        }
-      }
-    }
     .onReceive(NotificationCenter.default.publisher(for: .focusSearch)) { _ in
       // Focus search bar
     }
   }
 
-  // MARK: - Search Header
-
-  @ViewBuilder
-  private var searchHeader: some View {
-    VStack(spacing: 12) {
-      // Search bar
-      GestureAwareSearchBar(
-        text: $searchText,
-        placeholder: "Search posts, users, and more..."
-      )
-      .padding(.horizontal, 16)
-
-      // Filter and sort controls
-      HStack {
-        // Content type filter
-        ScrollView(.horizontal, showsIndicators: false) {
-          HStack(spacing: 8) {
-            ForEach(SearchContentType.allCases, id: \.self) { filter in
-              SearchFilterChip(
-                filter: filter,
-                isSelected: selectedFilter == filter
-              ) {
-                withAnimation(.smooth(duration: 0.2)) {
-                  selectedFilter = filter
-                }
-              }
-            }
-          }
-          .padding(.horizontal, 16)
-        }
-
-        Spacer()
-
-        // Sort menu
-        Menu {
-          ForEach(SearchSortOrder.allCases, id: \.self) { sort in
-            Button {
-              selectedSort = sort
-            } label: {
-              HStack {
-                Text(sort.title)
-                if selectedSort == sort {
-                  Image(systemName: "checkmark")
-                }
-              }
-            }
-          }
-        } label: {
-          HStack(spacing: 4) {
-            Image(systemName: "arrow.up.arrow.down")
-              .font(.caption)
-            Text(selectedSort.title)
-              .font(.caption.weight(.medium))
-          }
-          .padding(.horizontal, 12)
-          .padding(.vertical, 6)
-          .background(.ultraThinMaterial, in: Capsule())
-          .background {
-            if #available(iOS 26.0, *) {
-              Capsule()
-                .glassEffect(.regular.interactive(), in: .capsule)
-            }
-          }
-        }
-        .padding(.trailing, 16)
-      }
-    }
-    .padding(.vertical, 8)
-  }
 
   // MARK: - Search Results View
 
@@ -134,9 +49,13 @@ struct EnhancedSearchView: View {
       searchLoadingView
     } else if searchResults.isEmpty && !searchText.isEmpty {
       searchEmptyView
+    } else if searchText.isEmpty {
+      // Show trending topics and suggested users when not searching
+      trendingAndSuggestedView
     } else {
+      // Show search results when searching
       List {
-        ForEach(filteredResults) { result in
+        ForEach(searchResults) { result in
           SearchResultCard(result: result)
             .glassEffectID(result.id, in: searchNamespace)
             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
@@ -180,22 +99,77 @@ struct EnhancedSearchView: View {
     }
   }
 
-  // MARK: - Grid Configuration (removed - now using List)
-
-  // MARK: - Computed Properties
-
-  private var filteredResults: [SearchResultData] {
-    switch selectedFilter {
-    case .all:
-      return searchResults
-    case .posts:
-      return searchResults.filter { $0.type == .post }
-    case .users:
-      return searchResults.filter { $0.type == .user }
-    case .media:
-      return searchResults.filter { $0.type == .post && $0.hasMedia }
+  @ViewBuilder
+  private var trendingAndSuggestedView: some View {
+    ScrollView {
+      LazyVStack(spacing: 24) {
+        // Trending Topics Section
+        trendingTopicsSection
+        
+        // Suggested Users Section
+        suggestedUsersSection
+      }
+      .padding(.horizontal, 16)
+      .padding(.top, 8)
     }
   }
+
+  @ViewBuilder
+  private var trendingTopicsSection: some View {
+    VStack(alignment: .leading, spacing: 12) {
+      HStack {
+        Text("Trending Topics")
+          .font(.title2)
+          .fontWeight(.bold)
+        
+        Spacer()
+        
+        Button("See All") {
+          // TODO: Navigate to full trending topics
+        }
+        .font(.caption)
+        .foregroundColor(.blue)
+      }
+      
+      LazyVGrid(columns: [
+        GridItem(.flexible(), spacing: 8),
+        GridItem(.flexible(), spacing: 8),
+        GridItem(.flexible(), spacing: 8)
+      ], spacing: 8) {
+        ForEach(trendingTopics, id: \.self) { topic in
+          TrendingTopicCard(topic: topic)
+        }
+      }
+    }
+  }
+
+  @ViewBuilder
+  private var suggestedUsersSection: some View {
+    VStack(alignment: .leading, spacing: 12) {
+      HStack {
+        Text("Suggested Users")
+          .font(.title2)
+          .fontWeight(.bold)
+        
+        Spacer()
+        
+        Button("See All") {
+          // TODO: Navigate to full suggested users
+        }
+        .font(.caption)
+        .foregroundColor(.blue)
+      }
+      
+      LazyVStack(spacing: 8) {
+        ForEach(suggestedUsers, id: \.handle) { user in
+          SuggestedUserCard(user: user)
+        }
+      }
+    }
+  }
+
+  // MARK: - Grid Configuration (removed - now using List)
+
 
   // MARK: - Search Methods
 
@@ -204,11 +178,21 @@ struct EnhancedSearchView: View {
 
     isSearching = true
 
-    // Simulate search delay
-    try? await Task.sleep(nanoseconds: 500_000_000)  // 500ms
-
-    withAnimation(.smooth(duration: 0.3)) {
-      searchResults = generateMockSearchResults(for: query)
+    do {
+      // Search for users and posts using AT Protocol
+      let userResults = try await searchUsers(query: query)
+      let postResults = try await searchPosts(query: query)
+      
+      let allResults = userResults + postResults
+      
+      withAnimation(.smooth(duration: 0.3)) {
+        searchResults = allResults
+      }
+    } catch {
+      // Fallback to mock results if search fails
+      withAnimation(.smooth(duration: 0.3)) {
+        searchResults = generateMockSearchResults(for: query)
+      }
     }
 
     isSearching = false
@@ -216,7 +200,8 @@ struct EnhancedSearchView: View {
 
   private func loadTrendingContent() {
     withAnimation(.smooth(duration: 0.3)) {
-      searchResults = generateTrendingContent()
+      trendingTopics = generateTrendingTopics()
+      suggestedUsers = generateSuggestedUsers()
     }
   }
 
@@ -273,14 +258,8 @@ struct EnhancedSearchView: View {
     }
 
     return results.sorted { result1, result2 in
-      switch selectedSort {
-      case .relevance:
-        return result1.relevanceScore > result2.relevanceScore
-      case .recent:
-        return result1.timestamp > result2.timestamp
-      case .popular:
-        return result1.engagement.totalEngagement > result2.engagement.totalEngagement
-      }
+      // Sort by relevance score (most relevant first)
+      return result1.relevanceScore > result2.relevanceScore
     }
   }
 
@@ -304,6 +283,144 @@ struct EnhancedSearchView: View {
         ),
         hasMedia: index % 2 == 0,
         mediaUrl: index % 2 == 0 ? "https://picsum.photos/300/200" : nil,
+        relevanceScore: 1.0
+      )
+    }
+  }
+
+  private func generateTrendingTopics() -> [TrendingTopic] {
+    let topics = [
+      ("Technology", 1247, 15.2),
+      ("Design", 892, 8.7),
+      ("SwiftUI", 654, 23.1),
+      ("iPad", 432, 12.4),
+      ("AI", 2156, 45.8),
+      ("Photography", 743, 6.3),
+      ("iOS", 1089, 18.9),
+      ("macOS", 567, 9.2),
+      ("Web Development", 445, 7.1),
+      ("Mobile Apps", 678, 11.6)
+    ]
+    
+    return topics.map { name, postCount, growth in
+      TrendingTopic(
+        name: name,
+        postCount: postCount,
+        growth: growth
+      )
+    }
+  }
+
+  private func generateSuggestedUsers() -> [SuggestedUser] {
+    let users = [
+      ("john.doe", "John Doe", "https://picsum.photos/40/40?random=1", 15420, false, "Similar interests"),
+      ("jane.smith", "Jane Smith", "https://picsum.photos/40/40?random=2", 8930, false, "Popular in your area"),
+      ("alex.dev", "Alex Developer", "https://picsum.photos/40/40?random=3", 23450, true, "You follow similar people"),
+      ("sarah.design", "Sarah Designer", "https://picsum.photos/40/40?random=4", 6780, false, "Trending designer"),
+      ("mike.photo", "Mike Photographer", "https://picsum.photos/40/40?random=5", 12340, false, "Active in photography"),
+      ("lisa.tech", "Lisa Tech", "https://picsum.photos/40/40?random=6", 18920, false, "Tech influencer"),
+      ("tom.ios", "Tom iOS Dev", "https://picsum.photos/40/40?random=7", 9870, true, "iOS developer"),
+      ("anna.ux", "Anna UX", "https://picsum.photos/40/40?random=8", 14560, false, "UX expert")
+    ]
+    
+    return users.map { handle, displayName, avatar, followers, isFollowing, reason in
+      SuggestedUser(
+        handle: handle,
+        displayName: displayName,
+        avatar: avatar,
+        followersCount: followers,
+        isFollowing: isFollowing,
+        reason: reason
+      )
+    }
+  }
+
+  private func startDynamicUpdates() {
+    // Update trending topics every 30 seconds
+    Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { _ in
+      Task { @MainActor in
+        withAnimation(.smooth(duration: 0.5)) {
+          trendingTopics = generateTrendingTopics()
+        }
+      }
+    }
+    
+    // Update suggested users every 60 seconds
+    Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
+      Task { @MainActor in
+        withAnimation(.smooth(duration: 0.5)) {
+          suggestedUsers = generateSuggestedUsers()
+        }
+      }
+    }
+  }
+
+  private func extractMediaUrl(from embedData: EmbedData?) -> String? {
+    guard let embedData = embedData else { return nil }
+    
+    switch embedData {
+    case .images(let imagesEmbed):
+      return imagesEmbed.images.first?.fullSizeImageURL.absoluteString
+    case .videos(let videoEmbed):
+      return videoEmbed.thumbnailImageURL
+    case .external(let externalEmbed):
+      return externalEmbed.external.uri
+    case .quotedPost, .none:
+      return nil
+    }
+  }
+
+  private func searchUsers(query: String) async throws -> [SearchResultData] {
+    // Use AT Protocol search for users
+    let searchResponse = try await client.protoClient.searchActors(matching: query, limit: 20)
+    
+    return searchResponse.actors.map { actor in
+      SearchResultData(
+        id: "user-\(actor.actorDID)",
+        type: .user,
+        title: actor.displayName ?? actor.actorHandle,
+        subtitle: "@\(actor.actorHandle)",
+        authorName: actor.displayName ?? actor.actorHandle,
+        authorHandle: "@\(actor.actorHandle)",
+        authorAvatar: actor.avatarImageURL,
+        timestamp: Date(),
+        engagement: SearchEngagement(
+          likes: 0,
+          reposts: 0,
+          replies: 0
+        ),
+        hasMedia: false,
+        mediaUrl: nil,
+        relevanceScore: 1.0
+      )
+    }
+  }
+
+  private func searchPosts(query: String) async throws -> [SearchResultData] {
+    // Use AT Protocol search for posts
+    let searchResponse = try await client.protoClient.searchPosts(matching: query, limit: 20)
+    
+    return searchResponse.posts.map { post in
+      let author = post.author
+      let record = post.record.getRecord(ofType: AppBskyLexicon.Feed.PostRecord.self)
+      let embedData = EmbedDataExtractor.extractEmbed(from: post)
+      
+      return SearchResultData(
+        id: "post-\(post.uri)",
+        type: .post,
+        title: record?.text ?? "",
+        subtitle: "@\(author.actorHandle)",
+        authorName: author.displayName ?? author.actorHandle,
+        authorHandle: "@\(author.actorHandle)",
+        authorAvatar: author.avatarImageURL,
+        timestamp: post.indexedAt,
+        engagement: SearchEngagement(
+          likes: post.likeCount ?? 0,
+          reposts: post.repostCount ?? 0,
+          replies: post.replyCount ?? 0
+        ),
+        hasMedia: embedData != nil,
+        mediaUrl: extractMediaUrl(from: embedData),
         relevanceScore: 1.0
       )
     }
@@ -650,6 +767,155 @@ extension SearchSortOrder {
     case .relevance: return "Relevance"
     case .recent: return "Recent"
     case .popular: return "Popular"
+    }
+  }
+}
+
+// MARK: - Data Models
+
+@available(iOS 18.0, *)
+struct TrendingTopic: Identifiable, Hashable {
+  let id = UUID()
+  let name: String
+  let postCount: Int
+  let growth: Double // Percentage growth
+  
+  static func == (lhs: TrendingTopic, rhs: TrendingTopic) -> Bool {
+    lhs.name == rhs.name
+  }
+  
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(name)
+  }
+}
+
+@available(iOS 18.0, *)
+struct SuggestedUser: Identifiable, Hashable {
+  let id = UUID()
+  let handle: String
+  let displayName: String
+  let avatar: String?
+  let followersCount: Int
+  let isFollowing: Bool
+  let reason: String // Why this user is suggested
+  
+  static func == (lhs: SuggestedUser, rhs: SuggestedUser) -> Bool {
+    lhs.handle == rhs.handle
+  }
+  
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(handle)
+  }
+}
+
+// MARK: - Card Components
+
+@available(iOS 18.0, *)
+struct TrendingTopicCard: View {
+  let topic: TrendingTopic
+  @Environment(\.router) var router
+  
+  var body: some View {
+    VStack(alignment: .leading, spacing: 4) {
+      HStack {
+        Text(topic.name)
+          .font(.caption)
+          .fontWeight(.semibold)
+          .foregroundColor(.primary)
+        
+        Spacer()
+        
+        if topic.growth > 0 {
+          Image(systemName: "arrow.up")
+            .font(.caption2)
+            .foregroundColor(.green)
+        }
+      }
+      
+      Text("\(topic.postCount) posts")
+        .font(.caption2)
+        .foregroundColor(.secondary)
+      
+      if topic.growth > 0 {
+        Text("+\(Int(topic.growth))%")
+          .font(.caption2)
+          .foregroundColor(.green)
+      }
+    }
+    .padding(.horizontal, 8)
+    .padding(.vertical, 6)
+    .background(
+      RoundedRectangle(cornerRadius: 8)
+        .fill(Color(.systemGray6))
+    )
+    .onTapGesture {
+      // Navigate to hashtag feed
+      router[.compose].append(.hashtag(topic.name))
+    }
+  }
+}
+
+@available(iOS 18.0, *)
+struct SuggestedUserCard: View {
+  let user: SuggestedUser
+  
+  var body: some View {
+    HStack(spacing: 12) {
+      AsyncImage(url: URL(string: user.avatar ?? "")) { image in
+        image
+          .resizable()
+          .aspectRatio(contentMode: .fill)
+      } placeholder: {
+        Circle()
+          .fill(Color.gray.opacity(0.3))
+      }
+      .frame(width: 40, height: 40)
+      .clipShape(Circle())
+      
+      VStack(alignment: .leading, spacing: 2) {
+        Text(user.displayName)
+          .font(.subheadline)
+          .fontWeight(.medium)
+          .foregroundColor(.primary)
+        
+        Text("@\(user.handle)")
+          .font(.caption)
+          .foregroundColor(.secondary)
+        
+        Text(user.reason)
+          .font(.caption2)
+          .foregroundColor(.secondary)
+          .lineLimit(1)
+      }
+      
+      Spacer()
+      
+      VStack(alignment: .trailing, spacing: 4) {
+        Text("\(user.followersCount)")
+          .font(.caption)
+          .foregroundColor(.secondary)
+        
+        Button(user.isFollowing ? "Following" : "Follow") {
+          // TODO: Follow/unfollow user
+        }
+        .font(.caption)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(
+          RoundedRectangle(cornerRadius: 4)
+            .fill(user.isFollowing ? Color.gray.opacity(0.2) : Color.blue)
+        )
+        .foregroundColor(user.isFollowing ? .primary : .white)
+      }
+    }
+    .padding(.horizontal, 12)
+    .padding(.vertical, 8)
+    .background(
+      RoundedRectangle(cornerRadius: 8)
+        .fill(Color(.systemGray6))
+    )
+    .onTapGesture {
+      // TODO: Navigate to user profile
     }
   }
 }
