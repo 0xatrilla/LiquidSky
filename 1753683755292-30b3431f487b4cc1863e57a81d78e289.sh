@@ -160,7 +160,7 @@ configure_claude() {
 
         const homeDir = os.homedir();
         const filePath = path.join(homeDir, ".claude", "settings.json");
-        const apiKey = "'"$api_key"'";
+        const apiKey = process.env.API_KEY;
 
         const content = fs.existsSync(filePath)
             ? JSON.parse(fs.readFileSync(filePath, "utf-8"))
